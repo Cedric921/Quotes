@@ -1,28 +1,31 @@
-import { View, StyleSheet, Animated } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import { View, StyleSheet, ViewStyle } from "react-native";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface DotsIndicatorProps {
-  total: number;
-  currentIndex: number;
+  readonly total: number;
+  readonly currentIndex: number;
 }
 
-export default function DotsIndicator({ total, currentIndex }: DotsIndicatorProps) {
+export default function DotsIndicator({
+  total,
+  currentIndex,
+}: DotsIndicatorProps) {
   const { colors } = useTheme();
-  
+
   // Limiter à 5 dots maximum pour éviter l'encombrement
   const maxDots = 5;
   const showDots = Math.min(total, maxDots);
-  
+
   // Calculer quel dot doit être actif
   const getActiveDot = () => {
     if (total <= maxDots) return currentIndex;
-    
+
     // Si on est au début
     if (currentIndex < 2) return currentIndex;
-    
+
     // Si on est à la fin
     if (currentIndex >= total - 2) return maxDots - (total - currentIndex);
-    
+
     // Au milieu
     return 2;
   };
@@ -53,19 +56,17 @@ export default function DotsIndicator({ total, currentIndex }: DotsIndicatorProp
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 40,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-  },
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    columnGap: 6,
+  } as ViewStyle,
   dot: {
     height: 6,
     borderRadius: 3,
-    transition: 'all 0.3s ease',
-  },
+  } as ViewStyle,
 });
-

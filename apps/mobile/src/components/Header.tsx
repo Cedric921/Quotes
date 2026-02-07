@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
 import { BlurView } from "expo-blur";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -34,25 +41,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.1)",
-  },
+  } as ViewStyle,
   content: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
+  } as ViewStyle,
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },
+  } as ViewStyle,
   logo: {
     fontSize: 24,
-    fontWeight: "700",
+    fontWeight: "700" as const,
     letterSpacing: -0.5,
-  },
+  } as TextStyle,
   logoDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
     marginLeft: 2,
-  },
+  } as ViewStyle,
 });

@@ -1,8 +1,15 @@
-import { View, StyleSheet, Dimensions, Animated } from 'react-native';
-import { useEffect, useRef } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Animated,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
+import { useEffect, useRef } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 export default function LoadingSkeleton() {
   const { colors } = useTheme();
@@ -21,7 +28,7 @@ export default function LoadingSkeleton() {
           duration: 1000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -34,10 +41,23 @@ export default function LoadingSkeleton() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Logo animé */}
       <Animated.View style={[styles.logoContainer, { opacity }]}>
-        <View style={[styles.logoCircle, { backgroundColor: colors.cardBackground }]}>
+        <View
+          style={[
+            styles.logoCircle,
+            { backgroundColor: colors.cardBackground },
+          ]}
+        >
           <View style={styles.logoText}>
-            <View style={[styles.logoLine, { backgroundColor: colors.border }]} />
-            <View style={[styles.logoLine, styles.logoLineShort, { backgroundColor: colors.border }]} />
+            <View
+              style={[styles.logoLine, { backgroundColor: colors.border }]}
+            />
+            <View
+              style={[
+                styles.logoLine,
+                styles.logoLineShort,
+                { backgroundColor: colors.border },
+              ]}
+            />
           </View>
         </View>
       </Animated.View>
@@ -65,7 +85,7 @@ export default function LoadingSkeleton() {
             { backgroundColor: colors.cardBackground, opacity },
           ]}
         />
-        
+
         {/* Author skeleton */}
         <Animated.View
           style={[
@@ -102,73 +122,72 @@ export default function LoadingSkeleton() {
 const styles = StyleSheet.create({
   container: {
     height,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 30,
-  },
+  } as ViewStyle,
   logoContainer: {
     marginBottom: 60,
-  },
+  } as ViewStyle,
   logoCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+    justifyContent: "center",
+    alignItems: "center",
+  } as ViewStyle,
   logoText: {
-    gap: 8,
-  },
+    rowGap: 8,
+  } as TextStyle,
   logoLine: {
     height: 4,
     width: 40,
     borderRadius: 2,
-  },
+  } as ViewStyle,
   logoLineShort: {
     width: 28,
-  },
+  } as ViewStyle,
   skeletonContent: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 16,
-  },
+    width: "100%",
+    alignItems: "center",
+    rowGap: 16,
+  } as ViewStyle,
   skeletonLine: {
     height: 20,
     borderRadius: 10,
-  },
+  } as ViewStyle,
   skeletonLineLong: {
-    width: '90%',
-  },
+    width: "90%",
+  } as ViewStyle,
   skeletonLineMedium: {
-    width: '80%',
-  },
+    width: "80%",
+  } as ViewStyle,
   skeletonLineShort: {
-    width: '60%',
-  },
+    width: "60%",
+  } as ViewStyle,
   authorSkeleton: {
     width: 120,
     height: 16,
     borderRadius: 8,
     marginTop: 20,
-  },
+  } as ViewStyle,
   badgeSkeleton: {
-    position: 'absolute',
+    position: "absolute",
     top: 80,
     right: 30,
     width: 80,
     height: 32,
     borderRadius: 16,
-  },
+  } as ViewStyle,
   buttonsSkeleton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 100,
     right: 20,
-    gap: 12,
-  },
+    rowGap: 12,
+  } as ViewStyle,
   buttonSkeleton: {
     width: 56,
     height: 56,
     borderRadius: 28,
-  },
+  } as ViewStyle,
 });
-

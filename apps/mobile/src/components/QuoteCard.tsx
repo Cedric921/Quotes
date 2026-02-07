@@ -5,11 +5,17 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   Animated,
+  TouchableOpacity,
+  ViewStyle,
+  TextStyle,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { getTopicGradient } from "../constants/colors";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
 const { height } = Dimensions.get("window");
 
@@ -29,11 +35,14 @@ interface QuoteCardProps {
   readonly isLiked?: boolean;
 }
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function QuoteCard({
   quote,
   onLike,
   isLiked = false,
 }: QuoteCardProps) {
+  const navigation = useNavigation<NavigationProp>();
   const [liked, setLiked] = useState(isLiked);
   const [lastTap, setLastTap] = useState(0);
 
@@ -83,6 +92,16 @@ export default function QuoteCard({
     onLike(quote.id);
   };
 
+  const handleTopicPress = () => {
+    if (quote.topic) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      navigation.navigate("Topic", {
+        topicId: quote.topic.id,
+        topicName: quote.topic.name,
+      });
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={handleDoubleTap}>
       <LinearGradient
@@ -114,9 +133,13 @@ export default function QuoteCard({
 
         {/* Topic badge with glassmorphism */}
         {quote.topic && (
-          <View style={styles.topicBadge}>
+          <TouchableOpacity
+            style={styles.topicBadge}
+            onPress={handleTopicPress}
+            activeOpacity={0.7}
+          >
             <Text style={styles.topicText}>{quote.topic.name}</Text>
-          </View>
+          </TouchableOpacity>
         )}
       </LinearGradient>
     </TouchableWithoutFeedback>
@@ -129,7 +152,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 30,
-  },
+  } as ViewStyle,
   heartAnimation: {
     position: "absolute",
     fontSize: 120,
@@ -137,14 +160,14 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
-  },
+  } as TextStyle,
   content: {
     alignItems: "center",
     maxWidth: "100%",
-  },
+  } as ViewStyle,
   quoteText: {
     fontSize: 28,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#ffffff",
     textAlign: "center",
     lineHeight: 40,
@@ -152,7 +175,7 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
-  },
+  } as TextStyle,
   author: {
     fontSize: 18,
     color: "#ffffff",
@@ -160,7 +183,7 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-  },
+  } as TextStyle,
   topicBadge: {
     position: "absolute",
     top: 100,
@@ -176,13 +199,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-  },
+  } as ViewStyle,
   topicText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     textShadowColor: "rgba(0, 0, 0, 0.2)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-  },
+  } as TextStyle,
 });

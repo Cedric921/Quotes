@@ -6,6 +6,7 @@ import {
   Dimensions,
   RefreshControl,
   ActivityIndicator,
+  ViewStyle,
 } from "react-native";
 import * as Sharing from "expo-sharing";
 import {
@@ -19,10 +20,21 @@ import {
 import { useQuotes } from "../hooks";
 import { Quote } from "../types";
 import { useTheme } from "../contexts/ThemeContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
 const { height } = Dimensions.get("window");
 
-export default function HomeScreen() {
+type HomeScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Home"
+>;
+
+interface HomeScreenProps {
+  readonly navigation: HomeScreenNavigationProp;
+}
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
@@ -73,14 +85,12 @@ export default function HomeScreen() {
   }, []);
 
   const handleProfile = useCallback(() => {
-    console.log("Profile clicked");
-    // TODO: Navigate to profile screen
-  }, []);
+    navigation.navigate("Profile");
+  }, [navigation]);
 
   const handleSettings = useCallback(() => {
-    console.log("Settings clicked");
-    // TODO: Navigate to settings screen
-  }, []);
+    navigation.navigate("Settings");
+  }, [navigation]);
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -183,10 +193,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
+  } as ViewStyle,
   footer: {
     height: height,
     justifyContent: "center",
     alignItems: "center",
-  },
+  } as ViewStyle,
 });

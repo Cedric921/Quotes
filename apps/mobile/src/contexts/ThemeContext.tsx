@@ -1,8 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS } from '../constants/colors';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { COLORS } from "../constants/colors";
 
-type Theme = 'light' | 'dark';
+type Theme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
@@ -13,10 +19,12 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = '@focus_theme';
+const THEME_STORAGE_KEY = "@focus_theme";
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
+export function ThemeProvider({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
     loadTheme();
@@ -25,21 +33,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const loadTheme = async () => {
     try {
       const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-      if (savedTheme === 'light' || savedTheme === 'dark') {
+      if (savedTheme === "light" || savedTheme === "dark") {
         setTheme(savedTheme);
       }
     } catch (error) {
-      console.error('Error loading theme:', error);
+      console.error("Error loading theme:", error);
     }
   };
 
   const toggleTheme = async () => {
-    const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
+    const newTheme: Theme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
     } catch (error) {
-      console.error('Error saving theme:', error);
+      console.error("Error saving theme:", error);
     }
   };
 
@@ -47,21 +55,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     theme,
     colors: COLORS[theme],
     toggleTheme,
-    isDark: theme === 'dark',
+    isDark: theme === "dark",
   };
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
+    throw new Error("useTheme must be used within ThemeProvider");
   }
   return context;
 }
-
