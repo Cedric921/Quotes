@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/auth";
 import { seedDatabase } from "@/lib/data";
+import { useLocale } from "@/contexts/LocaleContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,6 +46,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
+  const { t } = useLocale();
   const [isSeeding, setIsSeeding] = useState(false);
   const [seedResult, setSeedResult] = useState<string>("");
   const [stats, setStats] = useState<Stats>({ users: 0, topics: 0, quotes: 0 });
@@ -80,15 +82,13 @@ export default function DashboardPage() {
     try {
       const result = await seedDatabase(apiClient);
       if (result.success) {
-        setSeedResult(
-          "✅ Database seeded successfully! Check the Topics and Quotes pages.",
-        );
+        setSeedResult(t.dashboard.seedSuccess);
         fetchStats(); // Refresh stats after seeding
       } else {
-        setSeedResult("❌ Failed to seed database. Check console for errors.");
+        setSeedResult(t.dashboard.seedError);
       }
     } catch (error) {
-      setSeedResult("❌ Error during seeding. Check console for details.");
+      setSeedResult(t.dashboard.seedErrorDetails);
     } finally {
       setIsSeeding(false);
     }
@@ -96,26 +96,26 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: "Total Users",
+      title: t.dashboard.totalUsers,
       value: stats.users,
       icon: Users,
-      description: "Registered users",
+      description: t.dashboard.registeredUsers,
       gradient: "from-blue-500 to-cyan-500",
       bgGradient: "from-blue-500/10 to-cyan-500/10",
     },
     {
-      title: "Topics",
+      title: t.nav.topics,
       value: stats.topics,
       icon: BookOpen,
-      description: "Quote categories",
+      description: t.dashboard.quoteCategories,
       gradient: "from-purple-500 to-pink-500",
       bgGradient: "from-purple-500/10 to-pink-500/10",
     },
     {
-      title: "Quotes",
+      title: t.nav.quotes,
       value: stats.quotes,
       icon: FileText,
-      description: "Inspirational quotes",
+      description: t.dashboard.inspirationalQuotes,
       gradient: "from-orange-500 to-red-500",
       bgGradient: "from-orange-500/10 to-red-500/10",
     },
@@ -127,15 +127,15 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Dashboard
+            {t.dashboard.title}
           </h1>
-          <p className="text-muted-foreground mt-2">
-            Welcome back! Here's an overview of your content.
-          </p>
+          <p className="text-muted-foreground mt-2">{t.dashboard.welcome}</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/20">
           <Sparkles className="w-5 h-5 text-primary" />
-          <span className="text-sm font-medium text-primary">Admin Panel</span>
+          <span className="text-sm font-medium text-primary">
+            {t.dashboard.adminPanel}
+          </span>
         </div>
       </div>
 
@@ -190,14 +190,14 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Finances & Subscriptions
+              {t.dashboard.financesTitle}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Revenue tracking and subscription analytics
+              {t.dashboard.financesDescription}
             </p>
           </div>
           <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 px-4 py-1.5 text-sm">
-            Bientôt
+            {t.dashboard.comingSoon}
           </Badge>
         </div>
 
@@ -208,7 +208,7 @@ export default function DashboardPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription className="text-sm font-medium">
-                  Revenus Totaux
+                  {t.dashboard.stats.totalRevenue}
                 </CardDescription>
                 <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500">
                   <DollarSign className="w-5 h-5 text-white" />
@@ -220,7 +220,9 @@ export default function DashboardPage() {
                 <div className="text-3xl font-bold blur-[2px] select-none">
                   $12,450
                 </div>
-                <p className="text-xs text-muted-foreground">Tous les temps</p>
+                <p className="text-xs text-muted-foreground">
+                  {t.dashboard.stats.allTime}
+                </p>
               </div>
             </CardContent>
             <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-green-500 to-emerald-500 opacity-10 rounded-full blur-2xl" />
@@ -231,7 +233,7 @@ export default function DashboardPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription className="text-sm font-medium">
-                  Revenus du Mois
+                  {t.dashboard.stats.monthlyRevenue}
                 </CardDescription>
                 <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
                   <Calendar className="w-5 h-5 text-white" />
@@ -249,7 +251,7 @@ export default function DashboardPage() {
                     +12.5%
                   </Badge>
                   <span className="text-xs text-muted-foreground blur-[1px] select-none">
-                    vs mois dernier
+                    {t.dashboard.stats.vsLastMonth}
                   </span>
                 </div>
               </div>
@@ -262,7 +264,7 @@ export default function DashboardPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription className="text-sm font-medium">
-                  Utilisateurs Premium
+                  {t.dashboard.stats.premiumUsers}
                 </CardDescription>
                 <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
                   <UserCheck className="w-5 h-5 text-white" />
@@ -275,7 +277,7 @@ export default function DashboardPage() {
                   156
                 </div>
                 <p className="text-xs text-muted-foreground blur-[1px] select-none">
-                  68% du total
+                  68% {t.dashboard.stats.ofTotal}
                 </p>
               </div>
             </CardContent>
@@ -287,7 +289,7 @@ export default function DashboardPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription className="text-sm font-medium">
-                  Utilisateurs Gratuits
+                  {t.dashboard.stats.freeUsers}
                 </CardDescription>
                 <div className="p-2 rounded-lg bg-gradient-to-br from-slate-500 to-gray-500">
                   <UserX className="w-5 h-5 text-white" />
@@ -300,7 +302,7 @@ export default function DashboardPage() {
                   73
                 </div>
                 <p className="text-xs text-muted-foreground blur-[1px] select-none">
-                  32% du total
+                  32% {t.dashboard.stats.ofTotal}
                 </p>
               </div>
             </CardContent>
@@ -319,14 +321,14 @@ export default function DashboardPage() {
                     <Receipt className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <CardTitle>Dernières Transactions</CardTitle>
+                    <CardTitle>{t.dashboard.transactions.title}</CardTitle>
                     <CardDescription>
-                      Historique des paiements récents
+                      {t.dashboard.transactions.description}
                     </CardDescription>
                   </div>
                 </div>
                 <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                  Bientôt
+                  {t.dashboard.comingSoon}
                 </Badge>
               </div>
             </CardHeader>
@@ -334,11 +336,11 @@ export default function DashboardPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Utilisateur</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Montant</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Statut</TableHead>
+                    <TableHead>{t.dashboard.transactions.user}</TableHead>
+                    <TableHead>{t.dashboard.transactions.plan}</TableHead>
+                    <TableHead>{t.dashboard.transactions.amount}</TableHead>
+                    <TableHead>{t.dashboard.transactions.date}</TableHead>
+                    <TableHead>{t.dashboard.transactions.status}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -408,10 +410,10 @@ export default function DashboardPage() {
                           }
                         >
                           {transaction.status === "success"
-                            ? "Réussi"
+                            ? t.dashboard.transactions.success
                             : transaction.status === "pending"
-                              ? "En cours"
-                              : "Échoué"}
+                              ? t.dashboard.transactions.pending
+                              : t.dashboard.transactions.failed}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -432,7 +434,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">
-                      Partenariat Stripe
+                      {t.dashboard.stripe.title}
                     </CardTitle>
                   </div>
                 </div>
@@ -441,37 +443,45 @@ export default function DashboardPage() {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-                  <span className="text-sm font-medium">Statut</span>
+                  <span className="text-sm font-medium">
+                    {t.dashboard.stripe.status}
+                  </span>
                   <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                    Bientôt
+                    {t.dashboard.comingSoon}
                   </Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-card border blur-[1.5px] select-none">
-                  <span className="text-sm font-medium">API Key</span>
+                  <span className="text-sm font-medium">
+                    {t.dashboard.stripe.apiKey}
+                  </span>
                   <span className="text-xs text-muted-foreground font-mono">
                     sk_test_***********
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-card border blur-[1.5px] select-none">
-                  <span className="text-sm font-medium">Webhook</span>
+                  <span className="text-sm font-medium">
+                    {t.dashboard.stripe.webhook}
+                  </span>
                   <Badge variant="secondary" className="text-xs">
-                    Configuré
+                    {t.dashboard.stripe.webhookConfigured}
                   </Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-card border blur-[1.5px] select-none">
-                  <span className="text-sm font-medium">Mode</span>
+                  <span className="text-sm font-medium">
+                    {t.dashboard.stripe.mode}
+                  </span>
                   <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 text-xs">
-                    Test
+                    {t.dashboard.stripe.test}
                   </Badge>
                 </div>
               </div>
 
               <div className="pt-4 border-t">
                 <p className="text-xs text-muted-foreground text-center">
-                  Intégration de paiement sécurisée
+                  {t.dashboard.stripe.securePayment}
                 </p>
               </div>
             </CardContent>
@@ -488,18 +498,17 @@ export default function DashboardPage() {
             </div>
             <div>
               <CardTitle className="text-2xl">
-                Welcome to Quotes Admin Panel
+                {t.dashboard.welcomeTitle}
               </CardTitle>
               <CardDescription className="text-base mt-1">
-                Manage users, topics, and quotes from the sidebar navigation.
+                {t.dashboard.welcomeDescription}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Select a section from the sidebar to get started. You can manage
-            users, organize topics, and curate inspirational quotes.
+            {t.dashboard.welcomeText}
           </p>
         </CardContent>
       </Card>
@@ -512,21 +521,20 @@ export default function DashboardPage() {
               <Database className="w-6 h-6 text-orange-500" />
             </div>
             <div>
-              <CardTitle>Database Seeding</CardTitle>
+              <CardTitle>{t.dashboard.seedingTitle}</CardTitle>
               <CardDescription>
-                Populate the database with test data (users, topics, and quotes)
+                {t.dashboard.seedingDescription}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Click the button below to seed the database with sample data for
-            testing. This will create users, topics, and quotes.
+            {t.dashboard.seedingText}
           </p>
           <Button onClick={handleSeed} disabled={isSeeding} className="gap-2">
             <Database className="w-4 h-4" />
-            {isSeeding ? "Seeding..." : "Seed Database"}
+            {isSeeding ? t.dashboard.seeding : t.dashboard.seedDatabase}
           </Button>
           {seedResult && (
             <div

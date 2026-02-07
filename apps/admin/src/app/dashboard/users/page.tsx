@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/auth";
+import { useLocale } from "@/contexts/LocaleContext";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ interface User {
 }
 
 export default function UsersPage() {
+  const { t } = useLocale();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -66,14 +68,14 @@ export default function UsersPage() {
       <div className="flex items-center justify-between pb-4 border-b">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Users Management
+            {t.users.title}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage and view all registered users
+            {t.users.description}
           </p>
         </div>
         <Badge variant="secondary" className="text-sm px-3 py-1">
-          {users.length} {users.length === 1 ? "User" : "Users"}
+          {users.length} {users.length === 1 ? t.users.user : t.users.title}
         </Badge>
       </div>
 
@@ -120,7 +122,7 @@ export default function UsersPage() {
                   {user.isAdmin && (
                     <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
                       <Crown className="w-3 h-3 mr-1" />
-                      Admin
+                      {t.users.admin}
                     </Badge>
                   )}
                   <Badge
@@ -131,7 +133,7 @@ export default function UsersPage() {
                         : ""
                     }
                   >
-                    {user.isSubscribed ? "Subscribed" : "Free"}
+                    {user.isSubscribed ? t.users.premium : t.users.free}
                   </Badge>
                 </div>
 
@@ -154,9 +156,9 @@ export default function UsersPage() {
       {users.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <UserIcon className="w-16 h-16 text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No users found</h3>
+          <h3 className="text-lg font-semibold mb-2">{t.users.noUsers}</h3>
           <p className="text-sm text-muted-foreground">
-            Users will appear here once they register
+            {t.users.usersWillAppear}
           </p>
         </div>
       )}
