@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { isAuthenticated, logout } from "@/lib/auth";
+import { useLocale } from "@/contexts/LocaleContext";
 import {
   LogOut,
   Users,
@@ -16,6 +17,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +36,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
@@ -49,15 +52,15 @@ export default function DashboardLayout({
   };
 
   const handleLogoutConfirm = () => {
-    const toastId = toast.loading("Signing out...");
+    const toastId = toast.loading(t.auth.signingOut);
 
     try {
       logout();
-      toast.success("Signed out successfully!", { id: toastId });
+      toast.success(t.auth.signedOut, { id: toastId });
       setLogoutDialogOpen(false);
       router.push("/login");
     } catch (error) {
-      toast.error("Failed to sign out", { id: toastId });
+      toast.error(t.auth.signOutFailed, { id: toastId });
     }
   };
 
@@ -66,10 +69,10 @@ export default function DashboardLayout({
   }
 
   const navItems = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/dashboard/users", icon: Users, label: "Users" },
-    { href: "/dashboard/topics", icon: BookOpen, label: "Topics" },
-    { href: "/dashboard/quotes", icon: FileText, label: "Quotes" },
+    { href: "/dashboard", icon: LayoutDashboard, label: t.nav.dashboard },
+    { href: "/dashboard/users", icon: Users, label: t.nav.users },
+    { href: "/dashboard/topics", icon: BookOpen, label: t.nav.topics },
+    { href: "/dashboard/quotes", icon: FileText, label: t.nav.quotes },
   ];
 
   return (
@@ -84,9 +87,9 @@ export default function DashboardLayout({
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Quotes Admin
+                {t.app.name}
               </h1>
-              <p className="text-xs text-muted-foreground">Management Panel</p>
+              <p className="text-xs text-muted-foreground">{t.app.subtitle}</p>
             </div>
           </div>
         </div>
@@ -123,14 +126,17 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        {/* Theme Toggle & Logout */}
+        {/* Theme, Language & Logout */}
         <div className="p-4 border-t border-border/50 space-y-3">
-          {/* Theme Toggle */}
+          {/* Theme & Language Toggle */}
           <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-muted/30">
             <span className="text-sm font-medium text-muted-foreground">
-              Theme
+              Settings
             </span>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <LanguageToggle />
+            </div>
           </div>
 
           {/* Logout Button */}
@@ -140,7 +146,7 @@ export default function DashboardLayout({
             onClick={handleLogoutClick}
           >
             <LogOut className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
-            Logout
+            {t.auth.logout}
           </Button>
         </div>
       </aside>
@@ -161,21 +167,24 @@ export default function DashboardLayout({
               <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-amber-500" />
               </div>
-              <AlertDialogTitle className="text-xl">Sign Out</AlertDialogTitle>
+              <AlertDialogTitle className="text-xl">
+                {t.auth.signOut}
+              </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-base">
-              Are you sure you want to sign out? You will need to log in again
-              to access the admin panel.
+              {t.auth.logoutConfirm} {t.auth.logoutDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-2">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-2">
+              {t.common.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLogoutConfirm}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              {t.auth.signOut}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

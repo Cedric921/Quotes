@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { useLocale } from "@/contexts/LocaleContext";
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function LoginPage() {
+  const { t } = useLocale();
   const router = useRouter();
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,14 +35,14 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    const toastId = toast.loading("Signing in...");
+    const toastId = toast.loading(t.auth.signingIn);
 
     try {
       await login(data);
-      toast.success("Welcome back!", { id: toastId });
+      toast.success(t.auth.signedIn, { id: toastId });
       router.push("/dashboard");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Invalid credentials";
+      const errorMessage = err.response?.data?.message || t.auth.signInFailed;
       setError(errorMessage);
       toast.error(errorMessage, { id: toastId });
     } finally {
@@ -71,10 +73,10 @@ export default function LoginPage() {
           {/* Title */}
           <div className="text-center space-y-2">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Admin Portal
+              {t.app.name}
             </CardTitle>
             <CardDescription className="text-base">
-              Sign in to access the management dashboard
+              {t.auth.enterCredentials}
             </CardDescription>
           </div>
         </CardHeader>
@@ -88,7 +90,7 @@ export default function LoginPage() {
                 className="text-sm font-medium flex items-center gap-2"
               >
                 <Mail className="w-4 h-4 text-primary" />
-                Email Address
+                {t.auth.email}
               </Label>
               <div className="relative">
                 <Input
@@ -115,7 +117,7 @@ export default function LoginPage() {
                 className="text-sm font-medium flex items-center gap-2"
               >
                 <Lock className="w-4 h-4 text-primary" />
-                Password
+                {t.auth.password}
               </Label>
               <div className="relative">
                 <Input
@@ -154,12 +156,12 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Sparkles className="w-4 h-4 mr-2 animate-spin" />
-                  Signing in...
+                  {t.auth.signingIn}
                 </>
               ) : (
                 <>
                   <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
+                  {t.auth.signIn}
                 </>
               )}
             </Button>
