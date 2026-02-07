@@ -18,6 +18,7 @@ import {
   Mail,
   ChevronRight,
 } from "lucide-react";
+import { UsersSkeleton } from "@/components/skeletons/UsersSkeleton";
 
 interface User {
   id: number;
@@ -48,11 +49,7 @@ export default function UsersPage() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-lg text-muted-foreground">Loading users...</div>
-      </div>
-    );
+    return <UsersSkeleton />;
   }
 
   if (error) {

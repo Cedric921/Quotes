@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/auth";
+import { QuotesSkeleton } from "@/components/skeletons/QuotesSkeleton";
 import {
   Card,
   CardDescription,
@@ -178,11 +179,7 @@ export default function QuotesPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-lg text-muted-foreground">Loading quotes...</div>
-      </div>
-    );
+    return <QuotesSkeleton />;
   }
 
   return (
