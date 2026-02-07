@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/auth";
+import { TopicsSkeleton } from "@/components/skeletons/TopicsSkeleton";
 import {
   Card,
   CardDescription,
@@ -126,11 +127,7 @@ export default function TopicsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-lg text-muted-foreground">Loading topics...</div>
-      </div>
-    );
+    return <TopicsSkeleton />;
   }
 
   return (

@@ -1,79 +1,77 @@
 @import "tailwindcss";
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
-  --radius: 0.5rem;
+@theme {
+  /* Light theme colors */
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(15% 0.02 250);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(15% 0.02 250);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(15% 0.02 250);
+  --color-primary: oklch(60% 0.2 250);
+  --color-primary-foreground: oklch(98% 0 0);
+  --color-secondary: oklch(96% 0.01 250);
+  --color-secondary-foreground: oklch(20% 0.02 250);
+  --color-muted: oklch(96% 0.01 250);
+  --color-muted-foreground: oklch(55% 0.01 250);
+  --color-accent: oklch(96% 0.01 250);
+  --color-accent-foreground: oklch(20% 0.02 250);
+  --color-destructive: oklch(60% 0.22 25);
+  --color-destructive-foreground: oklch(98% 0 0);
+  --color-border: oklch(90% 0.01 250);
+  --color-input: oklch(90% 0.01 250);
+  --color-ring: oklch(60% 0.2 250);
+
+  /* Dark theme colors */
+  --color-background-dark: oklch(15% 0.02 250);
+  --color-foreground-dark: oklch(98% 0 0);
+  --color-card-dark: oklch(15% 0.02 250);
+  --color-card-foreground-dark: oklch(98% 0 0);
+  --color-popover-dark: oklch(15% 0.02 250);
+  --color-popover-foreground-dark: oklch(98% 0 0);
+  --color-primary-dark: oklch(65% 0.2 250);
+  --color-primary-foreground-dark: oklch(20% 0.02 250);
+  --color-secondary-dark: oklch(25% 0.02 250);
+  --color-secondary-foreground-dark: oklch(98% 0 0);
+  --color-muted-dark: oklch(25% 0.02 250);
+  --color-muted-foreground-dark: oklch(70% 0.01 250);
+  --color-accent-dark: oklch(25% 0.02 250);
+  --color-accent-foreground-dark: oklch(98% 0 0);
+  --color-destructive-dark: oklch(45% 0.18 25);
+  --color-destructive-foreground-dark: oklch(98% 0 0);
+  --color-border-dark: oklch(25% 0.02 250);
+  --color-input-dark: oklch(25% 0.02 250);
+  --color-ring-dark: oklch(55% 0.18 250);
 }
 
-@theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-  }
+/* Apply dark theme colors when .dark class is present */
+.dark {
+  --color-background: var(--color-background-dark);
+  --color-foreground: var(--color-foreground-dark);
+  --color-card: var(--color-card-dark);
+  --color-card-foreground: var(--color-card-foreground-dark);
+  --color-popover: var(--color-popover-dark);
+  --color-popover-foreground: var(--color-popover-foreground-dark);
+  --color-primary: var(--color-primary-dark);
+  --color-primary-foreground: var(--color-primary-foreground-dark);
+  --color-secondary: var(--color-secondary-dark);
+  --color-secondary-foreground: var(--color-secondary-foreground-dark);
+  --color-muted: var(--color-muted-dark);
+  --color-muted-foreground: var(--color-muted-foreground-dark);
+  --color-accent: var(--color-accent-dark);
+  --color-accent-foreground: var(--color-accent-foreground-dark);
+  --color-destructive: var(--color-destructive-dark);
+  --color-destructive-foreground: var(--color-destructive-foreground-dark);
+  --color-border: var(--color-border-dark);
+  --color-input: var(--color-input-dark);
+  --color-ring: var(--color-ring-dark);
 }
 
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--color-border);
 }
 
 body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background: var(--color-background);
+  color: var(--color-foreground);
 }
