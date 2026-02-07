@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from "react";
 import {
   View,
   FlatList,
@@ -6,14 +6,27 @@ import {
   Dimensions,
   RefreshControl,
   ActivityIndicator,
-} from 'react-native';
-import { QuoteCard, LoadingScreen, ErrorMessage } from '../components';
-import { useQuotes } from '../hooks';
-import { Quote } from '../types';
+} from "react-native";
+import * as Sharing from "expo-sharing";
+import {
+  QuoteCard,
+  LoadingSkeleton,
+  ErrorMessage,
+  Header,
+  DotsIndicator,
+  ActionButtons,
+} from "../components";
+import { useQuotes } from "../hooks";
+import { Quote } from "../types";
+import { useTheme } from "../contexts/ThemeContext";
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
+
   const {
     quotes,
     loading,
@@ -33,22 +46,75 @@ export default function HomeScreen() {
     fetchQuotes(1, true);
   }, [fetchQuotes]);
 
-  const renderItem = useCallback(({ item }: { item: Quote }) => (
-    <QuoteCard quote={item} onLike={likeQuote} />
-  ), [likeQuote]);
+  const handleLike = useCallback(
+    (quoteId: number) => {
+      setLikedQuotes((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(quoteId)) {
+          newSet.delete(quoteId);
+        } else {
+          newSet.add(quoteId);
+        }
+        return newSet;
+      });
+      likeQuote(quoteId);
+    },
+    [likeQuote],
+  );
+
+  const handleShare = useCallback(async (text: string, author: string) => {
+    const shareText = `"${text}"\n\n— ${author}\n\n📱 Focus App`;
+
+    if (await Sharing.isAvailableAsync()) {
+      // Create a temporary text file to share
+      // For now, we'll just log it (you can implement file creation later)
+      console.log("Share:", shareText);
+    }
+  }, []);
+
+  const handleProfile = useCallback(() => {
+    console.log("Profile clicked");
+    // TODO: Navigate to profile screen
+  }, []);
+
+  const handleSettings = useCallback(() => {
+    console.log("Settings clicked");
+    // TODO: Navigate to settings screen
+  }, []);
+
+  const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index || 0);
+    }
+  }, []);
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+  };
+
+  const renderItem = useCallback(
+    ({ item }: { item: Quote }) => (
+      <QuoteCard
+        quote={item}
+        onLike={handleLike}
+        isLiked={likedQuotes.has(item.id)}
+      />
+    ),
+    [handleLike, likedQuotes],
+  );
 
   const renderFooter = useCallback(() => {
     if (!loading) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
-  }, [loading]);
+  }, [loading, colors.primary]);
 
-  // Show loading screen on initial load
+  // Show loading skeleton on initial load
   if (loading && quotes.length === 0 && !error) {
-    return <LoadingScreen />;
+    return <LoadingSkeleton />;
   }
 
   // Show error message if there's an error and no quotes
@@ -62,7 +128,11 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Header */}
+      <Header />
+
+      {/* Quotes List */}
       <FlatList
         data={quotes}
         renderItem={renderItem}
@@ -71,11 +141,13 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
+        onViewableItemsChanged={handleViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor="#fff"
+            tintColor={colors.primary}
           />
         }
         ListFooterComponent={renderFooter}
@@ -85,6 +157,25 @@ export default function HomeScreen() {
           index,
         })}
       />
+
+      {/* Dots Indicator */}
+      {quotes.length > 0 && (
+        <DotsIndicator total={quotes.length} currentIndex={currentIndex} />
+      )}
+
+      {/* Fixed Action Buttons */}
+      {quotes.length > 0 && quotes[currentIndex] && (
+        <ActionButtons
+          quoteId={quotes[currentIndex].id}
+          quoteText={quotes[currentIndex].text}
+          author={quotes[currentIndex].author}
+          isLiked={likedQuotes.has(quotes[currentIndex].id)}
+          onLike={handleLike}
+          onShare={handleShare}
+          onProfile={handleProfile}
+          onSettings={handleSettings}
+        />
+      )}
     </View>
   );
 }
@@ -92,12 +183,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
   },
   footer: {
     height: height,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
-
