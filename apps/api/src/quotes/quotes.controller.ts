@@ -16,10 +16,12 @@ export class QuotesController {
   findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('topicId') topicId?: string,
   ) {
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
-    return this.quotesService.findAll(pageNum, limitNum);
+    const topicIdNum = topicId ? parseInt(topicId, 10) : undefined;
+    return this.quotesService.findAll(pageNum, limitNum, topicIdNum);
   }
 
   @Get(':id')

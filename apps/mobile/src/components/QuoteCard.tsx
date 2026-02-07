@@ -1,12 +1,20 @@
-import React from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { Quote } from '../types';
 
 const { height } = Dimensions.get('window');
 
+interface Quote {
+  id: number;
+  text: string;
+  author: string;
+  topic?: {
+    id: number;
+    name: string;
+  };
+}
+
 interface QuoteCardProps {
-  quote: Quote;
-  onLike?: (quoteId: number) => void;
+  readonly quote: Quote;
+  readonly onLike?: (quoteId: number) => void;
 }
 
 export default function QuoteCard({ quote, onLike }: QuoteCardProps) {
@@ -15,12 +23,12 @@ export default function QuoteCard({ quote, onLike }: QuoteCardProps) {
       <View style={styles.content}>
         <Text style={styles.quoteText}>"{quote.text}"</Text>
 
-        {quote.author && (
+        {Boolean(quote.author) && (
           <Text style={styles.author}>— {quote.author}</Text>
         )}
       </View>
 
-      {/* Topic badge en bas à droite */}
+      {/* Topic badge en haut à droite */}
       {quote.topic && (
         <View style={styles.topicBadge}>
           <Text style={styles.topicText}>{quote.topic.name}</Text>
@@ -61,16 +69,15 @@ const styles = StyleSheet.create({
   author: {
     fontSize: 18,
     color: '#a0a0a0',
-    fontStyle: 'italic',
     marginBottom: 20,
   },
   topicBadge: {
     position: 'absolute',
-    bottom: 180,
+    top: 60,
     right: 30,
     backgroundColor: 'rgba(51, 51, 51, 0.9)',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

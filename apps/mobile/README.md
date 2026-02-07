@@ -1,4 +1,70 @@
-# Mobile App - Quotes Application
+# Mobile App - Focus Project
+
+Application mobile React Native avec Expo pour afficher des citations inspirantes.
+
+## 📁 Structure du projet
+
+```
+apps/mobile/
+├── src/
+│   ├── components/          # Composants réutilisables
+│   │   ├── QuoteCard.tsx   # Carte d'affichage d'une citation
+│   │   ├── LoadingScreen.tsx # Écran de chargement
+│   │   ├── ErrorMessage.tsx  # Message d'erreur
+│   │   └── index.ts        # Exports centralisés
+│   │
+│   ├── screens/            # Écrans de l'application
+│   │   ├── HomeScreen.tsx  # Écran principal avec liste de citations
+│   │   └── index.ts        # Exports centralisés
+│   │
+│   ├── hooks/              # Hooks personnalisés
+│   │   ├── useQuotes.ts    # Hook pour gérer les citations
+│   │   └── index.ts        # Exports centralisés
+│   │
+│   ├── services/           # Services API
+│   │   └── api.ts          # Client API avec intercepteurs
+│   │
+│   ├── types/              # Définitions TypeScript
+│   │   └── index.ts        # Types Quote, Topic, etc.
+│   │
+│   └── constants/          # Constantes de configuration
+│       └── config.ts       # Configuration API, thème, etc.
+│
+├── App.tsx                 # Point d'entrée de l'application
+├── index.ts                # Fichier d'entrée Expo
+├── package.json            # Dépendances
+└── tsconfig.json           # Configuration TypeScript
+```
+
+## 🚀 Démarrage
+
+```bash
+# Installer les dépendances
+npm install
+
+# Démarrer le serveur de développement
+npm run dev
+```
+
+## 🔧 Configuration
+
+Modifiez `src/constants/config.ts` pour configurer l'URL de l'API :
+
+```typescript
+export const API_CONFIG = {
+  LOCAL_IP: '192.168.1.66', // Votre IP locale
+  PORT: 3001,
+};
+```
+
+## 📱 Fonctionnalités
+
+- ✅ Liste infinie de citations avec pagination
+- ✅ Pull-to-refresh
+- ✅ Affichage des topics
+- ✅ Bouton like
+- ✅ Gestion des erreurs
+- ✅ Architecture modulaire - Quotes Application
 
 Application mobile React Native/Expo pour parcourir des citations inspirantes avec un infinite scroll en plein écran.
 

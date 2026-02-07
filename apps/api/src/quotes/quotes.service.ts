@@ -21,10 +21,13 @@ export class QuotesService {
     return this.quotesRepository.save(quote);
   }
 
-  findAll(page?: number, limit?: number) {
+  findAll(page?: number, limit?: number, topicId?: number) {
+    const where = topicId ? { topic: { id: topicId } } : {};
+
     if (page && limit) {
       const skip = (page - 1) * limit;
       return this.quotesRepository.find({
+        where,
         relations: ['topic'],
         skip,
         take: limit,
@@ -32,6 +35,7 @@ export class QuotesService {
       });
     }
     return this.quotesRepository.find({
+      where,
       relations: ['topic'],
       order: { id: 'DESC' },
     });

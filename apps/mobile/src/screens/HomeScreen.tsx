@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import {
   View,
   FlatList,
@@ -7,108 +7,75 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import QuoteCard from '../components/QuoteCard';
-import { quotesApi } from '../services/api';
+import { QuoteCard, LoadingScreen, ErrorMessage } from '../components';
+import { useQuotes } from '../hooks';
 import { Quote } from '../types';
 
 const { height } = Dimensions.get('window');
 
 export default function HomeScreen() {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  const loadQuotes = async (pageNum: number, refresh: boolean = false) => {
-    try {
-      if (refresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      const newQuotes = await quotesApi.getQuotes(pageNum, 10);
-      
-      if (newQuotes.length === 0) {
-        setHasMore(false);
-      } else if (refresh) {
-        setQuotes(newQuotes);
-      } else {
-        setQuotes((prev) => [...prev, ...newQuotes]);
-      }
-    } catch (error) {
-      console.error('Error loading quotes:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  const {
+    quotes,
+    loading,
+    refreshing,
+    error,
+    loadMore,
+    refresh,
+    likeQuote,
+    fetchQuotes,
+  } = useQuotes({ pageSize: 10 });
 
   useEffect(() => {
-    loadQuotes(1);
+    fetchQuotes(1, true);
   }, []);
 
-  const onRefresh = useCallback(() => {
-    setPage(1);
-    setHasMore(true);
-    loadQuotes(1, true);
-  }, []);
+  const handleRetry = useCallback(() => {
+    fetchQuotes(1, true);
+  }, [fetchQuotes]);
 
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      loadQuotes(nextPage);
-    }
-  };
+  const renderItem = useCallback(({ item }: { item: Quote }) => (
+    <QuoteCard quote={item} onLike={likeQuote} />
+  ), [likeQuote]);
 
-  const handleLike = (quoteId: number) => {
-    console.log('Liked quote:', quoteId);
-    // TODO: Implement like functionality
-  };
-
-  const renderItem = ({ item }: { item: Quote }) => (
-    <QuoteCard quote={item} onLike={handleLike} />
-  );
-
-  const renderFooter = () => {
-    if (!loading || quotes.length === 0) return null;
+  const renderFooter = useCallback(() => {
+    if (!loading) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="large" color="#ffffff" />
+        <ActivityIndicator size="large" color="#fff" />
       </View>
     );
-  };
+  }, [loading]);
 
-  if (loading && quotes.length === 0) {
+  // Show loading screen on initial load
+  if (loading && quotes.length === 0 && !error) {
+    return <LoadingScreen />;
+  }
+
+  // Show error message if there's an error and no quotes
+  if (error && quotes.length === 0) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
+      <ErrorMessage
+        message="Impossible de charger les citations. Vérifiez votre connexion."
+        onRetry={handleRetry}
+      />
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <FlatList
         data={quotes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        pagingEnabled
-        snapToAlignment="start"
-        snapToInterval={height}
-        decelerationRate="fast"
+        pagingEnabled={true}
         showsVerticalScrollIndicator={false}
-        bounces={false}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#ffffff"
+            onRefresh={refresh}
+            tintColor="#fff"
           />
         }
         ListFooterComponent={renderFooter}
@@ -118,25 +85,19 @@ export default function HomeScreen() {
           index,
         })}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#000',
   },
   footer: {
-    height: 100,
+    height: height,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
   },
 });
+

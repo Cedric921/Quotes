@@ -1,24 +1,14 @@
-export interface Quote {
-  id: number;
-  text: string;
-  author: string | null;
-  deletedAt?: Date | null;
-  topic?: {
-    id: number;
-    name: string;
-  } | null;
-}
-
 export interface Topic {
   id: number;
   name: string;
-  description: string;
+  description?: string;
+  deletedAt?: string | null;
 }
 
-export interface User {
+export interface Quote {
   id: number;
-  email: string;
-  isAdmin: boolean;
-  isSubscribed: boolean;
-  subscriptionEndDate?: string;
+  text: string;
+  author: string;
+  topic?: Topic;
+  deletedAt?: string | null;
 }
