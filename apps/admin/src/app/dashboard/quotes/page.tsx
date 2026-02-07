@@ -28,12 +28,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Plus,
   Pencil,
   Trash2,
   Quote as QuoteIcon,
   BookOpen,
+  AlertTriangle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Quote {
   id: number;
@@ -57,6 +69,8 @@ export default function QuotesPage() {
   const [error, setError] = useState<string>("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [quoteToDelete, setQuoteToDelete] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     text: "",
     author: "",
@@ -90,6 +104,11 @@ export default function QuotesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const toastId = toast.loading(
+      editingQuote ? "Updating quote..." : "Creating quote...",
+    );
+
     try {
       const payload = {
         text: formData.text,
@@ -102,15 +121,20 @@ export default function QuotesPage() {
 
       if (editingQuote) {
         await apiClient.patch(`/quotes/${editingQuote.id}`, payload);
+        toast.success("Quote updated successfully!", { id: toastId });
       } else {
         await apiClient.post("/quotes", payload);
+        toast.success("Quote created successfully!", { id: toastId });
       }
+
       setFormData({ text: "", author: "", topicId: "none" });
       setIsSheetOpen(false);
       setEditingQuote(null);
       fetchQuotes();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to save quote");
+      toast.error(err.response?.data?.message || "Failed to save quote", {
+        id: toastId,
+      });
     }
   };
 
@@ -130,13 +154,26 @@ export default function QuotesPage() {
     setIsSheetOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this quote?")) return;
+  const handleDeleteClick = (id: number) => {
+    setQuoteToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!quoteToDelete) return;
+
+    const toastId = toast.loading("Deleting quote...");
+
     try {
-      await apiClient.delete(`/quotes/${id}`);
+      await apiClient.delete(`/quotes/${quoteToDelete}`);
+      toast.success("Quote deleted successfully!", { id: toastId });
+      setDeleteDialogOpen(false);
+      setQuoteToDelete(null);
       fetchQuotes();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to delete quote");
+      toast.error(err.response?.data?.message || "Failed to delete quote", {
+        id: toastId,
+      });
     }
   };
 
@@ -227,7 +264,7 @@ export default function QuotesPage() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => handleDelete(quote.id)}
+                      onClick={() => handleDeleteClick(quote.id)}
                       className="hover:bg-destructive hover:text-destructive-foreground hover:scale-110 transition-all shadow-md"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -379,6 +416,36 @@ export default function QuotesPage() {
           </form>
         </SheetContent>
       </Sheet>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="border-2 border-destructive/20">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-destructive" />
+              </div>
+              <AlertDialogTitle className="text-xl">
+                Delete Quote
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to delete this quote? This action cannot be
+              undone and the quote will be permanently removed from the
+              database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-2">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Delete Quote
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

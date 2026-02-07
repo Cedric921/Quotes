@@ -19,7 +19,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Plus, Pencil, Trash2, Tag } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Pencil, Trash2, Tag, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 interface Topic {
   id: number;
@@ -33,6 +44,8 @@ export default function TopicsPage() {
   const [error, setError] = useState<string>("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [topicToDelete, setTopicToDelete] = useState<number | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
 
   const fetchTopics = async () => {
@@ -52,18 +65,28 @@ export default function TopicsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const toastId = toast.loading(
+      editingTopic ? "Updating topic..." : "Creating topic...",
+    );
+
     try {
       if (editingTopic) {
         await apiClient.patch(`/topics/${editingTopic.id}`, formData);
+        toast.success("Topic updated successfully!", { id: toastId });
       } else {
         await apiClient.post("/topics", formData);
+        toast.success("Topic created successfully!", { id: toastId });
       }
+
       setFormData({ name: "", description: "" });
       setIsSheetOpen(false);
       setEditingTopic(null);
       fetchTopics();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to save topic");
+      toast.error(err.response?.data?.message || "Failed to save topic", {
+        id: toastId,
+      });
     }
   };
 
@@ -79,13 +102,26 @@ export default function TopicsPage() {
     setIsSheetOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this topic?")) return;
+  const handleDeleteClick = (id: number) => {
+    setTopicToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!topicToDelete) return;
+
+    const toastId = toast.loading("Deleting topic...");
+
     try {
-      await apiClient.delete(`/topics/${id}`);
+      await apiClient.delete(`/topics/${topicToDelete}`);
+      toast.success("Topic deleted successfully!", { id: toastId });
+      setDeleteDialogOpen(false);
+      setTopicToDelete(null);
       fetchTopics();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to delete topic");
+      toast.error(err.response?.data?.message || "Failed to delete topic", {
+        id: toastId,
+      });
     }
   };
 
@@ -164,7 +200,7 @@ export default function TopicsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDelete(topic.id)}
+                    onClick={() => handleDeleteClick(topic.id)}
                     className="flex-1 hover:bg-destructive hover:text-destructive-foreground hover:scale-105 transition-all shadow-md"
                   >
                     <Trash2 className="w-3 h-3 mr-1" />
@@ -287,6 +323,36 @@ export default function TopicsPage() {
           </form>
         </SheetContent>
       </Sheet>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="border-2 border-destructive/20">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-destructive" />
+              </div>
+              <AlertDialogTitle className="text-xl">
+                Delete Topic
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to delete this topic? This action cannot be
+              undone and the topic will be permanently removed from the
+              database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-2">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Delete Topic
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

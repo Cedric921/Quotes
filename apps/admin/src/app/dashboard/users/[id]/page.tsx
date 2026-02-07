@@ -1,31 +1,143 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/auth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  User as UserIcon,
+  Mail,
+  Shield,
+  ShieldCheck,
+  Calendar,
+  DollarSign,
+  CreditCard,
+  Clock,
+  ArrowLeft,
+  Edit,
+  CheckCircle,
+  XCircle,
+  Receipt,
+  TrendingUp,
+} from "lucide-react";
+import { toast } from "sonner";
 
 interface User {
   id: number;
   email: string;
+  name?: string;
   isAdmin: boolean;
   isSubscribed: boolean;
   subscriptionEndDate: string | null;
+  subscriptionStartDate?: string | null;
+}
+
+interface Payment {
+  id: number;
+  amount: number;
+  date: string;
+  status: "success" | "pending" | "failed";
+  description: string;
+}
+
+interface Subscription {
+  startDate: string;
+  endDate: string;
+  amount: number;
+  status: "active" | "expired" | "cancelled";
 }
 
 export default function UserDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const userId = params.id as string;
-  
+
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
+
+  // Edit user states
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editIsAdmin, setEditIsAdmin] = useState(false);
+
+  // Password confirmation dialog
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  // Mock data for payments (will be replaced with real API)
+  const [payments] = useState<Payment[]>([
+    {
+      id: 1,
+      amount: 9.99,
+      date: "2024-01-15",
+      status: "success",
+      description: "Monthly Premium Subscription",
+    },
+    {
+      id: 2,
+      amount: 9.99,
+      date: "2023-12-15",
+      status: "success",
+      description: "Monthly Premium Subscription",
+    },
+    {
+      id: 3,
+      amount: 9.99,
+      date: "2023-11-15",
+      status: "success",
+      description: "Monthly Premium Subscription",
+    },
+  ]);
+
+  // Calculate total spent
+  const totalSpent = payments
+    .filter((p) => p.status === "success")
+    .reduce((sum, p) => sum + p.amount, 0);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await apiClient.get<User>(`/users/${userId}`);
         setUser(response.data);
+        setEditName(response.data.name || "");
+        setEditIsAdmin(response.data.isAdmin);
       } catch (err: any) {
         setError(err.response?.data?.message || "Failed to fetch user");
       } finally {
@@ -36,63 +148,500 @@ export default function UserDetailPage() {
     fetchUser();
   }, [userId]);
 
+  const handleEditClick = () => {
+    setIsEditSheetOpen(true);
+  };
+
+  const handleSaveClick = () => {
+    // Close the edit sheet and open password confirmation dialog
+    setIsEditSheetOpen(false);
+    setIsPasswordDialogOpen(true);
+    setPasswordError("");
+    setConfirmPassword("");
+  };
+
+  const handleConfirmEdit = async () => {
+    if (!confirmPassword) {
+      setPasswordError("Password is required");
+      return;
+    }
+
+    const toastId = toast.loading("Updating user...");
+
+    try {
+      // First verify the admin password
+      await apiClient.post("/auth/verify-password", {
+        password: confirmPassword,
+      });
+
+      // Then update the user
+      const response = await apiClient.put(`/users/${userId}`, {
+        name: editName,
+        isAdmin: editIsAdmin,
+      });
+
+      setUser(response.data);
+      toast.success("User updated successfully!", { id: toastId });
+      setIsPasswordDialogOpen(false);
+      setConfirmPassword("");
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "Failed to update user";
+      setPasswordError(errorMessage);
+      toast.error(errorMessage, { id: toastId });
+    }
+  };
+
   if (isLoading) {
-    return <div>Loading user details...</div>;
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-muted-foreground">Loading user details...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error || !user) {
-    return <div className="text-destructive">{error || "User not found"}</div>;
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center space-y-3">
+          <XCircle className="w-16 h-16 text-destructive mx-auto" />
+          <p className="text-destructive text-lg font-semibold">
+            {error || "User not found"}
+          </p>
+          <Button onClick={() => router.push("/dashboard/users")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Users
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">User Details</h1>
-      
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Identity</CardTitle>
-            <CardDescription>User information</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div>
-              <span className="font-medium">Email:</span> {user.email}
-            </div>
-            <div>
-              <span className="font-medium">Role:</span> {user.isAdmin ? "Admin" : "User"}
-            </div>
-            <div>
-              <span className="font-medium">User ID:</span> {user.id}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-6 pb-8">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-4 border-b">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.push("/dashboard/users")}
+            className="border-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              User Details
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              View and manage user information
+            </p>
+          </div>
+        </div>
+        <Button
+          onClick={handleEditClick}
+          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+        >
+          <Edit className="w-4 h-4 mr-2" />
+          Edit User
+        </Button>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Subscription Status</CardTitle>
-            <CardDescription>Subscription information and payment history</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div>
-              <span className="font-medium">Status:</span>{" "}
-              <span className={user.isSubscribed ? "text-green-600" : "text-muted-foreground"}>
-                {user.isSubscribed ? "Active" : "Inactive"}
-              </span>
+      {/* User Identity Card */}
+      <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-card to-muted/20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full" />
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg">
+              <UserIcon className="w-8 h-8 text-white" />
             </div>
-            {user.subscriptionEndDate && (
+            <div className="flex-1">
+              <CardTitle className="text-2xl">
+                {user.name || "Unnamed User"}
+              </CardTitle>
+              <CardDescription className="text-base mt-1">
+                User Information & Profile
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-card border">
+              <Mail className="w-5 h-5 text-muted-foreground" />
               <div>
-                <span className="font-medium">End Date:</span>{" "}
-                {new Date(user.subscriptionEndDate).toLocaleDateString()}
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-medium">{user.email}</p>
               </div>
-            )}
-            <div className="pt-4">
-              <p className="text-sm text-muted-foreground">
-                Payment history feature coming soon...
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-card border">
+              {user.isAdmin ? (
+                <ShieldCheck className="w-5 h-5 text-amber-500" />
+              ) : (
+                <Shield className="w-5 h-5 text-muted-foreground" />
+              )}
+              <div>
+                <p className="text-xs text-muted-foreground">Role</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">
+                    {user.isAdmin ? "Administrator" : "User"}
+                  </p>
+                  {user.isAdmin && (
+                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
+                      Admin
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Financial Overview - Only show if user is subscribed */}
+      {user.isSubscribed && (
+        <>
+          {/* Financial Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Total Spent Card */}
+            <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative overflow-hidden">
+              <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-green-500 to-emerald-500 opacity-10 rounded-full blur-2xl" />
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-sm font-medium">
+                    Total Dépensé
+                  </CardDescription>
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500">
+                    <DollarSign className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1">
+                  <div className="text-3xl font-bold blur-[2px] select-none">
+                    ${totalSpent.toFixed(2)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Depuis le début
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Current Subscription Card */}
+            <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative overflow-hidden">
+              <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 opacity-10 rounded-full blur-2xl" />
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-sm font-medium">
+                    Souscription Actuelle
+                  </CardDescription>
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                    <CreditCard className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      Statut
+                    </span>
+                    <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 text-xs">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Active
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between blur-[1.5px] select-none">
+                    <span className="text-xs text-muted-foreground">Début</span>
+                    <span className="text-sm font-medium">
+                      {user.subscriptionStartDate
+                        ? new Date(
+                            user.subscriptionStartDate,
+                          ).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between blur-[1.5px] select-none">
+                    <span className="text-xs text-muted-foreground">Fin</span>
+                    <span className="text-sm font-medium">
+                      {user.subscriptionEndDate
+                        ? new Date(
+                            user.subscriptionEndDate,
+                          ).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t blur-[1.5px] select-none">
+                    <span className="text-xs text-muted-foreground">
+                      Montant
+                    </span>
+                    <span className="text-lg font-bold">$9.99/mois</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Payment History */}
+          <Card className="border-2 hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500">
+                    <Receipt className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">
+                      Historique des Paiements
+                    </CardTitle>
+                    <CardDescription>
+                      Liste de toutes les transactions
+                    </CardDescription>
+                  </div>
+                </div>
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
+                  Bientôt
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Montant</TableHead>
+                    <TableHead>Statut</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {payments.map((payment) => (
+                    <TableRow
+                      key={payment.id}
+                      className="blur-[1.5px] select-none"
+                    >
+                      <TableCell className="font-medium">
+                        {payment.description}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {new Date(payment.date).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        ${payment.amount.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            payment.status === "success"
+                              ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                              : payment.status === "pending"
+                                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                                : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+                          }
+                        >
+                          {payment.status === "success"
+                            ? "Réussi"
+                            : payment.status === "pending"
+                              ? "En cours"
+                              : "Échoué"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {/* Edit User Sheet */}
+      <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-gradient-to-br from-background to-muted/20">
+          <SheetHeader className="space-y-3 pb-6 border-b">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-gradient-to-br from-primary to-primary/60 shadow-lg">
+                <Edit className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <SheetTitle className="text-2xl">Edit User</SheetTitle>
+                <SheetDescription className="text-base">
+                  Modify user information and role
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <div className="space-y-6 py-6">
+            {/* Name Field */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-name" className="text-sm font-medium">
+                Name
+              </Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Enter user name"
+                className="border-2 focus:border-primary"
+              />
+            </div>
+
+            {/* Email Field (Read-only) */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-email" className="text-sm font-medium">
+                Email
+              </Label>
+              <Input
+                id="edit-email"
+                value={user.email}
+                disabled
+                className="border-2 bg-muted cursor-not-allowed"
+              />
+              <p className="text-xs text-muted-foreground">
+                Email cannot be changed
               </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            {/* Role Toggle */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Role</Label>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant={!editIsAdmin ? "default" : "outline"}
+                  className={
+                    !editIsAdmin
+                      ? "flex-1 border-2"
+                      : "flex-1 border-2 hover:border-primary"
+                  }
+                  onClick={() => setEditIsAdmin(false)}
+                >
+                  <UserIcon className="w-4 h-4 mr-2" />
+                  User
+                </Button>
+                <Button
+                  type="button"
+                  variant={editIsAdmin ? "default" : "outline"}
+                  className={
+                    editIsAdmin
+                      ? "flex-1 border-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                      : "flex-1 border-2 hover:border-primary"
+                  }
+                  onClick={() => setEditIsAdmin(true)}
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  Admin
+                </Button>
+              </div>
+            </div>
+
+            {/* Warning Message */}
+            <div className="p-4 rounded-lg bg-amber-500/10 border-2 border-amber-500/20">
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 text-amber-500 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                    Password Confirmation Required
+                  </p>
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    You will be asked to confirm your admin password before
+                    saving changes.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-6 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditSheetOpen(false)}
+              className="flex-1 border-2"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveClick}
+              className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Password Confirmation Dialog */}
+      <AlertDialog
+        open={isPasswordDialogOpen}
+        onOpenChange={setIsPasswordDialogOpen}
+      >
+        <AlertDialogContent className="border-2 border-primary/20">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-amber-500" />
+              </div>
+              <AlertDialogTitle className="text-xl">
+                Confirm Changes
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base space-y-4">
+              <p>
+                Please enter your admin password to confirm the changes to this
+                user account.
+              </p>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="confirm-password"
+                  className="text-sm font-medium text-foreground"
+                >
+                  Admin Password
+                </Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setPasswordError("");
+                  }}
+                  placeholder="Enter your password"
+                  className="border-2 focus:border-primary"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleConfirmEdit();
+                    }
+                  }}
+                />
+                {passwordError && (
+                  <p className="text-sm text-destructive">{passwordError}</p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-2">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmEdit}
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { isAuthenticated, logout } from "@/lib/auth";
 import {
@@ -10,10 +10,23 @@ import {
   BookOpen,
   LayoutDashboard,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function DashboardLayout({
   children,
@@ -22,6 +35,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -29,9 +43,21 @@ export default function DashboardLayout({
     }
   }, [router]);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
+  const handleLogoutClick = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    const toastId = toast.loading("Signing out...");
+
+    try {
+      logout();
+      toast.success("Signed out successfully!", { id: toastId });
+      setLogoutDialogOpen(false);
+      router.push("/login");
+    } catch (error) {
+      toast.error("Failed to sign out", { id: toastId });
+    }
   };
 
   if (!isAuthenticated()) {
@@ -100,10 +126,10 @@ export default function DashboardLayout({
         <div className="p-4 border-t border-border/50">
           <Button
             variant="outline"
-            className="w-full justify-start hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
-            onClick={handleLogout}
+            className="w-full justify-start hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all group"
+            onClick={handleLogoutClick}
           >
-            <LogOut className="w-5 h-5 mr-2" />
+            <LogOut className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
             Logout
           </Button>
         </div>
@@ -113,6 +139,37 @@ export default function DashboardLayout({
       <main className="flex-1 overflow-y-auto">
         <div className="min-h-full p-8">{children}</div>
       </main>
+
+      {/* Toast Notifications */}
+      <Toaster />
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+        <AlertDialogContent className="border-2 border-destructive/20">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-amber-500" />
+              </div>
+              <AlertDialogTitle className="text-xl">Sign Out</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base">
+              Are you sure you want to sign out? You will need to log in again
+              to access the admin panel.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-2">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLogoutConfirm}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
