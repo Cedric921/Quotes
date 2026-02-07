@@ -1,58 +1,52 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import { View, Text, StyleSheet, Platform } from "react-native";
+import { BlurView } from "expo-blur";
+import { useTheme } from "../contexts/ThemeContext";
 
-interface HeaderProps {
-  onThemeToggle: () => void;
-}
-
-export default function Header({ onThemeToggle }: HeaderProps) {
+export default function Header() {
   const { colors, isDark } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <BlurView
+      intensity={80}
+      tint={isDark ? "dark" : "light"}
+      style={styles.container}
+    >
       <View style={styles.content}>
         {/* Logo */}
         <View style={styles.logoContainer}>
           <Text style={[styles.logo, { color: colors.text }]}>Focus</Text>
           <View style={[styles.logoDot, { backgroundColor: colors.accent }]} />
         </View>
-
-        {/* Theme Toggle */}
-        <TouchableOpacity
-          style={[styles.themeButton, { backgroundColor: colors.cardBackground }]}
-          onPress={onThemeToggle}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.themeIcon}>{isDark ? '☀️' : '🌙'}</Text>
-        </TouchableOpacity>
       </View>
-    </View>
+    </BlurView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     zIndex: 100,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
     paddingBottom: 10,
     paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   content: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   logo: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: -0.5,
   },
   logoDot: {
@@ -61,20 +55,4 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     marginLeft: 2,
   },
-  themeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  themeIcon: {
-    fontSize: 20,
-  },
 });
-

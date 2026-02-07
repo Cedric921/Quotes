@@ -7,12 +7,14 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from "react-native";
+import * as Sharing from "expo-sharing";
 import {
   QuoteCard,
   LoadingSkeleton,
   ErrorMessage,
   Header,
   DotsIndicator,
+  ActionButtons,
 } from "../components";
 import { useQuotes } from "../hooks";
 import { Quote } from "../types";
@@ -21,10 +23,9 @@ import { useTheme } from "../contexts/ThemeContext";
 const { height } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const { colors, toggleTheme } = useTheme();
+  const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
-  const [savedQuotes, setSavedQuotes] = useState<Set<number>>(new Set());
 
   const {
     quotes,
@@ -61,17 +62,24 @@ export default function HomeScreen() {
     [likeQuote],
   );
 
-  const handleSave = useCallback((quoteId: number) => {
-    setSavedQuotes((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(quoteId)) {
-        newSet.delete(quoteId);
-      } else {
-        newSet.add(quoteId);
-      }
-      return newSet;
-    });
-    // TODO: Implement save to local storage
+  const handleShare = useCallback(async (text: string, author: string) => {
+    const shareText = `"${text}"\n\n— ${author}\n\n📱 Focus App`;
+
+    if (await Sharing.isAvailableAsync()) {
+      // Create a temporary text file to share
+      // For now, we'll just log it (you can implement file creation later)
+      console.log("Share:", shareText);
+    }
+  }, []);
+
+  const handleProfile = useCallback(() => {
+    console.log("Profile clicked");
+    // TODO: Navigate to profile screen
+  }, []);
+
+  const handleSettings = useCallback(() => {
+    console.log("Settings clicked");
+    // TODO: Navigate to settings screen
   }, []);
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
@@ -89,12 +97,10 @@ export default function HomeScreen() {
       <QuoteCard
         quote={item}
         onLike={handleLike}
-        onSave={handleSave}
         isLiked={likedQuotes.has(item.id)}
-        isSaved={savedQuotes.has(item.id)}
       />
     ),
-    [handleLike, handleSave, likedQuotes, savedQuotes],
+    [handleLike, likedQuotes],
   );
 
   const renderFooter = useCallback(() => {
@@ -124,7 +130,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <Header onThemeToggle={toggleTheme} />
+      <Header />
 
       {/* Quotes List */}
       <FlatList
@@ -155,6 +161,20 @@ export default function HomeScreen() {
       {/* Dots Indicator */}
       {quotes.length > 0 && (
         <DotsIndicator total={quotes.length} currentIndex={currentIndex} />
+      )}
+
+      {/* Fixed Action Buttons */}
+      {quotes.length > 0 && quotes[currentIndex] && (
+        <ActionButtons
+          quoteId={quotes[currentIndex].id}
+          quoteText={quotes[currentIndex].text}
+          author={quotes[currentIndex].author}
+          isLiked={likedQuotes.has(quotes[currentIndex].id)}
+          onLike={handleLike}
+          onShare={handleShare}
+          onProfile={handleProfile}
+          onSettings={handleSettings}
+        />
       )}
     </View>
   );
