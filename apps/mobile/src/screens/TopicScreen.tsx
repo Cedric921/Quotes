@@ -6,13 +6,19 @@ import {
   FlatList,
   ViewStyle,
   TextStyle,
+  Dimensions,
+  RefreshControl,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
-import { Quote } from "../types";
-import { quotesService } from "../services/api";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Quote, Topic } from "../types";
+import { quotesApi, topicsApi } from "../services/api";
 import * as Haptics from "expo-haptics";
-import { LoadingSkeleton, ErrorMessage, QuoteCard } from "../components";
+import { LoadingSkeleton, QuoteCard, DotsIndicator } from "../components";
+import { BlurView } from "expo-blur";
+
+const { height } = Dimensions.get("window");
 
 interface TopicScreenProps {
   readonly navigation: any;
@@ -26,37 +32,58 @@ interface TopicScreenProps {
 
 export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const { topicId, topicName } = route.params;
+  const [topic, setTopic] = useState<Topic | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
 
   useEffect(() => {
-    fetchTopicQuotes();
+    fetchTopicData();
   }, [topicId]);
 
-  const fetchTopicQuotes = async () => {
+  const fetchTopicData = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
-      const data = await quotesService.getAll();
-      // Filter quotes by topic
-      const topicQuotes = data.filter((q) => q.topic?.id === topicId);
-      setQuotes(topicQuotes);
+
+      // Fetch topic details and quotes in parallel
+      const [topicData, quotesData] = await Promise.all([
+        topicsApi.getTopicById(topicId),
+        quotesApi.getQuotesByTopic(topicId),
+      ]);
+
+      setTopic(topicData);
+      setQuotes(quotesData);
     } catch (err) {
-      setError("Failed to load quotes for this topic");
-      console.error("Error fetching topic quotes:", err);
+      setError("Failed to load topic data");
+      console.error("Error fetching topic data:", err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
+
+  const handleRefresh = useCallback(() => {
+    fetchTopicData(true);
+  }, [topicId]);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
 
-  const handleLike = (quoteId: number) => {
+  const handleLike = useCallback((quoteId: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLikedQuotes((prev) => {
       const newSet = new Set(prev);
@@ -67,13 +94,20 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const renderItem = ({ item }: { item: Quote }) => (
+  const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index || 0);
+    }
+  }, []);
+
+  const renderQuoteCard = ({ item }: { item: Quote }) => (
     <QuoteCard
       quote={item}
       onLike={handleLike}
       isLiked={likedQuotes.has(item.id)}
+      showTopicName={false}
     />
   );
 
@@ -82,41 +116,78 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={fetchTopicQuotes} />;
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Error</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#ff4444" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => fetchTopicData()}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{topicName}</Text>
-          <Text style={styles.headerSubtitle}>
-            {quotes.length} {quotes.length === 1 ? "quote" : "quotes"}
-          </Text>
+      {/* Header avec topic name et quote count */}
+      <BlurView intensity={80} tint="dark" style={styles.headerBlur}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>{topic?.name || topicName}</Text>
+            <Text style={styles.headerSubtitle}>
+              {quotes.length} {quotes.length === 1 ? "quote" : "quotes"}
+            </Text>
+          </View>
+          <View style={styles.placeholder} />
         </View>
-        <View style={styles.placeholder} />
-      </View>
+      </BlurView>
 
-      {/* Quotes List */}
+      {/* Quotes List - Full Screen comme HomeScreen */}
       {quotes.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="document-text-outline" size={64} color="#a0a0a0" />
           <Text style={styles.emptyText}>No quotes found for this topic</Text>
         </View>
       ) : (
-        <FlatList
-          data={quotes}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          pagingEnabled
-          showsVerticalScrollIndicator={false}
-          snapToInterval={600}
-          decelerationRate="fast"
-        />
+        <>
+          <FlatList
+            data={quotes}
+            renderItem={renderQuoteCard}
+            keyExtractor={(item) => item.id.toString()}
+            pagingEnabled
+            showsVerticalScrollIndicator={false}
+            snapToInterval={height}
+            snapToAlignment="start"
+            decelerationRate="fast"
+            onViewableItemsChanged={handleViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor="#fff"
+              />
+            }
+          />
+
+          {/* Dots Indicator */}
+          <DotsIndicator total={quotes.length} currentIndex={currentIndex} />
+        </>
       )}
     </View>
   );
@@ -127,15 +198,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   } as ViewStyle,
+  headerBlur: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    overflow: "hidden",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  } as ViewStyle,
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 16,
   } as ViewStyle,
   backButton: {
     width: 40,
@@ -148,14 +227,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   } as ViewStyle,
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600" as const,
+    fontSize: 18,
+    fontWeight: "700" as const,
     color: "#fff",
+    letterSpacing: 0.5,
   } as TextStyle,
   headerSubtitle: {
-    fontSize: 14,
-    marginTop: 2,
+    fontSize: 12,
+    fontWeight: "500" as const,
     color: "#a0a0a0",
+    marginTop: 2,
+    letterSpacing: 0.3,
   } as TextStyle,
   placeholder: {
     width: 40,
@@ -169,5 +251,29 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: "#a0a0a0",
+  } as TextStyle,
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    rowGap: 16,
+    paddingHorizontal: 40,
+  } as ViewStyle,
+  errorText: {
+    fontSize: 16,
+    color: "#a0a0a0",
+    textAlign: "center",
+  } as TextStyle,
+  retryButton: {
+    marginTop: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: "#0A84FF",
+    borderRadius: 8,
+  } as ViewStyle,
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#fff",
   } as TextStyle,
 });

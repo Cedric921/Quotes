@@ -1,9 +1,11 @@
 import {
   View,
+  Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
   ViewStyle,
+  TextStyle,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
@@ -16,8 +18,8 @@ interface ActionButtonsProps {
   readonly isLiked?: boolean;
   readonly onLike: (quoteId: number) => void;
   readonly onShare: (text: string, author: string) => void;
-  readonly onProfile: () => void;
   readonly onSettings: () => void;
+  readonly onTopics: () => void;
 }
 
 export default function ActionButtons({
@@ -27,8 +29,8 @@ export default function ActionButtons({
   isLiked = false,
   onLike,
   onShare,
-  onProfile,
   onSettings,
+  onTopics,
 }: ActionButtonsProps) {
   const [liked, setLiked] = useState(isLiked);
   const [isOpen, setIsOpen] = useState(false);
@@ -66,14 +68,14 @@ export default function ActionButtons({
     onShare(quoteText, author);
   };
 
-  const handleProfile = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onProfile();
-  };
-
   const handleSettings = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSettings();
+  };
+
+  const handleTopics = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onTopics();
   };
 
   const toggleMenu = () => {
@@ -114,7 +116,7 @@ export default function ActionButtons({
     outputRange: [0, -160],
   });
 
-  const profileTranslate = menuAnimation.interpolate({
+  const settingsTranslate = menuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [0, -240],
   });
@@ -172,12 +174,12 @@ export default function ActionButtons({
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Profile Button - Animated */}
+        {/* Settings Button (User Menu) - Animated */}
         <Animated.View
           style={[
             styles.animatedButton,
             {
-              transform: [{ translateY: profileTranslate }],
+              transform: [{ translateY: settingsTranslate }],
               opacity: buttonOpacity,
             },
           ]}
@@ -185,7 +187,7 @@ export default function ActionButtons({
         >
           <TouchableOpacity
             style={styles.button}
-            onPress={handleProfile}
+            onPress={handleSettings}
             activeOpacity={0.8}
           >
             <MaterialIcons name="person-outline" size={28} color="#ffffff" />
@@ -204,14 +206,15 @@ export default function ActionButtons({
         </TouchableOpacity>
       </View>
 
-      {/* Left Side Settings Button */}
+      {/* Left Side Topics Button */}
       <View style={styles.leftContainer}>
         <TouchableOpacity
-          style={styles.button}
-          onPress={handleSettings}
+          style={styles.topicsButton}
+          onPress={handleTopics}
           activeOpacity={0.8}
         >
-          <Ionicons name="settings-outline" size={26} color="#ffffff" />
+          <Ionicons name="grid-outline" size={22} color="#ffffff" />
+          <Text style={styles.topicsText}>Topics</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -261,4 +264,29 @@ const styles = StyleSheet.create({
     shadowColor: "#ff4444",
     shadowOpacity: 0.6,
   } as ViewStyle,
+  topicsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 28,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.35)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 10,
+  } as ViewStyle,
+  topicsText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#ffffff",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  } as TextStyle,
 });
