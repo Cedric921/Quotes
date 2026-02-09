@@ -6,6 +6,7 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 interface ErrorMessageProps {
   readonly message: string;
@@ -13,13 +14,15 @@ interface ErrorMessageProps {
 }
 
 export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <Text style={styles.errorText}>⚠️</Text>
       <Text style={styles.message}>{message}</Text>
       {onRetry && (
         <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-          <Text style={styles.retryText}>Réessayer</Text>
+          <Text style={styles.retryText}>{t("common.retry")}</Text>
         </TouchableOpacity>
       )}
     </View>

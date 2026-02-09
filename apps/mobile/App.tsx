@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import AppNavigator from "./src/navigation/AppNavigator";
+import "./src/i18n"; // Initialiser i18n
 
 export default function App() {
   return (

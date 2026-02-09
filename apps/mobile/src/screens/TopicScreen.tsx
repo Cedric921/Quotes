@@ -18,6 +18,7 @@ import * as Haptics from "expo-haptics";
 import { LoadingSkeleton, QuoteCard, DotsIndicator } from "../components";
 import { BlurView } from "expo-blur";
 import { useTheme } from "../contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 const { height } = Dimensions.get("window");
 
@@ -32,6 +33,7 @@ interface TopicScreenProps {
 }
 
 export default function TopicScreen({ navigation, route }: TopicScreenProps) {
+  const { t } = useTranslation();
   const { topicId, topicName } = route.params;
   const { colors, isDark } = useTheme();
   const styles = createStyles(colors);
@@ -69,7 +71,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
       setTopic(topicData);
       setQuotes(quotesData);
     } catch (err) {
-      setError("Failed to load topic data");
+      setError(t("errors.failedToLoadTopic"));
       console.error("Error fetching topic data:", err);
     } finally {
       setLoading(false);
@@ -125,7 +127,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Error</Text>
+          <Text style={styles.headerTitle}>{t("common.error")}</Text>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.errorContainer}>
@@ -135,7 +137,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
             style={styles.retryButton}
             onPress={() => fetchTopicData()}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -168,7 +170,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
       {quotes.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="document-text-outline" size={64} color="#a0a0a0" />
-          <Text style={styles.emptyText}>No quotes found for this topic</Text>
+          <Text style={styles.emptyText}>{t("topics.noQuotesForTopic")}</Text>
         </View>
       ) : (
         <>

@@ -16,12 +16,14 @@ import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
 import { useAuth } from "../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface LoginScreenProps {
   readonly navigation: any;
 }
 
 export default function LoginScreen({ navigation }: LoginScreenProps) {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,8 +34,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     if (!email || !password) {
       Toast.show({
         type: "error",
-        text1: "Erreur",
-        text2: "Veuillez remplir tous les champs",
+        text1: t("common.error"),
+        text2: t("auth.fillAllFields"),
         position: "top",
         visibilityTime: 3000,
       });
@@ -50,8 +52,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     } catch (error: any) {
       Toast.show({
         type: "error",
-        text1: "Erreur de connexion",
-        text2: error.message || "Une erreur est survenue",
+        text1: t("auth.loginError"),
+        text2: error.message || t("auth.errorOccurred"),
         position: "top",
         visibilityTime: 4000,
       });
@@ -95,7 +97,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             <Text style={styles.logo}>
               Focus<Text style={styles.logoDot}>.</Text>
             </Text>
-            <Text style={styles.subtitle}>Bienvenue de retour</Text>
+            <Text style={styles.subtitle}>{t("auth.welcomeBack")}</Text>
           </View>
 
           {/* Form */}
@@ -108,7 +110,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder={t("auth.email")}
                 placeholderTextColor="rgba(255,255,255,0.5)"
                 value={email}
                 onChangeText={setEmail}
@@ -126,7 +128,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Mot de passe"
+                placeholder={t("auth.password")}
                 placeholderTextColor="rgba(255,255,255,0.5)"
                 value={password}
                 onChangeText={setPassword}
@@ -150,13 +152,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               {isLoading ? (
                 <ActivityIndicator color="#667eea" />
               ) : (
-                <Text style={styles.loginButtonText}>Se connecter</Text>
+                <Text style={styles.loginButtonText}>{t("auth.login")}</Text>
               )}
             </TouchableOpacity>
 
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>ou</Text>
+              <Text style={styles.dividerText}>{t("common.or")}</Text>
               <View style={styles.dividerLine} />
             </View>
 
@@ -164,7 +166,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               style={styles.signupButton}
               onPress={handleSignup}
             >
-              <Text style={styles.signupButtonText}>Créer un compte</Text>
+              <Text style={styles.signupButtonText}>
+                {t("auth.createAccount")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
