@@ -1,18 +1,32 @@
-export interface Topic {
+/**
+ * Base interface with common fields from BaseEntity
+ */
+export interface BaseModel {
   id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+}
+
+export interface Topic extends BaseModel {
   name: string;
   title?: string;
   description?: string;
   icon?: string;
   color?: string;
   isPremium?: boolean;
-  deletedAt?: string | null;
 }
 
-export interface Quote {
-  id: string;
+export interface Quote extends BaseModel {
   text: string;
   author: string;
   topic?: Topic;
-  deletedAt?: string | null;
+}
+
+export interface User extends BaseModel {
+  email: string;
+  isAdmin: boolean;
+  isSubscribed: boolean;
+  subscriptionEndDate?: string | null;
+  isPremium?: boolean;
 }
