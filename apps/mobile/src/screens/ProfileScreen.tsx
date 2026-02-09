@@ -13,6 +13,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface ProfileScreenProps {
   readonly navigation: any;
@@ -20,6 +21,8 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user } = useAuth();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -31,7 +34,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={styles.placeholder} />
@@ -126,135 +129,136 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  } as ViewStyle,
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  } as ViewStyle,
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  } as ViewStyle,
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "600" as const,
-    color: "#fff",
-  } as TextStyle,
-  placeholder: {
-    width: 40,
-  } as ViewStyle,
-  content: {
-    flex: 1,
-  } as ViewStyle,
-  profileSection: {
-    alignItems: "center",
-    paddingVertical: 32,
-  } as ViewStyle,
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  } as ViewStyle,
-  avatarImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 16,
-  } as ImageStyle,
-  avatarText: {
-    fontSize: 40,
-    fontWeight: "700" as const,
-    color: "#fff",
-  } as TextStyle,
-  nameContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    columnGap: 8,
-    marginBottom: 4,
-  } as ViewStyle,
-  name: {
-    fontSize: 24,
-    fontWeight: "600" as const,
-    color: "#fff",
-  } as TextStyle,
-  email: {
-    fontSize: 14,
-    marginBottom: 12,
-    color: "#a0a0a0",
-  } as TextStyle,
-  premiumBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    columnGap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 215, 0, 0.1)",
-  } as ViewStyle,
-  premiumText: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-    color: "#FFD700",
-  } as TextStyle,
-  statsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    columnGap: 12,
-    marginBottom: 24,
-  } as ViewStyle,
-  statCard: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    rowGap: 8,
-    backgroundColor: "#1a1a1a",
-  } as ViewStyle,
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: "#fff",
-  } as TextStyle,
-  statLabel: {
-    fontSize: 12,
-    textAlign: "center",
-    color: "#a0a0a0",
-  } as TextStyle,
-  section: {
-    paddingHorizontal: 20,
-  } as ViewStyle,
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-    backgroundColor: "#1a1a1a",
-  } as ViewStyle,
-  menuItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    columnGap: 12,
-  } as ViewStyle,
-  menuItemText: {
-    fontSize: 16,
-    fontWeight: "500" as const,
-    color: "#fff",
-  } as TextStyle,
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    } as ViewStyle,
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+      paddingTop: 60,
+      paddingBottom: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    } as ViewStyle,
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
+    } as ViewStyle,
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: "600" as const,
+      color: colors.text,
+    } as TextStyle,
+    placeholder: {
+      width: 40,
+    } as ViewStyle,
+    content: {
+      flex: 1,
+    } as ViewStyle,
+    profileSection: {
+      alignItems: "center",
+      paddingVertical: 32,
+    } as ViewStyle,
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 16,
+    } as ViewStyle,
+    avatarImage: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      marginBottom: 16,
+    } as ImageStyle,
+    avatarText: {
+      fontSize: 40,
+      fontWeight: "700" as const,
+      color: "#fff",
+    } as TextStyle,
+    nameContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 8,
+      marginBottom: 4,
+    } as ViewStyle,
+    name: {
+      fontSize: 24,
+      fontWeight: "600" as const,
+      color: colors.text,
+    } as TextStyle,
+    email: {
+      fontSize: 14,
+      marginBottom: 12,
+      color: colors.textTertiary,
+    } as TextStyle,
+    premiumBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: "rgba(255, 215, 0, 0.1)",
+    } as ViewStyle,
+    premiumText: {
+      fontSize: 12,
+      fontWeight: "600" as const,
+      color: "#FFD700",
+    } as TextStyle,
+    statsContainer: {
+      flexDirection: "row",
+      paddingHorizontal: 20,
+      columnGap: 12,
+      marginBottom: 24,
+    } as ViewStyle,
+    statCard: {
+      flex: 1,
+      padding: 16,
+      borderRadius: 12,
+      alignItems: "center",
+      rowGap: 8,
+      backgroundColor: colors.backgroundSecondary,
+    } as ViewStyle,
+    statNumber: {
+      fontSize: 24,
+      fontWeight: "700" as const,
+      color: colors.text,
+    } as TextStyle,
+    statLabel: {
+      fontSize: 12,
+      textAlign: "center",
+      color: colors.textTertiary,
+    } as TextStyle,
+    section: {
+      paddingHorizontal: 20,
+    } as ViewStyle,
+    menuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 8,
+      backgroundColor: colors.backgroundSecondary,
+    } as ViewStyle,
+    menuItemLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 12,
+    } as ViewStyle,
+    menuItemText: {
+      fontSize: 16,
+      fontWeight: "500" as const,
+      color: colors.text,
+    } as TextStyle,
+  });

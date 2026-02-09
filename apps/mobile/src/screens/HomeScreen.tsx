@@ -22,6 +22,7 @@ import { Quote } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -36,6 +37,8 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { user, isAuthenticated } = useAuth();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
 
@@ -208,14 +211,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  } as ViewStyle,
-  footer: {
-    height: height,
-    justifyContent: "center",
-    alignItems: "center",
-  } as ViewStyle,
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    } as ViewStyle,
+    footer: {
+      height: height,
+      justifyContent: "center",
+      alignItems: "center",
+    } as ViewStyle,
+  });

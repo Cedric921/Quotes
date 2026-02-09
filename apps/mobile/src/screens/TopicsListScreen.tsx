@@ -18,6 +18,7 @@ import { topicsApi } from "../services/api";
 import { Topic } from "../types";
 import { LoadingSkeleton } from "../components";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface TopicsListScreenProps {
   readonly navigation: any;
@@ -55,6 +56,8 @@ export default function TopicsListScreen({
   navigation,
 }: TopicsListScreenProps) {
   const { user, isAuthenticated } = useAuth();
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,10 +177,14 @@ export default function TopicsListScreen({
   if (error) {
     return (
       <View style={styles.container}>
-        <BlurView intensity={80} tint="dark" style={styles.headerBlur}>
+        <BlurView
+          intensity={80}
+          tint={isDark ? "dark" : "light"}
+          style={styles.headerBlur}
+        >
           <View style={styles.header}>
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Topics</Text>
             <View style={styles.placeholder} />
@@ -200,10 +207,14 @@ export default function TopicsListScreen({
   return (
     <View style={styles.container}>
       {/* Header */}
-      <BlurView intensity={80} tint="dark" style={styles.headerBlur}>
+      <BlurView
+        intensity={80}
+        tint={isDark ? "dark" : "light"}
+        style={styles.headerBlur}
+      >
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Topics</Text>
           <View style={styles.placeholder} />
@@ -222,137 +233,138 @@ export default function TopicsListScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  } as ViewStyle,
-  headerBlur: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    overflow: "hidden",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  } as ViewStyle,
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
-    paddingBottom: 16,
-  } as ViewStyle,
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  } as ViewStyle,
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: "#fff",
-    letterSpacing: 0.5,
-  } as TextStyle,
-  placeholder: {
-    width: 40,
-  } as ViewStyle,
-  listContent: {
-    paddingTop: Platform.OS === "ios" ? 120 : 100,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  } as ViewStyle,
-  topicCard: {
-    marginBottom: 12,
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  } as ViewStyle,
-  cardGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    columnGap: 12,
-  } as ViewStyle,
-  iconContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  } as ViewStyle,
-  cardContent: {
-    flex: 1,
-    rowGap: 2,
-  } as ViewStyle,
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    columnGap: 6,
-  } as ViewStyle,
-  topicName: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: "#fff",
-    letterSpacing: 0.2,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  } as TextStyle,
-  premiumBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 215, 0, 0.4)",
-  } as ViewStyle,
-  topicDescription: {
-    fontSize: 12,
-    color: "#fff",
-    opacity: 0.85,
-    lineHeight: 16,
-    letterSpacing: 0.1,
-  } as TextStyle,
-  cardFooter: {
-    justifyContent: "center",
-    alignItems: "center",
-  } as ViewStyle,
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    rowGap: 16,
-    paddingHorizontal: 40,
-  } as ViewStyle,
-  errorText: {
-    fontSize: 16,
-    color: "#a0a0a0",
-    textAlign: "center",
-  } as TextStyle,
-  retryButton: {
-    marginTop: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: "#0A84FF",
-    borderRadius: 8,
-  } as ViewStyle,
-  retryButtonText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#fff",
-  } as TextStyle,
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    } as ViewStyle,
+    headerBlur: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 10,
+      overflow: "hidden",
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+    } as ViewStyle,
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+      paddingTop: Platform.OS === "ios" ? 60 : 40,
+      paddingBottom: 16,
+    } as ViewStyle,
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
+    } as ViewStyle,
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: "700" as const,
+      color: colors.text,
+      letterSpacing: 0.5,
+    } as TextStyle,
+    placeholder: {
+      width: 40,
+    } as ViewStyle,
+    listContent: {
+      paddingTop: Platform.OS === "ios" ? 120 : 100,
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    } as ViewStyle,
+    topicCard: {
+      marginBottom: 12,
+      borderRadius: 16,
+      overflow: "hidden",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 3,
+    } as ViewStyle,
+    cardGradient: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      columnGap: 12,
+    } as ViewStyle,
+    iconContainer: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1.5,
+      borderColor: "rgba(255, 255, 255, 0.3)",
+    } as ViewStyle,
+    cardContent: {
+      flex: 1,
+      rowGap: 2,
+    } as ViewStyle,
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 6,
+    } as ViewStyle,
+    topicName: {
+      fontSize: 16,
+      fontWeight: "700" as const,
+      color: "#fff",
+      letterSpacing: 0.2,
+      textShadowColor: "rgba(0, 0, 0, 0.3)",
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    } as TextStyle,
+    premiumBadge: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      backgroundColor: "rgba(0, 0, 0, 0.25)",
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: "rgba(255, 215, 0, 0.4)",
+    } as ViewStyle,
+    topicDescription: {
+      fontSize: 12,
+      color: "#fff",
+      opacity: 0.85,
+      lineHeight: 16,
+      letterSpacing: 0.1,
+    } as TextStyle,
+    cardFooter: {
+      justifyContent: "center",
+      alignItems: "center",
+    } as ViewStyle,
+    errorContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      rowGap: 16,
+      paddingHorizontal: 40,
+    } as ViewStyle,
+    errorText: {
+      fontSize: 16,
+      color: colors.textTertiary,
+      textAlign: "center",
+    } as TextStyle,
+    retryButton: {
+      marginTop: 8,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+    } as ViewStyle,
+    retryButtonText: {
+      fontSize: 16,
+      fontWeight: "600" as const,
+      color: "#fff",
+    } as TextStyle,
+  });
