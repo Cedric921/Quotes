@@ -5,12 +5,14 @@ import {
   SettingsScreen,
   ProfileScreen,
   TopicScreen,
+  TopicsListScreen,
 } from "../screens";
 
 export type RootStackParamList = {
   Home: undefined;
   Settings: undefined;
   Profile: undefined;
+  Topics: undefined;
   Topic: {
     topicId: number;
     topicName: string;
@@ -31,6 +33,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Topics" component={TopicsListScreen} />
         <Stack.Screen name="Topic" component={TopicScreen} />
       </Stack.Navigator>
     </NavigationContainer>

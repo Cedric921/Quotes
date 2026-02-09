@@ -82,12 +82,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, []);
 
-  const handleProfile = useCallback(() => {
-    navigation.navigate("Profile");
-  }, [navigation]);
-
   const handleSettings = useCallback(() => {
     navigation.navigate("Settings");
+  }, [navigation]);
+
+  const handleTopics = useCallback(() => {
+    navigation.navigate("Topics");
   }, [navigation]);
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
@@ -180,8 +180,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           isLiked={likedQuotes.has(quotes[currentIndex].id)}
           onLike={handleLike}
           onShare={handleShare}
-          onProfile={handleProfile}
           onSettings={handleSettings}
+          onTopics={handleTopics}
         />
       )}
     </View>
