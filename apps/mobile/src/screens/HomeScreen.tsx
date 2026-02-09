@@ -21,6 +21,7 @@ import { useQuotes } from "../hooks";
 import { Quote } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { useAuth } from "../contexts/AuthContext";
 
 const { height } = Dimensions.get("window");
 
@@ -34,6 +35,7 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const { isAuthenticated } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
 
@@ -88,6 +90,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const handleTopics = useCallback(() => {
     navigation.navigate("Topics");
+  }, [navigation]);
+
+  const handleLogin = useCallback(() => {
+    navigation.navigate("Login");
   }, [navigation]);
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
@@ -178,10 +184,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           quoteText={quotes[currentIndex].text}
           author={quotes[currentIndex].author}
           isLiked={likedQuotes.has(quotes[currentIndex].id)}
+          isAuthenticated={isAuthenticated}
           onLike={handleLike}
           onShare={handleShare}
           onSettings={handleSettings}
           onTopics={handleTopics}
+          onLogin={handleLogin}
         />
       )}
     </View>

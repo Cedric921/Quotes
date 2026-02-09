@@ -15,20 +15,14 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 interface SettingsScreenProps {
   readonly navigation: any;
 }
 
-// Mock user data - à remplacer par les vraies données utilisateur
-const USER_DATA = {
-  name: "Cédric Karungu",
-  email: "cedric@focus.app",
-  isPremium: true,
-  avatar: null, // URL de l'avatar ou null
-};
-
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
+  const { user, logout } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
   const [language, setLanguage] = useState("Français");
 
@@ -100,9 +94,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       {
         text: "Déconnexion",
         style: "destructive",
-        onPress: () => {
-          // TODO: Implement logout
-          console.log("Logout");
+        onPress: async () => {
+          await logout();
+          navigation.navigate("Home");
         },
       },
     ]);
@@ -130,23 +124,22 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             style={styles.profileGradient}
           >
             <View style={styles.avatarContainer}>
-              {USER_DATA.avatar ? (
-                <Image
-                  source={{ uri: USER_DATA.avatar }}
-                  style={styles.avatar}
-                />
+              {user?.avatar ? (
+                <Image source={{ uri: user.avatar }} style={styles.avatar} />
               ) : (
                 <View style={styles.avatarPlaceholder}>
                   <Text style={styles.avatarText}>
-                    {USER_DATA.name.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0).toUpperCase() || "U"}
                   </Text>
                 </View>
               )}
             </View>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>{USER_DATA.name}</Text>
-              <Text style={styles.userEmail}>{USER_DATA.email}</Text>
-              {USER_DATA.isPremium && (
+              <Text style={styles.userName}>{user?.name || "User"}</Text>
+              <Text style={styles.userEmail}>
+                {user?.email || "user@example.com"}
+              </Text>
+              {user?.isPremium && (
                 <View style={styles.premiumBadge}>
                   <Ionicons name="diamond" size={14} color="#FFD700" />
                   <Text style={styles.premiumText}>Premium</Text>
