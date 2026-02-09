@@ -1,21 +1,14 @@
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { BlurView } from "expo-blur";
-import { useTheme } from "../contexts/ThemeContext";
 
 export default function Header() {
-  const { colors, isDark } = useTheme();
-
   return (
-    <BlurView
-      intensity={80}
-      tint={isDark ? "dark" : "light"}
-      style={styles.container}
-    >
+    <BlurView intensity={80} tint="dark" style={styles.container}>
       <View style={styles.content}>
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <Text style={[styles.logo, { color: colors.text }]}>Focus</Text>
-          <View style={[styles.logoDot, { backgroundColor: colors.accent }]} />
+          <Text style={styles.logo}>Focus</Text>
+          <View style={styles.logoDot} />
         </View>
       </View>
     </BlurView>
@@ -46,13 +39,15 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontSize: 24,
-    fontWeight: "700",
+    fontWeight: "700" as const,
     letterSpacing: -0.5,
+    color: "#fff",
   },
   logoDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
     marginLeft: 2,
+    backgroundColor: "#FF453A",
   },
 });

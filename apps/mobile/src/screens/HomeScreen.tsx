@@ -6,6 +6,7 @@ import {
   Dimensions,
   RefreshControl,
   ActivityIndicator,
+  ViewStyle,
 } from "react-native";
 import * as Sharing from "expo-sharing";
 import {
@@ -18,12 +19,21 @@ import {
 } from "../components";
 import { useQuotes } from "../hooks";
 import { Quote } from "../types";
-import { useTheme } from "../contexts/ThemeContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
 const { height } = Dimensions.get("window");
 
-export default function HomeScreen() {
-  const { colors } = useTheme();
+type HomeScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Home"
+>;
+
+interface HomeScreenProps {
+  readonly navigation: HomeScreenNavigationProp;
+}
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
 
@@ -73,14 +83,12 @@ export default function HomeScreen() {
   }, []);
 
   const handleProfile = useCallback(() => {
-    console.log("Profile clicked");
-    // TODO: Navigate to profile screen
-  }, []);
+    navigation.navigate("Profile");
+  }, [navigation]);
 
   const handleSettings = useCallback(() => {
-    console.log("Settings clicked");
-    // TODO: Navigate to settings screen
-  }, []);
+    navigation.navigate("Settings");
+  }, [navigation]);
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -107,10 +115,10 @@ export default function HomeScreen() {
     if (!loading) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color="#0A84FF" />
       </View>
     );
-  }, [loading, colors.primary]);
+  }, [loading]);
 
   // Show loading skeleton on initial load
   if (loading && quotes.length === 0 && !error) {
@@ -128,7 +136,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       {/* Header */}
       <Header />
 
@@ -137,7 +145,7 @@ export default function HomeScreen() {
         data={quotes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        pagingEnabled={true}
+        pagingEnabled
         showsVerticalScrollIndicator={false}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
@@ -147,7 +155,7 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor={colors.primary}
+            tintColor="#0A84FF"
           />
         }
         ListFooterComponent={renderFooter}
@@ -183,10 +191,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
+    backgroundColor: "#000",
+  } as ViewStyle,
   footer: {
     height: height,
     justifyContent: "center",
     alignItems: "center",
-  },
+  } as ViewStyle,
 });

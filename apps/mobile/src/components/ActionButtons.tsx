@@ -1,17 +1,23 @@
-import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  ViewStyle,
+} from "react-native";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 
 interface ActionButtonsProps {
-  quoteId: number;
-  quoteText: string;
-  author: string;
-  isLiked?: boolean;
-  onLike: (quoteId: number) => void;
-  onShare: (text: string, author: string) => void;
-  onProfile: () => void;
-  onSettings: () => void;
+  readonly quoteId: number;
+  readonly quoteText: string;
+  readonly author: string;
+  readonly isLiked?: boolean;
+  readonly onLike: (quoteId: number) => void;
+  readonly onShare: (text: string, author: string) => void;
+  readonly onProfile: () => void;
+  readonly onSettings: () => void;
 }
 
 export default function ActionButtons({
@@ -218,13 +224,13 @@ const styles = StyleSheet.create({
     bottom: 80,
     right: 20,
     zIndex: 1000,
-  },
+  } as ViewStyle,
   leftContainer: {
     position: "absolute",
     bottom: 80,
     left: 20,
     zIndex: 1000,
-  },
+  } as ViewStyle,
   button: {
     width: 56,
     height: 56,
@@ -240,19 +246,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 8,
     elevation: 10,
-  },
+  } as ViewStyle,
   animatedButton: {
     position: "absolute",
     bottom: 0,
-  },
+  } as ViewStyle,
   toggleButton: {
     backgroundColor: "rgba(100, 100, 255, 0.4)",
     borderColor: "rgba(100, 100, 255, 0.5)",
-  },
+  } as ViewStyle,
   likeButtonActive: {
     backgroundColor: "rgba(255, 68, 68, 0.2)",
     borderColor: "#ff4444",
     shadowColor: "#ff4444",
     shadowOpacity: 0.6,
-  },
+  } as ViewStyle,
 });
