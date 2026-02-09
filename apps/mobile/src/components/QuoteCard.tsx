@@ -60,6 +60,7 @@ interface QuoteCardProps {
   readonly quote: Quote;
   readonly onLike: (quoteId: number) => void;
   readonly isLiked?: boolean;
+  readonly showTopicName?: boolean;
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -68,6 +69,7 @@ export default function QuoteCard({
   quote,
   onLike,
   isLiked = false,
+  showTopicName = true,
 }: QuoteCardProps) {
   const navigation = useNavigation<NavigationProp>();
   const [liked, setLiked] = useState(isLiked);
@@ -159,7 +161,7 @@ export default function QuoteCard({
         </View>
 
         {/* Topic badge with glassmorphism */}
-        {quote.topic && (
+        {quote.topic && showTopicName && (
           <TouchableOpacity
             style={styles.topicBadge}
             onPress={handleTopicPress}

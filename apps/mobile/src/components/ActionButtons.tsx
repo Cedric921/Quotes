@@ -1,9 +1,11 @@
 import {
   View,
+  Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
   ViewStyle,
+  TextStyle,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
@@ -16,8 +18,8 @@ interface ActionButtonsProps {
   readonly isLiked?: boolean;
   readonly onLike: (quoteId: number) => void;
   readonly onShare: (text: string, author: string) => void;
-  readonly onProfile: () => void;
   readonly onSettings: () => void;
+  readonly onTopics: () => void;
 }
 
 export default function ActionButtons({
@@ -27,8 +29,8 @@ export default function ActionButtons({
   isLiked = false,
   onLike,
   onShare,
-  onProfile,
   onSettings,
+  onTopics,
 }: ActionButtonsProps) {
   const [liked, setLiked] = useState(isLiked);
   const [isOpen, setIsOpen] = useState(false);
@@ -66,14 +68,14 @@ export default function ActionButtons({
     onShare(quoteText, author);
   };
 
-  const handleProfile = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onProfile();
-  };
-
   const handleSettings = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSettings();
+  };
+
+  const handleTopics = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onTopics();
   };
 
   const toggleMenu = () => {
