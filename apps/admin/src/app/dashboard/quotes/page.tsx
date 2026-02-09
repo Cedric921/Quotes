@@ -49,17 +49,17 @@ import {
 import { toast } from "sonner";
 
 interface Quote {
-  id: number;
+  id: string;
   text: string;
   author?: string;
   topic?: {
-    id: number;
+    id: string;
     name: string;
   };
 }
 
 interface Topic {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -71,7 +71,7 @@ export default function QuotesPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [quoteToDelete, setQuoteToDelete] = useState<number | null>(null);
+  const [quoteToDelete, setQuoteToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     text: "",
     author: "",
@@ -144,7 +144,7 @@ export default function QuotesPage() {
     setFormData({
       text: quote.text || "",
       author: quote.author || "",
-      topicId: quote.topic?.id.toString() || "none",
+      topicId: quote.topic?.id || "none",
     });
     setIsSheetOpen(true);
   };
@@ -155,7 +155,7 @@ export default function QuotesPage() {
     setIsSheetOpen(true);
   };
 
-  const handleDeleteClick = (id: number) => {
+  const handleDeleteClick = (id: string) => {
     setQuoteToDelete(id);
     setDeleteDialogOpen(true);
   };
@@ -376,7 +376,7 @@ export default function QuotesPage() {
                 <SelectContent>
                   <SelectItem value="none">No Topic</SelectItem>
                   {topics.map((topic) => (
-                    <SelectItem key={topic.id} value={topic.id.toString()}>
+                    <SelectItem key={topic.id} value={topic.id}>
                       {topic.name}
                     </SelectItem>
                   ))}

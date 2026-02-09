@@ -1,5 +1,5 @@
 export interface Topic {
-  id: number;
+  id: string;
   name: string;
   title?: string;
   description?: string;
@@ -10,7 +10,7 @@ export interface Topic {
 }
 
 export interface Quote {
-  id: number;
+  id: string;
   text: string;
   author: string;
   topic?: Topic;

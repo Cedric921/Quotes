@@ -30,13 +30,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Tag, AlertTriangle } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Tag,
+  AlertTriangle,
+  Sparkles,
+  Palette,
+  Crown,
+} from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { getLucideIcon } from "@/lib/icon-helper";
 
 interface Topic {
-  id: number;
+  id: string;
   name: string;
   description: string;
+  title?: string;
+  icon?: string;
+  color?: string;
+  isPremium?: boolean;
 }
 
 export default function TopicsPage() {
@@ -46,8 +62,15 @@ export default function TopicsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [topicToDelete, setTopicToDelete] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    title: "",
+    icon: "",
+    color: "",
+    isPremium: false,
+  });
 
   const fetchTopics = async () => {
     try {
@@ -80,7 +103,14 @@ export default function TopicsPage() {
         toast.success("Topic created successfully!", { id: toastId });
       }
 
-      setFormData({ name: "", description: "" });
+      setFormData({
+        name: "",
+        description: "",
+        title: "",
+        icon: "",
+        color: "",
+        isPremium: false,
+      });
       setIsSheetOpen(false);
       setEditingTopic(null);
       fetchTopics();
@@ -93,17 +123,31 @@ export default function TopicsPage() {
 
   const handleEdit = (topic: Topic) => {
     setEditingTopic(topic);
-    setFormData({ name: topic.name, description: topic.description });
+    setFormData({
+      name: topic.name,
+      description: topic.description || "",
+      title: topic.title || "",
+      icon: topic.icon || "",
+      color: topic.color || "",
+      isPremium: topic.isPremium || false,
+    });
     setIsSheetOpen(true);
   };
 
   const handleAddNew = () => {
     setEditingTopic(null);
-    setFormData({ name: "", description: "" });
+    setFormData({
+      name: "",
+      description: "",
+      title: "",
+      icon: "",
+      color: "",
+      isPremium: false,
+    });
     setIsSheetOpen(true);
   };
 
-  const handleDeleteClick = (id: number) => {
+  const handleDeleteClick = (id: string) => {
     setTopicToDelete(id);
     setDeleteDialogOpen(true);
   };
@@ -172,13 +216,27 @@ export default function TopicsPage() {
 
               <CardHeader className="relative">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Tag className="w-6 h-6 text-primary-foreground" />
+                  <div
+                    className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
+                    style={{
+                      background: topic.color
+                        ? `linear-gradient(135deg, ${topic.color}, ${topic.color}99)`
+                        : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.6))",
+                    }}
+                  >
+                    {getLucideIcon(topic.icon, {
+                      className: "w-6 h-6 text-primary-foreground",
+                    })}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-xl mb-2 group-hover:text-primary transition-colors">
-                      {topic.name}
-                    </CardTitle>
+                    <div className="flex items-center gap-2 mb-2">
+                      <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                        {topic.title || topic.name}
+                      </CardTitle>
+                      {topic.isPremium && (
+                        <Crown className="w-4 h-4 text-yellow-500 shrink-0" />
+                      )}
+                    </div>
                     <CardDescription className="line-clamp-3 text-sm">
                       {topic.description || "No description provided"}
                     </CardDescription>
@@ -289,6 +347,103 @@ export default function TopicsPage() {
               <p className="text-xs text-muted-foreground">
                 {formData.description.length} characters
               </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label
+                htmlFor="title"
+                className="text-base font-semibold flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+                Display Title
+              </Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                placeholder="e.g., Motivation, Success..."
+                className="border-2 focus:border-primary transition-colors"
+              />
+              <p className="text-xs text-muted-foreground">
+                Title shown in the mobile app (defaults to name if empty)
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <Label
+                  htmlFor="icon"
+                  className="text-base font-semibold flex items-center gap-2"
+                >
+                  <Tag className="w-4 h-4 text-primary" />
+                  Icon
+                </Label>
+                <IconPicker
+                  value={formData.icon}
+                  onChange={(iconName) =>
+                    setFormData({ ...formData, icon: iconName })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Choose an icon from Lucide Icons
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <Label
+                  htmlFor="color"
+                  className="text-base font-semibold flex items-center gap-2"
+                >
+                  <Palette className="w-4 h-4 text-primary" />
+                  Color
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="color"
+                    type="color"
+                    value={formData.color || "#667eea"}
+                    onChange={(e) =>
+                      setFormData({ ...formData, color: e.target.value })
+                    }
+                    className="w-16 h-10 p-1 border-2 focus:border-primary transition-colors"
+                  />
+                  <Input
+                    value={formData.color}
+                    onChange={(e) =>
+                      setFormData({ ...formData, color: e.target.value })
+                    }
+                    placeholder="#667eea"
+                    className="flex-1 border-2 focus:border-primary transition-colors"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Gradient color for the topic card
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 border-2 rounded-lg">
+              <div className="space-y-1">
+                <Label
+                  htmlFor="isPremium"
+                  className="text-base font-semibold flex items-center gap-2 cursor-pointer"
+                >
+                  <Crown className="w-4 h-4 text-yellow-500" />
+                  Premium Topic
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Only accessible to premium users
+                </p>
+              </div>
+              <Switch
+                id="isPremium"
+                checked={formData.isPremium}
+                onCheckedChange={(checked: boolean) =>
+                  setFormData({ ...formData, isPremium: checked })
+                }
+              />
             </div>
 
             <div className="flex gap-3 pt-6 border-t">

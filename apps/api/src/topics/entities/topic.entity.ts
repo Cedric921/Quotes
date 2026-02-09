@@ -9,8 +9,8 @@ import { Quote } from '../../quotes/entities/quote.entity';
 
 @Entity()
 export class Topic {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateQuoteDto {
   @IsString()
@@ -9,7 +9,7 @@ export class CreateQuoteDto {
   @IsOptional()
   author?: string;
 
-  @IsNumber()
+  @IsUUID()
   @IsOptional()
-  topicId?: number;
+  topicId?: string;
 }
