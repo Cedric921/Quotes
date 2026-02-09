@@ -17,12 +17,14 @@ import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
 import { useAuth } from "../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface SignupScreenProps {
   readonly navigation: any;
 }
 
 export default function SignupScreen({ navigation }: SignupScreenProps) {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,8 +38,8 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
     if (!name || !email || !password || !confirmPassword) {
       Toast.show({
         type: "error",
-        text1: "Erreur",
-        text2: "Veuillez remplir tous les champs",
+        text1: t("common.error"),
+        text2: t("auth.fillAllFields"),
         position: "top",
         visibilityTime: 3000,
       });
@@ -47,8 +49,8 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
     if (password !== confirmPassword) {
       Toast.show({
         type: "error",
-        text1: "Erreur",
-        text2: "Les mots de passe ne correspondent pas",
+        text1: t("common.error"),
+        text2: t("auth.passwordMismatch"),
         position: "top",
         visibilityTime: 3000,
       });
@@ -58,8 +60,8 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
     if (password.length < 6) {
       Toast.show({
         type: "error",
-        text1: "Erreur",
-        text2: "Le mot de passe doit contenir au moins 6 caractères",
+        text1: t("common.error"),
+        text2: t("auth.passwordTooShort"),
         position: "top",
         visibilityTime: 3000,
       });
@@ -75,8 +77,8 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
     } catch (error: any) {
       Toast.show({
         type: "error",
-        text1: "Erreur d'inscription",
-        text2: error.message || "Une erreur est survenue",
+        text1: t("auth.signupError"),
+        text2: error.message || t("auth.errorOccurred"),
         position: "top",
         visibilityTime: 4000,
       });
@@ -123,7 +125,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
             <Text style={styles.logo}>
               Focus<Text style={styles.logoDot}>.</Text>
             </Text>
-            <Text style={styles.subtitle}>Créez votre compte</Text>
+            <Text style={styles.subtitle}>{t("auth.createAccount")}</Text>
           </View>
 
           {/* Form */}
@@ -136,7 +138,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Nom complet"
+                placeholder={t("auth.name")}
                 placeholderTextColor="rgba(255,255,255,0.5)"
                 value={name}
                 onChangeText={setName}
@@ -152,7 +154,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder={t("auth.email")}
                 placeholderTextColor="rgba(255,255,255,0.5)"
                 value={email}
                 onChangeText={setEmail}
@@ -170,7 +172,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Mot de passe"
+                placeholder={t("auth.password")}
                 placeholderTextColor="rgba(255,255,255,0.5)"
                 value={password}
                 onChangeText={setPassword}
@@ -194,7 +196,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Confirmer le mot de passe"
+                placeholder={t("auth.confirmPassword")}
                 placeholderTextColor="rgba(255,255,255,0.5)"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -220,18 +222,20 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
               {isLoading ? (
                 <ActivityIndicator color="#667eea" />
               ) : (
-                <Text style={styles.signupButtonText}>S'inscrire</Text>
+                <Text style={styles.signupButtonText}>{t("auth.signup")}</Text>
               )}
             </TouchableOpacity>
 
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>ou</Text>
+              <Text style={styles.dividerText}>{t("common.or")}</Text>
               <View style={styles.dividerLine} />
             </View>
 
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>J'ai déjà un compte</Text>
+              <Text style={styles.loginButtonText}>
+                {t("auth.alreadyHaveAccount")}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

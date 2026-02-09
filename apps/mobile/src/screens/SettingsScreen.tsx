@@ -14,22 +14,49 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
+import { changeLanguage, getCurrentLanguage } from "../i18n";
 
 interface SettingsScreenProps {
   readonly navigation: any;
 }
 
+interface Language {
+  code: string;
+  name: string;
+  nativeName: string;
+  flag: string;
+}
+
+const LANGUAGES: Language[] = [
+  { code: "fr", name: "French", nativeName: "Français", flag: "🇫🇷" },
+  { code: "en", name: "English", nativeName: "English", flag: "🇬🇧" },
+  { code: "es", name: "Spanish", nativeName: "Español", flag: "🇪🇸" },
+  { code: "ar", name: "Arabic", nativeName: "العربية", flag: "🇸🇦" },
+];
+
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { theme, setTheme, colors } = useTheme();
-  const [language, setLanguage] = useState("Français");
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(
+    LANGUAGES[0],
+  );
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   // Create dynamic styles based on theme
   const styles = createStyles(colors);
+
+  // Load current language on mount
+  useEffect(() => {
+    const langCode = getCurrentLanguage();
+    const lang = LANGUAGES.find((l) => l.code === langCode) || LANGUAGES[0];
+    setCurrentLanguage(lang);
+  }, []);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -47,10 +74,16 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     Alert.alert("Subscription", "Subscription screen coming soon!");
   };
 
-  const handleLanguage = () => {
+  const handleLanguagePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Show language picker
-    Alert.alert("Language", "Language selection coming soon!");
+    setShowLanguageModal(true);
+  };
+
+  const handleLanguageSelect = async (language: Language) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setCurrentLanguage(language);
+    await changeLanguage(language.code);
+    setShowLanguageModal(false);
   };
 
   const handleThemePress = () => {
@@ -67,13 +100,13 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const getThemeLabel = () => {
     switch (theme) {
       case "light":
-        return "Clair";
+        return t("settings.light");
       case "dark":
-        return "Sombre";
+        return t("settings.dark");
       case "system":
-        return "Système";
+        return t("settings.system");
       default:
-        return "Système";
+        return t("settings.system");
     }
   };
 
@@ -109,13 +142,13 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handleLogout = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert("Déconnexion", "Êtes-vous sûr de vouloir vous déconnecter ?", [
+    Alert.alert(t("auth.logout"), t("settings.logoutConfirmation"), [
       {
-        text: "Annuler",
+        text: t("common.cancel"),
         style: "cancel",
       },
       {
-        text: "Déconnexion",
+        text: t("auth.logout"),
         style: "destructive",
         onPress: async () => {
           await logout();
@@ -132,7 +165,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>User Menu</Text>
+        <Text style={styles.headerTitle}>{t("settings.title")}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -174,12 +207,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
         {/* Moi Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>MOI</Text>
+          <Text style={styles.sectionTitle}>{t("settings.account")}</Text>
 
           <TouchableOpacity style={styles.menuItem} onPress={handleProfile}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="person-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>Profile</Text>
+              <Text style={styles.menuItemText}>{t("settings.profile")}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -190,7 +223,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           >
             <View style={styles.menuItemLeft}>
               <Ionicons name="diamond-outline" size={24} color="#FFD700" />
-              <Text style={styles.menuItemText}>Subscription</Text>
+              <Text style={styles.menuItemText}>
+                {t("settings.subscription")}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -198,15 +233,20 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
         {/* Settings Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SETTINGS</Text>
+          <Text style={styles.sectionTitle}>{t("settings.settings")}</Text>
 
-          <TouchableOpacity style={styles.menuItem} onPress={handleLanguage}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleLanguagePress}
+          >
             <View style={styles.menuItemLeft}>
               <Ionicons name="language-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>Langues</Text>
+              <Text style={styles.menuItemText}>{t("settings.language")}</Text>
             </View>
             <View style={styles.menuItemRight}>
-              <Text style={styles.menuItemValue}>{language}</Text>
+              <Text style={styles.menuItemValue}>
+                {currentLanguage.nativeName}
+              </Text>
               <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
             </View>
           </TouchableOpacity>
@@ -214,7 +254,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <TouchableOpacity style={styles.menuItem} onPress={handleThemePress}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="contrast-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>Thème</Text>
+              <Text style={styles.menuItemText}>{t("settings.theme")}</Text>
             </View>
             <View style={styles.menuItemRight}>
               <Text style={styles.menuItemValue}>{getThemeLabel()}</Text>
@@ -225,7 +265,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <TouchableOpacity style={styles.menuItem} onPress={handleStorage}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="folder-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>Espace</Text>
+              <Text style={styles.menuItemText}>{t("settings.storage")}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -233,7 +273,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
         {/* Company Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>COMPANY</Text>
+          <Text style={styles.sectionTitle}>{t("settings.about")}</Text>
 
           <TouchableOpacity
             style={styles.menuItem}
@@ -242,7 +282,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             <View style={styles.menuItemLeft}>
               <MaterialIcons name="privacy-tip" size={24} color="#0A84FF" />
               <Text style={styles.menuItemText}>
-                Politique de confidentialité
+                {t("settings.privacyPolicy")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
@@ -255,7 +295,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 size={24}
                 color="#0A84FF"
               />
-              <Text style={styles.menuItemText}>Conditions d'utilisation</Text>
+              <Text style={styles.menuItemText}>
+                {t("settings.termsOfService")}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -263,7 +305,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <TouchableOpacity style={styles.menuItem} onPress={handleContact}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="mail-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>Contactez-nous</Text>
+              <Text style={styles.menuItemText}>{t("settings.contactUs")}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -271,7 +313,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <TouchableOpacity style={styles.menuItem} onPress={handleAbout}>
             <View style={styles.menuItemLeft}>
               <MaterialIcons name="info-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>À propos de nous</Text>
+              <Text style={styles.menuItemText}>{t("settings.aboutUs")}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -281,7 +323,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         <View style={styles.section}>
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={24} color="#ff4444" />
-            <Text style={styles.logoutText}>Log out</Text>
+            <Text style={styles.logoutText}>{t("auth.logout")}</Text>
           </TouchableOpacity>
         </View>
 
@@ -302,7 +344,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           onPress={() => setShowThemeModal(false)}
         >
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Choisir le thème</Text>
+            <Text style={styles.modalTitle}>{t("settings.selectTheme")}</Text>
 
             <TouchableOpacity
               style={[
@@ -322,7 +364,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                   theme === "light" && styles.themeOptionTextSelected,
                 ]}
               >
-                Clair
+                {t("settings.light")}
               </Text>
               {theme === "light" && (
                 <Ionicons
@@ -351,7 +393,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                   theme === "dark" && styles.themeOptionTextSelected,
                 ]}
               >
-                Sombre
+                {t("settings.dark")}
               </Text>
               {theme === "dark" && (
                 <Ionicons
@@ -380,7 +422,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                   theme === "system" && styles.themeOptionTextSelected,
                 ]}
               >
-                Système
+                {t("settings.system")}
               </Text>
               {theme === "system" && (
                 <Ionicons
@@ -390,6 +432,56 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 />
               )}
             </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Language Selection Modal */}
+      <Modal
+        visible={showLanguageModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowLanguageModal(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {t("settings.selectLanguage")}
+            </Text>
+
+            {LANGUAGES.map((language) => (
+              <TouchableOpacity
+                key={language.code}
+                style={[
+                  styles.themeOption,
+                  currentLanguage.code === language.code &&
+                    styles.themeOptionSelected,
+                ]}
+                onPress={() => handleLanguageSelect(language)}
+              >
+                <Text style={styles.languageFlag}>{language.flag}</Text>
+                <Text
+                  style={[
+                    styles.themeOptionText,
+                    currentLanguage.code === language.code &&
+                      styles.themeOptionTextSelected,
+                  ]}
+                >
+                  {language.nativeName}
+                </Text>
+                {currentLanguage.code === language.code && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={24}
+                    color={colors.primary}
+                  />
+                )}
+              </TouchableOpacity>
+            ))}
           </View>
         </TouchableOpacity>
       </Modal>
@@ -611,5 +703,9 @@ const createStyles = (colors: any) =>
     } as TextStyle,
     themeOptionTextSelected: {
       color: colors.primary,
+    } as TextStyle,
+    languageFlag: {
+      fontSize: 24,
+      marginRight: 4,
     } as TextStyle,
   });

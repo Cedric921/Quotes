@@ -10,6 +10,7 @@ import {
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 interface ActionButtonsProps {
   readonly quoteId: number;
@@ -36,6 +37,7 @@ export default function ActionButtons({
   onTopics,
   onLogin,
 }: ActionButtonsProps) {
+  const { t } = useTranslation();
   const [liked, setLiked] = useState(isLiked);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -238,7 +240,7 @@ export default function ActionButtons({
           activeOpacity={0.8}
         >
           <Ionicons name="grid-outline" size={22} color="#ffffff" />
-          <Text style={styles.topicsText}>Topics</Text>
+          <Text style={styles.topicsText}>{t("topics.title")}</Text>
         </TouchableOpacity>
       </View>
     </>

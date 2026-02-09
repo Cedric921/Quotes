@@ -23,6 +23,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 const { height } = Dimensions.get("window");
 
@@ -36,6 +37,7 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -147,7 +149,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   if (error && filteredQuotes.length === 0) {
     return (
       <ErrorMessage
-        message="Impossible de charger les citations. Vérifiez votre connexion."
+        message={t("errors.failedToLoadQuotes")}
         onRetry={handleRetry}
       />
     );

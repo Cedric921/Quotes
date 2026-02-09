@@ -14,12 +14,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 interface ProfileScreenProps {
   readonly navigation: any;
 }
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -36,7 +38,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile</Text>
+        <Text style={styles.headerTitle}>{t("profile.title")}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -72,7 +74,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           {user?.isPremium && (
             <View style={styles.premiumBadge}>
               <Ionicons name="diamond" size={14} color="#FFD700" />
-              <Text style={styles.premiumText}>Premium Member</Text>
+              <Text style={styles.premiumText}>{t("profile.premium")}</Text>
             </View>
           )}
         </View>
@@ -82,19 +84,19 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <View style={styles.statCard}>
             <MaterialIcons name="favorite" size={24} color="#ff4444" />
             <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Liked Quotes</Text>
+            <Text style={styles.statLabel}>{t("profile.likedQuotes")}</Text>
           </View>
 
           <View style={styles.statCard}>
             <Ionicons name="bookmark" size={24} color="#0A84FF" />
             <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Saved</Text>
+            <Text style={styles.statLabel}>{t("profile.saved")}</Text>
           </View>
 
           <View style={styles.statCard}>
             <Ionicons name="share-social" size={24} color="#0A84FF" />
             <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Shared</Text>
+            <Text style={styles.statLabel}>{t("profile.shared")}</Text>
           </View>
         </View>
 
@@ -103,7 +105,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <MaterialIcons name="edit" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>Edit Profile</Text>
+              <Text style={styles.menuItemText}>
+                {t("profile.editProfile")}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -111,7 +115,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <MaterialIcons name="favorite-border" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>My Favorites</Text>
+              <Text style={styles.menuItemText}>
+                {t("profile.myFavorites")}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
@@ -119,7 +125,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="bookmark-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>Saved Quotes</Text>
+              <Text style={styles.menuItemText}>
+                {t("profile.savedQuotes")}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>

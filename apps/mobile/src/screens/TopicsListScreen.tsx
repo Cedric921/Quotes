@@ -20,6 +20,7 @@ import { Topic } from "../types";
 import { LoadingSkeleton } from "../components";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 interface TopicsListScreenProps {
   readonly navigation: any;
@@ -56,6 +57,7 @@ const getTopicGradient = (color?: string): [string, string, ...string[]] => {
 export default function TopicsListScreen({
   navigation,
 }: TopicsListScreenProps) {
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
   const { colors, isDark } = useTheme();
   const styles = createStyles(colors);
@@ -74,7 +76,7 @@ export default function TopicsListScreen({
       const data = await topicsApi.getTopics();
       setTopics(data);
     } catch (err) {
-      setError("Failed to load topics");
+      setError(t("topics.failedToLoad"));
       console.error("Error fetching topics:", err);
     } finally {
       setLoading(false);
@@ -93,10 +95,10 @@ export default function TopicsListScreen({
     if (topic.isPremium && !isAuthenticated) {
       Toast.show({
         type: "error",
-        text1: "Contenu Premium",
+        text1: t("topics.premiumContent"),
         text2: isAuthenticated
-          ? "Abonnez-vous pour accéder à ce contenu premium"
-          : "Connectez-vous pour accéder à ce contenu premium",
+          ? t("topics.subscribeToAccess")
+          : t("topics.loginToAccess"),
         position: "top",
         visibilityTime: 3000,
       });
