@@ -13,9 +13,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import { topicsApi } from "../services/api";
 import { Topic } from "../types";
 import { LoadingSkeleton } from "../components";
+import { useAuth } from "../contexts/AuthContext";
 
 interface TopicsListScreenProps {
   readonly navigation: any;
@@ -52,6 +54,7 @@ const getTopicGradient = (color?: string): [string, string, ...string[]] => {
 export default function TopicsListScreen({
   navigation,
 }: TopicsListScreenProps) {
+  const { user, isAuthenticated } = useAuth();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +84,21 @@ export default function TopicsListScreen({
 
   const handleTopicPress = (topic: Topic) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    // Check if topic is premium and user is not authenticated or not premium
+    if (topic.isPremium && !isAuthenticated) {
+      Toast.show({
+        type: "error",
+        text1: "Contenu Premium",
+        text2: isAuthenticated
+          ? "Abonnez-vous pour accéder à ce contenu premium"
+          : "Connectez-vous pour accéder à ce contenu premium",
+        position: "top",
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
     navigation.navigate("Topic", {
       topicId: topic.id,
       topicName: topic.name,
@@ -90,6 +108,7 @@ export default function TopicsListScreen({
   const renderTopicCard = ({ item }: { item: Topic }) => {
     const gradient = getTopicGradient(item.color);
     const iconName = (item.icon || "star") as keyof typeof Ionicons.glyphMap;
+    const isLocked = item.isPremium && !isAuthenticated;
 
     return (
       <TouchableOpacity
@@ -103,33 +122,45 @@ export default function TopicsListScreen({
           end={{ x: 1, y: 1 }}
           style={styles.cardGradient}
         >
-          <View style={styles.cardHeader}>
-            <View style={styles.iconContainer}>
-              <Ionicons name={iconName} size={28} color="#fff" />
-            </View>
-            {item.isPremium && (
-              <View style={styles.premiumBadge}>
-                <Ionicons name="diamond" size={14} color="#FFD700" />
-                <Text style={styles.premiumText}>Premium</Text>
-              </View>
-            )}
+          {/* Left side: Icon */}
+          <View style={styles.iconContainer}>
+            <Ionicons name={iconName} size={22} color="#fff" />
           </View>
 
+          {/* Center: Content */}
           <View style={styles.cardContent}>
-            <Text style={styles.topicName}>{item.title || item.name}</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.topicName} numberOfLines={1}>
+                {item.title || item.name}
+              </Text>
+              {item.isPremium && (
+                <View style={styles.premiumBadge}>
+                  <Ionicons name="diamond" size={10} color="#FFD700" />
+                </View>
+              )}
+            </View>
             {item.description && (
-              <Text style={styles.topicDescription} numberOfLines={2}>
+              <Text style={styles.topicDescription} numberOfLines={1}>
                 {item.description}
               </Text>
             )}
           </View>
 
+          {/* Right side: Arrow or Lock */}
           <View style={styles.cardFooter}>
-            <Ionicons
-              name="chevron-forward"
-              size={24}
-              color="rgba(255, 255, 255, 0.8)"
-            />
+            {isLocked ? (
+              <Ionicons
+                name="lock-closed"
+                size={20}
+                color="rgba(255, 215, 0, 0.9)"
+              />
+            ) : (
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color="rgba(255, 255, 255, 0.7)"
+              />
+            )}
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -235,78 +266,71 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   } as ViewStyle,
   topicCard: {
-    marginBottom: 16,
-    borderRadius: 20,
+    marginBottom: 12,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   } as ViewStyle,
   cardGradient: {
-    padding: 20,
-    minHeight: 140,
-  } as ViewStyle,
-  cardHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    columnGap: 12,
   } as ViewStyle,
   iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: "rgba(255, 255, 255, 0.3)",
   } as ViewStyle,
-  premiumBadge: {
+  cardContent: {
+    flex: 1,
+    rowGap: 2,
+  } as ViewStyle,
+  titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    columnGap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 215, 0, 0.5)",
-  } as ViewStyle,
-  premiumText: {
-    fontSize: 11,
-    fontWeight: "600" as const,
-    color: "#FFD700",
-    letterSpacing: 0.5,
-  } as TextStyle,
-  cardContent: {
-    marginBottom: 12,
-  } as ViewStyle,
-  cardFooter: {
-    alignItems: "flex-end",
+    columnGap: 6,
   } as ViewStyle,
   topicName: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: "700" as const,
     color: "#fff",
-    marginBottom: 6,
-    letterSpacing: 0.3,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  } as TextStyle,
-  topicDescription: {
-    fontSize: 14,
-    color: "#fff",
-    opacity: 0.9,
-    lineHeight: 20,
     letterSpacing: 0.2,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   } as TextStyle,
+  premiumBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 215, 0, 0.4)",
+  } as ViewStyle,
+  topicDescription: {
+    fontSize: 12,
+    color: "#fff",
+    opacity: 0.85,
+    lineHeight: 16,
+    letterSpacing: 0.1,
+  } as TextStyle,
+  cardFooter: {
+    justifyContent: "center",
+    alignItems: "center",
+  } as ViewStyle,
   errorContainer: {
     flex: 1,
     justifyContent: "center",
