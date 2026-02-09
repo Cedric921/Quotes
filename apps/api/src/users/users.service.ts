@@ -20,7 +20,9 @@ export class UsersService {
     }
 
     const { password, ...rest } = createUserDto;
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
+    const hashedPassword = password
+      ? await bcrypt.hash(password, 10)
+      : undefined;
 
     const user = this.usersRepository.create({
       ...rest,
@@ -33,7 +35,7 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.usersRepository.findOneBy({ id });
   }
 
@@ -41,7 +43,7 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
     if (!user) return null;
 
@@ -52,7 +54,7 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.usersRepository.delete(id);
   }
 }

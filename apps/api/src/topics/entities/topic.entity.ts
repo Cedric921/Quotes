@@ -1,17 +1,9 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  DeleteDateColumn,
-} from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { Quote } from '../../quotes/entities/quote.entity';
+import { BaseEntity } from '../../common/entities/base.entity';
 
 @Entity()
-export class Topic {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Topic extends BaseEntity {
   @Column()
   name: string;
 
@@ -29,9 +21,6 @@ export class Topic {
 
   @Column({ default: false })
   isPremium: boolean;
-
-  @DeleteDateColumn()
-  deletedAt: Date;
 
   @OneToMany(() => Quote, (quote) => quote.topic)
   quotes: Quote[];
