@@ -21,6 +21,7 @@ import { useQuotes } from "../hooks";
 import { Quote } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { useAuth } from "../contexts/AuthContext";
 
 const { height } = Dimensions.get("window");
 
@@ -34,6 +35,7 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const { user, isAuthenticated } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
 
@@ -51,6 +53,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   useEffect(() => {
     fetchQuotes(1, true);
   }, []);
+
+  // Filter out quotes from premium topics if user is not authenticated or not premium
+  const filteredQuotes = quotes.filter((quote) => {
+    // If topic is not premium, show it
+    if (!quote.topic?.isPremium) return true;
+
+    // If topic is premium, only show if user is authenticated AND premium
+    return isAuthenticated && user?.isPremium;
+  });
 
   const handleRetry = useCallback(() => {
     fetchQuotes(1, true);
@@ -90,6 +101,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     navigation.navigate("Topics");
   }, [navigation]);
 
+  const handleLogin = useCallback(() => {
+    navigation.navigate("Login");
+  }, [navigation]);
+
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index || 0);
@@ -121,12 +136,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, [loading]);
 
   // Show loading skeleton on initial load
-  if (loading && quotes.length === 0 && !error) {
+  if (loading && filteredQuotes.length === 0 && !error) {
     return <LoadingSkeleton />;
   }
 
   // Show error message if there's an error and no quotes
-  if (error && quotes.length === 0) {
+  if (error && filteredQuotes.length === 0) {
     return (
       <ErrorMessage
         message="Impossible de charger les citations. Vérifiez votre connexion."
@@ -142,7 +157,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       {/* Quotes List */}
       <FlatList
-        data={quotes}
+        data={filteredQuotes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         pagingEnabled
@@ -167,21 +182,26 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       />
 
       {/* Dots Indicator */}
-      {quotes.length > 0 && (
-        <DotsIndicator total={quotes.length} currentIndex={currentIndex} />
+      {filteredQuotes.length > 0 && (
+        <DotsIndicator
+          total={filteredQuotes.length}
+          currentIndex={currentIndex}
+        />
       )}
 
       {/* Fixed Action Buttons */}
-      {quotes.length > 0 && quotes[currentIndex] && (
+      {filteredQuotes.length > 0 && filteredQuotes[currentIndex] && (
         <ActionButtons
-          quoteId={quotes[currentIndex].id}
-          quoteText={quotes[currentIndex].text}
-          author={quotes[currentIndex].author}
-          isLiked={likedQuotes.has(quotes[currentIndex].id)}
+          quoteId={filteredQuotes[currentIndex].id}
+          quoteText={filteredQuotes[currentIndex].text}
+          author={filteredQuotes[currentIndex].author}
+          isLiked={likedQuotes.has(filteredQuotes[currentIndex].id)}
+          isAuthenticated={isAuthenticated}
           onLike={handleLike}
           onShare={handleShare}
           onSettings={handleSettings}
           onTopics={handleTopics}
+          onLogin={handleLogin}
         />
       )}
     </View>

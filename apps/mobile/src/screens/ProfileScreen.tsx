@@ -6,15 +6,21 @@ import {
   ScrollView,
   ViewStyle,
   TextStyle,
+  Image,
+  ImageStyle,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useAuth } from "../contexts/AuthContext";
 
 interface ProfileScreenProps {
   readonly navigation: any;
 }
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
+  const { user } = useAuth();
+
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
@@ -35,11 +41,37 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       <ScrollView style={styles.content}>
         {/* Profile Info */}
         <View style={styles.profileSection}>
-          <View style={styles.avatar}>
-            <MaterialIcons name="person" size={48} color="#ffffff" />
+          {/* Avatar with gradient background */}
+          {user?.avatar ? (
+            <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+          ) : (
+            <LinearGradient
+              colors={["#667eea", "#764ba2"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.avatar}
+            >
+              <Text style={styles.avatarText}>
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </Text>
+            </LinearGradient>
+          )}
+
+          <View style={styles.nameContainer}>
+            <Text style={styles.name}>{user?.name || "User"}</Text>
+            {user?.isPremium && (
+              <Ionicons name="diamond" size={20} color="#FFD700" />
+            )}
           </View>
-          <Text style={styles.name}>User Name</Text>
-          <Text style={styles.email}>user@example.com</Text>
+
+          <Text style={styles.email}>{user?.email || "user@example.com"}</Text>
+
+          {user?.isPremium && (
+            <View style={styles.premiumBadge}>
+              <Ionicons name="diamond" size={14} color="#FFD700" />
+              <Text style={styles.premiumText}>Premium Member</Text>
+            </View>
+          )}
         </View>
 
         {/* Stats */}
@@ -137,17 +169,47 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
-    backgroundColor: "#0A84FF",
+  } as ViewStyle,
+  avatarImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+  } as ImageStyle,
+  avatarText: {
+    fontSize: 40,
+    fontWeight: "700" as const,
+    color: "#fff",
+  } as TextStyle,
+  nameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 8,
+    marginBottom: 4,
   } as ViewStyle,
   name: {
     fontSize: 24,
     fontWeight: "600" as const,
-    marginBottom: 4,
     color: "#fff",
   } as TextStyle,
   email: {
     fontSize: 14,
+    marginBottom: 12,
     color: "#a0a0a0",
+  } as TextStyle,
+  premiumBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 215, 0, 0.1)",
+  } as ViewStyle,
+  premiumText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#FFD700",
   } as TextStyle,
   statsContainer: {
     flexDirection: "row",

@@ -16,10 +16,12 @@ interface ActionButtonsProps {
   readonly quoteText: string;
   readonly author: string;
   readonly isLiked?: boolean;
+  readonly isAuthenticated?: boolean;
   readonly onLike: (quoteId: number) => void;
   readonly onShare: (text: string, author: string) => void;
   readonly onSettings: () => void;
   readonly onTopics: () => void;
+  readonly onLogin?: () => void;
 }
 
 export default function ActionButtons({
@@ -27,10 +29,12 @@ export default function ActionButtons({
   quoteText,
   author,
   isLiked = false,
+  isAuthenticated = false,
   onLike,
   onShare,
   onSettings,
   onTopics,
+  onLogin,
 }: ActionButtonsProps) {
   const [liked, setLiked] = useState(isLiked);
   const [isOpen, setIsOpen] = useState(false);
@@ -130,80 +134,100 @@ export default function ActionButtons({
     <>
       {/* Right Side Buttons */}
       <View style={styles.rightContainer}>
-        {/* Like Button - Animated */}
-        <Animated.View
-          style={[
-            styles.animatedButton,
-            {
-              transform: [{ translateY: likeTranslate }, { scale: likeScale }],
-              opacity: buttonOpacity,
-            },
-          ]}
-          pointerEvents={isOpen ? "auto" : "none"}
-        >
+        {/* If not authenticated, show only User button */}
+        {!isAuthenticated ? (
           <TouchableOpacity
-            style={[styles.button, liked && styles.likeButtonActive]}
-            onPress={handleLike}
-            activeOpacity={0.8}
-          >
-            <MaterialIcons
-              name={liked ? "favorite" : "favorite-border"}
-              size={28}
-              color={liked ? "#ff4444" : "#ffffff"}
-            />
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* Share Button - Animated */}
-        <Animated.View
-          style={[
-            styles.animatedButton,
-            {
-              transform: [{ translateY: shareTranslate }],
-              opacity: buttonOpacity,
-            },
-          ]}
-          pointerEvents={isOpen ? "auto" : "none"}
-        >
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleShare}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="share-outline" size={26} color="#ffffff" />
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* Settings Button (User Menu) - Animated */}
-        <Animated.View
-          style={[
-            styles.animatedButton,
-            {
-              transform: [{ translateY: settingsTranslate }],
-              opacity: buttonOpacity,
-            },
-          ]}
-          pointerEvents={isOpen ? "auto" : "none"}
-        >
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleSettings}
+            style={[styles.button, styles.toggleButton]}
+            onPress={onLogin}
             activeOpacity={0.8}
           >
             <MaterialIcons name="person-outline" size={28} color="#ffffff" />
           </TouchableOpacity>
-        </Animated.View>
+        ) : (
+          <>
+            {/* Like Button - Animated */}
+            <Animated.View
+              style={[
+                styles.animatedButton,
+                {
+                  transform: [
+                    { translateY: likeTranslate },
+                    { scale: likeScale },
+                  ],
+                  opacity: buttonOpacity,
+                },
+              ]}
+              pointerEvents={isOpen ? "auto" : "none"}
+            >
+              <TouchableOpacity
+                style={[styles.button, liked && styles.likeButtonActive]}
+                onPress={handleLike}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons
+                  name={liked ? "favorite" : "favorite-border"}
+                  size={28}
+                  color={liked ? "#ff4444" : "#ffffff"}
+                />
+              </TouchableOpacity>
+            </Animated.View>
 
-        {/* Toggle Menu Button (+ / X) */}
-        <TouchableOpacity
-          style={[styles.button, styles.toggleButton]}
-          onPress={toggleMenu}
-          activeOpacity={0.8}
-        >
-          <Animated.View style={{ transform: [{ rotate }] }}>
-            <Ionicons name="add" size={32} color="#ffffff" />
-          </Animated.View>
-        </TouchableOpacity>
+            {/* Share Button - Animated */}
+            <Animated.View
+              style={[
+                styles.animatedButton,
+                {
+                  transform: [{ translateY: shareTranslate }],
+                  opacity: buttonOpacity,
+                },
+              ]}
+              pointerEvents={isOpen ? "auto" : "none"}
+            >
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleShare}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="share-outline" size={26} color="#ffffff" />
+              </TouchableOpacity>
+            </Animated.View>
+
+            {/* Settings Button (User Menu) - Animated */}
+            <Animated.View
+              style={[
+                styles.animatedButton,
+                {
+                  transform: [{ translateY: settingsTranslate }],
+                  opacity: buttonOpacity,
+                },
+              ]}
+              pointerEvents={isOpen ? "auto" : "none"}
+            >
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSettings}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons
+                  name="person-outline"
+                  size={28}
+                  color="#ffffff"
+                />
+              </TouchableOpacity>
+            </Animated.View>
+
+            {/* Toggle Menu Button (+ / X) */}
+            <TouchableOpacity
+              style={[styles.button, styles.toggleButton]}
+              onPress={toggleMenu}
+              activeOpacity={0.8}
+            >
+              <Animated.View style={{ transform: [{ rotate }] }}>
+                <Ionicons name="add" size={32} color="#ffffff" />
+              </Animated.View>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       {/* Left Side Topics Button */}
