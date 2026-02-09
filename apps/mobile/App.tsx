@@ -1,15 +1,19 @@
 import { StatusBar } from "expo-status-bar";
-import { ThemeProvider } from "./src/contexts/ThemeContext";
+import { StyleSheet, View } from "react-native";
 import AppNavigator from "./src/navigation/AppNavigator";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <AppNavigator />
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <View style={styles.container}>
+      <AppNavigator />
+      <StatusBar style="light" />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+});

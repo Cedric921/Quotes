@@ -1,5 +1,4 @@
 import { View, StyleSheet, ViewStyle } from "react-native";
-import { useTheme } from "../contexts/ThemeContext";
 
 interface DotsIndicatorProps {
   readonly total: number;
@@ -10,8 +9,6 @@ export default function DotsIndicator({
   total,
   currentIndex,
 }: DotsIndicatorProps) {
-  const { colors } = useTheme();
-
   // Limiter à 5 dots maximum pour éviter l'encombrement
   const maxDots = 5;
   const showDots = Math.min(total, maxDots);
@@ -38,11 +35,11 @@ export default function DotsIndicator({
         const isActive = index === activeDot;
         return (
           <View
-            key={index}
+            key={`dot-${index}`}
             style={[
               styles.dot,
               {
-                backgroundColor: isActive ? colors.accent : colors.border,
+                backgroundColor: isActive ? "#FF453A" : "#333",
                 width: isActive ? 24 : 6,
                 opacity: isActive ? 1 : 0.5,
               },

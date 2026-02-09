@@ -8,7 +8,6 @@ import {
   TextStyle,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../contexts/ThemeContext";
 import * as Haptics from "expo-haptics";
 
 interface ProfileScreenProps {
@@ -16,23 +15,19 @@ interface ProfileScreenProps {
 }
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
-  const { colors } = useTheme();
-
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Profile
-        </Text>
+        <Text style={styles.headerTitle}>Profile</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -40,122 +35,58 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       <ScrollView style={styles.content}>
         {/* Profile Info */}
         <View style={styles.profileSection}>
-          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+          <View style={styles.avatar}>
             <MaterialIcons name="person" size={48} color="#ffffff" />
           </View>
-          <Text style={[styles.name, { color: colors.text }]}>User Name</Text>
-          <Text style={[styles.email, { color: colors.textSecondary }]}>
-            user@example.com
-          </Text>
+          <Text style={styles.name}>User Name</Text>
+          <Text style={styles.email}>user@example.com</Text>
         </View>
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
+          <View style={styles.statCard}>
             <MaterialIcons name="favorite" size={24} color="#ff4444" />
-            <Text style={[styles.statNumber, { color: colors.text }]}>0</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Liked Quotes
-            </Text>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Liked Quotes</Text>
           </View>
 
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
-            <Ionicons name="bookmark" size={24} color={colors.primary} />
-            <Text style={[styles.statNumber, { color: colors.text }]}>0</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Saved
-            </Text>
+          <View style={styles.statCard}>
+            <Ionicons name="bookmark" size={24} color="#0A84FF" />
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Saved</Text>
           </View>
 
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
-            <Ionicons name="share-social" size={24} color={colors.primary} />
-            <Text style={[styles.statNumber, { color: colors.text }]}>0</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Shared
-            </Text>
+          <View style={styles.statCard}>
+            <Ionicons name="share-social" size={24} color="#0A84FF" />
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Shared</Text>
           </View>
         </View>
 
         {/* Menu Items */}
         <View style={styles.section}>
-          <TouchableOpacity
-            style={[
-              styles.menuItem,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
+          <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <MaterialIcons name="edit" size={24} color={colors.primary} />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                Edit Profile
-              </Text>
+              <MaterialIcons name="edit" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>Edit Profile</Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={colors.textSecondary}
-            />
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.menuItem,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
+          <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <MaterialIcons
-                name="favorite-border"
-                size={24}
-                color={colors.primary}
-              />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                My Favorites
-              </Text>
+              <MaterialIcons name="favorite-border" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>My Favorites</Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={colors.textSecondary}
-            />
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.menuItem,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
+          <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <Ionicons
-                name="bookmark-outline"
-                size={24}
-                color={colors.primary}
-              />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                Saved Quotes
-              </Text>
+              <Ionicons name="bookmark-outline" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>Saved Quotes</Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={colors.textSecondary}
-            />
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -166,6 +97,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   } as ViewStyle,
   header: {
     flexDirection: "row",
@@ -175,6 +107,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     borderBottomWidth: 1,
+    borderBottomColor: "#333",
   } as ViewStyle,
   backButton: {
     width: 40,
@@ -185,6 +118,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "600" as const,
+    color: "#fff",
   } as TextStyle,
   placeholder: {
     width: 40,
@@ -203,14 +137,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
+    backgroundColor: "#0A84FF",
   } as ViewStyle,
   name: {
     fontSize: 24,
     fontWeight: "600" as const,
     marginBottom: 4,
+    color: "#fff",
   } as TextStyle,
   email: {
     fontSize: 14,
+    color: "#a0a0a0",
   } as TextStyle,
   statsContainer: {
     flexDirection: "row",
@@ -224,14 +161,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     rowGap: 8,
+    backgroundColor: "#1a1a1a",
   } as ViewStyle,
   statNumber: {
     fontSize: 24,
     fontWeight: "700" as const,
+    color: "#fff",
   } as TextStyle,
   statLabel: {
     fontSize: 12,
     textAlign: "center",
+    color: "#a0a0a0",
   } as TextStyle,
   section: {
     paddingHorizontal: 20,
@@ -243,6 +183,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
+    backgroundColor: "#1a1a1a",
   } as ViewStyle,
   menuItemLeft: {
     flexDirection: "row",
@@ -252,5 +193,6 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 16,
     fontWeight: "500" as const,
+    color: "#fff",
   } as TextStyle,
 });

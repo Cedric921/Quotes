@@ -12,7 +12,34 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
-import { getTopicGradient } from "../constants/colors";
+
+// Gradients par topic
+const TOPIC_GRADIENTS: Record<string, [string, string, ...string[]]> = {
+  default: ["#667eea", "#764ba2"],
+  motivation: ["#f093fb", "#f5576c"],
+  success: ["#4facfe", "#00f2fe"],
+  wisdom: ["#43e97b", "#38f9d7"],
+  love: ["#fa709a", "#fee140"],
+  life: ["#30cfd0", "#330867"],
+  happiness: ["#a8edea", "#fed6e3"],
+  inspiration: ["#ff9a9e", "#fecfef"],
+  mindfulness: ["#ffecd2", "#fcb69f"],
+  growth: ["#ff6e7f", "#bfe9ff"],
+};
+
+function getTopicGradient(topicName?: string): [string, string, ...string[]] {
+  if (!topicName) return TOPIC_GRADIENTS.default;
+
+  const normalized = topicName.toLowerCase();
+
+  for (const [key, gradient] of Object.entries(TOPIC_GRADIENTS)) {
+    if (normalized.includes(key)) {
+      return gradient;
+    }
+  }
+
+  return TOPIC_GRADIENTS.default;
+}
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";

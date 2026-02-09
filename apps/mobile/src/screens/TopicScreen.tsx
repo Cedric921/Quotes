@@ -8,7 +8,6 @@ import {
   TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "../contexts/ThemeContext";
 import { useState, useEffect } from "react";
 import { Quote } from "../types";
 import { quotesService } from "../services/api";
@@ -27,7 +26,6 @@ interface TopicScreenProps {
 
 export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const { topicId, topicName } = route.params;
-  const { colors } = useTheme();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,19 +86,15 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            {topicName}
-          </Text>
-          <Text
-            style={[styles.headerSubtitle, { color: colors.textSecondary }]}
-          >
+          <Text style={styles.headerTitle}>{topicName}</Text>
+          <Text style={styles.headerSubtitle}>
             {quotes.length} {quotes.length === 1 ? "quote" : "quotes"}
           </Text>
         </View>
@@ -110,14 +104,8 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
       {/* Quotes List */}
       {quotes.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons
-            name="document-text-outline"
-            size={64}
-            color={colors.textSecondary}
-          />
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            No quotes found for this topic
-          </Text>
+          <Ionicons name="document-text-outline" size={64} color="#a0a0a0" />
+          <Text style={styles.emptyText}>No quotes found for this topic</Text>
         </View>
       ) : (
         <FlatList
@@ -137,6 +125,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   } as ViewStyle,
   header: {
     flexDirection: "row",
@@ -146,6 +135,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     borderBottomWidth: 1,
+    borderBottomColor: "#333",
   } as ViewStyle,
   backButton: {
     width: 40,
@@ -160,10 +150,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "600" as const,
+    color: "#fff",
   } as TextStyle,
   headerSubtitle: {
     fontSize: 14,
     marginTop: 2,
+    color: "#a0a0a0",
   } as TextStyle,
   placeholder: {
     width: 40,
@@ -176,5 +168,6 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   emptyText: {
     fontSize: 16,
+    color: "#a0a0a0",
   } as TextStyle,
 });

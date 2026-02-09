@@ -19,7 +19,6 @@ import {
 } from "../components";
 import { useQuotes } from "../hooks";
 import { Quote } from "../types";
-import { useTheme } from "../contexts/ThemeContext";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 
@@ -35,7 +34,6 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
 
@@ -117,10 +115,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     if (!loading) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color="#0A84FF" />
       </View>
     );
-  }, [loading, colors.primary]);
+  }, [loading]);
 
   // Show loading skeleton on initial load
   if (loading && quotes.length === 0 && !error) {
@@ -138,7 +136,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       {/* Header */}
       <Header />
 
@@ -147,7 +145,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         data={quotes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        pagingEnabled={true}
+        pagingEnabled
         showsVerticalScrollIndicator={false}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
@@ -157,7 +155,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor={colors.primary}
+            tintColor="#0A84FF"
           />
         }
         ListFooterComponent={renderFooter}
@@ -193,6 +191,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   } as ViewStyle,
   footer: {
     height: height,

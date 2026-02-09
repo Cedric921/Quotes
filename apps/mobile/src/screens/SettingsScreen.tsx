@@ -8,7 +8,6 @@ import {
   TextStyle,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../contexts/ThemeContext";
 import * as Haptics from "expo-haptics";
 
 interface SettingsScreenProps {
@@ -16,144 +15,59 @@ interface SettingsScreenProps {
 }
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
-  const { theme, toggleTheme, colors } = useTheme();
-
-  const handleThemeToggle = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    toggleTheme();
-  };
-
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Settings
-        </Text>
+        <Text style={styles.headerTitle}>Settings</Text>
         <View style={styles.placeholder} />
       </View>
 
       {/* Content */}
       <ScrollView style={styles.content}>
-        {/* Appearance Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-            APPEARANCE
-          </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.menuItem,
-              { backgroundColor: colors.cardBackground },
-            ]}
-            onPress={handleThemeToggle}
-          >
-            <View style={styles.menuItemLeft}>
-              <Ionicons
-                name={theme === "dark" ? "moon" : "sunny"}
-                size={24}
-                color={colors.primary}
-              />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                Theme
-              </Text>
-            </View>
-            <Text
-              style={[styles.menuItemValue, { color: colors.textSecondary }]}
-            >
-              {theme === "dark" ? "Dark" : "Light"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Notifications Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-            NOTIFICATIONS
-          </Text>
+          <Text style={styles.sectionTitle}>NOTIFICATIONS</Text>
 
-          <TouchableOpacity
-            style={[
-              styles.menuItem,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
+          <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
               <Ionicons
                 name="notifications-outline"
                 size={24}
-                color={colors.primary}
+                color="#0A84FF"
               />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                Push Notifications
-              </Text>
+              <Text style={styles.menuItemText}>Push Notifications</Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={colors.textSecondary}
-            />
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
         </View>
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-            ABOUT
-          </Text>
+          <Text style={styles.sectionTitle}>ABOUT</Text>
 
-          <TouchableOpacity
-            style={[
-              styles.menuItem,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
+          <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <MaterialIcons
-                name="info-outline"
-                size={24}
-                color={colors.primary}
-              />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                About Focus
-              </Text>
+              <MaterialIcons name="info-outline" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>About Focus</Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={colors.textSecondary}
-            />
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.menuItem,
-              { backgroundColor: colors.cardBackground },
-            ]}
-          >
+          <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <MaterialIcons
-                name="privacy-tip"
-                size={24}
-                color={colors.primary}
-              />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                Privacy Policy
-              </Text>
+              <MaterialIcons name="privacy-tip" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>Privacy Policy</Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={colors.textSecondary}
-            />
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -164,6 +78,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   } as ViewStyle,
   header: {
     flexDirection: "row",
@@ -173,6 +88,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     borderBottomWidth: 1,
+    borderBottomColor: "#333",
   } as ViewStyle,
   backButton: {
     width: 40,
@@ -183,6 +99,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "600" as const,
+    color: "#fff",
   } as TextStyle,
   placeholder: {
     width: 40,
@@ -199,6 +116,7 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
     marginBottom: 12,
     letterSpacing: 0.5,
+    color: "#a0a0a0",
   } as TextStyle,
   menuItem: {
     flexDirection: "row",
@@ -207,6 +125,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 8,
+    backgroundColor: "#1a1a1a",
   } as ViewStyle,
   menuItemLeft: {
     flexDirection: "row",
@@ -216,8 +135,10 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 16,
     fontWeight: "500" as const,
+    color: "#fff",
   } as TextStyle,
   menuItemValue: {
     fontSize: 14,
+    color: "#a0a0a0",
   } as TextStyle,
 });
