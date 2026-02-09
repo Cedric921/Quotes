@@ -65,7 +65,7 @@ export const quotesApi = {
   getQuotes: async (
     page: number = 1,
     limit: number = 10,
-    topicId?: number,
+    topicId?: string,
   ): Promise<Quote[]> => {
     const response = await apiClient.get<Quote[]>("/quotes", {
       params: { page, limit, ...(topicId && { topicId }) },
@@ -77,7 +77,7 @@ export const quotesApi = {
    * Get all quotes for a specific topic
    * @param topicId - Topic ID
    */
-  getQuotesByTopic: async (topicId: number): Promise<Quote[]> => {
+  getQuotesByTopic: async (topicId: string): Promise<Quote[]> => {
     const response = await apiClient.get<Quote[]>("/quotes", {
       params: { topicId },
     });
@@ -88,7 +88,7 @@ export const quotesApi = {
    * Get a single quote by ID
    * @param quoteId - Quote ID
    */
-  getQuoteById: async (quoteId: number): Promise<Quote> => {
+  getQuoteById: async (quoteId: string): Promise<Quote> => {
     const response = await apiClient.get<Quote>(`/quotes/${quoteId}`);
     return response.data;
   },
@@ -97,7 +97,7 @@ export const quotesApi = {
    * Like a quote
    * @param quoteId - Quote ID
    */
-  likeQuote: async (quoteId: number): Promise<void> => {
+  likeQuote: async (quoteId: string): Promise<void> => {
     await apiClient.post(`/quotes/${quoteId}/like`);
   },
 
@@ -105,7 +105,7 @@ export const quotesApi = {
    * Unlike a quote
    * @param quoteId - Quote ID
    */
-  unlikeQuote: async (quoteId: number): Promise<void> => {
+  unlikeQuote: async (quoteId: string): Promise<void> => {
     await apiClient.delete(`/quotes/${quoteId}/like`);
   },
 };
@@ -123,7 +123,7 @@ export const topicsApi = {
    * Get a single topic by ID
    * @param topicId - Topic ID
    */
-  getTopicById: async (topicId: number): Promise<Topic> => {
+  getTopicById: async (topicId: string): Promise<Topic> => {
     const response = await apiClient.get<Topic>(`/topics/${topicId}`);
     return response.data;
   },

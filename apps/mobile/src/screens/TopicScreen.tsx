@@ -25,7 +25,7 @@ interface TopicScreenProps {
   readonly navigation: any;
   readonly route: {
     params: {
-      topicId: number;
+      topicId: string;
       topicName: string;
     };
   };
@@ -40,7 +40,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
+  const [likedQuotes, setLikedQuotes] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const viewabilityConfig = useRef({

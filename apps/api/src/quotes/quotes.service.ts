@@ -21,7 +21,7 @@ export class QuotesService {
     return this.quotesRepository.save(quote);
   }
 
-  findAll(page?: number, limit?: number, topicId?: number) {
+  findAll(page?: number, limit?: number, topicId?: string) {
     const where = topicId ? { topic: { id: topicId } } : {};
 
     if (page && limit) {
@@ -41,14 +41,14 @@ export class QuotesService {
     });
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.quotesRepository.findOne({
       where: { id },
       relations: ['topic'],
     });
   }
 
-  async update(id: number, updateQuoteDto: UpdateQuoteDto) {
+  async update(id: string, updateQuoteDto: UpdateQuoteDto) {
     const quote = await this.findOne(id);
     if (!quote) return null;
 
@@ -56,13 +56,13 @@ export class QuotesService {
     Object.assign(quote, quoteData);
 
     if (topicId !== undefined) {
-      quote.topic = topicId ? { id: topicId } as any : null;
+      quote.topic = topicId ? ({ id: topicId } as any) : null;
     }
 
     return this.quotesRepository.save(quote);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.quotesRepository.softDelete(id);
   }
 }

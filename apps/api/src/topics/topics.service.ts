@@ -21,18 +21,18 @@ export class TopicsService {
     return this.topicsRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.topicsRepository.findOneBy({ id });
   }
 
-  async update(id: number, updateTopicDto: UpdateTopicDto) {
+  async update(id: string, updateTopicDto: UpdateTopicDto) {
     const topic = await this.findOne(id);
     if (!topic) return null;
     Object.assign(topic, updateTopicDto);
     return this.topicsRepository.save(topic);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.topicsRepository.softDelete(id);
   }
 }

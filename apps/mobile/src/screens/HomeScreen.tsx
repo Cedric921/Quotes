@@ -40,7 +40,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [likedQuotes, setLikedQuotes] = useState<Set<number>>(new Set());
+  const [likedQuotes, setLikedQuotes] = useState<Set<string>>(new Set());
 
   const {
     quotes,

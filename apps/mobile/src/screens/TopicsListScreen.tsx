@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import { lucideToIonicons } from "../utils/iconMapper";
 import Toast from "react-native-toast-message";
 import { topicsApi } from "../services/api";
 import { Topic } from "../types";
@@ -110,7 +111,7 @@ export default function TopicsListScreen({
 
   const renderTopicCard = ({ item }: { item: Topic }) => {
     const gradient = getTopicGradient(item.color);
-    const iconName = (item.icon || "star") as keyof typeof Ionicons.glyphMap;
+    const iconName = lucideToIonicons(item.icon);
     const isLocked = item.isPremium && !isAuthenticated;
 
     return (
