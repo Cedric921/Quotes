@@ -1,5 +1,6 @@
 import * as icons from "lucide-react";
 import { LucideProps } from "lucide-react";
+import React from "react";
 
 /**
  * Récupère un composant d'icône Lucide par son nom
@@ -10,22 +11,23 @@ import { LucideProps } from "lucide-react";
 export function getLucideIcon(
   iconName?: string,
   props?: LucideProps
-): JSX.Element {
+): React.ReactElement {
+  const Tag = icons.Tag;
+  
   if (!iconName) {
-    const Tag = icons.Tag;
-    return <Tag {...props} />;
+    return React.createElement(Tag, props || {});
   }
 
   // Récupérer le composant d'icône dynamiquement
-  const IconComponent = (icons as any)[iconName];
+  const iconsMap = icons as unknown as Record<string, typeof Tag>;
+  const IconComponent = iconsMap[iconName];
 
   if (!IconComponent) {
     // Si l'icône n'existe pas, utiliser Tag par défaut
-    const Tag = icons.Tag;
-    return <Tag {...props} />;
+    return React.createElement(Tag, props || {});
   }
 
-  return <IconComponent {...props} />;
+  return React.createElement(IconComponent, props || {});
 }
 
 /**
@@ -34,6 +36,6 @@ export function getLucideIcon(
  * @returns true si l'icône existe, false sinon
  */
 export function isValidLucideIcon(iconName: string): boolean {
-  return !!(icons as any)[iconName];
+  const iconsMap = icons as unknown as Record<string, unknown>;
+  return !!iconsMap[iconName];
 }
-
