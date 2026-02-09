@@ -13,32 +13,32 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
 
-// Gradients par topic
-const TOPIC_GRADIENTS: Record<string, [string, string, ...string[]]> = {
-  default: ["#667eea", "#764ba2"],
-  motivation: ["#f093fb", "#f5576c"],
-  success: ["#4facfe", "#00f2fe"],
-  wisdom: ["#43e97b", "#38f9d7"],
-  love: ["#fa709a", "#fee140"],
-  life: ["#30cfd0", "#330867"],
-  happiness: ["#a8edea", "#fed6e3"],
-  inspiration: ["#ff9a9e", "#fecfef"],
-  mindfulness: ["#ffecd2", "#fcb69f"],
-  growth: ["#ff6e7f", "#bfe9ff"],
-};
+// Helper function to get gradient colors from topic color
+function getTopicGradient(color?: string): [string, string, ...string[]] {
+  if (!color) return ["#667eea", "#764ba2"];
 
-function getTopicGradient(topicName?: string): [string, string, ...string[]] {
-  if (!topicName) return TOPIC_GRADIENTS.default;
+  // Create a gradient from the base color to a darker variant
+  const darkenColor = (hex: string, percent: number): string => {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) - amt;
+    const G = ((num >> 8) & 0x00ff) - amt;
+    const B = (num & 0x0000ff) - amt;
+    return (
+      "#" +
+      (
+        0x1000000 +
+        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+        (B < 255 ? (B < 1 ? 0 : B) : 255)
+      )
+        .toString(16)
+        .slice(1)
+    );
+  };
 
-  const normalized = topicName.toLowerCase();
-
-  for (const [key, gradient] of Object.entries(TOPIC_GRADIENTS)) {
-    if (normalized.includes(key)) {
-      return gradient;
-    }
-  }
-
-  return TOPIC_GRADIENTS.default;
+  const darkerColor = darkenColor(color, 30);
+  return [color, darkerColor];
 }
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -53,6 +53,7 @@ interface Quote {
   topic?: {
     id: number;
     name: string;
+    color?: string;
   };
 }
 
@@ -78,7 +79,7 @@ export default function QuoteCard({
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(0)).current;
 
-  const gradient = getTopicGradient(quote.topic?.name);
+  const gradient = getTopicGradient(quote.topic?.color);
 
   useEffect(() => {
     setLiked(isLiked);

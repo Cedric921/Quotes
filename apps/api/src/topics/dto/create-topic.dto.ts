@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateTopicDto {
   @IsString()
@@ -7,5 +7,21 @@ export class CreateTopicDto {
 
   @IsString()
   @IsOptional()
+  title?: string;
+
+  @IsString()
+  @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  icon?: string;
+
+  @IsString()
+  @IsOptional()
+  color?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isPremium?: boolean;
 }

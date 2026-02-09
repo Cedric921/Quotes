@@ -21,31 +21,32 @@ interface TopicsListScreenProps {
   readonly navigation: any;
 }
 
-// Topic gradients
-const TOPIC_GRADIENTS: Record<string, [string, string, ...string[]]> = {
-  default: ["#667eea", "#764ba2"],
-  motivation: ["#f093fb", "#f5576c"],
-  success: ["#4facfe", "#00f2fe"],
-  wisdom: ["#43e97b", "#38f9d7"],
-  love: ["#fa709a", "#fee140"],
-  life: ["#30cfd0", "#330867"],
-  happiness: ["#a8edea", "#fed6e3"],
-  inspiration: ["#ff9a9e", "#fecfef"],
-  mindfulness: ["#ffecd2", "#fcb69f"],
-  growth: ["#ff6e7f", "#bfe9ff"],
-};
+// Helper function to get gradient colors from topic color
+const getTopicGradient = (color?: string): [string, string, ...string[]] => {
+  if (!color) return ["#667eea", "#764ba2"];
 
-const getTopicGradient = (
-  topicName?: string,
-): [string, string, ...string[]] => {
-  if (!topicName) return TOPIC_GRADIENTS.default;
-  const normalized = topicName.toLowerCase();
-  for (const [key, gradient] of Object.entries(TOPIC_GRADIENTS)) {
-    if (normalized.includes(key)) {
-      return gradient;
-    }
-  }
-  return TOPIC_GRADIENTS.default;
+  // Create a gradient from the base color to a darker/lighter variant
+  const lightenColor = (hex: string, percent: number): string => {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = ((num >> 8) & 0x00ff) + amt;
+    const B = (num & 0x0000ff) + amt;
+    return (
+      "#" +
+      (
+        0x1000000 +
+        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+        (B < 255 ? (B < 1 ? 0 : B) : 255)
+      )
+        .toString(16)
+        .slice(1)
+    );
+  };
+
+  const lighterColor = lightenColor(color, 20);
+  return [color, lighterColor];
 };
 
 export default function TopicsListScreen({
@@ -87,7 +88,8 @@ export default function TopicsListScreen({
   };
 
   const renderTopicCard = ({ item }: { item: Topic }) => {
-    const gradient = getTopicGradient(item.name);
+    const gradient = getTopicGradient(item.color);
+    const iconName = (item.icon || "star") as keyof typeof Ionicons.glyphMap;
 
     return (
       <TouchableOpacity
@@ -101,19 +103,34 @@ export default function TopicsListScreen({
           end={{ x: 1, y: 1 }}
           style={styles.cardGradient}
         >
+          <View style={styles.cardHeader}>
+            <View style={styles.iconContainer}>
+              <Ionicons name={iconName} size={28} color="#fff" />
+            </View>
+            {item.isPremium && (
+              <View style={styles.premiumBadge}>
+                <Ionicons name="diamond" size={14} color="#FFD700" />
+                <Text style={styles.premiumText}>Premium</Text>
+              </View>
+            )}
+          </View>
+
           <View style={styles.cardContent}>
-            <Text style={styles.topicName}>{item.name}</Text>
+            <Text style={styles.topicName}>{item.title || item.name}</Text>
             {item.description && (
               <Text style={styles.topicDescription} numberOfLines={2}>
                 {item.description}
               </Text>
             )}
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color="rgba(255, 255, 255, 0.8)"
-          />
+
+          <View style={styles.cardFooter}>
+            <Ionicons
+              name="chevron-forward"
+              size={24}
+              color="rgba(255, 255, 255, 0.8)"
+            />
+          </View>
         </LinearGradient>
       </TouchableOpacity>
     );
@@ -228,18 +245,50 @@ const styles = StyleSheet.create({
     elevation: 5,
   } as ViewStyle,
   cardGradient: {
+    padding: 20,
+    minHeight: 140,
+  } as ViewStyle,
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  } as ViewStyle,
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  } as ViewStyle,
+  premiumBadge: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    padding: 20,
-    minHeight: 100,
+    columnGap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 215, 0, 0.5)",
   } as ViewStyle,
+  premiumText: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+    color: "#FFD700",
+    letterSpacing: 0.5,
+  } as TextStyle,
   cardContent: {
-    flex: 1,
-    marginRight: 12,
+    marginBottom: 12,
+  } as ViewStyle,
+  cardFooter: {
+    alignItems: "flex-end",
   } as ViewStyle,
   topicName: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700" as const,
     color: "#fff",
     marginBottom: 6,
