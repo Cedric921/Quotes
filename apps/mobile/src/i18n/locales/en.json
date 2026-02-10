@@ -33,6 +33,8 @@
     "loginError": "Login error",
     "loginSuccess": "Login successful",
     "signupError": "Sign up error",
+    "signupSuccess": "Sign up successful",
+    "welcomeMessage": "Welcome!",
     "errorOccurred": "An error occurred"
   },
   "home": {

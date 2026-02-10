@@ -33,6 +33,8 @@
     "loginError": "Erreur de connexion",
     "loginSuccess": "Connexion réussie",
     "signupError": "Erreur d'inscription",
+    "signupSuccess": "Inscription réussie",
+    "welcomeMessage": "Bienvenue !",
     "errorOccurred": "Une erreur est survenue"
   },
   "home": {

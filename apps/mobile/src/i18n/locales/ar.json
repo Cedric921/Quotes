@@ -33,6 +33,8 @@
     "loginError": "خطأ في تسجيل الدخول",
     "loginSuccess": "تم تسجيل الدخول بنجاح",
     "signupError": "خطأ في إنشاء الحساب",
+    "signupSuccess": "تم إنشاء الحساب بنجاح",
+    "welcomeMessage": "مرحبا!",
     "errorOccurred": "حدث خطأ"
   },
   "home": {

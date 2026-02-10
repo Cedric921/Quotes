@@ -15,8 +15,10 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useState, useEffect } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { logoutThunk } from "../store/slices/authSlice";
+import { changeTheme } from "../store/slices/themeSlice";
+import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { changeLanguage, getCurrentLanguage } from "../i18n";
 
@@ -40,8 +42,10 @@ const LANGUAGES: Language[] = [
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
-  const { theme, setTheme, colors } = useTheme();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+  const theme = useAppSelector((state) => state.theme.mode);
+  const { colors } = useThemeColors();
   const [currentLanguage, setCurrentLanguage] = useState<Language>(
     LANGUAGES[0],
   );
@@ -93,7 +97,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handleThemeSelect = (selectedTheme: "light" | "dark" | "system") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setTheme(selectedTheme);
+    dispatch(changeTheme(selectedTheme));
     setShowThemeModal(false);
   };
 
@@ -151,7 +155,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         text: t("auth.logout"),
         style: "destructive",
         onPress: async () => {
-          await logout();
+          await dispatch(logoutThunk());
           navigation.navigate("Home");
         },
       },

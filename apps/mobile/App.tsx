@@ -7,12 +7,14 @@ import AppNavigator from "./src/navigation/AppNavigator";
 import { store } from "./src/store";
 import { queryClient } from "./src/api/queryClient";
 import { loadStoredAuth } from "./src/store/slices/authSlice";
+import { loadStoredTheme } from "./src/store/slices/themeSlice";
 import "./src/i18n"; // Initialiser i18n
 
 function AppContent() {
   useEffect(() => {
-    // Load stored authentication on app start
+    // Load stored authentication and theme on app start
     store.dispatch(loadStoredAuth());
+    store.dispatch(loadStoredTheme());
   }, []);
 
   return (

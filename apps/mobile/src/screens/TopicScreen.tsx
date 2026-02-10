@@ -16,7 +16,7 @@ import { Quote } from "../types";
 import * as Haptics from "expo-haptics";
 import { LoadingSkeleton, QuoteCard, DotsIndicator } from "../components";
 import { BlurView } from "expo-blur";
-import { useTheme } from "../contexts/ThemeContext";
+import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { useQuotesByTopic, useToggleLikeQuote } from "../api/hooks";
 import { useQuery } from "@tanstack/react-query";
@@ -39,7 +39,7 @@ interface TopicScreenProps {
 export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const { t } = useTranslation();
   const { topicId, topicName } = route.params;
-  const { colors, isDark } = useTheme();
+  const { colors, isDark } = useThemeColors();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
 

@@ -22,7 +22,7 @@ import { Quote } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAppSelector } from "../store/hooks";
-import { useTheme } from "../contexts/ThemeContext";
+import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 
 const { height } = Dimensions.get("window");
@@ -40,7 +40,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const { colors } = useTheme();
+  const { colors } = useThemeColors();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
 

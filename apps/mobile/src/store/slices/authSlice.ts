@@ -48,6 +48,63 @@ export const loginThunk = createAsyncThunk(
   },
 );
 
+export const registerThunk = createAsyncThunk(
+  "auth/register",
+  async (
+    {
+      name,
+      email,
+      password,
+    }: { name: string; email: string; password: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      // First, register the user
+      const registerResponse = await fetch(
+        `${API_CONFIG.getBaseUrl()}/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        },
+      );
+
+      const registerData = await registerResponse.json();
+
+      if (!registerResponse.ok) {
+        return rejectWithValue(registerData.message || "Registration failed");
+      }
+
+      // Then, auto-login
+      const loginResponse = await fetch(
+        `${API_CONFIG.getBaseUrl()}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+
+      const loginData = await loginResponse.json();
+
+      if (!loginResponse.ok) {
+        return rejectWithValue(loginData.message || "Auto-login failed");
+      }
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem("@focus_auth_token", loginData.access_token);
+      await AsyncStorage.setItem(
+        "@focus_user_data",
+        JSON.stringify(loginData.user),
+      );
+
+      return { user: loginData.user, token: loginData.access_token };
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Network error");
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -86,6 +143,19 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(loginThunk.rejected, (state) => {
+        state.isLoading = false;
+      })
+      // Register thunk
+      .addCase(registerThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(registerThunk.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.isLoading = false;
+      })
+      .addCase(registerThunk.rejected, (state) => {
         state.isLoading = false;
       });
   },
