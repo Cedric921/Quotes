@@ -16,7 +16,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
-import { useAuth } from "../contexts/AuthContext";
+import { useAppDispatch } from "../store/hooks";
+import { registerThunk } from "../store/slices/authSlice";
 import { useTranslation } from "react-i18next";
 
 interface SignupScreenProps {
@@ -25,7 +26,7 @@ interface SignupScreenProps {
 
 export default function SignupScreen({ navigation }: SignupScreenProps) {
   const { t } = useTranslation();
-  const { register } = useAuth();
+  const dispatch = useAppDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -72,7 +73,17 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
     setIsLoading(true);
 
     try {
-      await register(name, email, password);
+      await dispatch(registerThunk({ name, email, password })).unwrap();
+
+      Toast.show({
+        type: "success",
+        text1: t("auth.signupSuccess"),
+        text2: t("auth.welcomeMessage"),
+        position: "top",
+        visibilityTime: 2000,
+      });
+
+      // Navigate to Home after successful signup
       navigation.navigate("Home");
     } catch (error: any) {
       Toast.show({

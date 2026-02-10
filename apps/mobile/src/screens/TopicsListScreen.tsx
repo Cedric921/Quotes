@@ -8,19 +8,18 @@ import {
   TextStyle,
   Platform,
 } from "react-native";
-import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { lucideToIonicons } from "../utils/iconMapper";
 import Toast from "react-native-toast-message";
-import { topicsApi } from "../services/api";
 import { Topic } from "../types";
 import { LoadingSkeleton } from "../components";
 import { useAppSelector } from "../store/hooks";
-import { useTheme } from "../contexts/ThemeContext";
+import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
+import { useTopics } from "../api/hooks";
 
 interface TopicsListScreenProps {
   readonly navigation: any;
@@ -60,28 +59,14 @@ export default function TopicsListScreen({
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const { colors, isDark } = useTheme();
+  const { colors, isDark } = useThemeColors();
   const styles = createStyles(colors);
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchTopics();
-  }, []);
+  // Use React Query for topics
+  const { data: topics = [], isLoading: loading, error, refetch } = useTopics();
 
   const fetchTopics = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await topicsApi.getTopics();
-      setTopics(data);
-    } catch (err) {
-      setError(t("topics.failedToLoad"));
-      console.error("Error fetching topics:", err);
-    } finally {
-      setLoading(false);
-    }
+    await refetch();
   };
 
   const handleBack = () => {
@@ -196,12 +181,14 @@ export default function TopicsListScreen({
         </BlurView>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#ff4444" />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>
+            {error?.message || t("topics.failedToLoad")}
+          </Text>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={() => fetchTopics()}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
           </TouchableOpacity>
         </View>
       </View>

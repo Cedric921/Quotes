@@ -1,6 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "../../types";
+import { API_CONFIG } from "../../constants/config";
 
 interface AuthState {
   user: User | null;
@@ -15,6 +16,94 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: true,
 };
+
+// Thunks for async operations (defined before slice to avoid hoisting issues)
+export const loginThunk = createAsyncThunk(
+  "auth/login",
+  async (
+    { email, password }: { email: string; password: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await fetch(`${API_CONFIG.getBaseUrl()}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Login failed");
+      }
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem("@focus_auth_token", data.access_token);
+      await AsyncStorage.setItem("@focus_user_data", JSON.stringify(data.user));
+
+      return { user: data.user, token: data.access_token };
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Network error");
+    }
+  },
+);
+
+export const registerThunk = createAsyncThunk(
+  "auth/register",
+  async (
+    {
+      name,
+      email,
+      password,
+    }: { name: string; email: string; password: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      // First, register the user
+      const registerResponse = await fetch(
+        `${API_CONFIG.getBaseUrl()}/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        },
+      );
+
+      const registerData = await registerResponse.json();
+
+      if (!registerResponse.ok) {
+        return rejectWithValue(registerData.message || "Registration failed");
+      }
+
+      // Then, auto-login
+      const loginResponse = await fetch(
+        `${API_CONFIG.getBaseUrl()}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+
+      const loginData = await loginResponse.json();
+
+      if (!loginResponse.ok) {
+        return rejectWithValue(loginData.message || "Auto-login failed");
+      }
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem("@focus_auth_token", loginData.access_token);
+      await AsyncStorage.setItem(
+        "@focus_user_data",
+        JSON.stringify(loginData.user),
+      );
+
+      return { user: loginData.user, token: loginData.access_token };
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Network error");
+    }
+  },
+);
 
 const authSlice = createSlice({
   name: "auth",
@@ -42,42 +131,41 @@ const authSlice = createSlice({
       state.isLoading = action.payload;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(loginThunk.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.isLoading = false;
+      })
+      .addCase(loginThunk.rejected, (state) => {
+        state.isLoading = false;
+      })
+      // Register thunk
+      .addCase(registerThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(registerThunk.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.isLoading = false;
+      })
+      .addCase(registerThunk.rejected, (state) => {
+        state.isLoading = false;
+      });
+  },
 });
 
 export const { setCredentials, setUser, logout, setLoading } =
   authSlice.actions;
 export default authSlice.reducer;
 
-// Thunks for async operations
-export const loginThunk =
-  (email: string, password: string) => async (dispatch: any) => {
-    try {
-      // Use the API_CONFIG to get the correct base URL
-      const API_URL =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
-
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      // Save to AsyncStorage
-      await AsyncStorage.setItem("@focus_auth_token", data.access_token);
-      await AsyncStorage.setItem("@focus_user_data", JSON.stringify(data.user));
-
-      dispatch(setCredentials({ user: data.user, token: data.access_token }));
-    } catch (error) {
-      throw error;
-    }
-  };
-
+// Other thunks
 export const logoutThunk = () => async (dispatch: any) => {
   await AsyncStorage.removeItem("@focus_auth_token");
   await AsyncStorage.removeItem("@focus_user_data");

@@ -14,7 +14,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useAppSelector } from "../store/hooks";
-import { useTheme } from "../contexts/ThemeContext";
+import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "../api/hooks";
 
@@ -26,7 +26,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const { data: freshUserData, refetch, isRefetching } = useCurrentUser();
-  const { colors } = useTheme();
+  const { colors } = useThemeColors();
   const styles = createStyles(colors);
 
   // Use fresh data from React Query if available, otherwise use Redux state

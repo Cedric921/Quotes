@@ -31,7 +31,10 @@
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
     "loginError": "Login error",
+    "loginSuccess": "Login successful",
     "signupError": "Sign up error",
+    "signupSuccess": "Sign up successful",
+    "welcomeMessage": "Welcome!",
     "errorOccurred": "An error occurred"
   },
   "home": {
