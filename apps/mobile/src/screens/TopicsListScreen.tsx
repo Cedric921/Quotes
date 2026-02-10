@@ -18,7 +18,7 @@ import Toast from "react-native-toast-message";
 import { topicsApi } from "../services/api";
 import { Topic } from "../types";
 import { LoadingSkeleton } from "../components";
-import { useAuth } from "../contexts/AuthContext";
+import { useAppSelector } from "../store/hooks";
 import { useTheme } from "../contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 
@@ -58,7 +58,8 @@ export default function TopicsListScreen({
   navigation,
 }: TopicsListScreenProps) {
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useAuth();
+  const user = useAppSelector((state) => state.auth.user);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const { colors, isDark } = useTheme();
   const styles = createStyles(colors);
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -91,8 +92,8 @@ export default function TopicsListScreen({
   const handleTopicPress = (topic: Topic) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    // Check if topic is premium and user is not authenticated or not premium
-    if (topic.isPremium && !isAuthenticated) {
+    // Check if topic is premium and user doesn't have access
+    if (topic.isPremium && (!isAuthenticated || !user?.isPremium)) {
       Toast.show({
         type: "error",
         text1: t("topics.premiumContent"),
@@ -114,7 +115,7 @@ export default function TopicsListScreen({
   const renderTopicCard = ({ item }: { item: Topic }) => {
     const gradient = getTopicGradient(item.color);
     const iconName = lucideToIonicons(item.icon);
-    const isLocked = item.isPremium && !isAuthenticated;
+    const isLocked = item.isPremium && (!isAuthenticated || !user?.isPremium);
 
     return (
       <TouchableOpacity

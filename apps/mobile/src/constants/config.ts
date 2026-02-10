@@ -5,13 +5,13 @@ import { Platform } from "react-native";
  */
 export const API_CONFIG = {
   // Local IP for physical devices (update this to match your computer's IP)
-  LOCAL_IP: "192.168.1.64",
+  LOCAL_IP: "192.168.1.68",
 
   // API Port
   PORT: 3001,
 
   // Request timeout in milliseconds
-  TIMEOUT: 10000,
+  TIMEOUT: 30000, // Increased to 30 seconds for slower connections
 
   // Get the appropriate API URL based on platform
   getBaseUrl: () => {

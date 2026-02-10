@@ -21,12 +21,16 @@ export interface Quote extends BaseModel {
   text: string;
   author: string;
   topic?: Topic;
+  isLiked?: boolean;
 }
 
 export interface User extends BaseModel {
   email: string;
+  name?: string;
+  avatar?: string;
   isAdmin: boolean;
   isSubscribed: boolean;
   subscriptionEndDate?: string | null;
   isPremium?: boolean;
+  likedQuotesCount?: number;
 }

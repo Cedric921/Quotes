@@ -1,15 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
 import { Quote } from './entities/quote.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class QuotesService {
   constructor(
     @InjectRepository(Quote)
     private readonly quotesRepository: Repository<Quote>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async create(createQuoteDto: CreateQuoteDto) {
@@ -21,31 +24,73 @@ export class QuotesService {
     return this.quotesRepository.save(quote);
   }
 
-  findAll(page?: number, limit?: number, topicId?: string) {
-    const where = topicId ? { topic: { id: topicId } } : {};
+  async findAll(
+    page?: number,
+    limit?: number,
+    topicId?: string,
+    userId?: string,
+  ) {
+    const queryBuilder = this.quotesRepository
+      .createQueryBuilder('quote')
+      .leftJoinAndSelect('quote.topic', 'topic')
+      .orderBy('quote.createdAt', 'DESC');
+
+    if (topicId) {
+      queryBuilder.where('topic.id = :topicId', { topicId });
+    }
 
     if (page && limit) {
       const skip = (page - 1) * limit;
-      return this.quotesRepository.find({
-        where,
-        relations: ['topic'],
-        skip,
-        take: limit,
-        order: { id: 'DESC' },
-      });
+      queryBuilder.skip(skip).take(limit);
     }
-    return this.quotesRepository.find({
-      where,
-      relations: ['topic'],
-      order: { id: 'DESC' },
-    });
+
+    const quotes = await queryBuilder.getMany();
+
+    // If userId is provided, check which quotes are liked by this user
+    if (userId) {
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+        relations: ['likedQuotes'],
+      });
+
+      if (user) {
+        const likedQuoteIds = new Set(
+          user.likedQuotes.map((quote) => quote.id),
+        );
+        return quotes.map((quote) => ({
+          ...quote,
+          isLiked: likedQuoteIds.has(quote.id),
+        }));
+      }
+    }
+
+    return quotes.map((quote) => ({ ...quote, isLiked: false }));
   }
 
-  findOne(id: string) {
-    return this.quotesRepository.findOne({
+  async findOne(id: string, userId?: string) {
+    const quote = await this.quotesRepository.findOne({
       where: { id },
       relations: ['topic'],
     });
+
+    if (!quote) {
+      return null;
+    }
+
+    // If userId is provided, check if this quote is liked by the user
+    if (userId) {
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+        relations: ['likedQuotes'],
+      });
+
+      if (user) {
+        const isLiked = user.likedQuotes.some((q) => q.id === quote.id);
+        return { ...quote, isLiked };
+      }
+    }
+
+    return { ...quote, isLiked: false };
   }
 
   async update(id: string, updateQuoteDto: UpdateQuoteDto) {
@@ -64,5 +109,51 @@ export class QuotesService {
 
   remove(id: string) {
     return this.quotesRepository.softDelete(id);
+  }
+
+  async likeQuote(quoteId: string, userId: string) {
+    const quote = await this.quotesRepository.findOne({
+      where: { id: quoteId },
+    });
+
+    if (!quote) {
+      throw new NotFoundException(`Quote with ID ${quoteId} not found`);
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['likedQuotes'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Check if already liked
+    const alreadyLiked = user.likedQuotes.some((q) => q.id === quoteId);
+
+    if (!alreadyLiked) {
+      user.likedQuotes.push(quote);
+      await this.usersRepository.save(user);
+    }
+
+    return { message: 'Quote liked successfully', isLiked: true };
+  }
+
+  async unlikeQuote(quoteId: string, userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['likedQuotes'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Remove the quote from likedQuotes
+    user.likedQuotes = user.likedQuotes.filter((q) => q.id !== quoteId);
+    await this.usersRepository.save(user);
+
+    return { message: 'Quote unliked successfully', isLiked: false };
   }
 }

@@ -8,13 +8,15 @@ import {
   TextStyle,
   Image,
   ImageStyle,
+  RefreshControl,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { useAuth } from "../contexts/AuthContext";
+import { useAppSelector } from "../store/hooks";
 import { useTheme } from "../contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
+import { useCurrentUser } from "../api/hooks";
 
 interface ProfileScreenProps {
   readonly navigation: any;
@@ -22,9 +24,13 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const user = useAppSelector((state) => state.auth.user);
+  const { data: freshUserData, refetch, isRefetching } = useCurrentUser();
   const { colors } = useTheme();
   const styles = createStyles(colors);
+
+  // Use fresh data from React Query if available, otherwise use Redux state
+  const displayUser = freshUserData || user;
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -43,12 +49,24 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       </View>
 
       {/* Content */}
-      <ScrollView style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
+            tintColor="#0A84FF"
+          />
+        }
+      >
         {/* Profile Info */}
         <View style={styles.profileSection}>
           {/* Avatar with gradient background */}
-          {user?.avatar ? (
-            <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+          {displayUser?.avatar ? (
+            <Image
+              source={{ uri: displayUser.avatar }}
+              style={styles.avatarImage}
+            />
           ) : (
             <LinearGradient
               colors={["#667eea", "#764ba2"]}
@@ -57,21 +75,23 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               style={styles.avatar}
             >
               <Text style={styles.avatarText}>
-                {user?.name?.charAt(0).toUpperCase() || "U"}
+                {displayUser?.name?.charAt(0).toUpperCase() || "U"}
               </Text>
             </LinearGradient>
           )}
 
           <View style={styles.nameContainer}>
-            <Text style={styles.name}>{user?.name || "User"}</Text>
-            {user?.isPremium && (
+            <Text style={styles.name}>{displayUser?.name || "User"}</Text>
+            {displayUser?.isPremium && (
               <Ionicons name="diamond" size={20} color="#FFD700" />
             )}
           </View>
 
-          <Text style={styles.email}>{user?.email || "user@example.com"}</Text>
+          <Text style={styles.email}>
+            {displayUser?.email || "user@example.com"}
+          </Text>
 
-          {user?.isPremium && (
+          {displayUser?.isPremium && (
             <View style={styles.premiumBadge}>
               <Ionicons name="diamond" size={14} color="#FFD700" />
               <Text style={styles.premiumText}>{t("profile.premium")}</Text>
@@ -83,7 +103,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <MaterialIcons name="favorite" size={24} color="#ff4444" />
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statNumber}>
+              {displayUser?.likedQuotesCount || 0}
+            </Text>
             <Text style={styles.statLabel}>{t("profile.likedQuotes")}</Text>
           </View>
 
