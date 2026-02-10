@@ -11,15 +11,18 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Quote, Topic } from "../types";
-import { quotesApi, topicsApi } from "../services/api";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Quote } from "../types";
 import * as Haptics from "expo-haptics";
 import { LoadingSkeleton, QuoteCard, DotsIndicator } from "../components";
 import { BlurView } from "expo-blur";
 import { useTheme } from "../contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../contexts/AuthContext";
+import { useQuotesByTopic, useToggleLikeQuote } from "../api/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { topicsApi } from "../services/api";
+import { useAppSelector } from "../store/hooks";
+import Toast from "react-native-toast-message";
 
 const { height } = Dimensions.get("window");
 
@@ -37,52 +40,62 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const { t } = useTranslation();
   const { topicId, topicName } = route.params;
   const { colors, isDark } = useTheme();
-  const { refreshUser } = useAuth();
   const styles = createStyles(colors);
-  const [topic, setTopic] = useState<Topic | null>(null);
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Get user from Redux
+  const user = useAppSelector((state) => state.auth.user);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,
   }).current;
 
+  // React Query hooks
+  const {
+    data: topic,
+    isLoading: topicLoading,
+    error: topicError,
+  } = useQuery({
+    queryKey: ["topic", topicId],
+    queryFn: () => topicsApi.getTopicById(topicId),
+  });
+
+  const {
+    data: quotes = [],
+    isLoading: quotesLoading,
+    isRefetching,
+    error: quotesError,
+    refetch,
+  } = useQuotesByTopic(topicId);
+
+  const toggleLikeMutation = useToggleLikeQuote();
+
+  const isLoading = topicLoading || quotesLoading;
+  const error = topicError || quotesError;
+
+  // Check if topic is premium and user doesn't have access
   useEffect(() => {
-    fetchTopicData();
-  }, [topicId]);
-
-  const fetchTopicData = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      // Fetch topic details and quotes in parallel
-      const [topicData, quotesData] = await Promise.all([
-        topicsApi.getTopicById(topicId),
-        quotesApi.getQuotesByTopic(topicId),
-      ]);
-
-      setTopic(topicData);
-      setQuotes(quotesData);
-    } catch (err) {
-      setError(t("errors.failedToLoadTopic"));
-      console.error("Error fetching topic data:", err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+    if (topic && topic.isPremium && (!isAuthenticated || !user?.isPremium)) {
+      Toast.show({
+        type: "error",
+        text1: t("topics.premiumContent"),
+        text2: isAuthenticated
+          ? t("topics.subscribeToAccess")
+          : t("topics.loginToAccess"),
+        position: "top",
+        visibilityTime: 3000,
+      });
+      // Navigate back after showing the toast
+      setTimeout(() => {
+        navigation.goBack();
+      }, 500);
     }
-  };
+  }, [topic, isAuthenticated, user, navigation, t]);
 
   const handleRefresh = useCallback(() => {
-    fetchTopicData(true);
-  }, [topicId]);
+    refetch();
+  }, [refetch]);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -90,29 +103,18 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   };
 
   const handleLike = useCallback(
-    async (quoteId: string) => {
+    (quoteId: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       const quote = quotes.find((q) => q.id === quoteId);
       if (!quote) return;
 
-      const isCurrentlyLiked = quote.isLiked;
-
-      try {
-        if (isCurrentlyLiked) {
-          await quotesApi.unlikeQuote(quoteId);
-        } else {
-          await quotesApi.likeQuote(quoteId);
-        }
-        // Refresh to get updated state from server
-        fetchQuotes();
-        // Refresh user data to update liked quotes count
-        refreshUser();
-      } catch (error) {
-        console.error("Error toggling like:", error);
-      }
+      toggleLikeMutation.mutate({
+        quoteId,
+        isLiked: quote.isLiked || false,
+      });
     },
-    [quotes, fetchQuotes, refreshUser],
+    [quotes, toggleLikeMutation],
   );
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
@@ -130,7 +132,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
     />
   );
 
-  if (loading) {
+  if (isLoading && quotes.length === 0 && !error) {
     return <LoadingSkeleton />;
   }
 
@@ -146,10 +148,10 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
         </View>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#ff4444" />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>{error?.message}</Text>
           <TouchableOpacity
             style={styles.retryButton}
-            onPress={() => fetchTopicData()}
+            onPress={() => refetch()}
           >
             <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
           </TouchableOpacity>
@@ -201,7 +203,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
             viewabilityConfig={viewabilityConfig}
             refreshControl={
               <RefreshControl
-                refreshing={refreshing}
+                refreshing={isRefetching}
                 onRefresh={handleRefresh}
                 tintColor="#fff"
               />

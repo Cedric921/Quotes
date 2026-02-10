@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import {
   View,
   FlatList,
@@ -17,12 +17,11 @@ import {
   DotsIndicator,
   ActionButtons,
 } from "../components";
-import { useQuotes } from "../hooks";
+import { useQuotes, useToggleLikeQuote } from "../api/hooks";
 import { Quote } from "../types";
-import { quotesApi } from "../services/api";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
-import { useAuth } from "../contexts/AuthContext";
+import { useAppSelector } from "../store/hooks";
 import { useTheme } from "../contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 
@@ -39,62 +38,56 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { t } = useTranslation();
-  const { user, isAuthenticated, refreshUser } = useAuth();
+  const user = useAppSelector((state) => state.auth.user);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // React Query hooks
   const {
-    quotes,
-    loading,
-    refreshing,
+    data,
+    isLoading,
+    isRefetching,
     error,
-    loadMore,
-    refresh,
-    likeQuote,
-    fetchQuotes,
-  } = useQuotes({ pageSize: 10 });
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = useQuotes(10);
 
-  useEffect(() => {
-    fetchQuotes(1, true);
-  }, []);
+  const toggleLikeMutation = useToggleLikeQuote();
+
+  // Flatten pages into a single array of quotes
+  const quotes = useMemo(() => {
+    return data?.pages.flat() || [];
+  }, [data]);
 
   // Filter out quotes from premium topics if user is not authenticated or not premium
-  const filteredQuotes = quotes.filter((quote) => {
-    // If topic is not premium, show it
-    if (!quote.topic?.isPremium) return true;
+  const filteredQuotes = useMemo(() => {
+    return quotes.filter((quote) => {
+      // If topic is not premium, show it
+      if (!quote.topic?.isPremium) return true;
 
-    // If topic is premium, only show if user is authenticated AND premium
-    return isAuthenticated && user?.isPremium;
-  });
+      // If topic is premium, only show if user is authenticated AND premium
+      return isAuthenticated && user?.isPremium;
+    });
+  }, [quotes, isAuthenticated, user]);
 
   const handleRetry = useCallback(() => {
-    fetchQuotes(1, true);
-  }, [fetchQuotes]);
+    refetch();
+  }, [refetch]);
 
   const handleLike = useCallback(
-    async (quoteId: string) => {
-      // Optimistically update the quote in the list
+    (quoteId: string) => {
       const quote = quotes.find((q) => q.id === quoteId);
       if (!quote) return;
 
-      const isCurrentlyLiked = quote.isLiked;
-
-      try {
-        if (isCurrentlyLiked) {
-          await quotesApi.unlikeQuote(quoteId);
-        } else {
-          await quotesApi.likeQuote(quoteId);
-        }
-        // Refresh to get updated state from server
-        refresh();
-        // Refresh user data to update liked quotes count
-        refreshUser();
-      } catch (error) {
-        console.error("Error toggling like:", error);
-      }
+      toggleLikeMutation.mutate({
+        quoteId,
+        isLiked: quote.isLiked || false,
+      });
     },
-    [quotes, refresh, refreshUser],
+    [quotes, toggleLikeMutation],
   );
 
   const handleShare = useCallback(async (text: string, author: string) => {
@@ -136,17 +129,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     [handleLike],
   );
 
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isLoading && !isRefetching) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isLoading, isRefetching, fetchNextPage]);
+
   const renderFooter = useCallback(() => {
-    if (!loading) return null;
+    if (!isLoading && !isRefetching) return null;
     return (
       <View style={styles.footer}>
         <ActivityIndicator size="large" color="#0A84FF" />
       </View>
     );
-  }, [loading]);
+  }, [isLoading, isRefetching, styles.footer]);
 
   // Show loading skeleton on initial load
-  if (loading && filteredQuotes.length === 0 && !error) {
+  if (isLoading && filteredQuotes.length === 0 && !error) {
     return <LoadingSkeleton />;
   }
 
@@ -172,14 +171,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         keyExtractor={(item) => item.id.toString()}
         pagingEnabled
         showsVerticalScrollIndicator={false}
-        onEndReached={loadMore}
+        onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         onViewableItemsChanged={handleViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
             tintColor="#0A84FF"
           />
         }
