@@ -19,6 +19,7 @@ import {
 } from "../components";
 import { useQuotes } from "../hooks";
 import { Quote } from "../types";
+import { quotesApi } from "../services/api";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAuth } from "../contexts/AuthContext";
@@ -38,11 +39,10 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [likedQuotes, setLikedQuotes] = useState<Set<string>>(new Set());
 
   const {
     quotes,
@@ -73,19 +73,28 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, [fetchQuotes]);
 
   const handleLike = useCallback(
-    (quoteId: number) => {
-      setLikedQuotes((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(quoteId)) {
-          newSet.delete(quoteId);
+    async (quoteId: string) => {
+      // Optimistically update the quote in the list
+      const quote = quotes.find((q) => q.id === quoteId);
+      if (!quote) return;
+
+      const isCurrentlyLiked = quote.isLiked;
+
+      try {
+        if (isCurrentlyLiked) {
+          await quotesApi.unlikeQuote(quoteId);
         } else {
-          newSet.add(quoteId);
+          await quotesApi.likeQuote(quoteId);
         }
-        return newSet;
-      });
-      likeQuote(quoteId);
+        // Refresh to get updated state from server
+        refresh();
+        // Refresh user data to update liked quotes count
+        refreshUser();
+      } catch (error) {
+        console.error("Error toggling like:", error);
+      }
     },
-    [likeQuote],
+    [quotes, refresh, refreshUser],
   );
 
   const handleShare = useCallback(async (text: string, author: string) => {
@@ -122,13 +131,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const renderItem = useCallback(
     ({ item }: { item: Quote }) => (
-      <QuoteCard
-        quote={item}
-        onLike={handleLike}
-        isLiked={likedQuotes.has(item.id)}
-      />
+      <QuoteCard quote={item} onLike={handleLike} isLiked={item.isLiked} />
     ),
-    [handleLike, likedQuotes],
+    [handleLike],
   );
 
   const renderFooter = useCallback(() => {
@@ -200,7 +205,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           quoteId={filteredQuotes[currentIndex].id}
           quoteText={filteredQuotes[currentIndex].text}
           author={filteredQuotes[currentIndex].author}
-          isLiked={likedQuotes.has(filteredQuotes[currentIndex].id)}
+          isLiked={filteredQuotes[currentIndex].isLiked}
           isAuthenticated={isAuthenticated}
           onLike={handleLike}
           onShare={handleShare}

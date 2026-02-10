@@ -35,12 +35,36 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  findOne(id: string) {
-    return this.usersRepository.findOneBy({ id });
+  async findOne(id: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['likedQuotes'],
+    });
+
+    if (!user) return null;
+
+    // Return user with likedQuotesCount
+    const { likedQuotes, password, ...userWithoutPassword } = user as any;
+    return {
+      ...userWithoutPassword,
+      likedQuotesCount: likedQuotes?.length || 0,
+    };
   }
 
-  findOneByEmail(email: string) {
-    return this.usersRepository.findOneBy({ email });
+  async findOneByEmail(email: string) {
+    const user = await this.usersRepository.findOne({
+      where: { email },
+      relations: ['likedQuotes'],
+    });
+
+    if (!user) return null;
+
+    // Return user with likedQuotesCount
+    const { likedQuotes, ...userWithoutLikedQuotes } = user as any;
+    return {
+      ...userWithoutLikedQuotes,
+      likedQuotesCount: likedQuotes?.length || 0,
+    };
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

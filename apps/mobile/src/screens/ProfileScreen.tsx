@@ -83,7 +83,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <MaterialIcons name="favorite" size={24} color="#ff4444" />
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statNumber}>{user?.likedQuotesCount || 0}</Text>
             <Text style={styles.statLabel}>{t("profile.likedQuotes")}</Text>
           </View>
 

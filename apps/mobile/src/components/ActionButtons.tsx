@@ -13,12 +13,12 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 interface ActionButtonsProps {
-  readonly quoteId: number;
+  readonly quoteId: string;
   readonly quoteText: string;
   readonly author: string;
   readonly isLiked?: boolean;
   readonly isAuthenticated?: boolean;
-  readonly onLike: (quoteId: number) => void;
+  readonly onLike: (quoteId: string) => void;
   readonly onShare: (text: string, author: string) => void;
   readonly onSettings: () => void;
   readonly onTopics: () => void;

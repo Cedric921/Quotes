@@ -47,11 +47,12 @@ import { RootStackParamList } from "../navigation/AppNavigator";
 const { height } = Dimensions.get("window");
 
 interface Quote {
-  id: number;
+  id: string;
   text: string;
   author: string;
+  isLiked?: boolean;
   topic?: {
-    id: number;
+    id: string;
     name: string;
     color?: string;
   };
@@ -59,7 +60,7 @@ interface Quote {
 
 interface QuoteCardProps {
   readonly quote: Quote;
-  readonly onLike: (quoteId: number) => void;
+  readonly onLike: (quoteId: string) => void;
   readonly isLiked?: boolean;
   readonly showTopicName?: boolean;
 }

@@ -55,6 +55,23 @@ apiClient.interceptors.response.use(
   },
 );
 
+/**
+ * Helper function to get userId from stored JWT token
+ */
+const getUserIdFromToken = async (): Promise<string | null> => {
+  try {
+    const token = await AsyncStorage.getItem("@focus_auth_token");
+    if (!token) return null;
+
+    // Decode JWT payload (simple decode, not verification)
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.sub || payload.userId || null;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
+
 export const quotesApi = {
   /**
    * Get paginated quotes
@@ -67,8 +84,14 @@ export const quotesApi = {
     limit: number = 10,
     topicId?: string,
   ): Promise<Quote[]> => {
+    const userId = await getUserIdFromToken();
     const response = await apiClient.get<Quote[]>("/quotes", {
-      params: { page, limit, ...(topicId && { topicId }) },
+      params: {
+        page,
+        limit,
+        ...(topicId && { topicId }),
+        ...(userId && { userId }),
+      },
     });
     return response.data;
   },
@@ -78,8 +101,9 @@ export const quotesApi = {
    * @param topicId - Topic ID
    */
   getQuotesByTopic: async (topicId: string): Promise<Quote[]> => {
+    const userId = await getUserIdFromToken();
     const response = await apiClient.get<Quote[]>("/quotes", {
-      params: { topicId },
+      params: { topicId, ...(userId && { userId }) },
     });
     return response.data;
   },
@@ -89,7 +113,10 @@ export const quotesApi = {
    * @param quoteId - Quote ID
    */
   getQuoteById: async (quoteId: string): Promise<Quote> => {
-    const response = await apiClient.get<Quote>(`/quotes/${quoteId}`);
+    const userId = await getUserIdFromToken();
+    const response = await apiClient.get<Quote>(`/quotes/${quoteId}`, {
+      params: { ...(userId && { userId }) },
+    });
     return response.data;
   },
 

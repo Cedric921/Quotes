@@ -19,6 +19,7 @@ import { LoadingSkeleton, QuoteCard, DotsIndicator } from "../components";
 import { BlurView } from "expo-blur";
 import { useTheme } from "../contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../contexts/AuthContext";
 
 const { height } = Dimensions.get("window");
 
@@ -36,13 +37,13 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const { t } = useTranslation();
   const { topicId, topicName } = route.params;
   const { colors, isDark } = useTheme();
+  const { refreshUser } = useAuth();
   const styles = createStyles(colors);
   const [topic, setTopic] = useState<Topic | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [likedQuotes, setLikedQuotes] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const viewabilityConfig = useRef({
@@ -88,18 +89,31 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
     navigation.goBack();
   };
 
-  const handleLike = useCallback((quoteId: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setLikedQuotes((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(quoteId)) {
-        newSet.delete(quoteId);
-      } else {
-        newSet.add(quoteId);
+  const handleLike = useCallback(
+    async (quoteId: string) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      const quote = quotes.find((q) => q.id === quoteId);
+      if (!quote) return;
+
+      const isCurrentlyLiked = quote.isLiked;
+
+      try {
+        if (isCurrentlyLiked) {
+          await quotesApi.unlikeQuote(quoteId);
+        } else {
+          await quotesApi.likeQuote(quoteId);
+        }
+        // Refresh to get updated state from server
+        fetchQuotes();
+        // Refresh user data to update liked quotes count
+        refreshUser();
+      } catch (error) {
+        console.error("Error toggling like:", error);
       }
-      return newSet;
-    });
-  }, []);
+    },
+    [quotes, fetchQuotes, refreshUser],
+  );
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -111,7 +125,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
     <QuoteCard
       quote={item}
       onLike={handleLike}
-      isLiked={likedQuotes.has(item.id)}
+      isLiked={item.isLiked}
       showTopicName={false}
     />
   );
