@@ -31,6 +31,7 @@
     "passwordMismatch": "Las contraseñas no coinciden",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
     "loginError": "Error de inicio de sesión",
+    "loginSuccess": "Inicio de sesión exitoso",
     "signupError": "Error de registro",
     "errorOccurred": "Ocurrió un error"
   },

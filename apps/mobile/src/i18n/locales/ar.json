@@ -31,6 +31,7 @@
     "passwordMismatch": "كلمات المرور غير متطابقة",
     "passwordTooShort": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
     "loginError": "خطأ في تسجيل الدخول",
+    "loginSuccess": "تم تسجيل الدخول بنجاح",
     "signupError": "خطأ في إنشاء الحساب",
     "errorOccurred": "حدث خطأ"
   },

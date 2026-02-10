@@ -15,7 +15,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
-import { useAuth } from "../contexts/AuthContext";
+import { useAppDispatch } from "../store/hooks";
+import { loginThunk } from "../store/slices/authSlice";
 import { useTranslation } from "react-i18next";
 
 interface LoginScreenProps {
@@ -24,7 +25,7 @@ interface LoginScreenProps {
 
 export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { t } = useTranslation();
-  const { login } = useAuth();
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -46,8 +47,17 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      // Navigation will be handled automatically by auth state change
+      await dispatch(loginThunk({ email, password })).unwrap();
+
+      Toast.show({
+        type: "success",
+        text1: t("auth.loginSuccess"),
+        text2: t("auth.welcomeBack"),
+        position: "top",
+        visibilityTime: 2000,
+      });
+
+      // Navigate to Home after successful login
       navigation.navigate("Home");
     } catch (error: any) {
       Toast.show({
