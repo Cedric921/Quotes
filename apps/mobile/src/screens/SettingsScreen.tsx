@@ -78,6 +78,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     Alert.alert("Subscription", "Subscription screen coming soon!");
   };
 
+  const handleNotifications = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("Notifications");
+  };
+
   const handleLanguagePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setShowLanguageModal(true);
@@ -199,12 +204,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               <Text style={styles.userEmail}>
                 {user?.email || "user@example.com"}
               </Text>
-              {user?.isPremium && (
-                <View style={styles.premiumBadge}>
-                  <Ionicons name="diamond" size={14} color="#FFD700" />
-                  <Text style={styles.premiumText}>Premium</Text>
-                </View>
-              )}
+              <View style={styles.badgesContainer}>
+                {user?.isAdmin && (
+                  <View style={styles.adminBadge}>
+                    <Ionicons
+                      name="shield-checkmark"
+                      size={14}
+                      color="#FF6B35"
+                    />
+                    <Text style={styles.adminText}>Admin</Text>
+                  </View>
+                )}
+                {user?.isPremium && (
+                  <View style={styles.premiumBadge}>
+                    <Ionicons name="diamond" size={14} color="#FFD700" />
+                    <Text style={styles.premiumText}>Premium</Text>
+                  </View>
+                )}
+              </View>
             </View>
           </LinearGradient>
         </View>
@@ -264,6 +281,23 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               <Text style={styles.menuItemValue}>{getThemeLabel()}</Text>
               <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
             </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleNotifications}
+          >
+            <View style={styles.menuItemLeft}>
+              <Ionicons
+                name="notifications-outline"
+                size={24}
+                color="#0A84FF"
+              />
+              <Text style={styles.menuItemText}>
+                {t("settings.notifications")}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem} onPress={handleStorage}>
@@ -584,6 +618,30 @@ const createStyles = (colors: any) =>
       color: "#fff",
       opacity: 0.8,
     } as TextStyle,
+    badgesContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 8,
+      marginTop: 4,
+    } as ViewStyle,
+    adminBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+      backgroundColor: "rgba(0, 0, 0, 0.3)",
+      borderWidth: 1,
+      borderColor: "rgba(255, 107, 53, 0.5)",
+      alignSelf: "flex-start",
+    } as ViewStyle,
+    adminText: {
+      fontSize: 11,
+      fontWeight: "600" as const,
+      color: "#FF6B35",
+      letterSpacing: 0.5,
+    } as TextStyle,
     premiumBadge: {
       flexDirection: "row",
       alignItems: "center",
@@ -595,7 +653,6 @@ const createStyles = (colors: any) =>
       borderWidth: 1,
       borderColor: "rgba(255, 215, 0, 0.5)",
       alignSelf: "flex-start",
-      marginTop: 4,
     } as ViewStyle,
     premiumText: {
       fontSize: 11,

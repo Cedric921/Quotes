@@ -12,12 +12,21 @@ import {
   Request,
   ForbiddenException,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { TrackActivityDto } from './dto/track-activity.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    userId: string;
+    email: string;
+    isAdmin: boolean;
+  };
+}
 
 @Controller('users')
 export class UsersController {
@@ -52,14 +61,14 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me/notification-settings')
-  getNotificationSettings(@Request() req) {
+  getNotificationSettings(@Request() req: AuthenticatedRequest) {
     return this.usersService.getNotificationSettings(req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('me/notification-settings')
   updateNotificationSettings(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Body() updateDto: UpdateNotificationSettingsDto,
   ) {
     return this.usersService.updateNotificationSettings(
@@ -70,7 +79,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Post('me/notification-settings/reset')
-  resetNotificationSettings(@Request() req) {
+  resetNotificationSettings(@Request() req: AuthenticatedRequest) {
     return this.usersService.resetNotificationSettings(req.user.userId);
   }
 
@@ -78,14 +87,17 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Post('me/activity')
-  trackActivity(@Request() req, @Body() trackDto: TrackActivityDto) {
+  trackActivity(
+    @Request() req: AuthenticatedRequest,
+    @Body() trackDto: TrackActivityDto,
+  ) {
     return this.usersService.trackActivity(req.user.userId, trackDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me/activity')
   getUserActivity(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
@@ -99,7 +111,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('me/activity/stats')
   getActivityStats(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('year') year: string,
     @Query('month') month: string,
   ) {
@@ -123,7 +135,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get(':userId/notification-settings')
   async getNotificationSettingsAdmin(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('userId') userId: string,
   ) {
     // Only admins can access other users' notification settings
@@ -138,7 +150,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Put(':userId/notification-settings')
   async updateNotificationSettingsAdmin(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('userId') userId: string,
     @Body() updateDto: UpdateNotificationSettingsDto,
   ) {
@@ -154,7 +166,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Post(':userId/notification-settings/reset')
   async resetNotificationSettingsAdmin(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('userId') userId: string,
   ) {
     // Only admins can reset other users' notification settings

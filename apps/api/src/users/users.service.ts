@@ -121,20 +121,20 @@ export class UsersService {
     });
 
     // Convert notifications array to JSON string if provided
-    const updateData: any = { ...updateDto };
+    const updateData: Record<string, unknown> = { ...updateDto };
     if (updateDto.notifications) {
       updateData.notifications = JSON.stringify(updateDto.notifications);
     }
 
     if (!settings) {
-      settings = this.notificationSettingsRepository.create({
+      const newSettings = this.notificationSettingsRepository.create({
         userId,
         ...updateData,
       });
-    } else {
-      Object.assign(settings, updateData);
+      return this.notificationSettingsRepository.save(newSettings);
     }
 
+    Object.assign(settings, updateData);
     return this.notificationSettingsRepository.save(settings);
   }
 
