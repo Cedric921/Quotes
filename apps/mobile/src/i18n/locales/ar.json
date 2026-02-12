@@ -158,6 +158,8 @@
     "notificationsInfo": "ستتلقى ما يصل إلى 5 إشعارات يوميًا في الأوقات والأيام التي تختارها لاكتشاف اقتباسات ملهمة جديدة.",
     "selectAtLeastOneDay": "حدد يومًا واحدًا على الأقل",
     "minNotificationsRequired": "مطلوب إشعار واحد على الأقل",
-    "notification": "إشعار {{number}}"
+    "notification": "إشعار {{number}}",
+    "testNotificationSent": "تم إرسال إشعار تجريبي",
+    "checkYourDevice": "تحقق من جهازك للإشعار"
   }
 }

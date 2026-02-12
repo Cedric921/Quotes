@@ -22,10 +22,16 @@ import {
   useResetNotificationSettings,
 } from "../api/hooks/useNotificationSettings";
 import {
+  useRegisterPushToken,
+  useUnregisterAllPushTokens,
+  useSendTestNotification,
+} from "../api/hooks/usePushToken";
+import {
   requestNotificationPermissions,
   scheduleDailyNotifications,
   cancelAllNotifications,
   sendTestNotification,
+  getExpoPushToken,
 } from "../services/notificationService";
 
 interface NotificationsScreenProps {
@@ -45,6 +51,9 @@ export const NotificationsScreen = ({
   const { data: settings, isLoading } = useNotificationSettings();
   const updateSettings = useUpdateNotificationSettings();
   const resetSettings = useResetNotificationSettings();
+  const registerPushToken = useRegisterPushToken();
+  const unregisterAllPushTokens = useUnregisterAllPushTokens();
+  const sendServerTestNotification = useSendTestNotification();
 
   interface NotificationTime {
     id: string;
@@ -145,6 +154,27 @@ export const NotificationsScreen = ({
         });
         return;
       }
+
+      // Get and register push token with the server
+      try {
+        const pushToken = await getExpoPushToken();
+        if (pushToken) {
+          await registerPushToken.mutateAsync(pushToken);
+          console.log("Push token registered with server:", pushToken);
+        } else {
+          console.warn("Could not get push token");
+        }
+      } catch (error) {
+        console.error("Error registering push token:", error);
+      }
+    } else {
+      // Unregister push tokens when disabling notifications
+      try {
+        await unregisterAllPushTokens.mutateAsync();
+        console.log("Push tokens unregistered from server");
+      } catch (error) {
+        console.error("Error unregistering push tokens:", error);
+      }
     }
 
     setEnabled(value);
@@ -161,6 +191,8 @@ export const NotificationsScreen = ({
     });
 
     if (value) {
+      // Local notifications are now optional - server will send push notifications
+      // But we keep them as backup for when the app is offline
       await scheduleDailyNotifications(notificationsConfig);
       Toast.show({
         type: "success",
@@ -398,7 +430,12 @@ export const NotificationsScreen = ({
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Enable/Disable Toggle */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: colors.backgroundSecondary },
+          ]}
+        >
           <View style={styles.row}>
             <View style={styles.labelContainer}>
               <Ionicons name="notifications" size={24} color={colors.primary} />
@@ -421,7 +458,10 @@ export const NotificationsScreen = ({
             {notificationTimes.map((notification, index) => (
               <View
                 key={notification.id}
-                style={[styles.section, { backgroundColor: colors.card }]}
+                style={[
+                  styles.section,
+                  { backgroundColor: colors.backgroundSecondary },
+                ]}
               >
                 <TouchableOpacity
                   style={styles.cardHeader}
@@ -584,7 +624,34 @@ export const NotificationsScreen = ({
           <View style={styles.actions}>
             <TouchableOpacity
               style={[styles.button, { backgroundColor: colors.primary }]}
-              onPress={sendTestNotification}
+              onPress={async () => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                try {
+                  // Try server notification first
+                  const result = await sendServerTestNotification.mutateAsync();
+                  if (result.sent > 0) {
+                    Toast.show({
+                      type: "success",
+                      text1: t("notifications.testNotificationSent"),
+                      text2: t("notifications.checkYourDevice"),
+                    });
+                  } else {
+                    // Fallback to local notification
+                    await sendTestNotification();
+                    Toast.show({
+                      type: "success",
+                      text1: t("notifications.testNotificationSent"),
+                    });
+                  }
+                } catch {
+                  // Fallback to local notification
+                  await sendTestNotification();
+                  Toast.show({
+                    type: "success",
+                    text1: t("notifications.testNotificationSent"),
+                  });
+                }
+              }}
             >
               <Ionicons name="send" size={20} color="#fff" />
               <Text style={styles.buttonText}>

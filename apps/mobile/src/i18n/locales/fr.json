@@ -158,6 +158,8 @@
     "notificationsInfo": "Recevez jusqu'à 5 notifications par jour aux heures et jours que vous choisissez pour découvrir de nouvelles citations inspirantes.",
     "selectAtLeastOneDay": "Sélectionnez au moins un jour",
     "minNotificationsRequired": "Au moins une notification est requise",
-    "notification": "Notification {{number}}"
+    "notification": "Notification {{number}}",
+    "testNotificationSent": "Notification test envoyée",
+    "checkYourDevice": "Vérifiez votre appareil pour la notification"
   }
 }

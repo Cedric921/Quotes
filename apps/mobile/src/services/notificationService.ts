@@ -123,3 +123,47 @@ export const setupNotificationChannel = async (): Promise<void> => {
     });
   }
 };
+
+/**
+ * Get the Expo Push Token for this device
+ * This token is used by the server to send push notifications
+ */
+export const getExpoPushToken = async (): Promise<string | null> => {
+  try {
+    // Check if we have permission
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Notification permissions not granted");
+      return null;
+    }
+
+    // Get the token
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: "your-project-id", // This will be replaced by EAS project ID in production
+    });
+
+    console.log("Expo Push Token:", tokenData.data);
+    return tokenData.data;
+  } catch (error) {
+    console.error("Error getting Expo push token:", error);
+    return null;
+  }
+};
+
+/**
+ * Add a listener for received notifications (when app is in foreground)
+ */
+export const addNotificationReceivedListener = (
+  callback: (notification: Notifications.Notification) => void,
+) => {
+  return Notifications.addNotificationReceivedListener(callback);
+};
+
+/**
+ * Add a listener for notification responses (when user taps on notification)
+ */
+export const addNotificationResponseReceivedListener = (
+  callback: (response: Notifications.NotificationResponse) => void,
+) => {
+  return Notifications.addNotificationResponseReceivedListener(callback);
+};
