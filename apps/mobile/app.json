@@ -25,6 +25,13 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-localization"],
+    "extra": {
+      "API_URL": "http://192.168.1.66:3001",
+      "API_TIMEOUT": "30000",
+      "QUOTES_PER_PAGE": "10",
+      "PAGINATION_THRESHOLD": "0.5"
     }
   }
 }

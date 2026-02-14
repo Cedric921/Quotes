@@ -1,2 +1,2 @@
-export { useQuotes } from './useQuotes';
-
+export { useQuotes } from "./useQuotes";
+export { useThemeColors } from "./useThemeColors";

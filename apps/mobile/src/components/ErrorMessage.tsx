@@ -1,4 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
+import { useTranslation } from "react-i18next";
 
 interface ErrorMessageProps {
   readonly message: string;
@@ -6,13 +14,15 @@ interface ErrorMessageProps {
 }
 
 export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <Text style={styles.errorText}>⚠️</Text>
       <Text style={styles.message}>{message}</Text>
       {onRetry && (
         <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-          <Text style={styles.retryText}>Réessayer</Text>
+          <Text style={styles.retryText}>{t("common.retry")}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -22,31 +32,30 @@ export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#000',
-  },
+    backgroundColor: "#000",
+  } as ViewStyle,
   errorText: {
     fontSize: 48,
     marginBottom: 16,
-  },
+  } as TextStyle,
   message: {
     fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
+    color: "#fff",
+    textAlign: "center",
     marginBottom: 24,
-  },
+  } as TextStyle,
   retryButton: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
-  },
+  } as ViewStyle,
   retryText: {
-    color: '#000',
+    color: "#000",
     fontSize: 16,
-    fontWeight: '600',
-  },
+    fontWeight: "600" as const,
+  } as TextStyle,
 });
-

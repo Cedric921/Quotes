@@ -1,24 +1,26 @@
-import { Platform } from 'react-native';
+import Constants from "expo-constants";
+
+/**
+ * Get environment variable with fallback
+ */
+const getEnvVar = (key: string, fallback: string | number): string => {
+  const value = Constants.expoConfig?.extra?.[key] || process.env[key];
+  return value === undefined ? String(fallback) : String(value);
+};
 
 /**
  * API Configuration
  */
 export const API_CONFIG = {
-  // Local IP for physical devices (update this to match your computer's IP)
-  LOCAL_IP: '192.168.1.66',
-  
-  // API Port
-  PORT: 3001,
-  
-  // Request timeout in milliseconds
-  TIMEOUT: 10000,
-  
-  // Get the appropriate API URL based on platform
-  getBaseUrl: () => {
-    if (Platform.OS === 'web') {
-      return `http://localhost:${API_CONFIG.PORT}`;
-    }
-    return `http://${API_CONFIG.LOCAL_IP}:${API_CONFIG.PORT}`;
+  // Base URL for API (from environment variable)
+  BASE_URL: getEnvVar("API_URL", "http://192.168.1.66:3001"),
+
+  // Request timeout in milliseconds (from environment variable)
+  TIMEOUT: Number.parseInt(getEnvVar("API_TIMEOUT", "30000"), 10),
+
+  // Get the base URL (for backward compatibility)
+  getBaseUrl: (): string => {
+    return API_CONFIG.BASE_URL;
   },
 };
 
@@ -26,35 +28,11 @@ export const API_CONFIG = {
  * App Configuration
  */
 export const APP_CONFIG = {
-  // Number of quotes to load per page
-  QUOTES_PER_PAGE: 10,
-  
-  // Pagination threshold for infinite scroll
-  PAGINATION_THRESHOLD: 0.5,
-};
+  // Number of quotes to load per page (from environment variable)
+  QUOTES_PER_PAGE: Number.parseInt(getEnvVar("QUOTES_PER_PAGE", "10"), 10),
 
-/**
- * Theme Configuration
- */
-export const THEME = {
-  colors: {
-    background: '#000',
-    text: '#fff',
-    primary: '#fff',
-    secondary: '#666',
-    error: '#ff4444',
-  },
-  spacing: {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-  },
-  borderRadius: {
-    sm: 8,
-    md: 16,
-    lg: 24,
-  },
+  // Pagination threshold for infinite scroll (from environment variable)
+  PAGINATION_THRESHOLD: Number.parseFloat(
+    getEnvVar("PAGINATION_THRESHOLD", "0.5"),
+  ),
 };
-

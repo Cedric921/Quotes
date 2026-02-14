@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { QuotesService } from './quotes.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
@@ -17,25 +29,37 @@ export class QuotesController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('topicId') topicId?: string,
+    @Query('userId') userId?: string,
   ) {
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
-    const topicIdNum = topicId ? parseInt(topicId, 10) : undefined;
-    return this.quotesService.findAll(pageNum, limitNum, topicIdNum);
+    return this.quotesService.findAll(pageNum, limitNum, topicId, userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.quotesService.findOne(+id);
+  findOne(@Param('id') id: string, @Query('userId') userId?: string) {
+    return this.quotesService.findOne(id, userId);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateQuoteDto: UpdateQuoteDto) {
-    return this.quotesService.update(+id, updateQuoteDto);
+    return this.quotesService.update(id, updateQuoteDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.quotesService.remove(+id);
+    return this.quotesService.remove(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/like')
+  likeQuote(@Param('id') id: string, @Request() req: any) {
+    return this.quotesService.likeQuote(id, req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':id/like')
+  unlikeQuote(@Param('id') id: string, @Request() req: any) {
+    return this.quotesService.unlikeQuote(id, req.user.userId);
   }
 }

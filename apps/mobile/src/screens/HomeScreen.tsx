@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback, useState, useMemo } from "react";
 import {
   View,
   FlatList,
@@ -6,56 +6,154 @@ import {
   Dimensions,
   RefreshControl,
   ActivityIndicator,
-} from 'react-native';
-import { QuoteCard, LoadingScreen, ErrorMessage } from '../components';
-import { useQuotes } from '../hooks';
-import { Quote } from '../types';
+  ViewStyle,
+} from "react-native";
+import * as Sharing from "expo-sharing";
+import {
+  QuoteCard,
+  LoadingSkeleton,
+  ErrorMessage,
+  Header,
+  DotsIndicator,
+  ActionButtons,
+} from "../components";
+import { useQuotes, useToggleLikeQuote } from "../api/hooks";
+import { Quote } from "../types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
+import { useAppSelector } from "../store/hooks";
+import { useThemeColors } from "../hooks";
+import { useTranslation } from "react-i18next";
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
-export default function HomeScreen() {
+type HomeScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Home"
+>;
+
+interface HomeScreenProps {
+  readonly navigation: HomeScreenNavigationProp;
+}
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const { t } = useTranslation();
+  const user = useAppSelector((state) => state.auth.user);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { colors } = useThemeColors();
+  const styles = createStyles(colors);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // React Query hooks
   const {
-    quotes,
-    loading,
-    refreshing,
+    data,
+    isLoading,
+    isRefetching,
     error,
-    loadMore,
-    refresh,
-    likeQuote,
-    fetchQuotes,
-  } = useQuotes({ pageSize: 10 });
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = useQuotes(10);
 
-  useEffect(() => {
-    fetchQuotes(1, true);
-  }, []);
+  const toggleLikeMutation = useToggleLikeQuote();
+
+  // Flatten pages into a single array of quotes
+  const quotes = useMemo(() => {
+    return data?.pages.flat() || [];
+  }, [data]);
+
+  // Filter out quotes from premium topics if user is not authenticated or not premium/admin
+  const filteredQuotes = useMemo(() => {
+    return quotes.filter((quote) => {
+      // If topic is not premium, show it
+      if (!quote.topic?.isPremium) return true;
+
+      // If topic is premium, only show if user is authenticated AND (premium OR admin)
+      return isAuthenticated && (user?.isPremium || user?.isAdmin);
+    });
+  }, [quotes, isAuthenticated, user]);
 
   const handleRetry = useCallback(() => {
-    fetchQuotes(1, true);
-  }, [fetchQuotes]);
+    refetch();
+  }, [refetch]);
 
-  const renderItem = useCallback(({ item }: { item: Quote }) => (
-    <QuoteCard quote={item} onLike={likeQuote} />
-  ), [likeQuote]);
+  const handleLike = useCallback(
+    (quoteId: string) => {
+      const quote = quotes.find((q) => q.id === quoteId);
+      if (!quote) return;
+
+      toggleLikeMutation.mutate({
+        quoteId,
+        isLiked: quote.isLiked || false,
+      });
+    },
+    [quotes, toggleLikeMutation],
+  );
+
+  const handleShare = useCallback(async (text: string, author: string) => {
+    const shareText = `"${text}"\n\n— ${author}\n\n📱 Focus App`;
+
+    if (await Sharing.isAvailableAsync()) {
+      // Create a temporary text file to share
+      // For now, we'll just log it (you can implement file creation later)
+      console.log("Share:", shareText);
+    }
+  }, []);
+
+  const handleSettings = useCallback(() => {
+    navigation.navigate("Settings");
+  }, [navigation]);
+
+  const handleTopics = useCallback(() => {
+    navigation.navigate("Topics");
+  }, [navigation]);
+
+  const handleLogin = useCallback(() => {
+    navigation.navigate("Login");
+  }, [navigation]);
+
+  const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setCurrentIndex(viewableItems[0].index || 0);
+    }
+  }, []);
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+  };
+
+  const renderItem = useCallback(
+    ({ item }: { item: Quote }) => (
+      <QuoteCard quote={item} onLike={handleLike} isLiked={item.isLiked} />
+    ),
+    [handleLike],
+  );
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isLoading && !isRefetching) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isLoading, isRefetching, fetchNextPage]);
 
   const renderFooter = useCallback(() => {
-    if (!loading) return null;
+    if (!isLoading && !isRefetching) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color="#0A84FF" />
       </View>
     );
-  }, [loading]);
+  }, [isLoading, isRefetching, styles.footer]);
 
-  // Show loading screen on initial load
-  if (loading && quotes.length === 0 && !error) {
-    return <LoadingScreen />;
+  // Show loading skeleton on initial load
+  if (isLoading && filteredQuotes.length === 0 && !error) {
+    return <LoadingSkeleton />;
   }
 
   // Show error message if there's an error and no quotes
-  if (error && quotes.length === 0) {
+  if (error && filteredQuotes.length === 0) {
     return (
       <ErrorMessage
-        message="Impossible de charger les citations. Vérifiez votre connexion."
+        message={t("errors.failedToLoadQuotes")}
         onRetry={handleRetry}
       />
     );
@@ -63,19 +161,25 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
+      <Header />
+
+      {/* Quotes List */}
       <FlatList
-        data={quotes}
+        data={filteredQuotes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        pagingEnabled={true}
+        pagingEnabled
         showsVerticalScrollIndicator={false}
-        onEndReached={loadMore}
+        onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        onViewableItemsChanged={handleViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            tintColor="#fff"
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
+            tintColor="#0A84FF"
           />
         }
         ListFooterComponent={renderFooter}
@@ -85,19 +189,43 @@ export default function HomeScreen() {
           index,
         })}
       />
+
+      {/* Dots Indicator */}
+      {filteredQuotes.length > 0 && (
+        <DotsIndicator
+          total={filteredQuotes.length}
+          currentIndex={currentIndex}
+        />
+      )}
+
+      {/* Fixed Action Buttons */}
+      {filteredQuotes.length > 0 && filteredQuotes[currentIndex] && (
+        <ActionButtons
+          quoteId={filteredQuotes[currentIndex].id}
+          quoteText={filteredQuotes[currentIndex].text}
+          author={filteredQuotes[currentIndex].author}
+          isLiked={filteredQuotes[currentIndex].isLiked}
+          isAuthenticated={isAuthenticated}
+          onLike={handleLike}
+          onShare={handleShare}
+          onSettings={handleSettings}
+          onTopics={handleTopics}
+          onLogin={handleLogin}
+        />
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  footer: {
-    height: height,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
-
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    } as ViewStyle,
+    footer: {
+      height: height,
+      justifyContent: "center",
+      alignItems: "center",
+    } as ViewStyle,
+  });
