@@ -76,7 +76,11 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
 
   // Check if topic is premium and user doesn't have access
   useEffect(() => {
-    if (topic && topic.isPremium && (!isAuthenticated || !user?.isPremium)) {
+    if (
+      topic &&
+      topic.isPremium &&
+      (!isAuthenticated || (!user?.isPremium && !user?.isAdmin))
+    ) {
       Toast.show({
         type: "error",
         text1: t("topics.premiumContent"),

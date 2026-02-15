@@ -62,14 +62,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     return data?.pages.flat() || [];
   }, [data]);
 
-  // Filter out quotes from premium topics if user is not authenticated or not premium
+  // Filter out quotes from premium topics if user is not authenticated or not premium/admin
   const filteredQuotes = useMemo(() => {
     return quotes.filter((quote) => {
       // If topic is not premium, show it
       if (!quote.topic?.isPremium) return true;
 
-      // If topic is premium, only show if user is authenticated AND premium
-      return isAuthenticated && user?.isPremium;
+      // If topic is premium, only show if user is authenticated AND (premium OR admin)
+      return isAuthenticated && (user?.isPremium || user?.isAdmin);
     });
   }, [quotes, isAuthenticated, user]);
 

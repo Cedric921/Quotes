@@ -10,13 +10,16 @@ import {
   ImageStyle,
   RefreshControl,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useState, useMemo } from "react";
 import { useAppSelector } from "../store/hooks";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "../api/hooks";
+import { useActivityStats } from "../api/hooks/useUserActivity";
 
 interface ProfileScreenProps {
   readonly navigation: any;
@@ -32,13 +35,42 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   // Use fresh data from React Query if available, otherwise use Redux state
   const displayUser = freshUserData || user;
 
+  // Get current month and year for activity stats
+  const currentDate = new Date();
+  const [selectedYear] = useState(currentDate.getFullYear());
+  const [selectedMonth] = useState(currentDate.getMonth() + 1);
+
+  // Fetch activity stats for current month
+  const token = useAppSelector((state) => state.auth.token);
+  const { data: activityStats } = useActivityStats(selectedYear, selectedMonth);
+
+  // Calculate calendar grid
+  const calendarDays = useMemo(() => {
+    if (!activityStats) return [];
+
+    const activeDates = new Set(
+      activityStats.activities.map((a) => a.date.split("T")[0]),
+    );
+    const days = [];
+
+    for (let day = 1; day <= activityStats.totalDays; day++) {
+      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      days.push({
+        day,
+        isActive: activeDates.has(dateStr),
+      });
+    }
+
+    return days;
+  }, [activityStats, selectedYear, selectedMonth]);
+
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -85,18 +117,29 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             {displayUser?.isPremium && (
               <Ionicons name="diamond" size={20} color="#FFD700" />
             )}
+            {displayUser?.isAdmin && (
+              <Ionicons name="shield-checkmark" size={20} color="#FF6B35" />
+            )}
           </View>
 
           <Text style={styles.email}>
             {displayUser?.email || "user@example.com"}
           </Text>
 
-          {displayUser?.isPremium && (
-            <View style={styles.premiumBadge}>
-              <Ionicons name="diamond" size={14} color="#FFD700" />
-              <Text style={styles.premiumText}>{t("profile.premium")}</Text>
-            </View>
-          )}
+          <View style={styles.badgesContainer}>
+            {displayUser?.isAdmin && (
+              <View style={styles.adminBadge}>
+                <Ionicons name="shield-checkmark" size={14} color="#FF6B35" />
+                <Text style={styles.adminText}>{t("profile.admin")}</Text>
+              </View>
+            )}
+            {displayUser?.isPremium && (
+              <View style={styles.premiumBadge}>
+                <Ionicons name="diamond" size={14} color="#FFD700" />
+                <Text style={styles.premiumText}>{t("profile.premium")}</Text>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Stats */}
@@ -121,6 +164,46 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Text style={styles.statLabel}>{t("profile.shared")}</Text>
           </View>
         </View>
+
+        {/* Activity Calendar */}
+        {token && activityStats && (
+          <View style={styles.activitySection}>
+            <View style={styles.activityHeader}>
+              <Ionicons name="calendar" size={24} color={colors.primary} />
+              <Text style={styles.activityTitle}>
+                {t("profile.activityCalendar")}
+              </Text>
+            </View>
+
+            <View style={styles.activityStats}>
+              <Text style={styles.activityStatsText}>
+                {activityStats.activeDays}/{activityStats.totalDays}{" "}
+                {t("profile.daysActive")}
+              </Text>
+            </View>
+
+            <View style={styles.calendar}>
+              {calendarDays.map((dayInfo) => (
+                <View
+                  key={dayInfo.day}
+                  style={[
+                    styles.calendarDay,
+                    dayInfo.isActive && styles.calendarDayActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.calendarDayText,
+                      dayInfo.isActive && styles.calendarDayTextActive,
+                    ]}
+                  >
+                    {dayInfo.day}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Menu Items */}
         <View style={styles.section}>
@@ -155,7 +238,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -170,7 +253,7 @@ const createStyles = (colors: any) =>
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 20,
-      paddingTop: 60,
+      paddingTop: 10,
       paddingBottom: 20,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
@@ -231,6 +314,25 @@ const createStyles = (colors: any) =>
       marginBottom: 12,
       color: colors.textTertiary,
     } as TextStyle,
+    badgesContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 8,
+    } as ViewStyle,
+    adminBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: "rgba(255, 107, 53, 0.1)",
+    } as ViewStyle,
+    adminText: {
+      fontSize: 12,
+      fontWeight: "600" as const,
+      color: "#FF6B35",
+    } as TextStyle,
     premiumBadge: {
       flexDirection: "row",
       alignItems: "center",
@@ -290,5 +392,63 @@ const createStyles = (colors: any) =>
       fontSize: 16,
       fontWeight: "500" as const,
       color: colors.text,
+    } as TextStyle,
+    activitySection: {
+      paddingHorizontal: 20,
+      marginBottom: 24,
+    } as ViewStyle,
+    activityHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 8,
+      marginBottom: 12,
+    } as ViewStyle,
+    activityTitle: {
+      fontSize: 18,
+      fontWeight: "600" as const,
+      color: colors.text,
+    } as TextStyle,
+    activityStats: {
+      backgroundColor: colors.backgroundSecondary,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+    } as ViewStyle,
+    activityStatsText: {
+      fontSize: 14,
+      fontWeight: "600" as const,
+      color: colors.primary,
+      textAlign: "center",
+    } as TextStyle,
+    calendar: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+      backgroundColor: colors.backgroundSecondary,
+      padding: 12,
+      borderRadius: 12,
+    } as ViewStyle,
+    calendarDay: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+    } as ViewStyle,
+    calendarDayActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    } as ViewStyle,
+    calendarDayText: {
+      fontSize: 12,
+      fontWeight: "500" as const,
+      color: colors.textTertiary,
+    } as TextStyle,
+    calendarDayTextActive: {
+      color: "#fff",
+      fontWeight: "700" as const,
     } as TextStyle,
   });

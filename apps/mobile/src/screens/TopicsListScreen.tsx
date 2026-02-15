@@ -78,7 +78,10 @@ export default function TopicsListScreen({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     // Check if topic is premium and user doesn't have access
-    if (topic.isPremium && (!isAuthenticated || !user?.isPremium)) {
+    if (
+      topic.isPremium &&
+      (!isAuthenticated || (!user?.isPremium && !user?.isAdmin))
+    ) {
       Toast.show({
         type: "error",
         text1: t("topics.premiumContent"),
@@ -100,7 +103,9 @@ export default function TopicsListScreen({
   const renderTopicCard = ({ item }: { item: Topic }) => {
     const gradient = getTopicGradient(item.color);
     const iconName = lucideToIonicons(item.icon);
-    const isLocked = item.isPremium && (!isAuthenticated || !user?.isPremium);
+    const isLocked =
+      item.isPremium &&
+      (!isAuthenticated || (!user?.isPremium && !user?.isAdmin));
 
     return (
       <TouchableOpacity

@@ -5,3 +5,4 @@ export { default as TopicScreen } from "./TopicScreen";
 export { default as TopicsListScreen } from "./TopicsListScreen";
 export { default as LoginScreen } from "./LoginScreen";
 export { default as SignupScreen } from "./SignupScreen";
+export { NotificationsScreen } from "./NotificationsScreen";

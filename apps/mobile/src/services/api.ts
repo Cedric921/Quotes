@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Quote, Topic } from "../types";
 import { API_CONFIG } from "../constants/config";
+import { handleTokenExpired } from "./authService";
 
 const apiClient = axios.create({
   baseURL: API_CONFIG.getBaseUrl(),
@@ -38,12 +39,17 @@ apiClient.interceptors.response.use(
     );
     return response;
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     if (error.response) {
       // Server responded with error status
       console.error(
         `[API Error] ${error.response.status} - ${error.response.statusText}`,
       );
+
+      // Handle 401 Unauthorized - Token expired
+      if (error.response.status === 401) {
+        await handleTokenExpired();
+      }
     } else if (error.request) {
       // Request was made but no response received
       console.error("[API Error] No response received from server");
