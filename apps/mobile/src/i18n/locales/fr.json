@@ -119,6 +119,7 @@
     "freeTrial": "Essai gratuit",
     "freeTrialDescription": "Essayez les fonctionnalités premium gratuitement",
     "daysRemaining": "{{days}} jours restants",
+    "days": "jours",
     "monthly": "Mensuel",
     "yearly": "Annuel",
     "perMonth": "/mois",
@@ -133,6 +134,8 @@
     "subscriptionCancelled": "Abonnement annulé",
     "expiresOn": "Expire le {{date}}",
     "renewsOn": "Renouvellement le {{date}}",
+    "trialStarted": "Essai commencé !",
+    "enjoyTrial": "Profitez de votre période d'essai gratuit",
     "features": {
       "title": "Fonctionnalités Premium",
       "unlimitedQuotes": "Citations illimitées",

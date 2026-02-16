@@ -9,43 +9,24 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import { useState, useEffect } from "react";
-import { useAppSelector } from "../store/hooks";
+import * as WebBrowser from "expo-web-browser";
+import { useState } from "react";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { setSelectedPlan } from "../store/slices/subscriptionSlice";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
-import apiClient from "../services/api";
+import {
+  useSubscriptionData,
+  useStartFreeTrial,
+  useCreateCheckout,
+} from "../api/hooks/useSubscriptions";
 
 interface SubscriptionScreenProps {
   readonly navigation: any;
-}
-
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  description?: string;
-  type: "MONTHLY" | "YEARLY";
-  price: number;
-  discountPercentage: number;
-  isActive: boolean;
-}
-
-interface Subscription {
-  id: string;
-  status: "ACTIVE" | "CANCELLED" | "EXPIRED" | "TRIAL" | "PAST_DUE";
-  startDate: string;
-  endDate: string;
-  plan?: SubscriptionPlan;
-}
-
-interface AppConfig {
-  freemiumDurationDays: number;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  yearlyDiscountPercentage: number;
 }
 
 export default function SubscriptionScreen({
@@ -54,49 +35,21 @@ export default function SubscriptionScreen({
   const { t } = useTranslation();
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
+  const dispatch = useAppDispatch();
+
   const token = useAppSelector((state) => state.auth.token);
+  const selectedPlanId = useAppSelector(
+    (state) => state.subscription.selectedPlanId,
+  );
+  const isAuthenticated = !!token;
 
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [config, setConfig] = useState<AppConfig | null>(null);
-  const [currentSubscription, setCurrentSubscription] =
-    useState<Subscription | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  // React Query hooks
+  const { plans, config, currentSubscription, isLoading, refetch } =
+    useSubscriptionData(isAuthenticated);
+  const startTrialMutation = useStartFreeTrial();
+  const checkoutMutation = useCreateCheckout();
+
   const [subscribing, setSubscribing] = useState(false);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [plansRes, configRes] = await Promise.all([
-        apiClient.get<SubscriptionPlan[]>(
-          "/subscriptions/plans?activeOnly=true",
-        ),
-        apiClient.get<AppConfig>("/subscriptions/config"),
-      ]);
-      setPlans(plansRes.data);
-      setConfig(configRes.data);
-
-      // Fetch current subscription if logged in
-      if (token) {
-        try {
-          const subRes = await apiClient.get<Subscription>(
-            "/subscriptions/my-subscription",
-          );
-          setCurrentSubscription(subRes.data);
-        } catch {
-          // No subscription
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch subscription data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -105,11 +58,11 @@ export default function SubscriptionScreen({
 
   const handleSelectPlan = (planId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedPlan(planId);
+    dispatch(setSelectedPlan(planId));
   };
 
   const handleSubscribe = async () => {
-    if (!selectedPlan || !token) {
+    if (!selectedPlanId || !token) {
       if (!token) {
         navigation.navigate("Login");
       }
@@ -120,23 +73,25 @@ export default function SubscriptionScreen({
     setSubscribing(true);
 
     try {
-      const response = await apiClient.post("/subscriptions/checkout", {
-        planId: selectedPlan,
-      });
+      const result = await checkoutMutation.mutateAsync(selectedPlanId);
 
-      // In a real app, this would open Stripe checkout
-      // For now, we'll show a success message
-      Toast.show({
-        type: "success",
-        text1: t("subscription.success"),
-      });
+      // Open Stripe Checkout in browser
+      if (result.url) {
+        const browserResult = await WebBrowser.openBrowserAsync(result.url);
 
-      fetchData(); // Refresh data
+        // Refresh data after returning from browser
+        if (
+          browserResult.type === "cancel" ||
+          browserResult.type === "dismiss"
+        ) {
+          refetch();
+        }
+      }
     } catch (error: any) {
       Toast.show({
         type: "error",
         text1: t("subscription.error"),
-        text2: error.response?.data?.message || t("subscription.tryAgain"),
+        text2: error.message || t("subscription.tryAgain"),
       });
     } finally {
       setSubscribing(false);
@@ -150,23 +105,20 @@ export default function SubscriptionScreen({
     }
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSubscribing(true);
 
     try {
-      await apiClient.post("/subscriptions/start-trial");
+      await startTrialMutation.mutateAsync();
       Toast.show({
         type: "success",
-        text1: t("subscription.success"),
+        text1: t("subscription.trialStarted"),
+        text2: t("subscription.enjoyTrial"),
       });
-      fetchData();
     } catch (error: any) {
       Toast.show({
         type: "error",
         text1: t("subscription.error"),
-        text2: error.response?.data?.message || t("subscription.tryAgain"),
+        text2: error.message || t("subscription.tryAgain"),
       });
-    } finally {
-      setSubscribing(false);
     }
   };
 
@@ -203,8 +155,10 @@ export default function SubscriptionScreen({
 
   const monthlyPlan = plans.find((p) => p.type === "MONTHLY");
   const yearlyPlan = plans.find((p) => p.type === "YEARLY");
+  const isTrialLoading = startTrialMutation.isPending;
+  const isCheckoutLoading = checkoutMutation.isPending || subscribing;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -302,13 +256,13 @@ export default function SubscriptionScreen({
           <TouchableOpacity
             style={[
               styles.planCard,
-              selectedPlan === monthlyPlan.id && styles.planCardSelected,
+              selectedPlanId === monthlyPlan.id && styles.planCardSelected,
             ]}
             onPress={() => handleSelectPlan(monthlyPlan.id)}
           >
             <View style={styles.planHeader}>
               <Text style={styles.planName}>{t("subscription.monthly")}</Text>
-              {selectedPlan === monthlyPlan.id && (
+              {selectedPlanId === monthlyPlan.id && (
                 <Ionicons
                   name="checkmark-circle"
                   size={24}
@@ -332,7 +286,7 @@ export default function SubscriptionScreen({
           <TouchableOpacity
             style={[
               styles.planCard,
-              selectedPlan === yearlyPlan.id && styles.planCardSelected,
+              selectedPlanId === yearlyPlan.id && styles.planCardSelected,
             ]}
             onPress={() => handleSelectPlan(yearlyPlan.id)}
           >
@@ -347,7 +301,7 @@ export default function SubscriptionScreen({
             )}
             <View style={styles.planHeader}>
               <Text style={styles.planName}>{t("subscription.yearly")}</Text>
-              {selectedPlan === yearlyPlan.id && (
+              {selectedPlanId === yearlyPlan.id && (
                 <Ionicons
                   name="checkmark-circle"
                   size={24}
@@ -367,16 +321,24 @@ export default function SubscriptionScreen({
         {/* Free Trial Button */}
         {!currentSubscription && config && (
           <TouchableOpacity
-            style={styles.trialButton}
+            style={[
+              styles.trialButton,
+              isTrialLoading && styles.buttonDisabled,
+            ]}
             onPress={handleStartTrial}
-            disabled={subscribing}
+            disabled={isTrialLoading}
           >
-            <Ionicons name="gift" size={20} color={colors.primary} />
-            <Text style={styles.trialButtonText}>
-              {t("subscription.startTrial")} ({config.freemiumDurationDays}{" "}
-              {t("subscription.daysRemaining", { days: "" }).replace("  ", " ")}
-              )
-            </Text>
+            {isTrialLoading ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <>
+                <Ionicons name="gift" size={20} color={colors.primary} />
+                <Text style={styles.trialButtonText}>
+                  {t("subscription.startTrial")} ({config.freemiumDurationDays}{" "}
+                  {t("subscription.days")})
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
         )}
 
@@ -384,20 +346,20 @@ export default function SubscriptionScreen({
         <TouchableOpacity
           style={[
             styles.subscribeButton,
-            !selectedPlan && styles.subscribeButtonDisabled,
+            !selectedPlanId && styles.subscribeButtonDisabled,
           ]}
           onPress={handleSubscribe}
-          disabled={!selectedPlan || subscribing}
+          disabled={!selectedPlanId || isCheckoutLoading}
         >
           <LinearGradient
             colors={
-              selectedPlan ? ["#667eea", "#764ba2"] : ["#9ca3af", "#9ca3af"]
+              selectedPlanId ? ["#667eea", "#764ba2"] : ["#9ca3af", "#9ca3af"]
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.subscribeGradient}
           >
-            {subscribing ? (
+            {isCheckoutLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.subscribeButtonText}>
@@ -591,6 +553,9 @@ const createStyles = (colors: any) =>
       fontWeight: "600" as const,
       color: colors.primary,
     } as TextStyle,
+    buttonDisabled: {
+      opacity: 0.6,
+    } as ViewStyle,
     subscribeButton: {
       marginTop: 20,
       borderRadius: 16,

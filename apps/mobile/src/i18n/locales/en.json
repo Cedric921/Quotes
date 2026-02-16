@@ -119,6 +119,7 @@
     "freeTrial": "Free Trial",
     "freeTrialDescription": "Try premium features for free",
     "daysRemaining": "{{days}} days remaining",
+    "days": "days",
     "monthly": "Monthly",
     "yearly": "Yearly",
     "perMonth": "/month",
@@ -133,6 +134,8 @@
     "subscriptionCancelled": "Subscription Cancelled",
     "expiresOn": "Expires on {{date}}",
     "renewsOn": "Renews on {{date}}",
+    "trialStarted": "Trial started!",
+    "enjoyTrial": "Enjoy your free trial period",
     "features": {
       "title": "Premium Features",
       "unlimitedQuotes": "Unlimited quotes",
