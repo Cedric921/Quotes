@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
-import { getToken } from "@/lib/auth";
+import { apiClient } from "@/lib/auth";
 import { toast } from "sonner";
 import { Settings, Save, Plus, Pencil, Trash2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,8 +40,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface Config {
   FREEMIUM_DURATION_DAYS: string;
@@ -95,13 +93,8 @@ export default function SubscriptionsPage() {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(`${API_URL}/subscriptions/config`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setConfig(data);
-      }
+      const response = await apiClient.get("/subscriptions/config");
+      setConfig(response.data);
     } catch (error) {
       console.error("Failed to fetch config:", error);
     }
@@ -109,13 +102,8 @@ export default function SubscriptionsPage() {
 
   const fetchPlans = async () => {
     try {
-      const response = await fetch(`${API_URL}/subscriptions/plans`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setPlans(data);
-      }
+      const response = await apiClient.get("/subscriptions/plans");
+      setPlans(response.data);
     } catch (error) {
       console.error("Failed to fetch plans:", error);
     } finally {
@@ -126,26 +114,17 @@ export default function SubscriptionsPage() {
   const saveConfig = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${API_URL}/subscriptions/config`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({
-          freemiumDurationDays: parseInt(config.FREEMIUM_DURATION_DAYS),
-          monthlyPrice: parseFloat(config.MONTHLY_PRICE),
-          yearlyPrice: parseFloat(config.YEARLY_PRICE),
-          yearlyDiscountPercentage: parseInt(config.YEARLY_DISCOUNT_PERCENTAGE),
-          stripeMonthlyPriceId: config.STRIPE_MONTHLY_PRICE_ID,
-          stripeYearlyPriceId: config.STRIPE_YEARLY_PRICE_ID,
-        }),
+      await apiClient.put("/subscriptions/config", {
+        freemiumDurationDays: Number.parseInt(config.FREEMIUM_DURATION_DAYS),
+        monthlyPrice: Number.parseFloat(config.MONTHLY_PRICE),
+        yearlyPrice: Number.parseFloat(config.YEARLY_PRICE),
+        yearlyDiscountPercentage: Number.parseInt(
+          config.YEARLY_DISCOUNT_PERCENTAGE,
+        ),
+        stripeMonthlyPriceId: config.STRIPE_MONTHLY_PRICE_ID,
+        stripeYearlyPriceId: config.STRIPE_YEARLY_PRICE_ID,
       });
-      if (response.ok) {
-        toast.success(t.subscriptions?.configSaved || "Configuration saved!");
-      } else {
-        toast.error(t.subscriptions?.configSaveFailed || "Failed to save");
-      }
+      toast.success(t.subscriptions?.configSaved || "Configuration saved!");
     } catch (error) {
       toast.error(t.subscriptions?.configSaveFailed || "Failed to save");
     } finally {
@@ -182,29 +161,18 @@ export default function SubscriptionsPage() {
 
   const savePlan = async () => {
     try {
-      const url = editingPlan
-        ? `${API_URL}/subscriptions/plans/${editingPlan.id}`
-        : `${API_URL}/subscriptions/plans`;
-      const method = editingPlan ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify(planForm),
-      });
-
-      if (response.ok) {
-        toast.success(
-          editingPlan
-            ? t.subscriptions?.planUpdated || "Plan updated!"
-            : t.subscriptions?.planCreated || "Plan created!",
-        );
-        setPlanDialogOpen(false);
-        fetchPlans();
+      if (editingPlan) {
+        await apiClient.put(`/subscriptions/plans/${editingPlan.id}`, planForm);
+      } else {
+        await apiClient.post("/subscriptions/plans", planForm);
       }
+      toast.success(
+        editingPlan
+          ? t.subscriptions?.planUpdated || "Plan updated!"
+          : t.subscriptions?.planCreated || "Plan created!",
+      );
+      setPlanDialogOpen(false);
+      fetchPlans();
     } catch (error) {
       toast.error("Failed to save plan");
     }
@@ -212,14 +180,9 @@ export default function SubscriptionsPage() {
 
   const deletePlan = async (id: string) => {
     try {
-      const response = await fetch(`${API_URL}/subscriptions/plans/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (response.ok) {
-        toast.success(t.subscriptions?.planDeleted || "Plan deleted!");
-        fetchPlans();
-      }
+      await apiClient.delete(`/subscriptions/plans/${id}`);
+      toast.success(t.subscriptions?.planDeleted || "Plan deleted!");
+      fetchPlans();
     } catch (error) {
       toast.error("Failed to delete plan");
     }

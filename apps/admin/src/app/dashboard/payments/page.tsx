@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
-import { getToken } from "@/lib/auth";
+import { apiClient } from "@/lib/auth";
 import {
   CreditCard,
   CheckCircle,
@@ -27,8 +27,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface Payment {
   id: string;
@@ -61,17 +59,11 @@ export default function PaymentsPage() {
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${API_URL}/subscriptions/payments?page=${page}&limit=${limit}`,
-        {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setPayments(data.payments);
-        setTotal(data.total);
-      }
+      const response = await apiClient.get(`/subscriptions/payments`, {
+        params: { page, limit },
+      });
+      setPayments(response.data.payments);
+      setTotal(response.data.total);
     } catch (error) {
       console.error("Failed to fetch payments:", error);
     } finally {
