@@ -10,6 +10,7 @@ import {
   LoginScreen,
   SignupScreen,
   NotificationsScreen,
+  SubscriptionScreen,
 } from "../screens";
 import { navigationRef } from "../services/navigationService";
 
@@ -25,6 +26,7 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Notifications: undefined;
+  Subscription: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -47,6 +49,7 @@ export default function AppNavigator() {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="Subscription" component={SubscriptionScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

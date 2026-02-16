@@ -74,8 +74,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handleSubscription = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Navigate to Subscription screen
-    Alert.alert("Subscription", "Subscription screen coming soon!");
+    navigation.navigate("Subscription");
   };
 
   const handleNotifications = () => {
