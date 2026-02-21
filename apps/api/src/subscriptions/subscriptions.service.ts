@@ -131,7 +131,7 @@ export class SubscriptionsService {
 
     const recentTransactions = recentPayments.map((payment) => ({
       id: payment.id,
-      userName: payment.user?.name || 'Unknown',
+      userName: payment.user?.email?.split('@')[0] || 'Unknown',
       userEmail: payment.user?.email || 'Unknown',
       planName: payment.subscription?.plan?.name || 'Premium',
       amount: payment.amount,
