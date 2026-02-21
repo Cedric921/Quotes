@@ -49,6 +49,108 @@ export class SubscriptionsService {
     this.stripe = new Stripe(stripeKey);
   }
 
+  // ============ STATISTICS ============
+
+  async getStats(): Promise<{
+    totalRevenue: number;
+    monthlyRevenue: number;
+    premiumUsers: number;
+    freeUsers: number;
+    totalUsers: number;
+    premiumPercentage: number;
+    revenueGrowth: number;
+    recentTransactions: Array<{
+      id: string;
+      userName: string;
+      userEmail: string;
+      planName: string;
+      amount: number;
+      date: Date;
+      status: string;
+    }>;
+  }> {
+    // Get user counts
+    const totalUsers = await this.userRepository.count();
+    const premiumUsers = await this.userRepository.count({
+      where: { isSubscribed: true },
+    });
+    const freeUsers = totalUsers - premiumUsers;
+    const premiumPercentage =
+      totalUsers > 0 ? Math.round((premiumUsers / totalUsers) * 100) : 0;
+
+    // Get total revenue (all successful payments)
+    const allPayments = await this.paymentRepository.find({
+      where: { status: PaymentStatus.SUCCEEDED },
+    });
+    const totalRevenue = allPayments.reduce(
+      (sum, payment) => sum + payment.amount,
+      0,
+    );
+
+    // Get monthly revenue (current month)
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyPayments = allPayments.filter(
+      (payment) => payment.paidAt && new Date(payment.paidAt) >= startOfMonth,
+    );
+    const monthlyRevenue = monthlyPayments.reduce(
+      (sum, payment) => sum + payment.amount,
+      0,
+    );
+
+    // Get last month revenue for growth calculation
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const lastMonthPayments = allPayments.filter(
+      (payment) =>
+        payment.paidAt &&
+        new Date(payment.paidAt) >= startOfLastMonth &&
+        new Date(payment.paidAt) <= endOfLastMonth,
+    );
+    const lastMonthRevenue = lastMonthPayments.reduce(
+      (sum, payment) => sum + payment.amount,
+      0,
+    );
+
+    // Calculate revenue growth percentage
+    const revenueGrowth =
+      lastMonthRevenue > 0
+        ? Math.round(
+            ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100,
+          )
+        : monthlyRevenue > 0
+          ? 100
+          : 0;
+
+    // Get recent transactions (last 10)
+    const recentPayments = await this.paymentRepository.find({
+      relations: ['user', 'subscription', 'subscription.plan'],
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
+
+    const recentTransactions = recentPayments.map((payment) => ({
+      id: payment.id,
+      userName: payment.user?.name || 'Unknown',
+      userEmail: payment.user?.email || 'Unknown',
+      planName: payment.subscription?.plan?.name || 'Premium',
+      amount: payment.amount,
+      date: payment.createdAt,
+      status: payment.status,
+    }));
+
+    return {
+      totalRevenue,
+      monthlyRevenue,
+      premiumUsers,
+      freeUsers,
+      totalUsers,
+      premiumPercentage,
+      revenueGrowth,
+      recentTransactions,
+    };
+  }
+
   // ============ CONFIG MANAGEMENT ============
 
   async getConfig(): Promise<Record<string, string>> {

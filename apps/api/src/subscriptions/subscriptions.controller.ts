@@ -59,6 +59,15 @@ export class SubscriptionsController {
     return this.subscriptionsService.getConfig();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('stats')
+  async getStats(@Request() req: AuthenticatedRequest) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view subscription stats');
+    }
+    return this.subscriptionsService.getStats();
+  }
+
   // ============ USER ROUTES ============
 
   @UseGuards(JwtAuthGuard)

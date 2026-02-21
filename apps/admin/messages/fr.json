@@ -82,7 +82,8 @@
       "date": "Date",
       "success": "Réussi",
       "pending": "En cours",
-      "failed": "Échoué"
+      "failed": "Échoué",
+      "noTransactions": "Aucune transaction"
     },
     "stripe": {
       "title": "Partenariat Stripe",
@@ -94,7 +95,8 @@
       "mode": "Mode",
       "test": "Test",
       "live": "Production",
-      "securePayment": "Intégration de paiement sécurisée"
+      "securePayment": "Intégration de paiement sécurisée",
+      "connected": "Connecté"
     },
     "comingSoon": "Bientôt",
     "financesTitle": "Finances & Abonnements",

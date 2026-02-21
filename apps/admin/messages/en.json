@@ -82,7 +82,8 @@
       "date": "Date",
       "success": "Success",
       "pending": "Pending",
-      "failed": "Failed"
+      "failed": "Failed",
+      "noTransactions": "No transactions"
     },
     "stripe": {
       "title": "Stripe Partnership",
@@ -94,7 +95,8 @@
       "mode": "Mode",
       "test": "Test",
       "live": "Live",
-      "securePayment": "Secure payment integration"
+      "securePayment": "Secure payment integration",
+      "connected": "Connected"
     },
     "comingSoon": "Coming Soon",
     "financesTitle": "Finances & Subscriptions",
