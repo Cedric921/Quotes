@@ -12,6 +12,8 @@ import {
   LayoutDashboard,
   Sparkles,
   AlertTriangle,
+  Settings,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -73,6 +75,16 @@ export default function DashboardLayout({
     { href: "/dashboard/users", icon: Users, label: t.nav.users },
     { href: "/dashboard/topics", icon: BookOpen, label: t.nav.topics },
     { href: "/dashboard/quotes", icon: FileText, label: t.nav.quotes },
+    {
+      href: "/dashboard/subscriptions",
+      icon: Settings,
+      label: t.nav.subscriptions || "Subscriptions",
+    },
+    {
+      href: "/dashboard/payments",
+      icon: CreditCard,
+      label: t.nav.payments || "Payments",
+    },
   ];
 
   return (

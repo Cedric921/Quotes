@@ -25,7 +25,6 @@ import {
   UserX,
   Receipt,
   ArrowUpRight,
-  ArrowDownRight,
   Calendar,
   Clock,
 } from "lucide-react";
@@ -45,15 +44,38 @@ interface Stats {
   quotes: number;
 }
 
+interface SubscriptionStats {
+  totalRevenue: number;
+  monthlyRevenue: number;
+  premiumUsers: number;
+  freeUsers: number;
+  totalUsers: number;
+  premiumPercentage: number;
+  revenueGrowth: number;
+  recentTransactions: Array<{
+    id: string;
+    userName: string;
+    userEmail: string;
+    planName: string;
+    amount: number;
+    date: string;
+    status: string;
+  }>;
+}
+
 export default function DashboardPage() {
   const { t } = useLocale();
   const [isSeeding, setIsSeeding] = useState(false);
   const [seedResult, setSeedResult] = useState<string>("");
   const [stats, setStats] = useState<Stats>({ users: 0, topics: 0, quotes: 0 });
+  const [subscriptionStats, setSubscriptionStats] =
+    useState<SubscriptionStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [isLoadingSubStats, setIsLoadingSubStats] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchSubscriptionStats();
   }, []);
 
   const fetchStats = async () => {
@@ -72,6 +94,17 @@ export default function DashboardPage() {
       console.error("Failed to fetch stats", error);
     } finally {
       setIsLoadingStats(false);
+    }
+  };
+
+  const fetchSubscriptionStats = async () => {
+    try {
+      const res = await apiClient.get("/subscriptions/stats");
+      setSubscriptionStats(res.data);
+    } catch (error) {
+      console.error("Failed to fetch subscription stats", error);
+    } finally {
+      setIsLoadingSubStats(false);
     }
   };
 
@@ -196,9 +229,6 @@ export default function DashboardPage() {
               {t.dashboard.financesDescription}
             </p>
           </div>
-          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 px-4 py-1.5 text-sm">
-            {t.dashboard.comingSoon}
-          </Badge>
         </div>
 
         {/* Financial Stats Cards */}
@@ -217,8 +247,12 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
-                <div className="text-3xl font-bold blur-[2px] select-none">
-                  $12,450
+                <div className="text-3xl font-bold">
+                  {isLoadingSubStats ? (
+                    <div className="h-9 w-24 bg-muted animate-pulse rounded" />
+                  ) : (
+                    `€${subscriptionStats?.totalRevenue.toFixed(2) ?? "0.00"}`
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {t.dashboard.stats.allTime}
@@ -242,18 +276,31 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="text-3xl font-bold blur-[2px] select-none">
-                  $2,340
+                <div className="text-3xl font-bold">
+                  {isLoadingSubStats ? (
+                    <div className="h-9 w-24 bg-muted animate-pulse rounded" />
+                  ) : (
+                    `€${subscriptionStats?.monthlyRevenue.toFixed(2) ?? "0.00"}`
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 text-xs blur-[1px] select-none">
-                    <ArrowUpRight className="w-3 h-3 mr-1" />
-                    +12.5%
-                  </Badge>
-                  <span className="text-xs text-muted-foreground blur-[1px] select-none">
-                    {t.dashboard.stats.vsLastMonth}
-                  </span>
-                </div>
+                {!isLoadingSubStats && (
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      className={`${
+                        (subscriptionStats?.revenueGrowth ?? 0) >= 0
+                          ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                          : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+                      } text-xs`}
+                    >
+                      <ArrowUpRight className="w-3 h-3 mr-1" />
+                      {(subscriptionStats?.revenueGrowth ?? 0) >= 0 ? "+" : ""}
+                      {subscriptionStats?.revenueGrowth ?? 0}%
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {t.dashboard.stats.vsLastMonth}
+                    </span>
+                  </div>
+                )}
               </div>
             </CardContent>
             <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-blue-500 to-cyan-500 opacity-10 rounded-full blur-2xl" />
@@ -273,11 +320,16 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
-                <div className="text-3xl font-bold blur-[2px] select-none">
-                  156
+                <div className="text-3xl font-bold">
+                  {isLoadingSubStats ? (
+                    <div className="h-9 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    (subscriptionStats?.premiumUsers ?? 0)
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground blur-[1px] select-none">
-                  68% {t.dashboard.stats.ofTotal}
+                <p className="text-xs text-muted-foreground">
+                  {subscriptionStats?.premiumPercentage ?? 0}%{" "}
+                  {t.dashboard.stats.ofTotal}
                 </p>
               </div>
             </CardContent>
@@ -298,11 +350,18 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
-                <div className="text-3xl font-bold blur-[2px] select-none">
-                  73
+                <div className="text-3xl font-bold">
+                  {isLoadingSubStats ? (
+                    <div className="h-9 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    (subscriptionStats?.freeUsers ?? 0)
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground blur-[1px] select-none">
-                  32% {t.dashboard.stats.ofTotal}
+                <p className="text-xs text-muted-foreground">
+                  {subscriptionStats
+                    ? 100 - subscriptionStats.premiumPercentage
+                    : 0}
+                  % {t.dashboard.stats.ofTotal}
                 </p>
               </div>
             </CardContent>
@@ -315,111 +374,88 @@ export default function DashboardPage() {
           {/* Recent Transactions Table */}
           <Card className="lg:col-span-2 border-2 hover:shadow-lg transition-shadow">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500">
-                    <Receipt className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle>{t.dashboard.transactions.title}</CardTitle>
-                    <CardDescription>
-                      {t.dashboard.transactions.description}
-                    </CardDescription>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500">
+                  <Receipt className="w-5 h-5 text-white" />
                 </div>
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                  {t.dashboard.comingSoon}
-                </Badge>
+                <div>
+                  <CardTitle>{t.dashboard.transactions.title}</CardTitle>
+                  <CardDescription>
+                    {t.dashboard.transactions.description}
+                  </CardDescription>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t.dashboard.transactions.user}</TableHead>
-                    <TableHead>{t.dashboard.transactions.plan}</TableHead>
-                    <TableHead>{t.dashboard.transactions.amount}</TableHead>
-                    <TableHead>{t.dashboard.transactions.date}</TableHead>
-                    <TableHead>{t.dashboard.transactions.status}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    {
-                      user: "John Doe",
-                      plan: "Premium",
-                      amount: "$9.99",
-                      date: "2024-01-15",
-                      status: "success",
-                    },
-                    {
-                      user: "Jane Smith",
-                      plan: "Premium",
-                      amount: "$9.99",
-                      date: "2024-01-14",
-                      status: "success",
-                    },
-                    {
-                      user: "Bob Johnson",
-                      plan: "Premium",
-                      amount: "$9.99",
-                      date: "2024-01-13",
-                      status: "pending",
-                    },
-                    {
-                      user: "Alice Brown",
-                      plan: "Premium",
-                      amount: "$9.99",
-                      date: "2024-01-12",
-                      status: "success",
-                    },
-                    {
-                      user: "Charlie Wilson",
-                      plan: "Premium",
-                      amount: "$9.99",
-                      date: "2024-01-11",
-                      status: "failed",
-                    },
-                  ].map((transaction, index) => (
-                    <TableRow key={index} className="blur-[1.5px] select-none">
-                      <TableCell className="font-medium">
-                        {transaction.user}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-xs">
-                          {transaction.plan}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {transaction.amount}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {transaction.date}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            transaction.status === "success"
-                              ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
-                              : transaction.status === "pending"
-                                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
-                                : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
-                          }
-                        >
-                          {transaction.status === "success"
-                            ? t.dashboard.transactions.success
-                            : transaction.status === "pending"
-                              ? t.dashboard.transactions.pending
-                              : t.dashboard.transactions.failed}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
+              {isLoadingSubStats ? (
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="h-12 bg-muted animate-pulse rounded"
+                    />
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              ) : subscriptionStats?.recentTransactions.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  {t.dashboard.transactions.noTransactions ||
+                    "Aucune transaction"}
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t.dashboard.transactions.user}</TableHead>
+                      <TableHead>{t.dashboard.transactions.plan}</TableHead>
+                      <TableHead>{t.dashboard.transactions.amount}</TableHead>
+                      <TableHead>{t.dashboard.transactions.date}</TableHead>
+                      <TableHead>{t.dashboard.transactions.status}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {subscriptionStats?.recentTransactions.map(
+                      (transaction) => (
+                        <TableRow key={transaction.id}>
+                          <TableCell className="font-medium">
+                            {transaction.userName}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-xs">
+                              {transaction.planName}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-semibold">
+                            €{transaction.amount.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {new Date(transaction.date).toLocaleDateString()}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              className={
+                                transaction.status === "SUCCEEDED"
+                                  ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                                  : transaction.status === "PENDING"
+                                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                                    : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+                              }
+                            >
+                              {transaction.status === "SUCCEEDED"
+                                ? t.dashboard.transactions.success
+                                : transaction.status === "PENDING"
+                                  ? t.dashboard.transactions.pending
+                                  : t.dashboard.transactions.failed}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ),
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
 
@@ -446,21 +482,21 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium">
                     {t.dashboard.stripe.status}
                   </span>
-                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                    {t.dashboard.comingSoon}
+                  <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
+                    {t.dashboard.stripe.connected || "Connecté"}
                   </Badge>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-card border blur-[1.5px] select-none">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
                   <span className="text-sm font-medium">
                     {t.dashboard.stripe.apiKey}
                   </span>
                   <span className="text-xs text-muted-foreground font-mono">
-                    sk_test_***********
+                    sk_****_***********
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-card border blur-[1.5px] select-none">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
                   <span className="text-sm font-medium">
                     {t.dashboard.stripe.webhook}
                   </span>
@@ -469,7 +505,7 @@ export default function DashboardPage() {
                   </Badge>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-card border blur-[1.5px] select-none">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
                   <span className="text-sm font-medium">
                     {t.dashboard.stripe.mode}
                   </span>
