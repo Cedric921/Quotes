@@ -74,8 +74,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handleSubscription = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Navigate to Subscription screen
-    Alert.alert("Subscription", "Subscription screen coming soon!");
+    navigation.navigate("Subscription");
   };
 
   const handleNotifications = () => {
@@ -127,14 +126,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handlePrivacyPolicy = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Open Privacy Policy
-    Alert.alert("Privacy Policy", "Privacy Policy coming soon!");
+    navigation.navigate("Privacy");
   };
 
   const handleTerms = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Open Terms of Service
-    Alert.alert("Terms", "Terms of Service coming soon!");
+    navigation.navigate("Terms");
   };
 
   const handleContact = () => {

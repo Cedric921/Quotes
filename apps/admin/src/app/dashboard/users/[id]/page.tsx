@@ -68,18 +68,26 @@ interface User {
 }
 
 interface Payment {
-  id: number;
+  id: string;
   amount: number;
-  date: string;
-  status: "success" | "pending" | "failed";
-  description: string;
+  createdAt: string;
+  paidAt?: string;
+  status: "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
+  subscription?: {
+    plan?: { name: string };
+  };
 }
 
 interface Subscription {
+  id: string;
+  status: "ACTIVE" | "CANCELLED" | "EXPIRED" | "TRIAL" | "PAST_DUE";
   startDate: string;
   endDate: string;
-  amount: number;
-  status: "active" | "expired" | "cancelled";
+  plan?: {
+    name: string;
+    type: string;
+    price: number;
+  };
 }
 
 export default function UserDetailPage() {
@@ -101,34 +109,15 @@ export default function UserDetailPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // Mock data for payments (will be replaced with real API)
-  const [payments] = useState<Payment[]>([
-    {
-      id: 1,
-      amount: 9.99,
-      date: "2024-01-15",
-      status: "success",
-      description: "Monthly Premium Subscription",
-    },
-    {
-      id: 2,
-      amount: 9.99,
-      date: "2023-12-15",
-      status: "success",
-      description: "Monthly Premium Subscription",
-    },
-    {
-      id: 3,
-      amount: 9.99,
-      date: "2023-11-15",
-      status: "success",
-      description: "Monthly Premium Subscription",
-    },
-  ]);
+  // Real data from API
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [activeSubscription, setActiveSubscription] =
+    useState<Subscription | null>(null);
 
   // Calculate total spent
   const totalSpent = payments
-    .filter((p) => p.status === "success")
+    .filter((p) => p.status === "SUCCEEDED")
     .reduce((sum, p) => sum + p.amount, 0);
 
   useEffect(() => {
@@ -145,7 +134,32 @@ export default function UserDetailPage() {
       }
     };
 
+    const fetchSubscriptionData = async () => {
+      try {
+        // Fetch user's subscription history
+        const subResponse = await apiClient.get<Subscription[]>(
+          `/subscriptions/users/${userId}/subscription/history`,
+        );
+        setSubscriptions(subResponse.data);
+
+        // Fetch active subscription
+        const activeResponse = await apiClient.get<Subscription>(
+          `/subscriptions/users/${userId}/subscription`,
+        );
+        setActiveSubscription(activeResponse.data);
+
+        // Fetch user's payments
+        const payResponse = await apiClient.get<Payment[]>(
+          `/subscriptions/users/${userId}/payments`,
+        );
+        setPayments(payResponse.data);
+      } catch (err) {
+        console.error("Failed to fetch subscription data:", err);
+      }
+    };
+
     fetchUser();
+    fetchSubscriptionData();
   }, [userId]);
 
   const handleEditClick = () => {
@@ -356,31 +370,31 @@ export default function UserDetailPage() {
                       Active
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between blur-[1.5px] select-none">
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Début</span>
                     <span className="text-sm font-medium">
-                      {user.subscriptionStartDate
+                      {activeSubscription?.startDate
                         ? new Date(
-                            user.subscriptionStartDate,
+                            activeSubscription.startDate,
                           ).toLocaleDateString()
                         : "N/A"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between blur-[1.5px] select-none">
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Fin</span>
                     <span className="text-sm font-medium">
-                      {user.subscriptionEndDate
+                      {activeSubscription?.endDate
                         ? new Date(
-                            user.subscriptionEndDate,
+                            activeSubscription.endDate,
                           ).toLocaleDateString()
                         : "N/A"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t blur-[1.5px] select-none">
-                    <span className="text-xs text-muted-foreground">
-                      Montant
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <span className="text-xs text-muted-foreground">Plan</span>
+                    <span className="text-lg font-bold">
+                      {activeSubscription?.plan?.name || "N/A"}
                     </span>
-                    <span className="text-lg font-bold">$9.99/mois</span>
                   </div>
                 </div>
               </CardContent>
@@ -404,60 +418,66 @@ export default function UserDetailPage() {
                     </CardDescription>
                   </div>
                 </div>
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                  Bientôt
-                </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Montant</TableHead>
-                    <TableHead>Statut</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payments.map((payment) => (
-                    <TableRow
-                      key={payment.id}
-                      className="blur-[1.5px] select-none"
-                    >
-                      <TableCell className="font-medium">
-                        {payment.description}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(payment.date).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        ${payment.amount.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            payment.status === "success"
-                              ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
-                              : payment.status === "pending"
-                                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
-                                : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
-                          }
-                        >
-                          {payment.status === "success"
-                            ? "Réussi"
-                            : payment.status === "pending"
-                              ? "En cours"
-                              : "Échoué"}
-                        </Badge>
-                      </TableCell>
+              {payments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Aucun paiement trouvé
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Montant</TableHead>
+                      <TableHead>Statut</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {payments.map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell className="font-medium">
+                          {payment.subscription?.plan?.name || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(
+                              payment.paidAt || payment.createdAt,
+                            ).toLocaleDateString()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          €{payment.amount.toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              payment.status === "SUCCEEDED"
+                                ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                                : payment.status === "PENDING"
+                                  ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                                  : payment.status === "REFUNDED"
+                                    ? "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
+                                    : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+                            }
+                          >
+                            {payment.status === "SUCCEEDED"
+                              ? "Réussi"
+                              : payment.status === "PENDING"
+                                ? "En cours"
+                                : payment.status === "REFUNDED"
+                                  ? "Remboursé"
+                                  : "Échoué"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </>

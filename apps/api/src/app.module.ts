@@ -8,6 +8,7 @@ import { QuotesModule } from './quotes/quotes.module';
 import { TopicsModule } from './topics/topics.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     TopicsModule,
     AuthModule,
     NotificationsModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
