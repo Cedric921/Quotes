@@ -247,5 +247,363 @@
     "expired": "Expired",
     "trial": "Trial",
     "pastDue": "Past Due"
+  },
+  "terms": {
+    "title": "CONTRACTUAL TERMS (T&C) – PREMIUM SERVICES",
+    "appName": "FOCUS Application",
+    "lastUpdate": "Last updated: February 13, 2026",
+    "footer": {
+      "copyright": "ODERA Formations - All rights reserved",
+      "contact": "For any questions:"
+    },
+    "sections": {
+      "s1": {
+        "title": "1. Contractual Information",
+        "p1": "These contractual terms (hereinafter the \"Contractual Terms\") govern the purchase and use of paid services available through the FOCUS mobile application (hereinafter the \"Application\"), accessible on Google Play Store (Android) and Apple App Store (iOS).",
+        "p2": "The services consist of providing users, in a simple and fast manner and according to the chosen frequency, with digital content such as: motivational messages, affirmations, mindset and personal development oriented content, and general interest information (hereinafter the \"Services\").",
+        "p3": "Access to the Application and/or subscription to the Services implies, without reservation, that the user:",
+        "list": [
+          "has read, understood and accepted these Contractual Terms;",
+          "has the legal capacity to contract;",
+          "accepts all obligations described below."
+        ],
+        "p4": "Before any subscription, the user is invited to carefully read these Contractual Terms and may ask any questions at:",
+        "p5": "These Contractual Terms remain applicable throughout the use of the subscribed Services. They may be updated; the version in force is the one published in the Application."
+      },
+      "s2": {
+        "title": "2. Service Provider",
+        "p1": "The Services are provided by:",
+        "address": "Headquarters: 36 Rue Aristide Briand, 69800 Saint-Priest, France",
+        "email": "Email:"
+      },
+      "s3": {
+        "title": "3. User / Buyer of Services",
+        "p1": "Subscription to the Services is made exclusively via the Application, downloaded from app stores (Apple App Store / Google Play Store).",
+        "p2": "The user declares:",
+        "list": [
+          "to be of legal age and have the legal capacity to contract;",
+          "to use a store account (Apple/Google) of which they are the holder and responsible."
+        ],
+        "p3": "If you suspect that a minor has subscribed to a subscription, you can contact us at:"
+      },
+      "s4": {
+        "title": "4. Purpose of the Contract",
+        "p1": "The purpose of this contract is to govern the contractual relationship between ODERA Formations and the user regarding access to Premium Services.",
+        "p2": "By subscribing to a Premium subscription via the store, the user obtains access to Premium content available in FOCUS, in return for the price indicated at the time of subscription."
+      },
+      "s5": {
+        "title": "5. Who Can Subscribe?",
+        "p1": "The Services can be subscribed by any natural person using the Application via a compatible device and having an active account on one of the stores.",
+        "p2": "These Terms apply in addition to:",
+        "list": [
+          "the general terms of the relevant store (Apple/Google);",
+          "consumer protection rules applicable in the user's country of residence."
+        ]
+      },
+      "s6": {
+        "title": "6. Subscription Procedure",
+        "p1": "To subscribe to Premium Services, the user must:",
+        "list": [
+          "download the Application via Apple App Store or Google Play Store;",
+          "open the Application and view the Premium offer;",
+          "validate the purchase in the store;",
+          "receive purchase confirmation via the store."
+        ],
+        "p2": "Upon first launch, the user can provide optional information (e.g.: first name, content preferences, notification frequency). This information can be modified in the settings.",
+        "p3": "The applicable store terms can be found on their official websites:",
+        "appleLink": "Apple App Store: Apple terms",
+        "googleLink": "Google Play Store: Google terms"
+      },
+      "s7": {
+        "title": "7. Price, Offer and Billing",
+        "s71": {
+          "title": "7.1 Premium Services Price",
+          "p1": "FOCUS offers the following (unless otherwise indicated at the time of purchase):",
+          "offer": [
+            "3-day free trial",
+            "€0.99 for the first month",
+            "€1.99 per month thereafter (automatic renewal)"
+          ],
+          "p2": "Prices displayed in the store at the time of purchase are authoritative. Applicable taxes (VAT) may be added depending on the user's country, in accordance with store rules."
+        },
+        "s72": {
+          "title": "7.2 Payment Methods",
+          "p1": "Payment is made exclusively via:",
+          "list": [
+            "Apple App Store (Apple account)",
+            "Google Play Store (Google account)"
+          ],
+          "p2": "ODERA Formations never has access to the user's banking information and does not store it."
+        },
+        "s73": {
+          "title": "7.3 Billing",
+          "p1": "Purchase receipts and/or invoices are managed by the store. The user can find their history in their Apple/Google account settings."
+        }
+      },
+      "s8": {
+        "title": "8. Duration, Renewal, Free Trial and Cancellation",
+        "s81": {
+          "title": "8.1 Duration and Automatic Renewal",
+          "p1": "The Premium subscription is monthly and renews automatically, unless cancelled before the renewal date."
+        },
+        "s82": {
+          "title": "8.2 Free Trial",
+          "p1": "When offered, the 3-day free trial gives access to Premium features.",
+          "p2": "At the end of the trial, the subscription becomes paid automatically, unless cancelled before the end of the trial period."
+        },
+        "s83": {
+          "title": "8.3 Cancellation",
+          "p1": "The user can cancel at any time via their Apple/Google account settings.",
+          "p2": "Cancellation takes effect at the end of the current subscription period."
+        }
+      },
+      "s9": {
+        "title": "9. Right of Withdrawal",
+        "p1": "In accordance with Article L221-28 of the Consumer Code, the user acknowledges that the Services are digital content provided immediately after purchase.",
+        "p2": "Consequently, by validating the subscription, the user:",
+        "list": [
+          "requests immediate execution of the service;",
+          "acknowledges losing their right of withdrawal."
+        ]
+      },
+      "s10": {
+        "title": "10. Force Majeure",
+        "p1": "Neither party shall be held liable in case of non-performance due to a force majeure event, as defined under French law. Performance shall be suspended for the duration of the event."
+      },
+      "s11": {
+        "title": "11. General Information About the Offer",
+        "p1": "ODERA Formations reserves the right to improve, modify or evolve the features and content of FOCUS, as long as it does not remove access to subscribed Services during their validity period."
+      },
+      "s12": {
+        "title": "12. Conformity Guarantee",
+        "p1": "Digital Services provided via FOCUS are subject to conformity rules applicable to digital content.",
+        "p2": "In case of malfunction attributable to the Application, ODERA Formations undertakes to implement reasonable necessary corrections."
+      },
+      "s13": {
+        "title": "13. User Obligations",
+        "p1": "The user agrees to:",
+        "list": [
+          "use the Application in compliance with applicable laws;",
+          "not misuse the Application from its normal use;",
+          "not engage in abusive, automated use or use likely to harm the service;",
+          "maintain the security of their Apple/Google account;",
+          "verify the accuracy of information associated with their store account."
+        ],
+        "p2": "Any breach may result in suspension of access to the service, without compensation."
+      },
+      "s14": {
+        "title": "14. Provider Obligations (ODERA Formations)",
+        "p1": "ODERA Formations undertakes to:",
+        "list": [
+          "provide access to Premium Services according to the subscribed offer;",
+          "ensure the security and confidentiality of processed data;",
+          "ensure reasonable maintenance and updates."
+        ]
+      },
+      "s15": {
+        "title": "15. Limitation of Liability",
+        "p1": "ODERA Formations cannot be held liable for:",
+        "list": [
+          "interruptions related to stores, the Internet network, or the user's system;",
+          "inappropriate use of the Application;",
+          "indirect damage (loss of revenue, loss of data not attributable to the Application, etc.)."
+        ]
+      },
+      "s16": {
+        "title": "16. Electronic Communications",
+        "p1": "The user accepts that communications relating to the contract (information, updates, notifications) may be carried out electronically (in the Application and/or by email if provided)."
+      },
+      "s17": {
+        "title": "17. Applicable Law and Jurisdiction",
+        "p1": "These Contractual Terms are governed by French law.",
+        "p2": "For consumers, in case of dispute, the competent courts will be those provided for by the common law rules applicable to the consumer."
+      },
+      "s18": {
+        "title": "18. Contact",
+        "p1": "For any questions:"
+      }
+    }
+  },
+  "privacy": {
+    "title": "Terms of Use and Privacy Policy",
+    "appName": "FOCUS Application",
+    "lastUpdate": "Last updated: February 13, 2026",
+    "intro": "These Terms govern the download, access and use of the FOCUS mobile application (hereinafter the \"Application\"), published by ODERA Formations, and available for free download on Google Play Store (Android) and Apple App Store (iOS).",
+    "acceptance": "By downloading, accessing or using the Application, the user acknowledges having read these Terms and accepts them without reservation.",
+    "footer": {
+      "copyright": "ODERA Formations - All rights reserved",
+      "contact": "For any questions:"
+    },
+    "sections": {
+      "s1": {
+        "title": "1. Application Publisher",
+        "p1": "The FOCUS Application is published by:",
+        "p2": "ODERA Formations is responsible for processing personal data collected through the Application."
+      },
+      "s2": {
+        "title": "2. Purpose of the Application",
+        "p1": "FOCUS was developed to enable users to access, simply and quickly:",
+        "list1": [
+          "Motivational quotes",
+          "Daily affirmations",
+          "Mindset-oriented messages",
+          "Content related to personal development and entrepreneurship"
+        ],
+        "p2": "This content is provided for informational and inspirational purposes only.",
+        "p3": "FOCUS does not constitute:",
+        "list2": [
+          "Medical support",
+          "Psychological counseling",
+          "Personalized legal or financial advice"
+        ]
+      },
+      "s3": {
+        "title": "3. Compatibility and Download",
+        "p1": "The Application is available for free:",
+        "list": ["On Google Play Store", "On Apple App Store"],
+        "p2": "The user acknowledges being subject to the terms of use specific to these platforms when downloading, updating and paying for the subscription."
+      },
+      "s4": {
+        "title": "4. Operation and Subscription",
+        "s41": {
+          "title": "4.1 First Use",
+          "p1": "Upon first launch, the user may be invited (optional) to:",
+          "list": [
+            "Enter their first name",
+            "Choose their content preferences",
+            "Set notification frequency"
+          ],
+          "p2": "These settings can be modified at any time in the Application settings."
+        },
+        "s42": {
+          "title": "4.2 Free and Premium Version",
+          "p1": "The user has limited free access to test the Application.",
+          "p2": "To access all content, the user must subscribe to the Premium version under the following terms:",
+          "offer": [
+            "3-day free trial",
+            "€0.99 for the first month",
+            "€1.99 per month thereafter",
+            "Automatic renewal"
+          ],
+          "p3": "Payment is made exclusively via Apple or Google depending on the platform used.",
+          "p4": "Subscription management and cancellation must be done directly from the relevant store settings.",
+          "p5": "In accordance with Article L221-28 of the Consumer Code, the user accepts immediate execution of the service and waives their right of withdrawal for digital content provided immediately."
+        }
+      },
+      "s5": {
+        "title": "5. Use of the Application",
+        "p1": "The user can:",
+        "list1": [
+          "View content",
+          "Save to favorites",
+          "Share content",
+          "Set notification frequency",
+          "Customize certain visual elements (if feature enabled)"
+        ],
+        "p2": "The user agrees not to use the Application for fraudulent, illegal purposes or contrary to public order."
+      },
+      "s6": {
+        "title": "6. Intellectual Property",
+        "p1": "All intellectual property rights relating to the FOCUS Application (content, design, brand, structure, database, graphic elements) belong exclusively to ODERA Formations.",
+        "p2": "Any reproduction, distribution, modification, decompilation or extraction of source code is strictly prohibited."
+      },
+      "s7": {
+        "title": "7. User-Generated Content (if applicable)",
+        "p1": "If the Application allows the creation or sharing of personalized content:",
+        "p2": "The user remains responsible for the content they create or share.",
+        "p3": "By publishing content via the Application, the user guarantees:",
+        "list": [
+          "To hold the necessary rights",
+          "That this content does not infringe any third-party rights"
+        ],
+        "p4": "The user retains their rights but grants ODERA Formations a non-exclusive license to use within the scope of the Application."
+      },
+      "s8": {
+        "title": "8. Privacy Policy",
+        "s81": {
+          "title": "8.1 Data Collected",
+          "p1": "We may collect:",
+          "list": [
+            "Voluntarily provided data: first name, content preferences, notification frequency",
+            "Technical data: device type, operating system, anonymous identifiers",
+            "Usage data: content viewed, favorites, interactions with the Application"
+          ]
+        },
+        "s82": {
+          "title": "8.2 Processing Purposes",
+          "p1": "Data is used to:",
+          "list": [
+            "Personalize user experience",
+            "Improve content and features",
+            "Manage Premium subscriptions",
+            "Send notifications (if authorized)",
+            "Analyze Application usage"
+          ]
+        },
+        "s83": {
+          "title": "8.3 Legal Basis",
+          "p1": "Data processing is based on:",
+          "list": [
+            "User consent",
+            "Contract execution (Premium subscription)",
+            "Legitimate interest of ODERA Formations (service improvement)"
+          ]
+        },
+        "s84": {
+          "title": "8.4 Data Sharing",
+          "p1": "Data is not sold to third parties.",
+          "p2": "It may be shared with:",
+          "list": [
+            "Apple/Google for subscription management",
+            "Technical providers (hosting, analytics)",
+            "Competent authorities if required by law"
+          ]
+        },
+        "s85": {
+          "title": "8.5 Data Retention",
+          "p1": "Data is retained for the duration of Application use and deleted within a reasonable time after uninstallation or deletion request."
+        },
+        "s86": {
+          "title": "8.6 User Rights",
+          "p1": "In accordance with GDPR, the user has the following rights:",
+          "list": [
+            "Right to access their data",
+            "Right to rectification",
+            "Right to erasure",
+            "Right to data portability",
+            "Right to object",
+            "Right to withdraw consent"
+          ],
+          "p2": "To exercise these rights, contact:"
+        }
+      },
+      "s9": {
+        "title": "9. Data Security",
+        "p1": "ODERA Formations implements appropriate technical and organizational measures to protect data against unauthorized access, loss or alteration."
+      },
+      "s10": {
+        "title": "10. Terms Modifications",
+        "p1": "ODERA Formations reserves the right to modify these Terms at any time.",
+        "p2": "Users will be informed of any significant modification via the Application. Continued use after modification constitutes acceptance."
+      },
+      "s11": {
+        "title": "11. Limitation of Liability",
+        "p1": "ODERA Formations cannot be held liable for:",
+        "list": [
+          "Service interruptions due to technical causes or force majeure",
+          "The use the user makes of the Application content",
+          "Indirect damages related to the use of the Application"
+        ]
+      },
+      "s12": {
+        "title": "12. Applicable Law",
+        "p1": "These Terms are governed by French law.",
+        "p2": "For consumers, in case of dispute, the competent courts will be those provided for by the common law rules applicable."
+      },
+      "s13": {
+        "title": "13. Contact",
+        "p1": "For any questions regarding these Terms or your personal data:"
+      }
+    }
   }
 }

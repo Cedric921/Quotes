@@ -7,3 +7,5 @@ export { default as LoginScreen } from "./LoginScreen";
 export { default as SignupScreen } from "./SignupScreen";
 export { NotificationsScreen } from "./NotificationsScreen";
 export { default as SubscriptionScreen } from "./SubscriptionScreen";
+export { default as TermsScreen } from "./TermsScreen";
+export { default as PrivacyScreen } from "./PrivacyScreen";
