@@ -3,8 +3,8 @@ import { BaseEntity } from '../../common/entities/base.entity';
 import { Subscription } from './subscription.entity';
 
 export enum PlanType {
-  MONTHLY = 'monthly',
-  YEARLY = 'yearly',
+  MONTHLY = 'MONTHLY',
+  YEARLY = 'YEARLY',
 }
 
 @Entity()
@@ -43,4 +43,3 @@ export class SubscriptionPlan extends BaseEntity {
   @OneToMany(() => Subscription, (subscription) => subscription.plan)
   subscriptions: Subscription[];
 }
-
