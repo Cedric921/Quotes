@@ -120,8 +120,7 @@ curl -X POST https://api.votre-domaine.com/subscriptions/plans \
     "price": 4.99,
     "discountPercentage": 0,
     "stripePriceId": "price_votre_id_mensuel",
-    "isActive": true,
-    "durationMonths": 1
+    "isActive": true
   }'
 
 # Créer le plan annuel
@@ -135,10 +134,11 @@ curl -X POST https://api.votre-domaine.com/subscriptions/plans \
     "price": 49.99,
     "discountPercentage": 17,
     "stripePriceId": "price_votre_id_annuel",
-    "isActive": true,
-    "durationMonths": 12
+    "isActive": true
   }'
 ```
+
+> **Note** : Le champ `type` accepte uniquement les valeurs `"MONTHLY"` ou `"YEARLY"` (en majuscules).
 
 ### Configuration Globale
 
@@ -350,7 +350,7 @@ stripe trigger checkout.session.completed
 
 - [ ] Créer un compte Stripe en mode live
 - [ ] Créer les produits et prix en mode live
-- [ ] Mettre à jour les clés API (sk*live*, pk*live*)
+- [ ] Mettre à jour les clés API (`sk_live_...`, `pk_live_...`)
 - [ ] Créer le webhook de production
 - [ ] Mettre à jour STRIPE_WEBHOOK_SECRET
 - [ ] Mettre à jour les Price IDs dans la config

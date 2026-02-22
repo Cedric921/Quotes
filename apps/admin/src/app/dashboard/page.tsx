@@ -251,7 +251,7 @@ export default function DashboardPage() {
                   {isLoadingSubStats ? (
                     <div className="h-9 w-24 bg-muted animate-pulse rounded" />
                   ) : (
-                    `€${subscriptionStats?.totalRevenue.toFixed(2) ?? "0.00"}`
+                    `€${(subscriptionStats?.totalRevenue ?? 0).toFixed(2)}`
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -280,7 +280,7 @@ export default function DashboardPage() {
                   {isLoadingSubStats ? (
                     <div className="h-9 w-24 bg-muted animate-pulse rounded" />
                   ) : (
-                    `€${subscriptionStats?.monthlyRevenue.toFixed(2) ?? "0.00"}`
+                    `€${(subscriptionStats?.totalRevenue ?? 0).toFixed(2)}`
                   )}
                 </div>
                 {!isLoadingSubStats && (
@@ -396,7 +396,8 @@ export default function DashboardPage() {
                     />
                   ))}
                 </div>
-              ) : subscriptionStats?.recentTransactions.length === 0 ? (
+              ) : !subscriptionStats ||
+                subscriptionStats.recentTransactions.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {t.dashboard.transactions.noTransactions ||
                     "Aucune transaction"}
