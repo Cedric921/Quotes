@@ -4,10 +4,10 @@ import { User } from '../../users/entities/user.entity';
 import { Subscription } from './subscription.entity';
 
 export enum PaymentStatus {
-  PENDING = 'pending',
-  SUCCEEDED = 'succeeded',
-  FAILED = 'failed',
-  REFUNDED = 'refunded',
+  PENDING = 'PENDING',
+  SUCCEEDED = 'SUCCEEDED',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
 }
 
 @Entity()
@@ -32,7 +32,7 @@ export class Payment extends BaseEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
-  @Column({ default: 'usd' })
+  @Column({ default: 'eur' })
   currency: string;
 
   @Column({
@@ -57,4 +57,3 @@ export class Payment extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   failureReason: string;
 }
-

@@ -5,11 +5,11 @@ import { SubscriptionPlan } from './subscription-plan.entity';
 import { Payment } from './payment.entity';
 
 export enum SubscriptionStatus {
-  ACTIVE = 'active',
-  CANCELLED = 'cancelled',
-  EXPIRED = 'expired',
-  TRIAL = 'trial',
-  PAST_DUE = 'past_due',
+  ACTIVE = 'ACTIVE',
+  CANCELLED = 'CANCELLED',
+  EXPIRED = 'EXPIRED',
+  TRIAL = 'TRIAL',
+  PAST_DUE = 'PAST_DUE',
 }
 
 @Entity()
@@ -21,12 +21,14 @@ export class Subscription extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
-  planId: string;
+  @Column({ nullable: true })
+  planId: string | null;
 
-  @ManyToOne(() => SubscriptionPlan, (plan) => plan.subscriptions)
+  @ManyToOne(() => SubscriptionPlan, (plan) => plan.subscriptions, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'planId' })
-  plan: SubscriptionPlan;
+  plan: SubscriptionPlan | null;
 
   @Column({
     type: 'simple-enum',
@@ -56,4 +58,3 @@ export class Subscription extends BaseEntity {
   @OneToMany(() => Payment, (payment) => payment.subscription)
   payments: Payment[];
 }
-
