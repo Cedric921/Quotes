@@ -360,7 +360,7 @@ export class SubscriptionsService {
 
     const subscription = this.subscriptionRepository.create({
       userId,
-      planId: null as any, // No plan for trial
+      planId: null,
       status: SubscriptionStatus.TRIAL,
       startDate: now,
       endDate,
