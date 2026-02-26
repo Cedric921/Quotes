@@ -21,7 +21,7 @@ export const useSubscriptionPlans = (activeOnly: boolean = true) => {
     queryKey: [...subscriptionKeys.plans(), { activeOnly }],
     queryFn: async () => {
       const response = await apiClient.get<SubscriptionPlan[]>(
-        `/subscriptions/plans?activeOnly=${activeOnly}`
+        `/subscriptions/plans?activeOnly=${activeOnly}`,
       );
       return response.data;
     },
@@ -45,7 +45,7 @@ export const useCurrentSubscription = (enabled: boolean = true) => {
     queryKey: subscriptionKeys.current(),
     queryFn: async () => {
       const response = await apiClient.get<Subscription>(
-        "/subscriptions/my-subscription"
+        "/subscriptions/my-subscription",
       );
       return response.data;
     },
@@ -64,7 +64,7 @@ export const useSubscriptionHistory = (enabled: boolean = true) => {
     queryKey: subscriptionKeys.history(),
     queryFn: async () => {
       const response = await apiClient.get<Subscription[]>(
-        "/subscriptions/my-subscription/history"
+        "/subscriptions/my-subscription/history",
       );
       return response.data;
     },
@@ -79,7 +79,7 @@ export const useStartFreeTrial = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.post<Subscription>(
-        "/subscriptions/start-trial"
+        "/subscriptions/start-trial",
       );
       return response.data;
     },
@@ -94,9 +94,10 @@ export const useStartFreeTrial = () => {
 export const useCreateCheckout = () => {
   return useMutation({
     mutationFn: async (planId: string) => {
+      console.log({ planId });
       const response = await apiClient.post<{ url: string; sessionId: string }>(
         "/subscriptions/checkout",
-        { planId }
+        { planId },
       );
       return response.data;
     },
@@ -110,7 +111,7 @@ export const useCancelSubscription = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.post<Subscription>(
-        "/subscriptions/cancel"
+        "/subscriptions/cancel",
       );
       return response.data;
     },
@@ -139,4 +140,3 @@ export const useSubscriptionData = (isAuthenticated: boolean = false) => {
     },
   };
 };
-
