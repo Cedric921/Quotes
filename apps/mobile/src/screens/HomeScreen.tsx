@@ -7,6 +7,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   ViewStyle,
+  ImageBackground,
 } from "react-native";
 import * as Sharing from "expo-sharing";
 import {
@@ -40,6 +41,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const backgroundTheme = useAppSelector(
+    (state) => state.theme.backgroundTheme,
+  );
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -159,8 +163,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }
 
-  return (
-    <View style={styles.container}>
+  const content = (
+    <>
       {/* Header */}
       <Header />
 
@@ -213,8 +217,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           onLogin={handleLogin}
         />
       )}
-    </View>
+    </>
   );
+
+  // If a background theme is selected, wrap content in ImageBackground
+  if (backgroundTheme?.imageUrl) {
+    return (
+      <ImageBackground
+        source={{ uri: backgroundTheme.imageUrl }}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>{content}</View>
+      </ImageBackground>
+    );
+  }
+
+  return <View style={styles.container}>{content}</View>;
 }
 
 const createStyles = (colors: any) =>
@@ -222,6 +241,10 @@ const createStyles = (colors: any) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    } as ViewStyle,
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.3)",
     } as ViewStyle,
     footer: {
       height: height,

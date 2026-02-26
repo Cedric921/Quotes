@@ -75,7 +75,10 @@
     "selectLanguage": "Select language",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "backgroundTheme": "Background",
+    "noBackground": "No background",
+    "noThemesAvailable": "No themes available"
   },
   "profile": {
     "title": "Profile",

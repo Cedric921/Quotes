@@ -75,7 +75,10 @@
     "selectLanguage": "Seleccionar idioma",
     "light": "Claro",
     "dark": "Oscuro",
-    "system": "Sistema"
+    "system": "Sistema",
+    "backgroundTheme": "Fondo de pantalla",
+    "noBackground": "Sin fondo",
+    "noThemesAvailable": "No hay temas disponibles"
   },
   "profile": {
     "title": "Perfil",
