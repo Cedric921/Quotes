@@ -162,4 +162,24 @@ export const topicsApi = {
   },
 };
 
+export interface BackgroundTheme {
+  id: string;
+  name: string;
+  description?: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  order: number;
+  isActive: boolean;
+}
+
+export const themesApi = {
+  /**
+   * Get all active themes (max 10)
+   */
+  getActiveThemes: async (): Promise<BackgroundTheme[]> => {
+    const response = await apiClient.get<BackgroundTheme[]>("/themes/active");
+    return response.data;
+  },
+};
+
 export default apiClient;

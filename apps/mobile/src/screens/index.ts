@@ -9,3 +9,4 @@ export { NotificationsScreen } from "./NotificationsScreen";
 export { default as SubscriptionScreen } from "./SubscriptionScreen";
 export { default as TermsScreen } from "./TermsScreen";
 export { default as PrivacyScreen } from "./PrivacyScreen";
+export { default as ThemeSelectionScreen } from "./ThemeSelectionScreen";

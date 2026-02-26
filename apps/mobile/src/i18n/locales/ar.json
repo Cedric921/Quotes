@@ -75,7 +75,10 @@
     "selectLanguage": "اختر اللغة",
     "light": "فاتح",
     "dark": "داكن",
-    "system": "النظام"
+    "system": "النظام",
+    "backgroundTheme": "خلفية الشاشة",
+    "noBackground": "بدون خلفية",
+    "noThemesAvailable": "لا توجد خلفيات متاحة"
   },
   "profile": {
     "title": "الملف الشخصي",

@@ -13,6 +13,7 @@ import {
   SubscriptionScreen,
   TermsScreen,
   PrivacyScreen,
+  ThemeSelectionScreen,
 } from "../screens";
 import { navigationRef } from "../services/navigationService";
 
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   Subscription: undefined;
   Terms: undefined;
   Privacy: undefined;
+  ThemeSelection: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -56,6 +58,10 @@ export default function AppNavigator() {
           <Stack.Screen name="Subscription" component={SubscriptionScreen} />
           <Stack.Screen name="Terms" component={TermsScreen} />
           <Stack.Screen name="Privacy" component={PrivacyScreen} />
+          <Stack.Screen
+            name="ThemeSelection"
+            component={ThemeSelectionScreen}
+          />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />
