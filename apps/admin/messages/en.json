@@ -233,6 +233,7 @@
     "requiredFields": "Name and Stripe Price ID required",
     "stripePriceIdHint": "Get this ID from your Stripe Dashboard > Products > Price ID",
     "activeHint": "Active plans are visible on the mobile app",
+    "payments": "Payments",
     "paymentsTitle": "Payment History",
     "paymentsDescription": "View all user payments",
     "noPayments": "No payments yet",
