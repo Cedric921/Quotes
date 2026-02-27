@@ -151,7 +151,16 @@
     "success": "Abonnement réussi !",
     "error": "Échec de l'abonnement",
     "tryAgain": "Veuillez réessayer",
-    "termsNotice": "En vous abonnant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité"
+    "termsNotice": "En vous abonnant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité",
+    "billingSummary": "Résumé de facturation",
+    "totalSpent": "Total dépensé",
+    "totalPayments": "Paiements",
+    "history": "Historique des abonnements",
+    "ongoing": "En cours",
+    "paymentHistory": "Historique des paiements",
+    "paymentSucceeded": "Réussi",
+    "paymentPending": "En attente",
+    "paymentFailed": "Échoué"
   },
   "notifications": {
     "title": "Notifications",

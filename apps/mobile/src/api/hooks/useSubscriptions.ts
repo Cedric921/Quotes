@@ -6,6 +6,17 @@ import {
   AppConfig,
 } from "../../store/slices/subscriptionSlice";
 
+// Payment interface
+export interface Payment {
+  id: string;
+  amount: number;
+  currency: string;
+  status: "SUCCEEDED" | "PENDING" | "FAILED" | "REFUNDED";
+  stripePaymentIntentId?: string;
+  createdAt: string;
+  subscription?: Subscription;
+}
+
 // Query keys
 export const subscriptionKeys = {
   all: ["subscriptions"] as const,
@@ -13,6 +24,7 @@ export const subscriptionKeys = {
   config: () => [...subscriptionKeys.all, "config"] as const,
   current: () => [...subscriptionKeys.all, "current"] as const,
   history: () => [...subscriptionKeys.all, "history"] as const,
+  payments: () => [...subscriptionKeys.all, "payments"] as const,
 };
 
 // Fetch subscription plans
@@ -65,6 +77,20 @@ export const useSubscriptionHistory = (enabled: boolean = true) => {
     queryFn: async () => {
       const response = await apiClient.get<Subscription[]>(
         "/subscriptions/my-subscription/history",
+      );
+      return response.data;
+    },
+    enabled,
+  });
+};
+
+// Fetch user payments
+export const useUserPayments = (enabled: boolean = true) => {
+  return useQuery({
+    queryKey: subscriptionKeys.payments(),
+    queryFn: async () => {
+      const response = await apiClient.get<Payment[]>(
+        "/subscriptions/my-payments",
       );
       return response.data;
     },
