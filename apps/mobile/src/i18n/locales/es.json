@@ -161,7 +161,6 @@
     "notificationsInfo": "Reciba hasta 5 notificaciones por día en los horarios y días que elija para descubrir nuevas citas inspiradoras.",
     "selectAtLeastOneDay": "Selecciona al menos un día",
     "minNotificationsRequired": "Se requiere al menos una notificación",
-    "notification": "Notificación {{number}}",
     "testNotificationSent": "Notificación de prueba enviada",
     "checkYourDevice": "Revise su dispositivo para ver la notificación"
   },
@@ -211,5 +210,11 @@
     "paymentSucceeded": "Exitoso",
     "paymentPending": "Pendiente",
     "paymentFailed": "Fallido"
+  },
+  "widget": {
+    "title": "Widget Focus",
+    "description": "Muestra una cita inspiradora en tu pantalla de inicio",
+    "defaultQuote": "Abre la app Focus para descubrir una cita inspiradora.",
+    "defaultAuthor": "Focus"
   }
 }

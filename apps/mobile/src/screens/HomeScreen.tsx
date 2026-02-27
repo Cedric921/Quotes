@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect, useRef } from "react";
 import {
   View,
   FlatList,
@@ -25,6 +25,7 @@ import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAppSelector } from "../store/hooks";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
+import { widgetService } from "../services/widgetService";
 
 const { height } = Dimensions.get("window");
 
@@ -116,6 +117,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     navigation.navigate("Login");
   }, [navigation]);
 
+  const lastWidgetUpdateRef = useRef<string | null>(null);
+
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index || 0);
@@ -125,6 +128,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 50,
   };
+
+  // Update widget when current quote changes
+  useEffect(() => {
+    const currentQuote = filteredQuotes[currentIndex];
+    if (currentQuote && currentQuote.id !== lastWidgetUpdateRef.current) {
+      lastWidgetUpdateRef.current = currentQuote.id;
+      widgetService.updateWidgetQuote({
+        content: currentQuote.text,
+        author: currentQuote.author,
+        topicName: currentQuote.topic?.name,
+      });
+    }
+  }, [currentIndex, filteredQuotes]);
 
   const renderItem = useCallback(
     ({ item }: { item: Quote }) => (
