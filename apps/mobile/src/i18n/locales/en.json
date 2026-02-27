@@ -151,7 +151,16 @@
     "success": "Subscription successful!",
     "error": "Subscription failed",
     "tryAgain": "Please try again",
-    "termsNotice": "By subscribing, you agree to our Terms of Service and Privacy Policy"
+    "termsNotice": "By subscribing, you agree to our Terms of Service and Privacy Policy",
+    "billingSummary": "Billing Summary",
+    "totalSpent": "Total Spent",
+    "totalPayments": "Payments",
+    "history": "Subscription History",
+    "ongoing": "Ongoing",
+    "paymentHistory": "Payment History",
+    "paymentSucceeded": "Succeeded",
+    "paymentPending": "Pending",
+    "paymentFailed": "Failed"
   },
   "notifications": {
     "title": "Notifications",

@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { setSelectedPlan } from "../store/slices/subscriptionSlice";
 import { useThemeColors } from "../hooks";
@@ -23,7 +23,11 @@ import {
   useSubscriptionData,
   useStartFreeTrial,
   useCreateCheckout,
+  useSubscriptionHistory,
+  useUserPayments,
+  Payment,
 } from "../api/hooks/useSubscriptions";
+import { Subscription } from "../store/slices/subscriptionSlice";
 
 interface SubscriptionScreenProps {
   readonly navigation: any;
@@ -48,8 +52,18 @@ export default function SubscriptionScreen({
     useSubscriptionData(isAuthenticated);
   const startTrialMutation = useStartFreeTrial();
   const checkoutMutation = useCreateCheckout();
+  const { data: subscriptionHistory = [] } =
+    useSubscriptionHistory(isAuthenticated);
+  const { data: payments = [] } = useUserPayments(isAuthenticated);
 
   const [subscribing, setSubscribing] = useState(false);
+
+  // Calculate total spent
+  const totalSpent = useMemo(() => {
+    return payments
+      .filter((p: Payment) => p.status === "SUCCEEDED")
+      .reduce((sum: number, p: Payment) => sum + p.amount, 0);
+  }, [payments]);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -369,6 +383,152 @@ export default function SubscriptionScreen({
           </LinearGradient>
         </TouchableOpacity>
 
+        {/* Billing Summary */}
+        {isAuthenticated && (payments.length > 0 || totalSpent > 0) && (
+          <View style={styles.billingSummaryCard}>
+            <View style={styles.billingSummaryHeader}>
+              <Ionicons
+                name="wallet-outline"
+                size={24}
+                color={colors.primary}
+              />
+              <Text style={styles.billingSummaryTitle}>
+                {t("subscription.billingSummary")}
+              </Text>
+            </View>
+            <View style={styles.billingSummaryContent}>
+              <View style={styles.billingStat}>
+                <Text style={styles.billingStatValue}>
+                  €{totalSpent.toFixed(2)}
+                </Text>
+                <Text style={styles.billingStatLabel}>
+                  {t("subscription.totalSpent")}
+                </Text>
+              </View>
+              <View style={styles.billingStatDivider} />
+              <View style={styles.billingStat}>
+                <Text style={styles.billingStatValue}>{payments.length}</Text>
+                <Text style={styles.billingStatLabel}>
+                  {t("subscription.totalPayments")}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Subscription History */}
+        {isAuthenticated && subscriptionHistory.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>{t("subscription.history")}</Text>
+            {subscriptionHistory.map((sub: Subscription, index: number) => (
+              <View key={sub.id || index} style={styles.historyCard}>
+                <View style={styles.historyHeader}>
+                  <Text style={styles.historyPlanName}>
+                    {sub.plan?.name || t("subscription.freeTrial")}
+                  </Text>
+                  <View
+                    style={[
+                      styles.historyStatusBadge,
+                      {
+                        backgroundColor:
+                          sub.status === "ACTIVE"
+                            ? "rgba(34, 197, 94, 0.1)"
+                            : sub.status === "TRIAL"
+                              ? "rgba(59, 130, 246, 0.1)"
+                              : "rgba(107, 114, 128, 0.1)",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.historyStatusText,
+                        {
+                          color:
+                            sub.status === "ACTIVE"
+                              ? "#22c55e"
+                              : sub.status === "TRIAL"
+                                ? "#3b82f6"
+                                : "#6b7280",
+                        },
+                      ]}
+                    >
+                      {sub.status === "ACTIVE"
+                        ? t("subscription.subscriptionActive")
+                        : sub.status === "TRIAL"
+                          ? t("subscription.freeTrial")
+                          : sub.status === "CANCELLED"
+                            ? t("subscription.subscriptionCancelled")
+                            : t("subscription.subscriptionExpired")}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.historyDates}>
+                  <Text style={styles.historyDateText}>
+                    {new Date(sub.startDate).toLocaleDateString()} -{" "}
+                    {sub.endDate
+                      ? new Date(sub.endDate).toLocaleDateString()
+                      : t("subscription.ongoing")}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* Payment History */}
+        {isAuthenticated && payments.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>
+              {t("subscription.paymentHistory")}
+            </Text>
+            {payments.slice(0, 5).map((payment: Payment, index: number) => (
+              <View key={payment.id || index} style={styles.paymentCard}>
+                <View style={styles.paymentInfo}>
+                  <Text style={styles.paymentAmount}>
+                    €{payment.amount.toFixed(2)}
+                  </Text>
+                  <Text style={styles.paymentDate}>
+                    {new Date(payment.createdAt).toLocaleDateString()}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.paymentStatusBadge,
+                    {
+                      backgroundColor:
+                        payment.status === "SUCCEEDED"
+                          ? "rgba(34, 197, 94, 0.1)"
+                          : payment.status === "PENDING"
+                            ? "rgba(245, 158, 11, 0.1)"
+                            : "rgba(239, 68, 68, 0.1)",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.paymentStatusText,
+                      {
+                        color:
+                          payment.status === "SUCCEEDED"
+                            ? "#22c55e"
+                            : payment.status === "PENDING"
+                              ? "#f59e0b"
+                              : "#ef4444",
+                      },
+                    ]}
+                  >
+                    {payment.status === "SUCCEEDED"
+                      ? t("subscription.paymentSucceeded")
+                      : payment.status === "PENDING"
+                        ? t("subscription.paymentPending")
+                        : t("subscription.paymentFailed")}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+
         {/* Terms Notice */}
         <Text style={styles.termsNotice}>{t("subscription.termsNotice")}</Text>
       </ScrollView>
@@ -573,6 +733,109 @@ const createStyles = (colors: any) =>
       fontSize: 18,
       fontWeight: "700" as const,
       color: "#fff",
+    } as TextStyle,
+    billingSummaryCard: {
+      backgroundColor: colors.backgroundSecondary,
+      borderRadius: 16,
+      padding: 20,
+      marginTop: 24,
+    } as ViewStyle,
+    billingSummaryHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      columnGap: 12,
+      marginBottom: 16,
+    } as ViewStyle,
+    billingSummaryTitle: {
+      fontSize: 18,
+      fontWeight: "600" as const,
+      color: colors.text,
+    } as TextStyle,
+    billingSummaryContent: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-around",
+    } as ViewStyle,
+    billingStat: {
+      alignItems: "center",
+    } as ViewStyle,
+    billingStatValue: {
+      fontSize: 24,
+      fontWeight: "700" as const,
+      color: colors.text,
+    } as TextStyle,
+    billingStatLabel: {
+      fontSize: 12,
+      color: colors.textTertiary,
+      marginTop: 4,
+    } as TextStyle,
+    billingStatDivider: {
+      width: 1,
+      height: 40,
+      backgroundColor: colors.border,
+    } as ViewStyle,
+    historyCard: {
+      backgroundColor: colors.backgroundSecondary,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 8,
+    } as ViewStyle,
+    historyHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    } as ViewStyle,
+    historyPlanName: {
+      fontSize: 16,
+      fontWeight: "600" as const,
+      color: colors.text,
+    } as TextStyle,
+    historyStatusBadge: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+    } as ViewStyle,
+    historyStatusText: {
+      fontSize: 11,
+      fontWeight: "600" as const,
+    } as TextStyle,
+    historyDates: {
+      marginTop: 8,
+    } as ViewStyle,
+    historyDateText: {
+      fontSize: 13,
+      color: colors.textTertiary,
+    } as TextStyle,
+    paymentCard: {
+      backgroundColor: colors.backgroundSecondary,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 8,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    } as ViewStyle,
+    paymentInfo: {
+      flex: 1,
+    } as ViewStyle,
+    paymentAmount: {
+      fontSize: 16,
+      fontWeight: "600" as const,
+      color: colors.text,
+    } as TextStyle,
+    paymentDate: {
+      fontSize: 13,
+      color: colors.textTertiary,
+      marginTop: 2,
+    } as TextStyle,
+    paymentStatusBadge: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+    } as ViewStyle,
+    paymentStatusText: {
+      fontSize: 11,
+      fontWeight: "600" as const,
     } as TextStyle,
     termsNotice: {
       fontSize: 12,
