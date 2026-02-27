@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { ThemesModule } from './themes/themes.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ThemesModule } from './themes/themes.module';
     NotificationsModule,
     SubscriptionsModule,
     ThemesModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
