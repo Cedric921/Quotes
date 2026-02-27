@@ -19,7 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:reset": "rm -f database.sqlite && echo '✅ Database reset! Start the server to create a new database with UUID.'"
+    "db:reset": "rm -f database.sqlite && echo '✅ Database reset! Start the server to create a new database with UUID.'",
+    "db:seed": "ts-node -r tsconfig-paths/register src/seeds/seed-database.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
