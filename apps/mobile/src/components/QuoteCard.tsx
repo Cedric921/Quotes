@@ -43,6 +43,7 @@ function getTopicGradient(color?: string): [string, string, ...string[]] {
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { useAppSelector } from "../store/hooks";
 
 const { height } = Dimensions.get("window");
 
@@ -76,6 +77,7 @@ export default function QuoteCard({
   const navigation = useNavigation<NavigationProp>();
   const [liked, setLiked] = useState(isLiked);
   const [lastTap, setLastTap] = useState(0);
+  const selectedFont = useAppSelector((state) => state.font.selectedFont);
 
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(0)).current;
@@ -155,10 +157,28 @@ export default function QuoteCard({
         </Animated.Text>
 
         <View style={styles.content}>
-          <Text style={styles.quoteText}>"{quote.text}"</Text>
+          <Text
+            style={[
+              styles.quoteText,
+              selectedFont?.fontFamily && {
+                fontFamily: selectedFont.fontFamily,
+              },
+            ]}
+          >
+            "{quote.text}"
+          </Text>
 
           {Boolean(quote.author) && (
-            <Text style={styles.author}>— {quote.author}</Text>
+            <Text
+              style={[
+                styles.author,
+                selectedFont?.fontFamily && {
+                  fontFamily: selectedFont.fontFamily,
+                },
+              ]}
+            >
+              — {quote.author}
+            </Text>
           )}
         </View>
 

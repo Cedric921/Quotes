@@ -34,3 +34,13 @@ export interface User extends BaseModel {
   isPremium?: boolean;
   likedQuotesCount?: number;
 }
+
+export interface Font extends BaseModel {
+  name: string;
+  fontFamily: string;
+  description?: string;
+  previewText?: string;
+  isActive: boolean;
+  isPremium: boolean;
+  order: number;
+}

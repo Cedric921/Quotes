@@ -15,6 +15,7 @@ import {
   Settings,
   CreditCard,
   Image,
+  Type,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,11 @@ export default function DashboardLayout({
       href: "/dashboard/themes",
       icon: Image,
       label: t.nav.themes || "Thèmes",
+    },
+    {
+      href: "/dashboard/fonts",
+      icon: Type,
+      label: t.nav.fonts || "Polices",
     },
     {
       href: "/dashboard/subscriptions",

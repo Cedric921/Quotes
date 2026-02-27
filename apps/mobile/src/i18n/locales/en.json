@@ -78,7 +78,9 @@
     "system": "System",
     "backgroundTheme": "Background",
     "noBackground": "No background",
-    "noThemesAvailable": "No themes available"
+    "noThemesAvailable": "No themes available",
+    "fonts": "Fonts",
+    "defaultFont": "Default Font"
   },
   "profile": {
     "title": "Profile",

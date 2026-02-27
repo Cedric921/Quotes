@@ -14,6 +14,7 @@ import {
   TermsScreen,
   PrivacyScreen,
   ThemeSelectionScreen,
+  FontSelectionScreen,
 } from "../screens";
 import { navigationRef } from "../services/navigationService";
 
@@ -33,6 +34,7 @@ export type RootStackParamList = {
   Terms: undefined;
   Privacy: undefined;
   ThemeSelection: undefined;
+  FontSelection: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -62,6 +64,7 @@ export default function AppNavigator() {
             name="ThemeSelection"
             component={ThemeSelectionScreen}
           />
+          <Stack.Screen name="FontSelection" component={FontSelectionScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

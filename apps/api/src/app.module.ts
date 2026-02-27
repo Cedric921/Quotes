@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { ThemesModule } from './themes/themes.module';
+import { FontsModule } from './fonts/fonts.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -28,6 +29,7 @@ import { HealthModule } from './health/health.module';
     NotificationsModule,
     SubscriptionsModule,
     ThemesModule,
+    FontsModule,
     HealthModule,
   ],
   controllers: [AppController],
