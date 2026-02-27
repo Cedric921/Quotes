@@ -32,7 +32,13 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
 
   // Option 1: Use DATABASE_URL directly (full connection string)
   if (databaseUrl && databaseUrl.startsWith('postgres')) {
+    // Mask password in URL for logging
+    const maskedUrl = databaseUrl.replace(
+      /(:\/\/[^:]+:)([^@]+)(@)/,
+      '$1****$3',
+    );
     console.log('🐘 Using PostgreSQL from DATABASE_URL');
+    console.log(`📍 Database URL: ${maskedUrl}`);
 
     // Parse the URL to extract host and password for extra options
     try {
