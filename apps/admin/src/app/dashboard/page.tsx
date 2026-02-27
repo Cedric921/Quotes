@@ -81,11 +81,16 @@ interface StripeStatus extends ServiceStatus {
   apiKeyConfigured?: boolean;
 }
 
+interface DatabaseStatus extends ServiceStatus {
+  type?: "postgres" | "sqlite";
+  provider?: "supabase" | "direct" | "local";
+}
+
 interface HealthCheckResponse {
   status: "healthy" | "degraded" | "unhealthy";
   timestamp: string;
   services: {
-    database: ServiceStatus;
+    database: DatabaseStatus;
     stripe: StripeStatus;
     cloudinary: ServiceStatus;
   };
@@ -152,7 +157,12 @@ export default function DashboardPage() {
         status: "unhealthy",
         timestamp: new Date().toISOString(),
         services: {
-          database: { status: "error", message: "Unable to check" },
+          database: {
+            status: "error",
+            message: "Unable to check",
+            type: "sqlite",
+            provider: "local",
+          },
           stripe: {
             status: "error",
             message: "Unable to check",
@@ -784,7 +794,14 @@ export default function DashboardPage() {
                     <p className="font-medium text-sm">
                       {t.dashboard.services?.database || "Base de données"}
                     </p>
-                    <p className="text-xs text-muted-foreground">SQLite</p>
+                    <p className="text-xs text-muted-foreground">
+                      {healthStatus?.services.database.type === "postgres"
+                        ? healthStatus?.services.database.provider ===
+                          "supabase"
+                          ? "Supabase (PostgreSQL)"
+                          : "PostgreSQL"
+                        : "SQLite"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">

@@ -36,8 +36,7 @@ export class Payment extends BaseEntity {
   currency: string;
 
   @Column({
-    type: 'simple-enum',
-    enum: PaymentStatus,
+    type: 'varchar',
     default: PaymentStatus.PENDING,
   })
   status: PaymentStatus;
@@ -51,7 +50,7 @@ export class Payment extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   paidAt: Date;
 
   @Column({ type: 'text', nullable: true })

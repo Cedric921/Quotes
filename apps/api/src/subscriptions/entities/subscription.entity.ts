@@ -31,16 +31,15 @@ export class Subscription extends BaseEntity {
   plan: SubscriptionPlan | null;
 
   @Column({
-    type: 'simple-enum',
-    enum: SubscriptionStatus,
+    type: 'varchar',
     default: SubscriptionStatus.ACTIVE,
   })
   status: SubscriptionStatus;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamp' })
   startDate: Date;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamp' })
   endDate: Date;
 
   @Column({ nullable: true })
@@ -52,7 +51,7 @@ export class Subscription extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   autoRenew: boolean;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   cancelledAt: Date;
 
   @OneToMany(() => Payment, (payment) => payment.subscription)
