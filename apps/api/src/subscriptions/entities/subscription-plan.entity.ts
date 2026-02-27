@@ -16,8 +16,7 @@ export class SubscriptionPlan extends BaseEntity {
   description: string;
 
   @Column({
-    type: 'simple-enum',
-    enum: PlanType,
+    type: 'varchar',
     default: PlanType.MONTHLY,
   })
   type: PlanType;

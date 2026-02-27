@@ -78,7 +78,9 @@
     "system": "Système",
     "backgroundTheme": "Fond d'écran",
     "noBackground": "Aucun fond",
-    "noThemesAvailable": "Aucun thème disponible"
+    "noThemesAvailable": "Aucun thème disponible",
+    "fonts": "Polices",
+    "defaultFont": "Police par défaut"
   },
   "profile": {
     "title": "Profil",

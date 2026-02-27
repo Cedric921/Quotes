@@ -182,4 +182,26 @@ export const themesApi = {
   },
 };
 
+// Font types
+export interface FontItem {
+  id: string;
+  name: string;
+  fontFamily: string;
+  description?: string;
+  previewText?: string;
+  isActive: boolean;
+  isPremium: boolean;
+  order: number;
+}
+
+export const fontsApi = {
+  /**
+   * Get all active fonts (max 10)
+   */
+  getActiveFonts: async (): Promise<FontItem[]> => {
+    const response = await apiClient.get<FontItem[]>("/fonts/active");
+    return response.data;
+  },
+};
+
 export default apiClient;

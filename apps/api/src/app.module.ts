@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,16 +11,17 @@ import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { ThemesModule } from './themes/themes.module';
+import { FontsModule } from './fonts/fonts.module';
 import { HealthModule } from './health/health.module';
+import { getDatabaseConfig } from './config/database.config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'database.sqlite',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.local', '.env'],
     }),
+    TypeOrmModule.forRoot(getDatabaseConfig()),
     ScheduleModule.forRoot(),
     UsersModule,
     QuotesModule,
@@ -28,6 +30,7 @@ import { HealthModule } from './health/health.module';
     NotificationsModule,
     SubscriptionsModule,
     ThemesModule,
+    FontsModule,
     HealthModule,
   ],
   controllers: [AppController],

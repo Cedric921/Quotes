@@ -8,6 +8,7 @@ import { store, RootState } from "./src/store";
 import { queryClient } from "./src/api/queryClient";
 import { loadStoredAuth } from "./src/store/slices/authSlice";
 import { loadStoredTheme } from "./src/store/slices/themeSlice";
+import { loadStoredFont } from "./src/store/slices/fontSlice";
 import { useTrackActivity } from "./src/api/hooks/useUserActivity";
 import { setupNotificationChannel } from "./src/services/notificationService";
 import "./src/i18n"; // Initialiser i18n
@@ -33,9 +34,10 @@ function AppContent() {
   const trackActivity = useTrackActivity();
 
   useEffect(() => {
-    // Load stored authentication and theme on app start
+    // Load stored authentication, theme and font on app start
     store.dispatch(loadStoredAuth());
     store.dispatch(loadStoredTheme());
+    store.dispatch(loadStoredFont());
 
     // Setup notification channel for Android
     setupNotificationChannel();
