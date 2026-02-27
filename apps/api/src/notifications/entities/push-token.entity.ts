@@ -26,7 +26,7 @@ export class PushToken extends BaseEntity {
   platform: string;
 
   // Last time this token was used successfully
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   lastUsedAt: Date;
 
   // Whether this token is still valid

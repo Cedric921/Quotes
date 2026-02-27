@@ -50,7 +50,7 @@ export class Payment extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   paidAt: Date;
 
   @Column({ type: 'text', nullable: true })
