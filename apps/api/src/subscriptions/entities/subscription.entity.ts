@@ -36,10 +36,10 @@ export class Subscription extends BaseEntity {
   })
   status: SubscriptionStatus;
 
-  @Column({ type: 'timestamp' })
+  @Column()
   startDate: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column()
   endDate: Date;
 
   @Column({ nullable: true })
@@ -51,7 +51,7 @@ export class Subscription extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   autoRenew: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   cancelledAt: Date;
 
   @OneToMany(() => Payment, (payment) => payment.subscription)
