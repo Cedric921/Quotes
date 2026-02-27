@@ -211,5 +211,11 @@
     "notification": "Notification {{number}}",
     "testNotificationSent": "Notification test envoyée",
     "checkYourDevice": "Vérifiez votre appareil pour la notification"
+  },
+  "widget": {
+    "title": "Widget Focus",
+    "description": "Affiche une citation inspirante sur votre écran d'accueil",
+    "defaultQuote": "Ouvrez l'app Focus pour découvrir une citation inspirante.",
+    "defaultAuthor": "Focus"
   }
 }

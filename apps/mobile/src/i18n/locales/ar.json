@@ -211,5 +211,11 @@
     "paymentSucceeded": "ناجح",
     "paymentPending": "قيد الانتظار",
     "paymentFailed": "فشل"
+  },
+  "widget": {
+    "title": "ويدجت Focus",
+    "description": "عرض اقتباس ملهم على شاشتك الرئيسية",
+    "defaultQuote": "افتح تطبيق Focus لاكتشاف اقتباس ملهم.",
+    "defaultAuthor": "Focus"
   }
 }

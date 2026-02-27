@@ -40,6 +40,11 @@ export default ({ config }) => {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.focus.quotes",
+      entitlements: {
+        "com.apple.security.application-groups": [
+          "group.com.focus.quotes.widget",
+        ],
+      },
     },
     android: {
       adaptiveIcon: {
@@ -53,7 +58,41 @@ export default ({ config }) => {
     web: {
       favicon: "./assets/favicon.png",
     },
-    plugins: ["expo-localization"],
+    plugins: [
+      "expo-localization",
+      "@bacons/apple-targets",
+      [
+        "react-native-android-widget",
+        {
+          widgets: [
+            {
+              name: "FocusQuoteWidget",
+              label: "Focus Quote",
+              description: "Affiche une citation inspirante",
+              minWidth: "110dp",
+              minHeight: "40dp",
+              previewImage: "./assets/widget-preview.png",
+              resizeMode: "horizontal|vertical",
+              widgetFeatures: "reconfigurable",
+              targetCellWidth: 2,
+              targetCellHeight: 1,
+            },
+            {
+              name: "FocusQuoteWidgetLarge",
+              label: "Focus Quote (Grand)",
+              description: "Citation inspirante en grand format",
+              minWidth: "250dp",
+              minHeight: "110dp",
+              previewImage: "./assets/widget-preview-large.png",
+              resizeMode: "horizontal|vertical",
+              widgetFeatures: "reconfigurable",
+              targetCellWidth: 4,
+              targetCellHeight: 2,
+            },
+          ],
+        },
+      ],
+    ],
     extra: {
       API_URL: apiUrl,
       API_TIMEOUT: apiTimeout,
