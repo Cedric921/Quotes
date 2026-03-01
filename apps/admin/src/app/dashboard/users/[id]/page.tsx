@@ -336,8 +336,8 @@ export default function UserDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <div className="text-3xl font-bold blur-[2px] select-none">
-                    ${totalSpent.toFixed(2)}
+                  <div className="text-3xl font-bold">
+                    €{totalSpent.toFixed(2)}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Depuis le début

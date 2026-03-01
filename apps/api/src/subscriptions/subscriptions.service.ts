@@ -214,6 +214,61 @@ export class SubscriptionsService {
     });
   }
 
+  // Get all payments (subscriptions formatted as payments for admin)
+  async getAllPayments(
+    page = 1,
+    limit = 20,
+  ): Promise<{ payments: any[]; total: number }> {
+    const [subscriptions, total] =
+      await this.subscriptionRepository.findAndCount({
+        relations: ['plan', 'user'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+    // Format subscriptions as payments
+    const payments = subscriptions.map((sub) => ({
+      id: sub.id,
+      userId: sub.userId,
+      user: sub.user ? { email: sub.user.email } : null,
+      subscriptionId: sub.id,
+      subscription: {
+        plan: sub.plan ? { name: sub.plan.name } : null,
+      },
+      amount: sub.amountPaid || 0,
+      currency: 'EUR',
+      status:
+        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
+      stripePaymentIntentId: sub.stripePaymentIntentId,
+      paidAt: sub.startDate,
+      createdAt: sub.createdAt,
+    }));
+
+    return { payments, total };
+  }
+
+  // Get user payments (from subscription history)
+  async getUserPayments(userId: string): Promise<any[]> {
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { userId },
+      relations: ['plan'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return subscriptions.map((sub) => ({
+      id: sub.id,
+      amount: sub.amountPaid || 0,
+      createdAt: sub.createdAt,
+      paidAt: sub.startDate,
+      status:
+        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
+      subscription: {
+        plan: sub.plan ? { name: sub.plan.name } : null,
+      },
+    }));
+  }
+
   // ============ STRIPE PAYMENT INTENT (Simple) ============
 
   async createPaymentIntent(
