@@ -40,6 +40,18 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
     connectTimeoutMS: 30000,
   });
 
+  if (process.env.DATABASE_URL) {
+    return {
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      synchronize: false,
+    };
+  }
+
   // Option 1: Use DATABASE_URL directly (full connection string)
   if (databaseUrl && databaseUrl.startsWith('postgres')) {
     // Mask password in URL for logging
