@@ -298,7 +298,7 @@ export default function SubscriptionsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-semibold">
-                      €{plan.price.toFixed(2)}
+                      €{plan?.price?.toFixed(2)}
                     </TableCell>
                     <TableCell>
                       {plan.discountPercentage > 0 ? (

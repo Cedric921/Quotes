@@ -20,7 +20,6 @@ import { SubscriptionsService } from './subscriptions.service';
 import {
   CreateSubscriptionPlanDto,
   UpdateSubscriptionPlanDto,
-  CreateSubscriptionDto,
   UpdateConfigDto,
 } from './dto';
 import Stripe from 'stripe';
@@ -59,15 +58,6 @@ export class SubscriptionsController {
     return this.subscriptionsService.getConfig();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('stats')
-  async getStats(@Request() req: AuthenticatedRequest) {
-    if (!req.user.isAdmin) {
-      throw new ForbiddenException('Only admins can view subscription stats');
-    }
-    return this.subscriptionsService.getStats();
-  }
-
   // ============ USER ROUTES ============
 
   @UseGuards(JwtAuthGuard)
@@ -85,24 +75,15 @@ export class SubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('my-payments')
-  async getMyPayments(@Request() req: AuthenticatedRequest) {
-    return this.subscriptionsService.getUserPayments(req.user.userId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('subscribe')
-  async subscribe(
+  @Post('create-payment-intent')
+  async createPaymentIntent(
     @Request() req: AuthenticatedRequest,
-    @Body() dto: CreateSubscriptionDto,
+    @Body('planId') planId: string,
   ) {
-    return this.subscriptionsService.createSubscription(req.user.userId, dto);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('start-trial')
-  async startTrial(@Request() req: AuthenticatedRequest) {
-    return this.subscriptionsService.startFreeTrial(req.user.userId);
+    return this.subscriptionsService.createPaymentIntent(
+      req.user.userId,
+      planId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -111,19 +92,31 @@ export class SubscriptionsController {
     return this.subscriptionsService.cancelSubscription(req.user.userId);
   }
 
+  // ============ ADMIN ROUTES ============
+
   @UseGuards(JwtAuthGuard)
-  @Post('checkout')
-  async createCheckoutSession(
-    @Request() req: AuthenticatedRequest,
-    @Body('planId') planId: string,
-  ) {
-    return this.subscriptionsService.createStripeCheckoutSession(
-      req.user.userId,
-      planId,
-    );
+  @Get('stats')
+  async getStats(@Request() req: AuthenticatedRequest) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view subscription stats');
+    }
+    return this.subscriptionsService.getStats();
   }
 
-  // ============ ADMIN ROUTES ============
+  @UseGuards(JwtAuthGuard)
+  @Get('all')
+  async getAllSubscriptions(
+    @Request() req: AuthenticatedRequest,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view all subscriptions');
+    }
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.subscriptionsService.getAllSubscriptions(pageNum, limitNum);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post('plans')
@@ -175,21 +168,6 @@ export class SubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('payments')
-  async getAllPayments(
-    @Request() req: AuthenticatedRequest,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    if (!req.user.isAdmin) {
-      throw new ForbiddenException('Only admins can view all payments');
-    }
-    const pageNum = page ? parseInt(page, 10) : 1;
-    const limitNum = limit ? parseInt(limit, 10) : 20;
-    return this.subscriptionsService.getAllPayments(pageNum, limitNum);
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Get('users/:userId/subscription')
   async getUserSubscription(
     @Request() req: AuthenticatedRequest,
@@ -213,18 +191,6 @@ export class SubscriptionsController {
       );
     }
     return this.subscriptionsService.getUserSubscriptionHistory(userId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('users/:userId/payments')
-  async getUserPayments(
-    @Request() req: AuthenticatedRequest,
-    @Param('userId') userId: string,
-  ) {
-    if (!req.user.isAdmin) {
-      throw new ForbiddenException('Only admins can view user payments');
-    }
-    return this.subscriptionsService.getUserPayments(userId);
   }
 
   // ============ STRIPE WEBHOOK ============

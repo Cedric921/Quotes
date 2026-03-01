@@ -286,7 +286,7 @@ export default function SubscriptionScreen({
             </View>
             <View style={styles.planPricing}>
               <Text style={styles.planPrice}>
-                €{monthlyPlan.price.toFixed(2)}
+                €{monthlyPlan?.price?.toFixed(2)}
               </Text>
               <Text style={styles.planPeriod}>
                 {t("subscription.perMonth")}
