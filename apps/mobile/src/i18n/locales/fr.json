@@ -158,6 +158,7 @@
     "paymentSuccess": "Paiement réussi !",
     "subscriptionActivated": "Votre abonnement est maintenant actif",
     "checkingPayment": "Vérification du paiement en cours...",
+    "pleaseWait": "Votre abonnement est en cours de traitement. Veuillez patienter.",
     "termsNotice": "En vous abonnant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité",
     "billingSummary": "Résumé de facturation",
     "totalSpent": "Total dépensé",

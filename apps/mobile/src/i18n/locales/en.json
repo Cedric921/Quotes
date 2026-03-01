@@ -158,6 +158,7 @@
     "paymentSuccess": "Payment successful!",
     "subscriptionActivated": "Your subscription is now active",
     "checkingPayment": "Checking payment status...",
+    "pleaseWait": "Your subscription is being processed. Please wait.",
     "termsNotice": "By subscribing, you agree to our Terms of Service and Privacy Policy",
     "billingSummary": "Billing Summary",
     "totalSpent": "Total Spent",

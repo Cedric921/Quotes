@@ -104,22 +104,47 @@ export default function SubscriptionScreen({
         return;
       }
 
-      // 4. Browser was dismissed - refresh to check if subscription was created
+      // 4. Browser was dismissed - check if subscription was created by webhook
       Toast.show({
         type: "info",
         text1: t("subscription.processing"),
         text2: t("subscription.checkingPayment"),
       });
 
-      // Refresh data after a delay to allow webhook to process
-      setTimeout(() => {
-        refetch();
+      // Poll to check if subscription was created (webhook may take a moment)
+      let attempts = 0;
+      const maxAttempts = 5;
+      const checkSubscription = async () => {
+        attempts++;
+        const result = await refetch();
+
+        if (result.data?.currentSubscription) {
+          Toast.show({
+            type: "success",
+            text1: t("subscription.paymentSuccess"),
+            text2: t("subscription.subscriptionActivated"),
+          });
+          return true;
+        }
+
+        if (attempts < maxAttempts) {
+          // Wait and retry
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          return checkSubscription();
+        }
+
+        // No subscription found after all attempts - may still be processing
         Toast.show({
-          type: "success",
-          text1: t("subscription.paymentSuccess"),
-          text2: t("subscription.subscriptionActivated"),
+          type: "info",
+          text1: t("subscription.processing"),
+          text2:
+            t("subscription.pleaseWait") ||
+            "Your subscription is being processed. Please refresh shortly.",
         });
-      }, 3000);
+        return false;
+      };
+
+      await checkSubscription();
     } catch (error: any) {
       Toast.show({
         type: "error",
