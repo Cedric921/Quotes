@@ -40,7 +40,7 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
     connectTimeoutMS: 30000,
   });
 
-  if (process.env.DATABASE_URL) {
+  if (databaseUrl) {
     return {
       type: 'postgres',
       url: process.env.DATABASE_URL,
