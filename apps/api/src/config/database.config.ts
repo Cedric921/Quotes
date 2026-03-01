@@ -10,7 +10,7 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
     throw new Error('DATABASE_URL is required');
   }
 
-  console.log('🐘 Connecting to PostgreSQL...');
+  console.log('🐘 Connecting to PostgreSQL...', databaseUrl);
 
   return {
     type: 'postgres',
