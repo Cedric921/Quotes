@@ -204,6 +204,48 @@ export class SubscriptionsController {
     return this.subscriptionsService.getAllSubscriptions(pageNum, limitNum);
   }
 
+  // Payments endpoint - returns subscriptions formatted as payments
+  @UseGuards(JwtAuthGuard)
+  @Get('payments')
+  async getAllPayments(
+    @Request() req: AuthenticatedRequest,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view payments');
+    }
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    return this.subscriptionsService.getAllPayments(pageNum, limitNum);
+  }
+
+  // Get user's subscription for admin
+  @UseGuards(JwtAuthGuard)
+  @Get('users/:userId/subscription')
+  async getUserSubscriptionAdmin(
+    @Request() req: AuthenticatedRequest,
+    @Param('userId') userId: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view user subscriptions');
+    }
+    return this.subscriptionsService.getUserSubscription(userId);
+  }
+
+  // Get user's payment history for admin (from subscriptions)
+  @UseGuards(JwtAuthGuard)
+  @Get('users/:userId/payments')
+  async getUserPaymentsAdmin(
+    @Request() req: AuthenticatedRequest,
+    @Param('userId') userId: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view user payments');
+    }
+    return this.subscriptionsService.getUserPayments(userId);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('plans')
   async createPlan(
