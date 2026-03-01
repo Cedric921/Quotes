@@ -1,16 +1,14 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsString()
   @IsNotEmpty()
   planId: string;
-
-  @IsString()
-  @IsOptional()
-  stripePaymentMethodId?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  autoRenew?: boolean;
 }
 
+// DTO pour créer un Payment Intent
+export class CreatePaymentIntentDto {
+  @IsString()
+  @IsNotEmpty()
+  planId: string;
+}

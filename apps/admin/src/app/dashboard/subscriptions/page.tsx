@@ -13,6 +13,8 @@ import {
   X,
   Loader2,
   AlertTriangle,
+  Users,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,13 +52,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 
@@ -64,17 +60,29 @@ interface Plan {
   id: string;
   name: string;
   description: string;
-  type: "MONTHLY" | "YEARLY";
   price: number;
-  discountPercentage: number;
-  isActive: boolean;
-  stripePriceId?: string;
   durationMonths: number;
+  isActive: boolean;
+}
+
+interface Subscription {
+  id: string;
+  userId: string;
+  planId: string;
+  status: "ACTIVE" | "EXPIRED" | "CANCELLED";
+  startDate: string;
+  endDate: string;
+  amountPaid: number;
+  stripePaymentIntentId?: string;
+  createdAt: string;
+  user?: { email: string };
+  plan?: { name: string };
 }
 
 export default function SubscriptionsPage() {
   const { t } = useLocale();
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
@@ -84,12 +92,9 @@ export default function SubscriptionsPage() {
   const [planForm, setPlanForm] = useState({
     name: "",
     description: "",
-    type: "MONTHLY" as "MONTHLY" | "YEARLY",
     price: 0,
-    discountPercentage: 0,
-    isActive: true,
-    stripePriceId: "",
     durationMonths: 1,
+    isActive: true,
   });
 
   const fetchPlans = useCallback(async () => {
@@ -99,25 +104,31 @@ export default function SubscriptionsPage() {
     } catch (error) {
       console.error("Failed to fetch plans:", error);
       toast.error(t.subscriptions?.loadError || "Erreur lors du chargement");
-    } finally {
-      setLoading(false);
     }
   }, [t.subscriptions?.loadError]);
 
+  const fetchSubscriptions = useCallback(async () => {
+    try {
+      const response = await apiClient.get("/subscriptions/all");
+      setSubscriptions(response.data.subscriptions || []);
+    } catch (error) {
+      console.error("Failed to fetch subscriptions:", error);
+    }
+  }, []);
+
   useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
+    Promise.all([fetchPlans(), fetchSubscriptions()]).finally(() =>
+      setLoading(false),
+    );
+  }, [fetchPlans, fetchSubscriptions]);
 
   const resetForm = () => {
     setPlanForm({
       name: "",
       description: "",
-      type: "MONTHLY",
       price: 0,
-      discountPercentage: 0,
-      isActive: true,
-      stripePriceId: "",
       durationMonths: 1,
+      isActive: true,
     });
     setEditingPlan(null);
   };
@@ -127,14 +138,10 @@ export default function SubscriptionsPage() {
       setEditingPlan(plan);
       setPlanForm({
         name: plan.name,
-        description: plan.description,
-        type: plan.type,
+        description: plan.description || "",
         price: plan.price,
-        discountPercentage: plan.discountPercentage,
+        durationMonths: plan.durationMonths || 1,
         isActive: plan.isActive,
-        stripePriceId: plan.stripePriceId || "",
-        durationMonths:
-          plan.durationMonths || (plan.type === "YEARLY" ? 12 : 1),
       });
     } else {
       resetForm();
@@ -143,10 +150,8 @@ export default function SubscriptionsPage() {
   };
 
   const savePlan = async () => {
-    if (!planForm.name || !planForm.stripePriceId) {
-      toast.error(
-        t.subscriptions?.requiredFields || "Nom et Stripe Price ID requis",
-      );
+    if (!planForm.name || planForm.price <= 0) {
+      toast.error(t.subscriptions?.requiredFields || "Nom et prix requis");
       return;
     }
 
@@ -201,6 +206,14 @@ export default function SubscriptionsPage() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -219,166 +232,221 @@ export default function SubscriptionsPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">
-              {t.subscriptions?.title || "Plans d'abonnement"}
+              {t.subscriptions?.title || "Abonnements"}
             </h1>
             <p className="text-muted-foreground">
               {t.subscriptions?.description ||
-                "Gérer les plans disponibles pour les utilisateurs"}
+                "Gérer les plans et voir les abonnements"}
             </p>
           </div>
         </div>
-        <Button onClick={() => openPlanSheet()} className="gap-2">
-          <Plus className="w-4 h-4" />
-          {t.subscriptions?.addPlan || "Nouveau plan"}
-        </Button>
       </div>
 
-      {/* Plans Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t.subscriptions?.plans || "Plans"}</CardTitle>
-          <CardDescription>
-            {t.subscriptions?.plansDescription ||
-              "Ces plans seront affichés aux utilisateurs sur l'application mobile"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {plans.length === 0 ? (
-            <div className="text-center py-12">
-              <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                {t.subscriptions?.noPlans || "Aucun plan"}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {t.subscriptions?.startAddingPlans ||
-                  "Commencez par créer votre premier plan d'abonnement"}
-              </p>
-              <Button onClick={() => openPlanSheet()}>
-                <Plus className="w-4 h-4 mr-2" />
-                {t.subscriptions?.addPlan || "Nouveau plan"}
+      <Tabs defaultValue="plans" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="plans" className="gap-2">
+            <CreditCard className="w-4 h-4" />
+            Plans
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions" className="gap-2">
+            <Users className="w-4 h-4" />
+            Abonnements ({subscriptions.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Plans Tab */}
+        <TabsContent value="plans">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>{t.subscriptions?.plans || "Plans"}</CardTitle>
+                <CardDescription>
+                  Plans affichés aux utilisateurs sur l'app mobile
+                </CardDescription>
+              </div>
+              <Button onClick={() => openPlanSheet()} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Nouveau plan
               </Button>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t.subscriptions?.planName || "Nom"}</TableHead>
-                  <TableHead>{t.subscriptions?.planType || "Type"}</TableHead>
-                  <TableHead>{t.subscriptions?.planPrice || "Prix"}</TableHead>
-                  <TableHead>
-                    {t.subscriptions?.planDiscount || "Réduction"}
-                  </TableHead>
-                  <TableHead>Stripe Price ID</TableHead>
-                  <TableHead>
-                    {t.subscriptions?.planActive || "Statut"}
-                  </TableHead>
-                  <TableHead className="text-right">
-                    {t.common?.actions || "Actions"}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {plans.map((plan) => (
-                  <TableRow key={plan.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{plan.name}</p>
-                        {plan.description && (
-                          <p className="text-sm text-muted-foreground">
-                            {plan.description}
-                          </p>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {plan.type === "MONTHLY"
-                          ? t.subscriptions?.monthly || "Mensuel"
-                          : t.subscriptions?.yearly || "Annuel"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      €{plan.price.toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      {plan.discountPercentage > 0 ? (
-                        <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
-                          -{plan.discountPercentage}%
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <code className="text-xs bg-muted px-2 py-1 rounded">
-                        {plan.stripePriceId || "-"}
-                      </code>
-                    </TableCell>
-                    <TableCell>
-                      {plan.isActive ? (
-                        <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
-                          <Check className="w-3 h-3 mr-1" />
-                          {t.subscriptions?.active || "Actif"}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          <X className="w-3 h-3 mr-1" />
-                          {t.subscriptions?.inactive || "Inactif"}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openPlanSheet(plan)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setPlanToDelete(plan.id);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent>
+              {plans.length === 0 ? (
+                <div className="text-center py-12">
+                  <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun plan</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Commencez par créer votre premier plan d'abonnement
+                  </p>
+                  <Button onClick={() => openPlanSheet()}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nouveau plan
+                  </Button>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Prix</TableHead>
+                      <TableHead>Durée</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {plans.map((plan) => (
+                      <TableRow key={plan.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{plan.name}</p>
+                            {plan.description && (
+                              <p className="text-sm text-muted-foreground">
+                                {plan.description}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          €{Number(plan.price).toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {plan.durationMonths} mois
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {plan.isActive ? (
+                            <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
+                              <Check className="w-3 h-3 mr-1" />
+                              Actif
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              <X className="w-3 h-3 mr-1" />
+                              Inactif
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openPlanSheet(plan)}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setPlanToDelete(plan.id);
+                                setDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Subscriptions Tab */}
+        <TabsContent value="subscriptions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Abonnements actifs</CardTitle>
+              <CardDescription>
+                Liste des utilisateurs abonnés et leurs plans
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {subscriptions.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    Aucun abonnement
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Les abonnements apparaîtront ici après les premiers
+                    paiements
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Utilisateur</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Montant</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Période</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {subscriptions.map((sub) => (
+                      <TableRow key={sub.id}>
+                        <TableCell>
+                          <span className="font-medium">
+                            {sub.user?.email || sub.userId}
+                          </span>
+                        </TableCell>
+                        <TableCell>{sub.plan?.name || "-"}</TableCell>
+                        <TableCell className="font-semibold">
+                          €{Number(sub.amountPaid).toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                          {sub.status === "ACTIVE" ? (
+                            <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
+                              <Check className="w-3 h-3 mr-1" />
+                              Actif
+                            </Badge>
+                          ) : sub.status === "EXPIRED" ? (
+                            <Badge variant="secondary">Expiré</Badge>
+                          ) : (
+                            <Badge variant="destructive">Annulé</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            {formatDate(sub.startDate)} -{" "}
+                            {formatDate(sub.endDate)}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Sheet for create/edit plan */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
-              {editingPlan
-                ? t.subscriptions?.editPlan || "Modifier le plan"
-                : t.subscriptions?.addPlan || "Nouveau plan"}
+              {editingPlan ? "Modifier le plan" : "Nouveau plan"}
             </SheetTitle>
             <SheetDescription>
               {editingPlan
-                ? t.subscriptions?.editPlanDescription ||
-                  "Modifiez les informations du plan"
-                : t.subscriptions?.addPlanDescription ||
-                  "Créez un nouveau plan d'abonnement"}
+                ? "Modifiez les informations du plan"
+                : "Créez un nouveau plan d'abonnement"}
             </SheetDescription>
           </SheetHeader>
 
           <div className="space-y-6 mt-6">
             <div className="space-y-2">
-              <Label htmlFor="name">
-                {t.subscriptions?.planName || "Nom"} *
-              </Label>
+              <Label htmlFor="name">Nom *</Label>
               <Input
                 id="name"
                 value={planForm.name}
@@ -390,9 +458,7 @@ export default function SubscriptionsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">
-                {t.subscriptions?.planDescription || "Description"}
-              </Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={planForm.description}
@@ -406,35 +472,7 @@ export default function SubscriptionsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t.subscriptions?.planType || "Type"}</Label>
-                <Select
-                  value={planForm.type}
-                  onValueChange={(value: "MONTHLY" | "YEARLY") =>
-                    setPlanForm({
-                      ...planForm,
-                      type: value,
-                      durationMonths: value === "YEARLY" ? 12 : 1,
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MONTHLY">
-                      {t.subscriptions?.monthly || "Mensuel"}
-                    </SelectItem>
-                    <SelectItem value="YEARLY">
-                      {t.subscriptions?.yearly || "Annuel"}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="price">
-                  {t.subscriptions?.planPrice || "Prix (€)"} *
-                </Label>
+                <Label htmlFor="price">Prix (€) *</Label>
                 <Input
                   id="price"
                   type="number"
@@ -449,32 +487,9 @@ export default function SubscriptionsPage() {
                   }
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="discount">
-                  {t.subscriptions?.planDiscount || "Réduction (%)"}
-                </Label>
-                <Input
-                  id="discount"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={planForm.discountPercentage}
-                  onChange={(e) =>
-                    setPlanForm({
-                      ...planForm,
-                      discountPercentage: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
-              </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duration">
-                  {t.subscriptions?.durationMonths || "Durée (mois)"}
-                </Label>
+                <Label htmlFor="duration">Durée (mois)</Label>
                 <Input
                   id="duration"
                   type="number"
@@ -490,30 +505,11 @@ export default function SubscriptionsPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="stripePriceId">Stripe Price ID *</Label>
-              <Input
-                id="stripePriceId"
-                value={planForm.stripePriceId}
-                onChange={(e) =>
-                  setPlanForm({ ...planForm, stripePriceId: e.target.value })
-                }
-                placeholder="price_1234567890..."
-              />
-              <p className="text-xs text-muted-foreground">
-                {t.subscriptions?.stripePriceIdHint ||
-                  "Récupérez ce ID depuis votre Dashboard Stripe > Products > Price ID"}
-              </p>
-            </div>
-
             <div className="flex items-center justify-between p-4 rounded-lg border">
               <div>
-                <Label htmlFor="isActive">
-                  {t.subscriptions?.planActive || "Actif"}
-                </Label>
+                <Label htmlFor="isActive">Actif</Label>
                 <p className="text-sm text-muted-foreground">
-                  {t.subscriptions?.activeHint ||
-                    "Les plans actifs sont visibles sur l'app mobile"}
+                  Les plans actifs sont visibles sur l&apos;app mobile
                 </p>
               </div>
               <Switch
@@ -533,9 +529,7 @@ export default function SubscriptionsPage() {
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingPlan
-                ? t.subscriptions?.updatePlan || "Mettre à jour"
-                : t.subscriptions?.createPlan || "Créer le plan"}
+              {editingPlan ? "Mettre à jour" : "Créer le plan"}
             </Button>
           </div>
         </SheetContent>

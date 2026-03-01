@@ -8,12 +8,8 @@ config({ path: resolve(__dirname, '../../.env') });
 import { Topic } from '../topics/entities/topic.entity';
 import { Quote } from '../quotes/entities/quote.entity';
 import { User } from '../users/entities/user.entity';
-import {
-  SubscriptionPlan,
-  PlanType,
-} from '../subscriptions/entities/subscription-plan.entity';
+import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import { Subscription } from '../subscriptions/entities/subscription.entity';
-import { Payment } from '../subscriptions/entities/payment.entity';
 import { Font } from '../fonts/entities/font.entity';
 import * as bcrypt from 'bcrypt';
 import { getDatabaseConfig } from '../config/database.config';
@@ -181,24 +177,20 @@ const quotesData = [
   },
 ];
 
-// Subscription plans
+// Subscription plans (simplified - no PlanType enum)
 const plansData = [
   {
     name: 'Monthly',
     description: 'Monthly premium subscription',
-    type: PlanType.MONTHLY,
     price: 4.99,
     durationMonths: 1,
     isActive: true,
-    discountPercentage: 0,
   },
   {
     name: 'Yearly',
     description: 'Yearly premium subscription - Save 40%',
-    type: PlanType.YEARLY,
     price: 35.99,
     durationMonths: 12,
-    discountPercentage: 40,
     isActive: true,
   },
 ];
@@ -257,15 +249,7 @@ async function seed() {
 
   const dataSource = new DataSource({
     ...getDatabaseConfig(),
-    entities: [
-      Topic,
-      Quote,
-      User,
-      SubscriptionPlan,
-      Subscription,
-      Payment,
-      Font,
-    ],
+    entities: [Topic, Quote, User, SubscriptionPlan, Subscription, Font],
   } as any);
 
   await dataSource.initialize();
