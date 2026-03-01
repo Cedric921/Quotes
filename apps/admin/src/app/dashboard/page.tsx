@@ -25,6 +25,7 @@ import {
   UserX,
   Receipt,
   ArrowUpRight,
+  ArrowDownRight,
   Calendar,
   Clock,
   Cloud,
@@ -349,7 +350,7 @@ export default function DashboardPage() {
                   {isLoadingSubStats ? (
                     <div className="h-9 w-24 bg-muted animate-pulse rounded" />
                   ) : (
-                    `€${(subscriptionStats?.totalRevenue ?? 0).toFixed(2)}`
+                    `€${(subscriptionStats?.monthlyRevenue ?? 0).toFixed(2)}`
                   )}
                 </div>
                 {!isLoadingSubStats && (
@@ -361,7 +362,11 @@ export default function DashboardPage() {
                           : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
                       } text-xs`}
                     >
-                      <ArrowUpRight className="w-3 h-3 mr-1" />
+                      {(subscriptionStats?.revenueGrowth ?? 0) >= 0 ? (
+                        <ArrowUpRight className="w-3 h-3 mr-1" />
+                      ) : (
+                        <ArrowDownRight className="w-3 h-3 mr-1" />
+                      )}
                       {(subscriptionStats?.revenueGrowth ?? 0) >= 0 ? "+" : ""}
                       {subscriptionStats?.revenueGrowth ?? 0}%
                     </Badge>
@@ -495,7 +500,7 @@ export default function DashboardPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="font-semibold">
-                            €{transaction.amount.toFixed(2)}
+                            €{(Number(transaction?.amount) || 0).toFixed(2)}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
                             <div className="flex items-center gap-1">
@@ -971,43 +976,6 @@ export default function DashboardPage() {
                   )}
                 </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Database Seeding Card */}
-      <Card className="border-2 hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-orange-500/10">
-              <Database className="w-6 h-6 text-orange-500" />
-            </div>
-            <div>
-              <CardTitle>{t.dashboard.seedingTitle}</CardTitle>
-              <CardDescription>
-                {t.dashboard.seedingDescription}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {t.dashboard.seedingText}
-          </p>
-          <Button onClick={handleSeed} disabled={isSeeding} className="gap-2">
-            <Database className="w-4 h-4" />
-            {isSeeding ? t.dashboard.seeding : t.dashboard.seedDatabase}
-          </Button>
-          {seedResult && (
-            <div
-              className={`mt-4 p-4 rounded-lg border-2 ${
-                seedResult.includes("✅")
-                  ? "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400"
-                  : "bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400"
-              }`}
-            >
-              <p className="text-sm font-medium">{seedResult}</p>
             </div>
           )}
         </CardContent>

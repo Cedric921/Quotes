@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/auth";
+import { UserDetailSkeleton } from "@/components/skeletons";
 import {
   Card,
   CardContent,
@@ -207,14 +208,7 @@ export default function UserDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-muted-foreground">Loading user details...</p>
-        </div>
-      </div>
-    );
+    return <UserDetailSkeleton />;
   }
 
   if (error || !user) {
@@ -337,7 +331,7 @@ export default function UserDetailPage() {
               <CardContent>
                 <div className="space-y-1">
                   <div className="text-3xl font-bold">
-                    €{totalSpent.toFixed(2)}
+                    €{Number(totalSpent || 0).toFixed(2)}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Depuis le début
@@ -450,7 +444,7 @@ export default function UserDetailPage() {
                           </div>
                         </TableCell>
                         <TableCell className="font-semibold">
-                          €{payment.amount.toFixed(2)}
+                          €{(Number(payment?.amount) || 0).toFixed(2)}
                         </TableCell>
                         <TableCell>
                           <Badge
