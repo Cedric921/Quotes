@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import Stripe from 'stripe';
 import { v2 as cloudinary } from 'cloudinary';
-import { getDatabaseType, isUsingSupabase } from '../config/database.config';
 
 export interface ServiceStatus {
   status: 'connected' | 'disconnected' | 'error' | 'not_configured';
@@ -11,8 +10,7 @@ export interface ServiceStatus {
 }
 
 export interface DatabaseStatus extends ServiceStatus {
-  type: 'postgres' | 'sqlite';
-  provider?: 'supabase' | 'direct' | 'local';
+  type: 'postgres';
 }
 
 export interface StripeStatus extends ServiceStatus {
@@ -87,24 +85,14 @@ export class HealthService {
 
   private async checkDatabase(): Promise<DatabaseStatus> {
     const startTime = Date.now();
-    const dbType = getDatabaseType();
-    const usingSupabase = isUsingSupabase();
-
-    // Determine provider
-    let provider: 'supabase' | 'direct' | 'local' = 'local';
-    if (dbType === 'postgres') {
-      provider = usingSupabase ? 'supabase' : 'direct';
-    }
 
     try {
-      // Simple query to check connection
       await this.dataSource.query('SELECT 1');
       return {
         status: 'connected',
-        message: `${dbType === 'postgres' ? 'PostgreSQL' : 'SQLite'} connection successful`,
+        message: 'PostgreSQL (Supabase) connection successful',
         latency: Date.now() - startTime,
-        type: dbType,
-        provider,
+        type: 'postgres',
       };
     } catch (error) {
       return {
@@ -112,8 +100,7 @@ export class HealthService {
         message:
           error instanceof Error ? error.message : 'Database connection failed',
         latency: Date.now() - startTime,
-        type: dbType,
-        provider,
+        type: 'postgres',
       };
     }
   }
