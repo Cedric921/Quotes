@@ -466,7 +466,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : !subscriptionStats ||
-                subscriptionStats.recentTransactions.length === 0 ? (
+                subscriptionStats.recentTransactions?.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {t.dashboard.transactions.noTransactions ||
                     "Aucune transaction"}
