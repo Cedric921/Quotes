@@ -7,18 +7,18 @@ export interface SubscriptionPlan {
   id: string;
   name: string;
   description?: string;
-  type: "MONTHLY" | "YEARLY";
   price: number;
-  discountPercentage: number;
+  durationMonths: number;
   isActive: boolean;
-  stripePriceId?: string;
 }
 
 export interface Subscription {
   id: string;
-  status: "ACTIVE" | "CANCELLED" | "EXPIRED" | "TRIAL" | "PAST_DUE";
+  status: "ACTIVE" | "CANCELLED" | "EXPIRED";
   startDate: string;
   endDate: string;
+  amountPaid?: number;
+  stripePaymentIntentId?: string;
   plan?: SubscriptionPlan;
 }
 
@@ -53,42 +53,54 @@ export const fetchSubscriptionData = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const [plansRes, configRes] = await Promise.all([
-        apiClient.get<SubscriptionPlan[]>("/subscriptions/plans?activeOnly=true"),
+        apiClient.get<SubscriptionPlan[]>(
+          "/subscriptions/plans?activeOnly=true",
+        ),
         apiClient.get<AppConfig>("/subscriptions/config"),
       ]);
       return { plans: plansRes.data, config: configRes.data };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch subscription data");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch subscription data",
+      );
     }
-  }
+  },
 );
 
 export const fetchCurrentSubscription = createAsyncThunk(
   "subscription/fetchCurrent",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get<Subscription>("/subscriptions/my-subscription");
+      const response = await apiClient.get<Subscription>(
+        "/subscriptions/my-subscription",
+      );
       return response.data;
     } catch (error: any) {
       // No subscription is not an error
       if (error.response?.status === 404) {
         return null;
       }
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch subscription");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch subscription",
+      );
     }
-  }
+  },
 );
 
 export const startFreeTrial = createAsyncThunk(
   "subscription/startTrial",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post<Subscription>("/subscriptions/start-trial");
+      const response = await apiClient.post<Subscription>(
+        "/subscriptions/start-trial",
+      );
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to start trial");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to start trial",
+      );
     }
-  }
+  },
 );
 
 export const createCheckoutSession = createAsyncThunk(
@@ -97,13 +109,15 @@ export const createCheckoutSession = createAsyncThunk(
     try {
       const response = await apiClient.post<{ url: string; sessionId: string }>(
         "/subscriptions/checkout",
-        { planId }
+        { planId },
       );
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to create checkout");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create checkout",
+      );
     }
-  }
+  },
 );
 
 // Slice
@@ -117,7 +131,10 @@ const subscriptionSlice = createSlice({
     clearSubscriptionError: (state) => {
       state.error = null;
     },
-    setCurrentSubscription: (state, action: PayloadAction<Subscription | null>) => {
+    setCurrentSubscription: (
+      state,
+      action: PayloadAction<Subscription | null>,
+    ) => {
       state.currentSubscription = action.payload;
     },
     resetSubscriptionState: (state) => {
@@ -167,4 +184,3 @@ export const {
 } = subscriptionSlice.actions;
 
 export default subscriptionSlice.reducer;
-

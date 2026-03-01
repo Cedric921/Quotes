@@ -6,15 +6,10 @@ import {
   AppConfig,
 } from "../../store/slices/subscriptionSlice";
 
-// Payment interface
-export interface Payment {
-  id: string;
-  amount: number;
-  currency: string;
-  status: "SUCCEEDED" | "PENDING" | "FAILED" | "REFUNDED";
-  stripePaymentIntentId?: string;
-  createdAt: string;
-  subscription?: Subscription;
+// Payment intent response
+export interface PaymentIntentResponse {
+  clientSecret: string;
+  paymentIntentId: string;
 }
 
 // Query keys
@@ -24,7 +19,6 @@ export const subscriptionKeys = {
   config: () => [...subscriptionKeys.all, "config"] as const,
   current: () => [...subscriptionKeys.all, "current"] as const,
   history: () => [...subscriptionKeys.all, "history"] as const,
-  payments: () => [...subscriptionKeys.all, "payments"] as const,
 };
 
 // Fetch subscription plans
@@ -84,51 +78,22 @@ export const useSubscriptionHistory = (enabled: boolean = true) => {
   });
 };
 
-// Fetch user payments
-export const useUserPayments = (enabled: boolean = true) => {
-  return useQuery({
-    queryKey: subscriptionKeys.payments(),
-    queryFn: async () => {
-      const response = await apiClient.get<Payment[]>(
-        "/subscriptions/my-payments",
-      );
-      return response.data;
-    },
-    enabled,
-  });
-};
-
-// Start free trial mutation
-export const useStartFreeTrial = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      const response = await apiClient.post<Subscription>(
-        "/subscriptions/start-trial",
-      );
-      return response.data;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(subscriptionKeys.current(), data);
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-    },
-  });
-};
-
-// Create checkout session mutation
-export const useCreateCheckout = () => {
+// Create payment intent mutation (new simplified flow)
+export const useCreatePaymentIntent = () => {
   return useMutation({
     mutationFn: async (planId: string) => {
       console.log({ planId });
-      const response = await apiClient.post<{ url: string; sessionId: string }>(
-        "/subscriptions/checkout",
+      const response = await apiClient.post<PaymentIntentResponse>(
+        "/subscriptions/create-payment-intent",
         { planId },
       );
       return response.data;
     },
   });
 };
+
+// Legacy: kept for backwards compatibility but redirects to new endpoint
+export const useCreateCheckout = useCreatePaymentIntent;
 
 // Cancel subscription mutation
 export const useCancelSubscription = () => {

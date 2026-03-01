@@ -483,7 +483,7 @@ export default function DashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {subscriptionStats?.recentTransactions.map(
+                    {subscriptionStats?.recentTransactions?.map(
                       (transaction) => (
                         <TableRow key={transaction.id}>
                           <TableCell className="font-medium">
