@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
+import { useStripe } from "@stripe/stripe-react-native";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { setSelectedPlan } from "../store/slices/subscriptionSlice";
 import { useThemeColors } from "../hooks";
@@ -39,6 +40,7 @@ export default function SubscriptionScreen({
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
   const dispatch = useAppDispatch();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const token = useAppSelector((state) => state.auth.token);
   const selectedPlanId = useAppSelector(
@@ -77,22 +79,49 @@ export default function SubscriptionScreen({
     setSubscribing(true);
 
     try {
+      // 1. Create payment intent on backend
       const result = await paymentIntentMutation.mutateAsync(selectedPlanId);
 
-      // TODO: Integrate Stripe SDK for payment sheet
-      // For now, show a success message with the payment intent
-      if (result.clientSecret) {
-        Toast.show({
-          type: "info",
-          text1: t("subscription.paymentReady"),
-          text2:
-            "Payment intent créé: " +
-            result.paymentIntentId.slice(0, 20) +
-            "...",
-        });
-        // Refresh data
-        refetch();
+      if (!result.clientSecret) {
+        throw new Error("No client secret received");
       }
+
+      // 2. Initialize the payment sheet
+      const { error: initError } = await initPaymentSheet({
+        paymentIntentClientSecret: result.clientSecret,
+        merchantDisplayName: "Focus App",
+        allowsDelayedPaymentMethods: false,
+      });
+
+      if (initError) {
+        throw new Error(initError.message);
+      }
+
+      // 3. Present the payment sheet to the user
+      const { error: presentError } = await presentPaymentSheet();
+
+      if (presentError) {
+        if (presentError.code === "Canceled") {
+          // User cancelled - not an error
+          Toast.show({
+            type: "info",
+            text1: t("subscription.paymentCancelled"),
+            text2: t("subscription.paymentCancelledMessage"),
+          });
+          return;
+        }
+        throw new Error(presentError.message);
+      }
+
+      // 4. Payment succeeded - the webhook will create the subscription
+      Toast.show({
+        type: "success",
+        text1: t("subscription.paymentSuccess"),
+        text2: t("subscription.subscriptionActivated"),
+      });
+
+      // Refresh data to show new subscription
+      setTimeout(() => refetch(), 2000);
     } catch (error: any) {
       Toast.show({
         type: "error",
