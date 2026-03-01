@@ -258,6 +258,66 @@ export class SubscriptionsService {
     };
   }
 
+  // ============ STRIPE CHECKOUT SESSION (for WebView/Browser) ============
+
+  async createCheckoutSession(
+    userId: string,
+    planId: string,
+    successUrl: string,
+    cancelUrl: string,
+  ): Promise<{ checkoutUrl: string; sessionId: string }> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const plan = await this.findPlanById(planId);
+    if (!plan.isActive) {
+      throw new BadRequestException('This plan is not available');
+    }
+
+    // Check if user already has an active subscription
+    const existingSubscription = await this.getUserSubscription(userId);
+    if (existingSubscription) {
+      throw new BadRequestException('User already has an active subscription');
+    }
+
+    // Create Checkout Session
+    const amountInCents = Math.round(Number(plan.price) * 100);
+
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: user.email,
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: plan.name,
+              description:
+                plan.description || `Abonnement ${plan.durationMonths} mois`,
+            },
+            unit_amount: amountInCents,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        userId,
+        planId,
+        userEmail: user.email,
+      },
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    });
+
+    return {
+      checkoutUrl: session.url!,
+      sessionId: session.id,
+    };
+  }
+
   // Called after successful payment (via webhook or manual confirmation)
   async activateSubscription(
     userId: string,
@@ -331,6 +391,11 @@ export class SubscriptionsService {
           event.data.object as Stripe.PaymentIntent,
         );
         break;
+      case 'checkout.session.completed':
+        await this.handleCheckoutSessionCompleted(
+          event.data.object as Stripe.Checkout.Session,
+        );
+        break;
       case 'payment_intent.payment_failed':
         console.log('❌ Payment failed:', event.data.object);
         break;
@@ -366,5 +431,31 @@ export class SubscriptionsService {
       amountPaid,
     );
     console.log(`✅ Subscription activated for user ${userId}`);
+  }
+
+  private async handleCheckoutSessionCompleted(
+    session: Stripe.Checkout.Session,
+  ): Promise<void> {
+    const { userId, planId } = session.metadata || {};
+
+    if (!userId || !planId) {
+      console.log('⚠️ Missing metadata in checkout session');
+      return;
+    }
+
+    // Check if subscription already exists for this session
+    const existingSubscription = await this.subscriptionRepository.findOne({
+      where: { stripePaymentIntentId: session.id },
+    });
+
+    if (existingSubscription) {
+      console.log('ℹ️ Subscription already exists for this checkout session');
+      return;
+    }
+
+    const amountPaid = (session.amount_total || 0) / 100; // Convert from cents
+
+    await this.activateSubscription(userId, planId, session.id, amountPaid);
+    console.log(`✅ Subscription activated for user ${userId} via checkout`);
   }
 }

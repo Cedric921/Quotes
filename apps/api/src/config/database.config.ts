@@ -1,4 +1,8 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import * as dns from 'dns';
+
+// Force Node.js to prefer IPv4 addresses
+dns.setDefaultResultOrder('ipv4first');
 
 /**
  * Database configuration factory
@@ -12,22 +16,28 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
   // Common PostgreSQL options for Supabase
   const getPostgresOptions = (
     host: string,
+    port: number,
     password: string,
+    username = 'postgres',
+    database = 'postgres',
   ): TypeOrmModuleOptions => ({
     type: 'postgres',
     host,
-    port: 5432,
-    username: 'postgres',
+    port,
+    username,
     password,
-    database: 'postgres',
+    database,
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
     synchronize: process.env.NODE_ENV !== 'production',
     ssl: { rejectUnauthorized: false },
     logging: process.env.NODE_ENV !== 'production',
     extra: {
-      // Force IPv4 to avoid IPv6 connection issues
+      // Force IPv4 to avoid IPv6 connection issues on Render
       family: 4,
     },
+    // Connection pooling settings for serverless environments
+    poolSize: 10,
+    connectTimeoutMS: 30000,
   });
 
   // Option 1: Use DATABASE_URL directly (full connection string)
@@ -40,21 +50,21 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
     console.log('🐘 Using PostgreSQL from DATABASE_URL');
     console.log(`📍 Database URL: ${maskedUrl}`);
 
-    // Parse the URL to extract host and password for extra options
+    // Parse the URL to extract connection details
     try {
       const url = new URL(databaseUrl);
       const host = url.hostname;
+      const port = parseInt(url.port, 10) || 5432;
       const password = decodeURIComponent(url.password);
+      const username = url.username || 'postgres';
+      const database = url.pathname.replace('/', '') || 'postgres';
 
-      return {
-        ...getPostgresOptions(host, password),
-        url: databaseUrl,
-        // Override host/password since we're using URL
-        host: undefined,
-        password: undefined,
-      } as TypeOrmModuleOptions;
-    } catch {
-      // If URL parsing fails, use basic config
+      console.log(`📍 Host: ${host}, Port: ${port}`);
+
+      return getPostgresOptions(host, port, password, username, database);
+    } catch (err) {
+      console.error('Failed to parse DATABASE_URL, using raw connection');
+      // If URL parsing fails, use basic config with extra options
       return {
         type: 'postgres',
         url: databaseUrl,
@@ -62,6 +72,7 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
         synchronize: process.env.NODE_ENV !== 'production',
         ssl: { rejectUnauthorized: false },
         logging: process.env.NODE_ENV !== 'production',
+        extra: { family: 4 },
       };
     }
   }
@@ -75,13 +86,11 @@ export function getDatabaseConfig(): TypeOrmModuleOptions {
     )?.[1];
 
     if (projectRef) {
-      // Use the pooler connection for better compatibility (supports IPv4)
-      // Direct: db.xxx.supabase.co (may have IPv6 issues)
-      // Pooler: aws-0-eu-central-1.pooler.supabase.com (more reliable)
+      // Use direct connection with IPv4 preference
       const host = `db.${projectRef}.supabase.co`;
       console.log(`🐘 Using Supabase PostgreSQL (${host})`);
 
-      return getPostgresOptions(host, supabaseDbPassword);
+      return getPostgresOptions(host, 5432, supabaseDbPassword);
     }
   }
 

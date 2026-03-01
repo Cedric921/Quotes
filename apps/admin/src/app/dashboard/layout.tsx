@@ -44,8 +44,10 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!isAuthenticated()) {
       router.push("/login");
     }
@@ -67,6 +69,11 @@ export default function DashboardLayout({
       toast.error(t.auth.signOutFailed, { id: toastId });
     }
   };
+
+  // Avoid hydration mismatch by not rendering until mounted on client
+  if (!mounted) {
+    return null;
+  }
 
   if (!isAuthenticated()) {
     return null;

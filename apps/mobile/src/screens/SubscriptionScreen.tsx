@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { setSelectedPlan } from "../store/slices/subscriptionSlice";
 import { useThemeColors } from "../hooks";
@@ -21,13 +21,13 @@ import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
 import {
   useSubscriptionData,
-  useStartFreeTrial,
-  useCreateCheckout,
+  useCreateCheckoutSession,
   useSubscriptionHistory,
-  useUserPayments,
-  Payment,
 } from "../api/hooks/useSubscriptions";
-import { Subscription } from "../store/slices/subscriptionSlice";
+import {
+  Subscription,
+  SubscriptionPlan,
+} from "../store/slices/subscriptionSlice";
 
 interface SubscriptionScreenProps {
   readonly navigation: any;
@@ -48,22 +48,13 @@ export default function SubscriptionScreen({
   const isAuthenticated = !!token;
 
   // React Query hooks
-  const { plans, config, currentSubscription, isLoading, refetch } =
+  const { plans, currentSubscription, isLoading, refetch } =
     useSubscriptionData(isAuthenticated);
-  const startTrialMutation = useStartFreeTrial();
-  const checkoutMutation = useCreateCheckout();
+  const checkoutMutation = useCreateCheckoutSession();
   const { data: subscriptionHistory = [] } =
     useSubscriptionHistory(isAuthenticated);
-  const { data: payments = [] } = useUserPayments(isAuthenticated);
 
   const [subscribing, setSubscribing] = useState(false);
-
-  // Calculate total spent
-  const totalSpent = useMemo(() => {
-    return payments
-      .filter((p: Payment) => p.status === "SUCCEEDED")
-      .reduce((sum: number, p: Payment) => sum + p.amount, 0);
-  }, [payments]);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -87,20 +78,48 @@ export default function SubscriptionScreen({
     setSubscribing(true);
 
     try {
+      // 1. Create checkout session on backend
       const result = await checkoutMutation.mutateAsync(selectedPlanId);
 
-      // Open Stripe Checkout in browser
-      if (result.url) {
-        const browserResult = await WebBrowser.openBrowserAsync(result.url);
-
-        // Refresh data after returning from browser
-        if (
-          browserResult.type === "cancel" ||
-          browserResult.type === "dismiss"
-        ) {
-          refetch();
-        }
+      if (!result.checkoutUrl) {
+        throw new Error("No checkout URL received");
       }
+
+      // 2. Open Stripe Checkout in browser
+      const browserResult = await WebBrowser.openBrowserAsync(
+        result.checkoutUrl,
+        {
+          dismissButtonStyle: "cancel",
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+        },
+      );
+
+      // 3. When browser closes, check if payment was successful
+      if (browserResult.type === "cancel") {
+        Toast.show({
+          type: "info",
+          text1: t("subscription.paymentCancelled"),
+          text2: t("subscription.paymentCancelledMessage"),
+        });
+        return;
+      }
+
+      // 4. Browser was dismissed - refresh to check if subscription was created
+      Toast.show({
+        type: "info",
+        text1: t("subscription.processing"),
+        text2: t("subscription.checkingPayment"),
+      });
+
+      // Refresh data after a delay to allow webhook to process
+      setTimeout(() => {
+        refetch();
+        Toast.show({
+          type: "success",
+          text1: t("subscription.paymentSuccess"),
+          text2: t("subscription.subscriptionActivated"),
+        });
+      }, 3000);
     } catch (error: any) {
       Toast.show({
         type: "error",
@@ -112,39 +131,13 @@ export default function SubscriptionScreen({
     }
   };
 
-  const handleStartTrial = async () => {
-    if (!token) {
-      navigation.navigate("Login");
-      return;
-    }
-
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    try {
-      await startTrialMutation.mutateAsync();
-      Toast.show({
-        type: "success",
-        text1: t("subscription.trialStarted"),
-        text2: t("subscription.enjoyTrial"),
-      });
-    } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: t("subscription.error"),
-        text2: error.message || t("subscription.tryAgain"),
-      });
-    }
-  };
-
   const getStatusBadge = () => {
     if (!currentSubscription) return null;
 
     const statusColors: Record<string, { bg: string; text: string }> = {
       ACTIVE: { bg: "rgba(34, 197, 94, 0.1)", text: "#22c55e" },
-      TRIAL: { bg: "rgba(59, 130, 246, 0.1)", text: "#3b82f6" },
       CANCELLED: { bg: "rgba(239, 68, 68, 0.1)", text: "#ef4444" },
       EXPIRED: { bg: "rgba(107, 114, 128, 0.1)", text: "#6b7280" },
-      PAST_DUE: { bg: "rgba(245, 158, 11, 0.1)", text: "#f59e0b" },
     };
 
     const statusColor =
@@ -152,11 +145,9 @@ export default function SubscriptionScreen({
     const statusText =
       currentSubscription.status === "ACTIVE"
         ? t("subscription.subscriptionActive")
-        : currentSubscription.status === "TRIAL"
-          ? t("subscription.freeTrial")
-          : currentSubscription.status === "CANCELLED"
-            ? t("subscription.subscriptionCancelled")
-            : t("subscription.subscriptionExpired");
+        : currentSubscription.status === "CANCELLED"
+          ? t("subscription.subscriptionCancelled")
+          : t("subscription.subscriptionExpired");
 
     return (
       <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
@@ -167,9 +158,6 @@ export default function SubscriptionScreen({
     );
   };
 
-  const monthlyPlan = plans.find((p) => p.type === "MONTHLY");
-  const yearlyPlan = plans.find((p) => p.type === "YEARLY");
-  const isTrialLoading = startTrialMutation.isPending;
   const isCheckoutLoading = checkoutMutation.isPending || subscribing;
 
   if (isLoading) {
@@ -265,18 +253,19 @@ export default function SubscriptionScreen({
         {/* Plans */}
         <Text style={styles.sectionTitle}>{t("subscription.choosePlan")}</Text>
 
-        {/* Monthly Plan */}
-        {monthlyPlan && (
+        {/* All Available Plans */}
+        {plans.map((plan: SubscriptionPlan) => (
           <TouchableOpacity
+            key={plan.id}
             style={[
               styles.planCard,
-              selectedPlanId === monthlyPlan.id && styles.planCardSelected,
+              selectedPlanId === plan.id && styles.planCardSelected,
             ]}
-            onPress={() => handleSelectPlan(monthlyPlan.id)}
+            onPress={() => handleSelectPlan(plan.id)}
           >
             <View style={styles.planHeader}>
-              <Text style={styles.planName}>{t("subscription.monthly")}</Text>
-              {selectedPlanId === monthlyPlan.id && (
+              <Text style={styles.planName}>{plan.name}</Text>
+              {selectedPlanId === plan.id && (
                 <Ionicons
                   name="checkmark-circle"
                   size={24}
@@ -284,77 +273,20 @@ export default function SubscriptionScreen({
                 />
               )}
             </View>
+            {plan.description && (
+              <Text style={styles.planDescription}>{plan.description}</Text>
+            )}
             <View style={styles.planPricing}>
               <Text style={styles.planPrice}>
-                €{monthlyPlan?.price?.toFixed(2)}
+                €{Number(plan.price).toFixed(2)}
               </Text>
               <Text style={styles.planPeriod}>
-                {t("subscription.perMonth")}
+                / {plan.durationMonths}{" "}
+                {plan.durationMonths === 1 ? "mois" : "mois"}
               </Text>
             </View>
           </TouchableOpacity>
-        )}
-
-        {/* Yearly Plan */}
-        {yearlyPlan && (
-          <TouchableOpacity
-            style={[
-              styles.planCard,
-              selectedPlanId === yearlyPlan.id && styles.planCardSelected,
-            ]}
-            onPress={() => handleSelectPlan(yearlyPlan.id)}
-          >
-            {yearlyPlan.discountPercentage > 0 && (
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>
-                  {t("subscription.save", {
-                    percent: yearlyPlan.discountPercentage,
-                  })}
-                </Text>
-              </View>
-            )}
-            <View style={styles.planHeader}>
-              <Text style={styles.planName}>{t("subscription.yearly")}</Text>
-              {selectedPlanId === yearlyPlan.id && (
-                <Ionicons
-                  name="checkmark-circle"
-                  size={24}
-                  color={colors.primary}
-                />
-              )}
-            </View>
-            <View style={styles.planPricing}>
-              <Text style={styles.planPrice}>
-                €{yearlyPlan.price.toFixed(2)}
-              </Text>
-              <Text style={styles.planPeriod}>{t("subscription.perYear")}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-
-        {/* Free Trial Button */}
-        {!currentSubscription && config && (
-          <TouchableOpacity
-            style={[
-              styles.trialButton,
-              isTrialLoading && styles.buttonDisabled,
-            ]}
-            onPress={handleStartTrial}
-            disabled={isTrialLoading}
-          >
-            {isTrialLoading ? (
-              <ActivityIndicator size="small" color={colors.primary} />
-            ) : (
-              <>
-                <Ionicons name="gift" size={20} color={colors.primary} />
-                <Text style={styles.trialButtonText}>
-                  {t("subscription.startTrial")} ({config.freemiumDurationDays}{" "}
-                  {t("subscription.days")})
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
+        ))}
 
         {/* Subscribe Button */}
         <TouchableOpacity
@@ -383,39 +315,6 @@ export default function SubscriptionScreen({
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* Billing Summary */}
-        {isAuthenticated && (payments.length > 0 || totalSpent > 0) && (
-          <View style={styles.billingSummaryCard}>
-            <View style={styles.billingSummaryHeader}>
-              <Ionicons
-                name="wallet-outline"
-                size={24}
-                color={colors.primary}
-              />
-              <Text style={styles.billingSummaryTitle}>
-                {t("subscription.billingSummary")}
-              </Text>
-            </View>
-            <View style={styles.billingSummaryContent}>
-              <View style={styles.billingStat}>
-                <Text style={styles.billingStatValue}>
-                  €{totalSpent.toFixed(2)}
-                </Text>
-                <Text style={styles.billingStatLabel}>
-                  {t("subscription.totalSpent")}
-                </Text>
-              </View>
-              <View style={styles.billingStatDivider} />
-              <View style={styles.billingStat}>
-                <Text style={styles.billingStatValue}>{payments.length}</Text>
-                <Text style={styles.billingStatLabel}>
-                  {t("subscription.totalPayments")}
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
-
         {/* Subscription History */}
         {isAuthenticated && subscriptionHistory.length > 0 && (
           <>
@@ -424,7 +323,7 @@ export default function SubscriptionScreen({
               <View key={sub.id || index} style={styles.historyCard}>
                 <View style={styles.historyHeader}>
                   <Text style={styles.historyPlanName}>
-                    {sub.plan?.name || t("subscription.freeTrial")}
+                    {sub.plan?.name || "Plan"}
                   </Text>
                   <View
                     style={[
@@ -433,9 +332,7 @@ export default function SubscriptionScreen({
                         backgroundColor:
                           sub.status === "ACTIVE"
                             ? "rgba(34, 197, 94, 0.1)"
-                            : sub.status === "TRIAL"
-                              ? "rgba(59, 130, 246, 0.1)"
-                              : "rgba(107, 114, 128, 0.1)",
+                            : "rgba(107, 114, 128, 0.1)",
                       },
                     ]}
                   >
@@ -444,21 +341,15 @@ export default function SubscriptionScreen({
                         styles.historyStatusText,
                         {
                           color:
-                            sub.status === "ACTIVE"
-                              ? "#22c55e"
-                              : sub.status === "TRIAL"
-                                ? "#3b82f6"
-                                : "#6b7280",
+                            sub.status === "ACTIVE" ? "#22c55e" : "#6b7280",
                         },
                       ]}
                     >
                       {sub.status === "ACTIVE"
                         ? t("subscription.subscriptionActive")
-                        : sub.status === "TRIAL"
-                          ? t("subscription.freeTrial")
-                          : sub.status === "CANCELLED"
-                            ? t("subscription.subscriptionCancelled")
-                            : t("subscription.subscriptionExpired")}
+                        : sub.status === "CANCELLED"
+                          ? t("subscription.subscriptionCancelled")
+                          : t("subscription.subscriptionExpired")}
                     </Text>
                   </View>
                 </View>
@@ -469,60 +360,11 @@ export default function SubscriptionScreen({
                       ? new Date(sub.endDate).toLocaleDateString()
                       : t("subscription.ongoing")}
                   </Text>
-                </View>
-              </View>
-            ))}
-          </>
-        )}
-
-        {/* Payment History */}
-        {isAuthenticated && payments.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>
-              {t("subscription.paymentHistory")}
-            </Text>
-            {payments.slice(0, 5).map((payment: Payment, index: number) => (
-              <View key={payment.id || index} style={styles.paymentCard}>
-                <View style={styles.paymentInfo}>
-                  <Text style={styles.paymentAmount}>
-                    €{payment.amount.toFixed(2)}
-                  </Text>
-                  <Text style={styles.paymentDate}>
-                    {new Date(payment.createdAt).toLocaleDateString()}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.paymentStatusBadge,
-                    {
-                      backgroundColor:
-                        payment.status === "SUCCEEDED"
-                          ? "rgba(34, 197, 94, 0.1)"
-                          : payment.status === "PENDING"
-                            ? "rgba(245, 158, 11, 0.1)"
-                            : "rgba(239, 68, 68, 0.1)",
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.paymentStatusText,
-                      {
-                        color:
-                          payment.status === "SUCCEEDED"
-                            ? "#22c55e"
-                            : payment.status === "PENDING"
-                              ? "#f59e0b"
-                              : "#ef4444",
-                      },
-                    ]}
-                  >
-                    {payment.status === "SUCCEEDED"
-                      ? t("subscription.paymentSucceeded")
-                      : payment.status === "PENDING"
-                        ? t("subscription.paymentPending")
-                        : t("subscription.paymentFailed")}
-                  </Text>
+                  {sub.amountPaid && (
+                    <Text style={styles.historyAmountText}>
+                      €{Number(sub.amountPaid).toFixed(2)}
+                    </Text>
+                  )}
                 </View>
               </View>
             ))}
@@ -683,6 +525,12 @@ const createStyles = (colors: any) =>
       color: colors.textTertiary,
       marginLeft: 4,
     } as TextStyle,
+    planDescription: {
+      fontSize: 13,
+      color: colors.textTertiary,
+      marginTop: 4,
+      marginBottom: 8,
+    } as TextStyle,
     discountBadge: {
       position: "absolute",
       top: -8,
@@ -801,41 +649,18 @@ const createStyles = (colors: any) =>
     } as TextStyle,
     historyDates: {
       marginTop: 8,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     } as ViewStyle,
     historyDateText: {
       fontSize: 13,
       color: colors.textTertiary,
     } as TextStyle,
-    paymentCard: {
-      backgroundColor: colors.backgroundSecondary,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 8,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    } as ViewStyle,
-    paymentInfo: {
-      flex: 1,
-    } as ViewStyle,
-    paymentAmount: {
-      fontSize: 16,
+    historyAmountText: {
+      fontSize: 14,
       fontWeight: "600" as const,
-      color: colors.text,
-    } as TextStyle,
-    paymentDate: {
-      fontSize: 13,
-      color: colors.textTertiary,
-      marginTop: 2,
-    } as TextStyle,
-    paymentStatusBadge: {
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 8,
-    } as ViewStyle,
-    paymentStatusText: {
-      fontSize: 11,
-      fontWeight: "600" as const,
+      color: colors.primary,
     } as TextStyle,
     termsNotice: {
       fontSize: 12,
