@@ -12,8 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
-import { useStripe } from "@stripe/stripe-react-native";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { setSelectedPlan } from "../store/slices/subscriptionSlice";
 import { useThemeColors } from "../hooks";
@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
 import {
   useSubscriptionData,
-  useCreatePaymentIntent,
+  useCreateCheckoutSession,
   useSubscriptionHistory,
 } from "../api/hooks/useSubscriptions";
 import {
@@ -40,7 +40,6 @@ export default function SubscriptionScreen({
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
   const dispatch = useAppDispatch();
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const token = useAppSelector((state) => state.auth.token);
   const selectedPlanId = useAppSelector(
@@ -51,7 +50,7 @@ export default function SubscriptionScreen({
   // React Query hooks
   const { plans, currentSubscription, isLoading, refetch } =
     useSubscriptionData(isAuthenticated);
-  const paymentIntentMutation = useCreatePaymentIntent();
+  const checkoutMutation = useCreateCheckoutSession();
   const { data: subscriptionHistory = [] } =
     useSubscriptionHistory(isAuthenticated);
 
@@ -79,49 +78,48 @@ export default function SubscriptionScreen({
     setSubscribing(true);
 
     try {
-      // 1. Create payment intent on backend
-      const result = await paymentIntentMutation.mutateAsync(selectedPlanId);
+      // 1. Create checkout session on backend
+      const result = await checkoutMutation.mutateAsync(selectedPlanId);
 
-      if (!result.clientSecret) {
-        throw new Error("No client secret received");
+      if (!result.checkoutUrl) {
+        throw new Error("No checkout URL received");
       }
 
-      // 2. Initialize the payment sheet
-      const { error: initError } = await initPaymentSheet({
-        paymentIntentClientSecret: result.clientSecret,
-        merchantDisplayName: "Focus App",
-        allowsDelayedPaymentMethods: false,
-      });
+      // 2. Open Stripe Checkout in browser
+      const browserResult = await WebBrowser.openBrowserAsync(
+        result.checkoutUrl,
+        {
+          dismissButtonStyle: "cancel",
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+        },
+      );
 
-      if (initError) {
-        throw new Error(initError.message);
+      // 3. When browser closes, check if payment was successful
+      if (browserResult.type === "cancel") {
+        Toast.show({
+          type: "info",
+          text1: t("subscription.paymentCancelled"),
+          text2: t("subscription.paymentCancelledMessage"),
+        });
+        return;
       }
 
-      // 3. Present the payment sheet to the user
-      const { error: presentError } = await presentPaymentSheet();
-
-      if (presentError) {
-        if (presentError.code === "Canceled") {
-          // User cancelled - not an error
-          Toast.show({
-            type: "info",
-            text1: t("subscription.paymentCancelled"),
-            text2: t("subscription.paymentCancelledMessage"),
-          });
-          return;
-        }
-        throw new Error(presentError.message);
-      }
-
-      // 4. Payment succeeded - the webhook will create the subscription
+      // 4. Browser was dismissed - refresh to check if subscription was created
       Toast.show({
-        type: "success",
-        text1: t("subscription.paymentSuccess"),
-        text2: t("subscription.subscriptionActivated"),
+        type: "info",
+        text1: t("subscription.processing"),
+        text2: t("subscription.checkingPayment"),
       });
 
-      // Refresh data to show new subscription
-      setTimeout(() => refetch(), 2000);
+      // Refresh data after a delay to allow webhook to process
+      setTimeout(() => {
+        refetch();
+        Toast.show({
+          type: "success",
+          text1: t("subscription.paymentSuccess"),
+          text2: t("subscription.subscriptionActivated"),
+        });
+      }, 3000);
     } catch (error: any) {
       Toast.show({
         type: "error",
@@ -160,7 +158,7 @@ export default function SubscriptionScreen({
     );
   };
 
-  const isCheckoutLoading = paymentIntentMutation.isPending || subscribing;
+  const isCheckoutLoading = checkoutMutation.isPending || subscribing;
 
   if (isLoading) {
     return (

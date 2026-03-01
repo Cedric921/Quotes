@@ -3,7 +3,6 @@ import { StyleSheet, View, Platform } from "react-native";
 import { Provider, useSelector } from "react-redux";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { StripeProvider } from "@stripe/stripe-react-native";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { store, RootState } from "./src/store";
 import { queryClient } from "./src/api/queryClient";
@@ -13,11 +12,6 @@ import { loadStoredFont } from "./src/store/slices/fontSlice";
 import { useTrackActivity } from "./src/api/hooks/useUserActivity";
 import { setupNotificationChannel } from "./src/services/notificationService";
 import "./src/i18n"; // Initialiser i18n
-
-// Stripe publishable key
-const STRIPE_PUBLISHABLE_KEY =
-  process.env.STRIPE_PUBLISHABLE_KEY ||
-  "pk_test_51MhK5fJHROrem9DuaIP66Znf5bkZRyGMFDE3pTHImcuk3wJZQS4TULZJyrUdspMutOEspfdTASBikyI2ytaApFwV00PNXM3ymX";
 
 // Register Android widget task handler
 if (Platform.OS === "android") {
@@ -69,9 +63,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-          <AppContent />
-        </StripeProvider>
+        <AppContent />
       </QueryClientProvider>
     </Provider>
   );

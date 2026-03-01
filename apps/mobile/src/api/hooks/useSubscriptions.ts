@@ -12,6 +12,12 @@ export interface PaymentIntentResponse {
   paymentIntentId: string;
 }
 
+// Checkout session response
+export interface CheckoutSessionResponse {
+  checkoutUrl: string;
+  sessionId: string;
+}
+
 // Query keys
 export const subscriptionKeys = {
   all: ["subscriptions"] as const,
@@ -92,8 +98,21 @@ export const useCreatePaymentIntent = () => {
   });
 };
 
-// Legacy: kept for backwards compatibility but redirects to new endpoint
-export const useCreateCheckout = useCreatePaymentIntent;
+// Create checkout session mutation (opens Stripe hosted page)
+export const useCreateCheckoutSession = () => {
+  return useMutation({
+    mutationFn: async (planId: string) => {
+      const response = await apiClient.post<CheckoutSessionResponse>(
+        "/subscriptions/create-checkout-session",
+        { planId },
+      );
+      return response.data;
+    },
+  });
+};
+
+// Legacy: kept for backwards compatibility
+export const useCreateCheckout = useCreateCheckoutSession;
 
 // Cancel subscription mutation
 export const useCancelSubscription = () => {

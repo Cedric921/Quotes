@@ -87,6 +87,28 @@ export class SubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('create-checkout-session')
+  async createCheckoutSession(
+    @Request() req: AuthenticatedRequest,
+    @Body('planId') planId: string,
+    @Body('successUrl') successUrl?: string,
+    @Body('cancelUrl') cancelUrl?: string,
+  ) {
+    // Default URLs for mobile app deep links
+    const defaultSuccessUrl =
+      successUrl ||
+      'focusapp://subscription/success?session_id={CHECKOUT_SESSION_ID}';
+    const defaultCancelUrl = cancelUrl || 'focusapp://subscription/cancel';
+
+    return this.subscriptionsService.createCheckoutSession(
+      req.user.userId,
+      planId,
+      defaultSuccessUrl,
+      defaultCancelUrl,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('cancel')
   async cancelSubscription(@Request() req: AuthenticatedRequest) {
     return this.subscriptionsService.cancelSubscription(req.user.userId);

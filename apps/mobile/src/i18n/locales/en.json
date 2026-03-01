@@ -157,6 +157,7 @@
     "paymentCancelledMessage": "You cancelled the payment",
     "paymentSuccess": "Payment successful!",
     "subscriptionActivated": "Your subscription is now active",
+    "checkingPayment": "Checking payment status...",
     "termsNotice": "By subscribing, you agree to our Terms of Service and Privacy Policy",
     "billingSummary": "Billing Summary",
     "totalSpent": "Total Spent",
