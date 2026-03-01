@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
+import { Repository, MoreThan, Between } from 'typeorm';
 import Stripe from 'stripe';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
 import {
@@ -51,7 +51,16 @@ export class SubscriptionsService {
     totalUsers: number;
     premiumPercentage: number;
     activeSubscriptions: number;
-    recentSubscriptions: Subscription[];
+    revenueGrowth: number;
+    recentTransactions: Array<{
+      id: string;
+      userName: string;
+      userEmail: string;
+      planName: string;
+      amount: number;
+      date: string;
+      status: string;
+    }>;
   }> {
     const totalUsers = await this.userRepository.count();
     const premiumUsers = await this.userRepository.count({
@@ -83,14 +92,47 @@ export class SubscriptionsService {
       0,
     );
 
+    // Calculate revenue growth (compare to last month)
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const lastMonthSubscriptions = await this.subscriptionRepository.find({
+      where: {
+        status: SubscriptionStatus.ACTIVE,
+        createdAt: Between(startOfLastMonth, endOfLastMonth),
+      },
+    });
+    const lastMonthRevenue = lastMonthSubscriptions.reduce(
+      (sum, sub) => sum + Number(sub.amountPaid || 0),
+      0,
+    );
+    const revenueGrowth =
+      lastMonthRevenue > 0
+        ? Math.round(
+            ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100,
+          )
+        : monthlyRevenue > 0
+          ? 100
+          : 0;
+
     const activeSubscriptions = allSubscriptions.length;
 
-    // Recent subscriptions
+    // Recent transactions (formatted for dashboard)
     const recentSubscriptions = await this.subscriptionRepository.find({
       relations: ['plan', 'user'],
       order: { createdAt: 'DESC' },
       take: 10,
     });
+
+    const recentTransactions = recentSubscriptions.map((sub) => ({
+      id: sub.id,
+      userName: sub.user?.email?.split('@')[0] || 'Unknown',
+      userEmail: sub.user?.email || 'Unknown',
+      planName: sub.plan?.name || 'N/A',
+      amount: Number(sub.amountPaid) || 0,
+      date: sub.createdAt.toISOString(),
+      status:
+        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
+    }));
 
     return {
       totalRevenue,
@@ -100,7 +142,8 @@ export class SubscriptionsService {
       totalUsers,
       premiumPercentage,
       activeSubscriptions,
-      recentSubscriptions,
+      revenueGrowth,
+      recentTransactions,
     };
   }
 

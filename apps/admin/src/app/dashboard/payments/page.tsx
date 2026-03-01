@@ -183,7 +183,8 @@ export default function PaymentsPage() {
                         {payment.subscription?.plan?.name || "-"}
                       </TableCell>
                       <TableCell>
-                        €{payment.amount.toFixed(2)} {payment.currency}
+                        €{(Number(payment?.amount) || 0).toFixed(2)}{" "}
+                        {payment.currency || "EUR"}
                       </TableCell>
                       <TableCell>{getStatusBadge(payment.status)}</TableCell>
                       <TableCell>
