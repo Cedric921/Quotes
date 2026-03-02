@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  Modal,
+  ScrollView,
+  TouchableWithoutFeedback,
 } from "react-native";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
@@ -31,21 +33,9 @@ export default function SubscriptionBottomSheet({
 }: SubscriptionBottomSheetProps) {
   const { t } = useTranslation();
   const { colors } = useThemeColors();
-  const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
   const { data: plans = [], isLoading } = useSubscriptionPlans(true);
-
-  const snapPoints = useMemo(() => ["75%", "90%"], []);
-
-  const handleSheetChanges = useCallback(
-    (index: number) => {
-      if (index === -1) {
-        onClose();
-      }
-    },
-    [onClose],
-  );
 
   const handleSelectPlan = (plan: SubscriptionPlan) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -62,144 +52,177 @@ export default function SubscriptionBottomSheet({
 
   const handleSkip = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    bottomSheetRef.current?.close();
+    onClose();
   };
-
-  if (!isVisible) return null;
 
   const styles = createStyles(colors);
 
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={0}
-      snapPoints={snapPoints}
-      onChange={handleSheetChanges}
-      enablePanDownToClose
-      backgroundStyle={{ backgroundColor: colors.background }}
-      handleIndicatorStyle={{ backgroundColor: colors.textTertiary }}
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
     >
-      <BottomSheetScrollView style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Ionicons name="diamond" size={48} color="#667eea" />
-          <Text style={styles.title}>{t("onboarding.welcomeTitle")}</Text>
-          <Text style={styles.subtitle}>{t("onboarding.welcomeSubtitle")}</Text>
-        </View>
-
-        {/* Features */}
-        <View style={styles.featuresContainer}>
-          {[
-            {
-              icon: "infinite",
-              text: t("subscription.features.unlimitedQuotes"),
-            },
-            { icon: "star", text: t("subscription.features.premiumTopics") },
-            {
-              icon: "notifications",
-              text: t("subscription.features.customNotifications"),
-            },
-            {
-              icon: "cloud-offline",
-              text: t("subscription.features.offlineAccess"),
-            },
-          ].map((feature, index) => (
-            <View key={index} style={styles.featureItem}>
-              <Ionicons
-                name={feature.icon as any}
-                size={20}
-                color={colors.primary}
-              />
-              <Text style={styles.featureText}>{feature.text}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Plans */}
-        {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color={colors.primary}
-            style={styles.loader}
-          />
-        ) : (
-          <View style={styles.plansContainer}>
-            <Text style={styles.sectionTitle}>
-              {t("onboarding.choosePlan")}
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.overlay} />
+      </TouchableWithoutFeedback>
+      <View style={styles.sheetContainer}>
+        <View style={styles.handleBar} />
+        <ScrollView
+          style={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Ionicons name="diamond" size={48} color="#667eea" />
+            <Text style={styles.title}>{t("onboarding.welcomeTitle")}</Text>
+            <Text style={styles.subtitle}>
+              {t("onboarding.welcomeSubtitle")}
             </Text>
-            {plans.map((plan: SubscriptionPlan) => (
-              <TouchableOpacity
-                key={plan.id}
-                style={[
-                  styles.planCard,
-                  selectedPlanId === plan.id && styles.planCardSelected,
-                ]}
-                onPress={() => handleSelectPlan(plan)}
-              >
-                <View style={styles.planHeader}>
-                  <Text style={styles.planName}>{plan.name}</Text>
-                  {selectedPlanId === plan.id && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={24}
-                      color={colors.primary}
-                    />
-                  )}
-                </View>
-                {plan.description && (
-                  <Text style={styles.planDescription}>{plan.description}</Text>
-                )}
-                <View style={styles.planPricing}>
-                  <Text style={styles.planPrice}>
-                    €{Number(plan.price).toFixed(2)}
-                  </Text>
-                  <Text style={styles.planPeriod}>
-                    / {plan.durationMonths}{" "}
-                    {plan.durationMonths === 1 ? "mois" : "mois"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+          </View>
+
+          {/* Features */}
+          <View style={styles.featuresContainer}>
+            {[
+              {
+                icon: "infinite",
+                text: t("subscription.features.unlimitedQuotes"),
+              },
+              { icon: "star", text: t("subscription.features.premiumTopics") },
+              {
+                icon: "notifications",
+                text: t("subscription.features.customNotifications"),
+              },
+              {
+                icon: "cloud-offline",
+                text: t("subscription.features.offlineAccess"),
+              },
+            ].map((feature, index) => (
+              <View key={index} style={styles.featureItem}>
+                <Ionicons
+                  name={feature.icon as any}
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={styles.featureText}>{feature.text}</Text>
+              </View>
             ))}
           </View>
-        )}
 
-        {/* Actions */}
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              !selectedPlanId && styles.buttonDisabled,
-            ]}
-            onPress={handleContinue}
-            disabled={!selectedPlanId}
-          >
-            <LinearGradient
-              colors={
-                selectedPlanId ? ["#667eea", "#764ba2"] : ["#9ca3af", "#9ca3af"]
-              }
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.gradientButton}
-            >
-              <Text style={styles.continueButtonText}>
-                {t("onboarding.continue")}
+          {/* Plans */}
+          {isLoading ? (
+            <ActivityIndicator
+              size="large"
+              color={colors.primary}
+              style={styles.loader}
+            />
+          ) : (
+            <View style={styles.plansContainer}>
+              <Text style={styles.sectionTitle}>
+                {t("onboarding.choosePlan")}
               </Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              {plans.map((plan: SubscriptionPlan) => (
+                <TouchableOpacity
+                  key={plan.id}
+                  style={[
+                    styles.planCard,
+                    selectedPlanId === plan.id && styles.planCardSelected,
+                  ]}
+                  onPress={() => handleSelectPlan(plan)}
+                >
+                  <View style={styles.planHeader}>
+                    <Text style={styles.planName}>{plan.name}</Text>
+                    {selectedPlanId === plan.id && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={24}
+                        color={colors.primary}
+                      />
+                    )}
+                  </View>
+                  {plan.description && (
+                    <Text style={styles.planDescription}>
+                      {plan.description}
+                    </Text>
+                  )}
+                  <View style={styles.planPricing}>
+                    <Text style={styles.planPrice}>
+                      €{Number(plan.price).toFixed(2)}
+                    </Text>
+                    <Text style={styles.planPeriod}>
+                      / {plan.durationMonths}{" "}
+                      {plan.durationMonths === 1 ? "mois" : "mois"}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
 
-          <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-            <Text style={styles.skipButtonText}>
-              {t("onboarding.skipForNow")}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </BottomSheetScrollView>
-    </BottomSheet>
+          {/* Actions */}
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity
+              style={[
+                styles.continueButton,
+                !selectedPlanId && styles.buttonDisabled,
+              ]}
+              onPress={handleContinue}
+              disabled={!selectedPlanId}
+            >
+              <LinearGradient
+                colors={
+                  selectedPlanId
+                    ? ["#667eea", "#764ba2"]
+                    : ["#9ca3af", "#9ca3af"]
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.gradientButton}
+              >
+                <Text style={styles.continueButtonText}>
+                  {t("onboarding.continue")}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+              <Text style={styles.skipButtonText}>
+                {t("onboarding.skipForNow")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    </Modal>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    sheetContainer: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      maxHeight: SCREEN_HEIGHT * 0.85,
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingTop: 12,
+    },
+    handleBar: {
+      width: 40,
+      height: 4,
+      backgroundColor: colors.textTertiary,
+      borderRadius: 2,
+      alignSelf: "center",
+      marginBottom: 8,
+    },
     container: {
       flex: 1,
       paddingHorizontal: 20,
