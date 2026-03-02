@@ -84,7 +84,7 @@
   },
   "profile": {
     "title": "Profil",
-    "likedQuotes": "Citations aimées",
+    "likedQuotes": "Favoris",
     "saved": "Enregistrées",
     "shared": "Partagées",
     "premium": "Membre Premium",
@@ -97,7 +97,36 @@
     "myFavorites": "Mes favoris",
     "savedQuotes": "Citations enregistrées",
     "activityCalendar": "Calendrier d'activité",
-    "daysActive": "jours actifs"
+    "daysActive": "jours actifs",
+    "totalSpent": "Total dépensé",
+    "subscription": "Abonnement",
+    "paymentHistory": "Historique des paiements"
+  },
+  "favorites": {
+    "title": "Mes favoris",
+    "empty": "Aucun favori",
+    "emptySubtext": "Aimez des citations pour les retrouver ici",
+    "removeTitle": "Retirer des favoris",
+    "removeMessage": "Voulez-vous retirer cette citation de vos favoris ?"
+  },
+  "editProfile": {
+    "title": "Modifier le profil",
+    "name": "Nom",
+    "namePlaceholder": "Entrez votre nom",
+    "email": "Email",
+    "emailHelper": "L'email ne peut pas être modifié pour le moment",
+    "changePhoto": "Changer la photo",
+    "permissionRequired": "Permission requise",
+    "permissionMessage": "Nous avons besoin d'accéder à vos photos",
+    "success": "Profil mis à jour",
+    "successMessage": "Vos modifications ont été enregistrées",
+    "errorMessage": "Impossible de mettre à jour le profil"
+  },
+  "payments": {
+    "title": "Historique des paiements",
+    "totalSpent": "Total dépensé",
+    "empty": "Aucun paiement",
+    "emptySubtext": "Vos paiements apparaîtront ici"
   },
   "actions": {
     "like": "J'aime",

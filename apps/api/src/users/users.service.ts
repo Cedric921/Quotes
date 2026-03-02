@@ -226,4 +226,35 @@ export class UsersService {
       })),
     };
   }
+
+  // ==================== Liked Quotes (Favorites) ====================
+
+  async getLikedQuotes(userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['likedQuotes', 'likedQuotes.topic'],
+    });
+
+    if (!user) return [];
+
+    return user.likedQuotes.map((quote) => ({
+      ...quote,
+      isLiked: true,
+    }));
+  }
+
+  // ==================== Profile Update ====================
+
+  async updateProfile(
+    userId: string,
+    data: { name?: string; avatar?: string },
+  ) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) return null;
+
+    if (data.name !== undefined) user.name = data.name;
+    if (data.avatar !== undefined) user.avatar = data.avatar;
+
+    return this.usersRepository.save(user);
+  }
 }

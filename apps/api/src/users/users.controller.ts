@@ -177,4 +177,23 @@ export class UsersController {
     }
     return this.usersService.resetNotificationSettings(userId);
   }
+
+  // ==================== Liked Quotes (Favorites) ====================
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/liked-quotes')
+  async getMyLikedQuotes(@Request() req: AuthenticatedRequest) {
+    return this.usersService.getLikedQuotes(req.user.userId);
+  }
+
+  // ==================== Profile Update ====================
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/profile')
+  async updateMyProfile(
+    @Request() req: AuthenticatedRequest,
+    @Body() updateDto: { name?: string; avatar?: string },
+  ) {
+    return this.usersService.updateProfile(req.user.userId, updateDto);
+  }
 }

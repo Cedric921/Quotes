@@ -84,7 +84,7 @@
   },
   "profile": {
     "title": "Profile",
-    "likedQuotes": "Liked Quotes",
+    "likedQuotes": "Favorites",
     "saved": "Saved",
     "shared": "Shared",
     "premium": "Premium Member",
@@ -97,7 +97,36 @@
     "myFavorites": "My Favorites",
     "savedQuotes": "Saved Quotes",
     "activityCalendar": "Activity Calendar",
-    "daysActive": "days active"
+    "daysActive": "days active",
+    "totalSpent": "Total Spent",
+    "subscription": "Subscription",
+    "paymentHistory": "Payment History"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "empty": "No favorites",
+    "emptySubtext": "Like quotes to find them here",
+    "removeTitle": "Remove from favorites",
+    "removeMessage": "Do you want to remove this quote from your favorites?"
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "email": "Email",
+    "emailHelper": "Email cannot be changed at this time",
+    "changePhoto": "Change photo",
+    "permissionRequired": "Permission required",
+    "permissionMessage": "We need access to your photos",
+    "success": "Profile updated",
+    "successMessage": "Your changes have been saved",
+    "errorMessage": "Unable to update profile"
+  },
+  "payments": {
+    "title": "Payment History",
+    "totalSpent": "Total Spent",
+    "empty": "No payments",
+    "emptySubtext": "Your payments will appear here"
   },
   "actions": {
     "like": "Like",
@@ -216,7 +245,6 @@
     "notificationsInfo": "Receive up to 5 notifications per day at the times and days you choose to discover new inspiring quotes.",
     "selectAtLeastOneDay": "Select at least one day",
     "minNotificationsRequired": "At least one notification is required",
-    "notification": "Notification {{number}}",
     "testNotificationSent": "Test notification sent",
     "checkYourDevice": "Check your device for the notification"
   },

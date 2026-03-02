@@ -11,3 +11,6 @@ export { default as TermsScreen } from "./TermsScreen";
 export { default as PrivacyScreen } from "./PrivacyScreen";
 export { default as ThemeSelectionScreen } from "./ThemeSelectionScreen";
 export { default as FontSelectionScreen } from "./FontSelectionScreen";
+export { default as FavoritesScreen } from "./FavoritesScreen";
+export { default as EditProfileScreen } from "./EditProfileScreen";
+export { default as PaymentHistoryScreen } from "./PaymentHistoryScreen";
