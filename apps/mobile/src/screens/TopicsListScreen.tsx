@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -63,9 +64,15 @@ export default function TopicsListScreen({
   const styles = createStyles(colors);
 
   // Use React Query for topics
-  const { data: topics = [], isLoading: loading, error, refetch } = useTopics();
+  const {
+    data: topics = [],
+    isLoading: loading,
+    isRefetching,
+    error,
+    refetch,
+  } = useTopics();
 
-  const fetchTopics = async () => {
+  const handleRefresh = async () => {
     await refetch();
   };
 
@@ -189,10 +196,7 @@ export default function TopicsListScreen({
           <Text style={styles.errorText}>
             {error?.message || t("topics.failedToLoad")}
           </Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => fetchTopics()}
-          >
+          <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
             <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
           </TouchableOpacity>
         </View>
@@ -224,6 +228,13 @@ export default function TopicsListScreen({
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
       />
     </View>
   );

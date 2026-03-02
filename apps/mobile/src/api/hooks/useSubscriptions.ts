@@ -142,11 +142,17 @@ export const useSubscriptionData = (isAuthenticated: boolean = false) => {
     config: configQuery.data ?? null,
     currentSubscription: currentQuery.data ?? null,
     isLoading: plansQuery.isLoading || configQuery.isLoading,
+    isRefetching:
+      plansQuery.isRefetching ||
+      configQuery.isRefetching ||
+      currentQuery.isRefetching,
     isError: plansQuery.isError || configQuery.isError,
-    refetch: () => {
-      plansQuery.refetch();
-      configQuery.refetch();
-      if (isAuthenticated) currentQuery.refetch();
+    refetch: async () => {
+      await Promise.all([
+        plansQuery.refetch(),
+        configQuery.refetch(),
+        isAuthenticated ? currentQuery.refetch() : Promise.resolve(),
+      ]);
     },
   };
 };

@@ -7,6 +7,7 @@ import {
   Image,
   Dimensions,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -32,7 +33,13 @@ export default function ThemeSelectionScreen({
   const dispatch = useAppDispatch();
   const { colors } = useThemeColors();
   const selectedTheme = useAppSelector((state) => state.theme.backgroundTheme);
-  const { data: themes, isLoading, error } = useActiveThemes();
+  const {
+    data: themes,
+    isLoading,
+    isRefetching,
+    error,
+    refetch,
+  } = useActiveThemes();
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -116,6 +123,13 @@ export default function ThemeSelectionScreen({
           numColumns={2}
           contentContainerStyle={styles.listContent}
           columnWrapperStyle={styles.row}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={colors.primary}
+            />
+          }
           ListHeaderComponent={
             <TouchableOpacity
               style={[
