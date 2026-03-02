@@ -43,6 +43,18 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
+  /**
+   * Calcule si l'utilisateur a un abonnement premium actif
+   * Premium = isSubscribed ET subscriptionEndDate > maintenant
+   */
+  private calculateIsPremium(user: User): boolean {
+    if (!user.isSubscribed) return false;
+    if (!user.subscriptionEndDate) return false;
+    const now = new Date();
+    const endDate = new Date(user.subscriptionEndDate);
+    return endDate > now;
+  }
+
   async findOne(id: string) {
     const user = await this.usersRepository.findOne({
       where: { id },
@@ -51,11 +63,12 @@ export class UsersService {
 
     if (!user) return null;
 
-    // Return user with likedQuotesCount
+    // Return user with likedQuotesCount and isPremium
     const { likedQuotes, password, ...userWithoutPassword } = user as any;
     return {
       ...userWithoutPassword,
       likedQuotesCount: likedQuotes?.length || 0,
+      isPremium: this.calculateIsPremium(user),
     };
   }
 
@@ -67,11 +80,12 @@ export class UsersService {
 
     if (!user) return null;
 
-    // Return user with likedQuotesCount
+    // Return user with likedQuotesCount and isPremium
     const { likedQuotes, ...userWithoutLikedQuotes } = user as any;
     return {
       ...userWithoutLikedQuotes,
       likedQuotesCount: likedQuotes?.length || 0,
+      isPremium: this.calculateIsPremium(user),
     };
   }
 
