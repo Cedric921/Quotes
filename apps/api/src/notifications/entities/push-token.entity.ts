@@ -26,11 +26,10 @@ export class PushToken extends BaseEntity {
   platform: string;
 
   // Last time this token was used successfully
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ nullable: true })
   lastUsedAt: Date;
 
   // Whether this token is still valid
   @Column({ default: true })
   isActive: boolean;
 }
-

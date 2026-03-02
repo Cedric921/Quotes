@@ -7,9 +7,11 @@ import {
   UseGuards,
   Request,
   Get,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
 import { NotificationsService } from './notifications.service';
+import { PremiumNotificationCronService } from './premium-notification-cron.service';
 import { RegisterPushTokenDto } from './dto/register-push-token.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -23,7 +25,10 @@ interface AuthenticatedRequest extends ExpressRequest {
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly premiumNotificationCronService: PremiumNotificationCronService,
+  ) {}
 
   // Register a push token for the authenticated user
   @UseGuards(JwtAuthGuard)
@@ -67,5 +72,39 @@ export class NotificationsController {
   @Post('test')
   sendTestNotification(@Request() req: AuthenticatedRequest) {
     return this.notificationsService.sendTestNotification(req.user.userId);
+  }
+
+  // ==================== ADMIN ENDPOINTS ====================
+
+  // Send a premium quote notification to all premium users (Admin only)
+  @UseGuards(JwtAuthGuard)
+  @Post('admin/send-premium-quote')
+  async sendPremiumQuoteNotification(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: { quoteId?: string },
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.premiumNotificationCronService.sendManualPremiumQuoteNotification(
+      body.quoteId,
+    );
+  }
+
+  // Send an announcement to all premium users (Admin only)
+  @UseGuards(JwtAuthGuard)
+  @Post('admin/send-announcement')
+  async sendAnnouncementToPremiumUsers(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: { title: string; body: string; data?: Record<string, any> },
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.premiumNotificationCronService.sendAnnouncementToPremiumUsers(
+      body.title,
+      body.body,
+      body.data,
+    );
   }
 }

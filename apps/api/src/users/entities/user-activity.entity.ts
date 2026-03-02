@@ -21,7 +21,6 @@ export class UserActivity extends BaseEntity {
   openCount: number;
 
   // Last time the app was opened on this day
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
   lastOpenedAt: Date;
 }
-

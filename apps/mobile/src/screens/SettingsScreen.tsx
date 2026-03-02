@@ -282,6 +282,38 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
           <TouchableOpacity
             style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("ThemeSelection");
+            }}
+          >
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="image-outline" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>
+                {t("settings.backgroundTheme") || "Fond d'écran"}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("FontSelection");
+            }}
+          >
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="text-outline" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>
+                {t("settings.fonts") || "Polices"}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
             onPress={handleNotifications}
           >
             <View style={styles.menuItemLeft}>

@@ -162,4 +162,46 @@ export const topicsApi = {
   },
 };
 
+export interface BackgroundTheme {
+  id: string;
+  name: string;
+  description?: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  order: number;
+  isActive: boolean;
+}
+
+export const themesApi = {
+  /**
+   * Get all active themes (max 10)
+   */
+  getActiveThemes: async (): Promise<BackgroundTheme[]> => {
+    const response = await apiClient.get<BackgroundTheme[]>("/themes/active");
+    return response.data;
+  },
+};
+
+// Font types
+export interface FontItem {
+  id: string;
+  name: string;
+  fontFamily: string;
+  description?: string;
+  previewText?: string;
+  isActive: boolean;
+  isPremium: boolean;
+  order: number;
+}
+
+export const fontsApi = {
+  /**
+   * Get all active fonts (max 10)
+   */
+  getActiveFonts: async (): Promise<FontItem[]> => {
+    const response = await apiClient.get<FontItem[]>("/fonts/active");
+    return response.data;
+  },
+};
+
 export default apiClient;

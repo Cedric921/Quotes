@@ -1,15 +1,12 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { SubscriptionPlan } from './subscription-plan.entity';
-import { Payment } from './payment.entity';
 
 export enum SubscriptionStatus {
-  ACTIVE = 'active',
-  CANCELLED = 'cancelled',
-  EXPIRED = 'expired',
-  TRIAL = 'trial',
-  PAST_DUE = 'past_due',
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
 }
 
 @Entity()
@@ -29,31 +26,22 @@ export class Subscription extends BaseEntity {
   plan: SubscriptionPlan;
 
   @Column({
-    type: 'simple-enum',
-    enum: SubscriptionStatus,
+    type: 'varchar',
     default: SubscriptionStatus.ACTIVE,
   })
   status: SubscriptionStatus;
 
-  @Column({ type: 'datetime' })
+  @Column()
   startDate: Date;
 
-  @Column({ type: 'datetime' })
+  @Column()
   endDate: Date;
 
+  // Stripe Payment Intent ID pour référence
   @Column({ nullable: true })
-  stripeSubscriptionId: string;
+  stripePaymentIntentId: string;
 
-  @Column({ nullable: true })
-  stripeCustomerId: string;
-
-  @Column({ type: 'boolean', default: false })
-  autoRenew: boolean;
-
-  @Column({ type: 'datetime', nullable: true })
-  cancelledAt: Date;
-
-  @OneToMany(() => Payment, (payment) => payment.subscription)
-  payments: Payment[];
+  // Montant payé (en centimes)
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  amountPaid: number;
 }
-

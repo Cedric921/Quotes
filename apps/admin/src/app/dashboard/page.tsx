@@ -25,8 +25,15 @@ import {
   UserX,
   Receipt,
   ArrowUpRight,
+  ArrowDownRight,
   Calendar,
   Clock,
+  Cloud,
+  Server,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -63,6 +70,33 @@ interface SubscriptionStats {
   }>;
 }
 
+interface ServiceStatus {
+  status: "connected" | "disconnected" | "error" | "not_configured";
+  message?: string;
+  latency?: number;
+}
+
+interface StripeStatus extends ServiceStatus {
+  mode?: "test" | "live";
+  webhookConfigured?: boolean;
+  apiKeyConfigured?: boolean;
+}
+
+interface DatabaseStatus extends ServiceStatus {
+  type?: "postgres" | "sqlite";
+  provider?: "supabase" | "direct" | "local";
+}
+
+interface HealthCheckResponse {
+  status: "healthy" | "degraded" | "unhealthy";
+  timestamp: string;
+  services: {
+    database: DatabaseStatus;
+    stripe: StripeStatus;
+    cloudinary: ServiceStatus;
+  };
+}
+
 export default function DashboardPage() {
   const { t } = useLocale();
   const [isSeeding, setIsSeeding] = useState(false);
@@ -70,12 +104,17 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats>({ users: 0, topics: 0, quotes: 0 });
   const [subscriptionStats, setSubscriptionStats] =
     useState<SubscriptionStats | null>(null);
+  const [healthStatus, setHealthStatus] = useState<HealthCheckResponse | null>(
+    null,
+  );
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingSubStats, setIsLoadingSubStats] = useState(true);
+  const [isLoadingHealth, setIsLoadingHealth] = useState(true);
 
   useEffect(() => {
     fetchStats();
     fetchSubscriptionStats();
+    fetchHealthStatus();
   }, []);
 
   const fetchStats = async () => {
@@ -105,6 +144,37 @@ export default function DashboardPage() {
       console.error("Failed to fetch subscription stats", error);
     } finally {
       setIsLoadingSubStats(false);
+    }
+  };
+
+  const fetchHealthStatus = async () => {
+    try {
+      const res = await apiClient.get("/health");
+      setHealthStatus(res.data);
+    } catch (error) {
+      console.error("Failed to fetch health status", error);
+      // Set a fallback status when health endpoint fails
+      setHealthStatus({
+        status: "unhealthy",
+        timestamp: new Date().toISOString(),
+        services: {
+          database: {
+            status: "error",
+            message: "Unable to check",
+            type: "sqlite",
+            provider: "local",
+          },
+          stripe: {
+            status: "error",
+            message: "Unable to check",
+            apiKeyConfigured: false,
+            webhookConfigured: false,
+          },
+          cloudinary: { status: "error", message: "Unable to check" },
+        },
+      });
+    } finally {
+      setIsLoadingHealth(false);
     }
   };
 
@@ -251,7 +321,7 @@ export default function DashboardPage() {
                   {isLoadingSubStats ? (
                     <div className="h-9 w-24 bg-muted animate-pulse rounded" />
                   ) : (
-                    `€${subscriptionStats?.totalRevenue.toFixed(2) ?? "0.00"}`
+                    `€${(subscriptionStats?.totalRevenue ?? 0).toFixed(2)}`
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -280,7 +350,7 @@ export default function DashboardPage() {
                   {isLoadingSubStats ? (
                     <div className="h-9 w-24 bg-muted animate-pulse rounded" />
                   ) : (
-                    `€${subscriptionStats?.monthlyRevenue.toFixed(2) ?? "0.00"}`
+                    `€${(subscriptionStats?.monthlyRevenue ?? 0).toFixed(2)}`
                   )}
                 </div>
                 {!isLoadingSubStats && (
@@ -292,7 +362,11 @@ export default function DashboardPage() {
                           : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
                       } text-xs`}
                     >
-                      <ArrowUpRight className="w-3 h-3 mr-1" />
+                      {(subscriptionStats?.revenueGrowth ?? 0) >= 0 ? (
+                        <ArrowUpRight className="w-3 h-3 mr-1" />
+                      ) : (
+                        <ArrowDownRight className="w-3 h-3 mr-1" />
+                      )}
                       {(subscriptionStats?.revenueGrowth ?? 0) >= 0 ? "+" : ""}
                       {subscriptionStats?.revenueGrowth ?? 0}%
                     </Badge>
@@ -396,7 +470,8 @@ export default function DashboardPage() {
                     />
                   ))}
                 </div>
-              ) : subscriptionStats?.recentTransactions.length === 0 ? (
+              ) : !subscriptionStats ||
+                subscriptionStats.recentTransactions?.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   {t.dashboard.transactions.noTransactions ||
                     "Aucune transaction"}
@@ -413,7 +488,7 @@ export default function DashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {subscriptionStats?.recentTransactions.map(
+                    {subscriptionStats?.recentTransactions?.map(
                       (transaction) => (
                         <TableRow key={transaction.id}>
                           <TableCell className="font-medium">
@@ -425,7 +500,7 @@ export default function DashboardPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="font-semibold">
-                            €{transaction.amount.toFixed(2)}
+                            €{(Number(transaction?.amount) || 0).toFixed(2)}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
                             <div className="flex items-center gap-1">
@@ -459,7 +534,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Stripe Partnership Card */}
+          {/* Stripe Partnership Card - Dynamic */}
           <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-500/5 to-purple-500/5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-bl-full" />
             <CardHeader>
@@ -474,46 +549,132 @@ export default function DashboardPage() {
                     </CardTitle>
                   </div>
                 </div>
+                {/* Refresh button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsLoadingHealth(true);
+                    fetchHealthStatus();
+                  }}
+                  disabled={isLoadingHealth}
+                  className="h-8 w-8 p-0"
+                >
+                  <ArrowUpRight
+                    className={`w-4 h-4 ${isLoadingHealth ? "animate-spin" : ""}`}
+                  />
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-                  <span className="text-sm font-medium">
-                    {t.dashboard.stripe.status}
-                  </span>
-                  <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
-                    {t.dashboard.stripe.connected || "Connecté"}
-                  </Badge>
+              {isLoadingHealth ? (
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-12 rounded-lg bg-muted animate-pulse"
+                    />
+                  ))}
                 </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Connection Status */}
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
+                    <span className="text-sm font-medium">
+                      {t.dashboard.stripe.status}
+                    </span>
+                    <Badge
+                      className={
+                        healthStatus?.services.stripe.status === "connected"
+                          ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                          : healthStatus?.services.stripe.status ===
+                              "not_configured"
+                            ? "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20"
+                            : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+                      }
+                    >
+                      {healthStatus?.services.stripe.status === "connected"
+                        ? t.dashboard.stripe.connected
+                        : healthStatus?.services.stripe.status ===
+                            "not_configured"
+                          ? t.dashboard.stripe.notConfigured || "Non configuré"
+                          : t.dashboard.stripe.disconnected || "Déconnecté"}
+                    </Badge>
+                  </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-                  <span className="text-sm font-medium">
-                    {t.dashboard.stripe.apiKey}
-                  </span>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    sk_****_***********
-                  </span>
-                </div>
+                  {/* API Key Status */}
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
+                    <span className="text-sm font-medium">
+                      {t.dashboard.stripe.apiKey}
+                    </span>
+                    {healthStatus?.services.stripe.apiKeyConfigured ? (
+                      <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-green-500" />
+                        {healthStatus.services.stripe.mode === "live"
+                          ? "sk_live_****"
+                          : "sk_test_****"}
+                      </span>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-yellow-600"
+                      >
+                        {t.dashboard.stripe.notConfigured || "Non configuré"}
+                      </Badge>
+                    )}
+                  </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-                  <span className="text-sm font-medium">
-                    {t.dashboard.stripe.webhook}
-                  </span>
-                  <Badge variant="secondary" className="text-xs">
-                    {t.dashboard.stripe.webhookConfigured}
-                  </Badge>
-                </div>
+                  {/* Webhook Status */}
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
+                    <span className="text-sm font-medium">
+                      {t.dashboard.stripe.webhook}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className={`text-xs ${
+                        healthStatus?.services.stripe.webhookConfigured
+                          ? "bg-green-500/10 text-green-700"
+                          : "bg-yellow-500/10 text-yellow-700"
+                      }`}
+                    >
+                      {healthStatus?.services.stripe.webhookConfigured
+                        ? t.dashboard.stripe.webhookConfigured
+                        : t.dashboard.stripe.webhookNotConfigured ||
+                          "Non configuré"}
+                    </Badge>
+                  </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-                  <span className="text-sm font-medium">
-                    {t.dashboard.stripe.mode}
-                  </span>
-                  <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 text-xs">
-                    {t.dashboard.stripe.test}
-                  </Badge>
+                  {/* Mode */}
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
+                    <span className="text-sm font-medium">
+                      {t.dashboard.stripe.mode}
+                    </span>
+                    <Badge
+                      className={`text-xs ${
+                        healthStatus?.services.stripe.mode === "live"
+                          ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                          : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                      }`}
+                    >
+                      {healthStatus?.services.stripe.mode === "live"
+                        ? t.dashboard.stripe.live || "Production"
+                        : t.dashboard.stripe.test}
+                    </Badge>
+                  </div>
+
+                  {/* Latency (if connected) */}
+                  {healthStatus?.services.stripe.latency && (
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
+                      <span className="text-sm font-medium">
+                        {t.dashboard.stripe.latency || "Latence"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {healthStatus.services.stripe.latency}ms
+                      </span>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               <div className="pt-4 border-t">
                 <p className="text-xs text-muted-foreground text-center">
@@ -549,38 +710,272 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Database Seeding Card */}
+      {/* Services Status Card */}
       <Card className="border-2 hover:shadow-lg transition-shadow">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-orange-500/10">
-              <Database className="w-6 h-6 text-orange-500" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Server className="w-6 h-6 text-blue-500" />
+              </div>
+              <div>
+                <CardTitle>
+                  {t.dashboard.services?.title || "État des Services"}
+                </CardTitle>
+                <CardDescription>
+                  {t.dashboard.services?.description ||
+                    "Vérifiez la connectivité de vos services"}
+                </CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle>{t.dashboard.seedingTitle}</CardTitle>
-              <CardDescription>
-                {t.dashboard.seedingDescription}
-              </CardDescription>
+            <div className="flex items-center gap-2">
+              {/* Global Status Badge */}
+              {healthStatus && (
+                <Badge
+                  className={`${
+                    healthStatus.status === "healthy"
+                      ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
+                      : healthStatus.status === "degraded"
+                        ? "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20"
+                        : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+                  }`}
+                >
+                  {healthStatus.status === "healthy"
+                    ? t.dashboard.services?.healthy || "Opérationnel"
+                    : healthStatus.status === "degraded"
+                      ? t.dashboard.services?.degraded || "Dégradé"
+                      : t.dashboard.services?.unhealthy || "Hors service"}
+                </Badge>
+              )}
+              {/* Refresh Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsLoadingHealth(true);
+                  fetchHealthStatus();
+                }}
+                disabled={isLoadingHealth}
+                className="h-8 w-8 p-0"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${isLoadingHealth ? "animate-spin" : ""}`}
+                />
+              </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {t.dashboard.seedingText}
-          </p>
-          <Button onClick={handleSeed} disabled={isSeeding} className="gap-2">
-            <Database className="w-4 h-4" />
-            {isSeeding ? t.dashboard.seeding : t.dashboard.seedDatabase}
-          </Button>
-          {seedResult && (
-            <div
-              className={`mt-4 p-4 rounded-lg border-2 ${
-                seedResult.includes("✅")
-                  ? "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400"
-                  : "bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400"
-              }`}
-            >
-              <p className="text-sm font-medium">{seedResult}</p>
+        <CardContent>
+          {isLoadingHealth ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-24 rounded-lg bg-muted animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Database Status */}
+              <div className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      healthStatus?.services.database.status === "connected"
+                        ? "bg-green-500/10"
+                        : "bg-red-500/10"
+                    }`}
+                  >
+                    <Database
+                      className={`w-5 h-5 ${
+                        healthStatus?.services.database.status === "connected"
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">
+                      {t.dashboard.services?.database || "Base de données"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {healthStatus?.services.database.type === "postgres"
+                        ? healthStatus?.services.database.provider ===
+                          "supabase"
+                          ? "Supabase (PostgreSQL)"
+                          : "PostgreSQL"
+                        : "SQLite"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {healthStatus?.services.database.status === "connected" ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-red-500" />
+                    )}
+                    <span
+                      className={`text-xs font-medium ${
+                        healthStatus?.services.database.status === "connected"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {healthStatus?.services.database.status === "connected"
+                        ? t.dashboard.services?.connected || "Connecté"
+                        : t.dashboard.services?.disconnected || "Déconnecté"}
+                    </span>
+                  </div>
+                  {healthStatus?.services.database.latency && (
+                    <span className="text-xs text-muted-foreground">
+                      {healthStatus.services.database.latency}ms
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Stripe Status */}
+              <div className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      healthStatus?.services.stripe.status === "connected"
+                        ? "bg-green-500/10"
+                        : healthStatus?.services.stripe.status ===
+                            "not_configured"
+                          ? "bg-yellow-500/10"
+                          : "bg-red-500/10"
+                    }`}
+                  >
+                    <CreditCard
+                      className={`w-5 h-5 ${
+                        healthStatus?.services.stripe.status === "connected"
+                          ? "text-green-500"
+                          : healthStatus?.services.stripe.status ===
+                              "not_configured"
+                            ? "text-yellow-500"
+                            : "text-red-500"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Stripe</p>
+                    <p className="text-xs text-muted-foreground">
+                      {healthStatus?.services.stripe.mode === "live"
+                        ? "Production"
+                        : "Test"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {healthStatus?.services.stripe.status === "connected" ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : healthStatus?.services.stripe.status ===
+                      "not_configured" ? (
+                      <AlertCircle className="w-4 h-4 text-yellow-500" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-red-500" />
+                    )}
+                    <span
+                      className={`text-xs font-medium ${
+                        healthStatus?.services.stripe.status === "connected"
+                          ? "text-green-600"
+                          : healthStatus?.services.stripe.status ===
+                              "not_configured"
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                      }`}
+                    >
+                      {healthStatus?.services.stripe.status === "connected"
+                        ? t.dashboard.services?.connected || "Connecté"
+                        : healthStatus?.services.stripe.status ===
+                            "not_configured"
+                          ? t.dashboard.services?.notConfigured ||
+                            "Non configuré"
+                          : t.dashboard.services?.disconnected || "Déconnecté"}
+                    </span>
+                  </div>
+                  {healthStatus?.services.stripe.latency && (
+                    <span className="text-xs text-muted-foreground">
+                      {healthStatus.services.stripe.latency}ms
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Cloudinary Status */}
+              <div className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      healthStatus?.services.cloudinary.status === "connected"
+                        ? "bg-green-500/10"
+                        : healthStatus?.services.cloudinary.status ===
+                            "not_configured"
+                          ? "bg-yellow-500/10"
+                          : "bg-red-500/10"
+                    }`}
+                  >
+                    <Cloud
+                      className={`w-5 h-5 ${
+                        healthStatus?.services.cloudinary.status === "connected"
+                          ? "text-green-500"
+                          : healthStatus?.services.cloudinary.status ===
+                              "not_configured"
+                            ? "text-yellow-500"
+                            : "text-red-500"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">
+                      {t.dashboard.services?.cloudinary || "Cloudinary"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Media Storage
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {healthStatus?.services.cloudinary.status ===
+                    "connected" ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : healthStatus?.services.cloudinary.status ===
+                      "not_configured" ? (
+                      <AlertCircle className="w-4 h-4 text-yellow-500" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-red-500" />
+                    )}
+                    <span
+                      className={`text-xs font-medium ${
+                        healthStatus?.services.cloudinary.status === "connected"
+                          ? "text-green-600"
+                          : healthStatus?.services.cloudinary.status ===
+                              "not_configured"
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                      }`}
+                    >
+                      {healthStatus?.services.cloudinary.status === "connected"
+                        ? t.dashboard.services?.connected || "Connecté"
+                        : healthStatus?.services.cloudinary.status ===
+                            "not_configured"
+                          ? t.dashboard.services?.notConfigured ||
+                            "Non configuré"
+                          : t.dashboard.services?.disconnected || "Déconnecté"}
+                    </span>
+                  </div>
+                  {healthStatus?.services.cloudinary.latency && (
+                    <span className="text-xs text-muted-foreground">
+                      {healthStatus.services.cloudinary.latency}ms
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </CardContent>

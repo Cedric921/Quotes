@@ -4,17 +4,13 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan, Between } from 'typeorm';
 import Stripe from 'stripe';
-import {
-  SubscriptionPlan,
-  PlanType,
-} from './entities/subscription-plan.entity';
+import { SubscriptionPlan } from './entities/subscription-plan.entity';
 import {
   Subscription,
   SubscriptionStatus,
 } from './entities/subscription.entity';
-import { Payment, PaymentStatus } from './entities/payment.entity';
 import {
   AppConfig,
   CONFIG_KEYS,
@@ -24,7 +20,6 @@ import { User } from '../users/entities/user.entity';
 import {
   CreateSubscriptionPlanDto,
   UpdateSubscriptionPlanDto,
-  CreateSubscriptionDto,
   UpdateConfigDto,
 } from './dto';
 
@@ -37,14 +32,11 @@ export class SubscriptionsService {
     private planRepository: Repository<SubscriptionPlan>,
     @InjectRepository(Subscription)
     private subscriptionRepository: Repository<Subscription>,
-    @InjectRepository(Payment)
-    private paymentRepository: Repository<Payment>,
     @InjectRepository(AppConfig)
     private configRepository: Repository<AppConfig>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {
-    // Initialize Stripe with secret key from env
     const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
     this.stripe = new Stripe(stripeKey);
   }
@@ -58,6 +50,7 @@ export class SubscriptionsService {
     freeUsers: number;
     totalUsers: number;
     premiumPercentage: number;
+    activeSubscriptions: number;
     revenueGrowth: number;
     recentTransactions: Array<{
       id: string;
@@ -65,11 +58,10 @@ export class SubscriptionsService {
       userEmail: string;
       planName: string;
       amount: number;
-      date: Date;
+      date: string;
       status: string;
     }>;
   }> {
-    // Get user counts
     const totalUsers = await this.userRepository.count();
     const premiumUsers = await this.userRepository.count({
       where: { isSubscribed: true },
@@ -78,41 +70,41 @@ export class SubscriptionsService {
     const premiumPercentage =
       totalUsers > 0 ? Math.round((premiumUsers / totalUsers) * 100) : 0;
 
-    // Get total revenue (all successful payments)
-    const allPayments = await this.paymentRepository.find({
-      where: { status: PaymentStatus.SUCCEEDED },
+    // Get all subscriptions for revenue calculation
+    const allSubscriptions = await this.subscriptionRepository.find({
+      where: { status: SubscriptionStatus.ACTIVE },
+      relations: ['plan'],
     });
-    const totalRevenue = allPayments.reduce(
-      (sum, payment) => sum + payment.amount,
+
+    const totalRevenue = allSubscriptions.reduce(
+      (sum, sub) => sum + Number(sub.amountPaid || 0),
       0,
     );
 
-    // Get monthly revenue (current month)
+    // Monthly revenue (subscriptions created this month)
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthlyPayments = allPayments.filter(
-      (payment) => payment.paidAt && new Date(payment.paidAt) >= startOfMonth,
+    const monthlySubscriptions = allSubscriptions.filter(
+      (sub) => new Date(sub.createdAt) >= startOfMonth,
     );
-    const monthlyRevenue = monthlyPayments.reduce(
-      (sum, payment) => sum + payment.amount,
+    const monthlyRevenue = monthlySubscriptions.reduce(
+      (sum, sub) => sum + Number(sub.amountPaid || 0),
       0,
     );
 
-    // Get last month revenue for growth calculation
+    // Calculate revenue growth (compare to last month)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-    const lastMonthPayments = allPayments.filter(
-      (payment) =>
-        payment.paidAt &&
-        new Date(payment.paidAt) >= startOfLastMonth &&
-        new Date(payment.paidAt) <= endOfLastMonth,
-    );
-    const lastMonthRevenue = lastMonthPayments.reduce(
-      (sum, payment) => sum + payment.amount,
+    const lastMonthSubscriptions = await this.subscriptionRepository.find({
+      where: {
+        status: SubscriptionStatus.ACTIVE,
+        createdAt: Between(startOfLastMonth, endOfLastMonth),
+      },
+    });
+    const lastMonthRevenue = lastMonthSubscriptions.reduce(
+      (sum, sub) => sum + Number(sub.amountPaid || 0),
       0,
     );
-
-    // Calculate revenue growth percentage
     const revenueGrowth =
       lastMonthRevenue > 0
         ? Math.round(
@@ -122,21 +114,24 @@ export class SubscriptionsService {
           ? 100
           : 0;
 
-    // Get recent transactions (last 10)
-    const recentPayments = await this.paymentRepository.find({
-      relations: ['user', 'subscription', 'subscription.plan'],
+    const activeSubscriptions = allSubscriptions.length;
+
+    // Recent transactions (formatted for dashboard)
+    const recentSubscriptions = await this.subscriptionRepository.find({
+      relations: ['plan', 'user'],
       order: { createdAt: 'DESC' },
       take: 10,
     });
 
-    const recentTransactions = recentPayments.map((payment) => ({
-      id: payment.id,
-      userName: payment.user?.email?.split('@')[0] || 'Unknown',
-      userEmail: payment.user?.email || 'Unknown',
-      planName: payment.subscription?.plan?.name || 'Premium',
-      amount: payment.amount,
-      date: payment.createdAt,
-      status: payment.status,
+    const recentTransactions = recentSubscriptions.map((sub) => ({
+      id: sub.id,
+      userName: sub.user?.email?.split('@')[0] || 'Unknown',
+      userEmail: sub.user?.email || 'Unknown',
+      planName: sub.plan?.name || 'N/A',
+      amount: Number(sub.amountPaid) || 0,
+      date: sub.createdAt.toISOString(),
+      status:
+        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
     }));
 
     return {
@@ -146,21 +141,20 @@ export class SubscriptionsService {
       freeUsers,
       totalUsers,
       premiumPercentage,
+      activeSubscriptions,
       revenueGrowth,
       recentTransactions,
     };
   }
 
-  // ============ CONFIG MANAGEMENT ============
+  // ============ CONFIG ============
 
   async getConfig(): Promise<Record<string, string>> {
     const configs = await this.configRepository.find();
     const configMap: Record<string, string> = { ...DEFAULT_CONFIG };
-
     configs.forEach((config) => {
       configMap[config.key] = config.value;
     });
-
     return configMap;
   }
 
@@ -173,36 +167,6 @@ export class SubscriptionsService {
         value: String(dto.freemiumDurationDays),
       });
     }
-    if (dto.monthlyPrice !== undefined) {
-      updates.push({
-        key: CONFIG_KEYS.MONTHLY_PRICE,
-        value: String(dto.monthlyPrice),
-      });
-    }
-    if (dto.yearlyPrice !== undefined) {
-      updates.push({
-        key: CONFIG_KEYS.YEARLY_PRICE,
-        value: String(dto.yearlyPrice),
-      });
-    }
-    if (dto.yearlyDiscountPercentage !== undefined) {
-      updates.push({
-        key: CONFIG_KEYS.YEARLY_DISCOUNT_PERCENTAGE,
-        value: String(dto.yearlyDiscountPercentage),
-      });
-    }
-    if (dto.stripeMonthlyPriceId !== undefined) {
-      updates.push({
-        key: CONFIG_KEYS.STRIPE_MONTHLY_PRICE_ID,
-        value: dto.stripeMonthlyPriceId,
-      });
-    }
-    if (dto.stripeYearlyPriceId !== undefined) {
-      updates.push({
-        key: CONFIG_KEYS.STRIPE_YEARLY_PRICE_ID,
-        value: dto.stripeYearlyPriceId,
-      });
-    }
 
     for (const update of updates) {
       let config = await this.configRepository.findOne({
@@ -211,10 +175,7 @@ export class SubscriptionsService {
       if (config) {
         config.value = update.value;
       } else {
-        config = this.configRepository.create({
-          key: update.key,
-          value: update.value,
-        });
+        config = this.configRepository.create(update);
       }
       await this.configRepository.save(config);
     }
@@ -227,7 +188,7 @@ export class SubscriptionsService {
   async createPlan(dto: CreateSubscriptionPlanDto): Promise<SubscriptionPlan> {
     const plan = this.planRepository.create({
       ...dto,
-      durationMonths: dto.type === PlanType.YEARLY ? 12 : 1,
+      durationMonths: dto.durationMonths || 1,
     });
     return this.planRepository.save(plan);
   }
@@ -261,9 +222,28 @@ export class SubscriptionsService {
 
   // ============ SUBSCRIPTIONS ============
 
+  async getAllSubscriptions(
+    page = 1,
+    limit = 20,
+  ): Promise<{ subscriptions: Subscription[]; total: number }> {
+    const [subscriptions, total] =
+      await this.subscriptionRepository.findAndCount({
+        relations: ['plan', 'user'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    return { subscriptions, total };
+  }
+
   async getUserSubscription(userId: string): Promise<Subscription | null> {
+    const now = new Date();
     return this.subscriptionRepository.findOne({
-      where: { userId, status: SubscriptionStatus.ACTIVE },
+      where: {
+        userId,
+        status: SubscriptionStatus.ACTIVE,
+        endDate: MoreThan(now),
+      },
       relations: ['plan'],
       order: { createdAt: 'DESC' },
     });
@@ -277,16 +257,86 @@ export class SubscriptionsService {
     });
   }
 
-  async createSubscription(
+  // Get user payments (subscriptions formatted as payments)
+  async getUserPayments(userId: string): Promise<any[]> {
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { userId },
+      relations: ['plan'],
+      order: { createdAt: 'DESC' },
+    });
+
+    // Format subscriptions as payments
+    return subscriptions.map((sub) => ({
+      id: sub.id,
+      planName: sub.plan?.name || 'Unknown Plan',
+      amount: sub.amountPaid || 0,
+      currency: 'EUR',
+      status:
+        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
+      stripePaymentIntentId: sub.stripePaymentIntentId,
+      paidAt: sub.startDate,
+      createdAt: sub.createdAt,
+    }));
+  }
+
+  // Get total amount spent by user
+  async getUserTotalSpent(userId: string): Promise<number> {
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { userId },
+    });
+
+    return subscriptions.reduce(
+      (total, sub) => total + Number(sub.amountPaid || 0),
+      0,
+    );
+  }
+
+  // Get all payments (subscriptions formatted as payments for admin)
+  async getAllPayments(
+    page = 1,
+    limit = 20,
+  ): Promise<{ payments: any[]; total: number }> {
+    const [subscriptions, total] =
+      await this.subscriptionRepository.findAndCount({
+        relations: ['plan', 'user'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+    // Format subscriptions as payments
+    const payments = subscriptions.map((sub) => ({
+      id: sub.id,
+      userId: sub.userId,
+      user: sub.user ? { email: sub.user.email } : null,
+      subscriptionId: sub.id,
+      subscription: {
+        plan: sub.plan ? { name: sub.plan.name } : null,
+      },
+      amount: sub.amountPaid || 0,
+      currency: 'EUR',
+      status:
+        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
+      stripePaymentIntentId: sub.stripePaymentIntentId,
+      paidAt: sub.startDate,
+      createdAt: sub.createdAt,
+    }));
+
+    return { payments, total };
+  }
+
+  // ============ STRIPE PAYMENT INTENT (Simple) ============
+
+  async createPaymentIntent(
     userId: string,
-    dto: CreateSubscriptionDto,
-  ): Promise<Subscription> {
+    planId: string,
+  ): Promise<{ clientSecret: string; paymentIntentId: string }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const plan = await this.findPlanById(dto.planId);
+    const plan = await this.findPlanById(planId);
     if (!plan.isActive) {
       throw new BadRequestException('This plan is not available');
     }
@@ -296,6 +346,102 @@ export class SubscriptionsService {
     if (existingSubscription) {
       throw new BadRequestException('User already has an active subscription');
     }
+
+    // Create Payment Intent (amount in cents)
+    const amountInCents = Math.round(Number(plan.price) * 100);
+
+    const paymentIntent = await this.stripe.paymentIntents.create({
+      amount: amountInCents,
+      currency: 'eur',
+      metadata: {
+        userId,
+        planId,
+        userEmail: user.email,
+      },
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+
+    return {
+      clientSecret: paymentIntent.client_secret!,
+      paymentIntentId: paymentIntent.id,
+    };
+  }
+
+  // ============ STRIPE CHECKOUT SESSION (for WebView/Browser) ============
+
+  async createCheckoutSession(
+    userId: string,
+    planId: string,
+    successUrl: string,
+    cancelUrl: string,
+  ): Promise<{ checkoutUrl: string; sessionId: string }> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const plan = await this.findPlanById(planId);
+    if (!plan.isActive) {
+      throw new BadRequestException('This plan is not available');
+    }
+
+    // Check if user already has an active subscription
+    const existingSubscription = await this.getUserSubscription(userId);
+    if (existingSubscription) {
+      throw new BadRequestException('User already has an active subscription');
+    }
+
+    // Create Checkout Session
+    const amountInCents = Math.round(Number(plan.price) * 100);
+
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: user.email,
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: plan.name,
+              description:
+                plan.description || `Abonnement ${plan.durationMonths} mois`,
+            },
+            unit_amount: amountInCents,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        userId,
+        planId,
+        userEmail: user.email,
+      },
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    });
+
+    return {
+      checkoutUrl: session.url!,
+      sessionId: session.id,
+    };
+  }
+
+  // Called after successful payment (via webhook or manual confirmation)
+  async activateSubscription(
+    userId: string,
+    planId: string,
+    stripePaymentIntentId: string,
+    amountPaid: number,
+  ): Promise<Subscription> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const plan = await this.findPlanById(planId);
 
     const now = new Date();
     const endDate = new Date(now);
@@ -307,7 +453,8 @@ export class SubscriptionsService {
       status: SubscriptionStatus.ACTIVE,
       startDate: now,
       endDate,
-      autoRenew: dto.autoRenew ?? false,
+      stripePaymentIntentId,
+      amountPaid,
     });
 
     const savedSubscription =
@@ -331,248 +478,95 @@ export class SubscriptionsService {
     }
 
     subscription.status = SubscriptionStatus.CANCELLED;
-    subscription.cancelledAt = new Date();
-    subscription.autoRenew = false;
-
-    return this.subscriptionRepository.save(subscription);
-  }
-
-  async startFreeTrial(userId: string): Promise<Subscription> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    // Check if user already had a trial
-    const existingTrial = await this.subscriptionRepository.findOne({
-      where: { userId, status: SubscriptionStatus.TRIAL },
-    });
-    if (existingTrial) {
-      throw new BadRequestException('User already used their free trial');
-    }
-
-    const config = await this.getConfig();
-    const trialDays = parseInt(config[CONFIG_KEYS.FREEMIUM_DURATION_DAYS], 10);
-
-    const now = new Date();
-    const endDate = new Date(now);
-    endDate.setDate(endDate.getDate() + trialDays);
-
-    const subscription = this.subscriptionRepository.create({
-      userId,
-      planId: null as any, // No plan for trial
-      status: SubscriptionStatus.TRIAL,
-      startDate: now,
-      endDate,
-      autoRenew: false,
-    });
-
     const savedSubscription =
       await this.subscriptionRepository.save(subscription);
 
-    // Update user subscription status
-    user.isSubscribed = true;
-    user.subscriptionEndDate = endDate;
-    await this.userRepository.save(user);
+    // Update user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (user) {
+      user.isSubscribed = false;
+      await this.userRepository.save(user);
+    }
 
     return savedSubscription;
   }
 
-  // ============ PAYMENTS ============
-
-  async createPayment(
-    userId: string,
-    subscriptionId: string | null,
-    amount: number,
-    stripePaymentIntentId?: string,
-  ): Promise<Payment> {
-    const payment = this.paymentRepository.create({
-      userId,
-      subscriptionId: subscriptionId || undefined,
-      amount,
-      status: PaymentStatus.PENDING,
-      stripePaymentIntentId,
-    });
-    return this.paymentRepository.save(payment);
-  }
-
-  async getUserPayments(userId: string): Promise<Payment[]> {
-    return this.paymentRepository.find({
-      where: { userId },
-      relations: ['subscription', 'subscription.plan'],
-      order: { createdAt: 'DESC' },
-    });
-  }
-
-  async getAllPayments(
-    page = 1,
-    limit = 20,
-  ): Promise<{ payments: Payment[]; total: number }> {
-    const [payments, total] = await this.paymentRepository.findAndCount({
-      relations: ['user', 'subscription', 'subscription.plan'],
-      order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-    return { payments, total };
-  }
-
-  async updatePaymentStatus(
-    paymentId: string,
-    status: PaymentStatus,
-    failureReason?: string,
-  ): Promise<Payment> {
-    const payment = await this.paymentRepository.findOne({
-      where: { id: paymentId },
-    });
-    if (!payment) {
-      throw new NotFoundException('Payment not found');
-    }
-
-    payment.status = status;
-    if (status === PaymentStatus.SUCCEEDED) {
-      payment.paidAt = new Date();
-    }
-    if (failureReason) {
-      payment.failureReason = failureReason;
-    }
-
-    return this.paymentRepository.save(payment);
-  }
-
-  // ============ STRIPE INTEGRATION ============
-
-  async createStripeCheckoutSession(
-    userId: string,
-    planId: string,
-  ): Promise<{ sessionId: string; url: string }> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const plan = await this.findPlanById(planId);
-    if (!plan.stripePriceId) {
-      throw new BadRequestException(
-        'This plan is not configured for Stripe payments',
-      );
-    }
-
-    const session = await this.stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: plan.stripePriceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: `${process.env.APP_URL || 'http://localhost:3000'}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/subscription/cancel`,
-      customer_email: user.email,
-      metadata: {
-        userId,
-        planId,
-      },
-    });
-
-    return { sessionId: session.id, url: session.url || '' };
-  }
+  // ============ STRIPE WEBHOOK ============
 
   async handleStripeWebhook(event: Stripe.Event): Promise<void> {
+    console.log(`📥 Stripe webhook received: ${event.type}`);
+
     switch (event.type) {
+      case 'payment_intent.succeeded':
+        await this.handlePaymentIntentSucceeded(
+          event.data.object as Stripe.PaymentIntent,
+        );
+        break;
       case 'checkout.session.completed':
-        await this.handleCheckoutCompleted(
+        await this.handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
         );
         break;
-      case 'invoice.paid':
-        await this.handleInvoicePaid(event.data.object as Stripe.Invoice);
-        break;
-      case 'invoice.payment_failed':
-        await this.handleInvoicePaymentFailed(
-          event.data.object as Stripe.Invoice,
-        );
-        break;
-      case 'customer.subscription.deleted':
-        await this.handleSubscriptionDeleted(
-          event.data.object as Stripe.Subscription,
-        );
+      case 'payment_intent.payment_failed':
+        console.log('❌ Payment failed:', event.data.object);
         break;
     }
   }
 
-  private async handleCheckoutCompleted(
+  private async handlePaymentIntentSucceeded(
+    paymentIntent: Stripe.PaymentIntent,
+  ): Promise<void> {
+    const { userId, planId } = paymentIntent.metadata;
+
+    if (!userId || !planId) {
+      console.log('⚠️ Missing metadata in payment intent');
+      return;
+    }
+
+    // Check if subscription already exists for this payment
+    const existingSubscription = await this.subscriptionRepository.findOne({
+      where: { stripePaymentIntentId: paymentIntent.id },
+    });
+
+    if (existingSubscription) {
+      console.log('ℹ️ Subscription already exists for this payment');
+      return;
+    }
+
+    const amountPaid = paymentIntent.amount / 100; // Convert from cents
+
+    await this.activateSubscription(
+      userId,
+      planId,
+      paymentIntent.id,
+      amountPaid,
+    );
+    console.log(`✅ Subscription activated for user ${userId}`);
+  }
+
+  private async handleCheckoutSessionCompleted(
     session: Stripe.Checkout.Session,
   ): Promise<void> {
-    const userId = session.metadata?.userId;
-    const planId = session.metadata?.planId;
+    const { userId, planId } = session.metadata || {};
 
-    if (!userId || !planId) return;
-
-    await this.createSubscription(userId, {
-      planId,
-      autoRenew: true,
-    });
-  }
-
-  private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
-    // Record successful payment
-    const customerId = invoice.customer as string;
-    const subscription = await this.subscriptionRepository.findOne({
-      where: {
-        stripeCustomerId: customerId,
-        status: SubscriptionStatus.ACTIVE,
-      },
-    });
-
-    if (subscription) {
-      // Get payment intent ID from invoice metadata or charge
-      const paymentIntentId = (invoice as any).payment_intent as
-        | string
-        | undefined;
-      await this.createPayment(
-        subscription.userId,
-        subscription.id,
-        (invoice.amount_paid || 0) / 100,
-        paymentIntentId,
-      );
+    if (!userId || !planId) {
+      console.log('⚠️ Missing metadata in checkout session');
+      return;
     }
-  }
 
-  private async handleInvoicePaymentFailed(
-    invoice: Stripe.Invoice,
-  ): Promise<void> {
-    const customerId = invoice.customer as string;
-    const subscription = await this.subscriptionRepository.findOne({
-      where: { stripeCustomerId: customerId },
+    // Check if subscription already exists for this session
+    const existingSubscription = await this.subscriptionRepository.findOne({
+      where: { stripePaymentIntentId: session.id },
     });
 
-    if (subscription) {
-      subscription.status = SubscriptionStatus.PAST_DUE;
-      await this.subscriptionRepository.save(subscription);
+    if (existingSubscription) {
+      console.log('ℹ️ Subscription already exists for this checkout session');
+      return;
     }
-  }
 
-  private async handleSubscriptionDeleted(
-    stripeSubscription: Stripe.Subscription,
-  ): Promise<void> {
-    const subscription = await this.subscriptionRepository.findOne({
-      where: { stripeSubscriptionId: stripeSubscription.id },
-    });
+    const amountPaid = (session.amount_total || 0) / 100; // Convert from cents
 
-    if (subscription) {
-      subscription.status = SubscriptionStatus.CANCELLED;
-      subscription.cancelledAt = new Date();
-      await this.subscriptionRepository.save(subscription);
-
-      const user = await this.userRepository.findOne({
-        where: { id: subscription.userId },
-      });
-      if (user) {
-        user.isSubscribed = false;
-        await this.userRepository.save(user);
-      }
-    }
+    await this.activateSubscription(userId, planId, session.id, amountPaid);
+    console.log(`✅ Subscription activated for user ${userId} via checkout`);
   }
 }

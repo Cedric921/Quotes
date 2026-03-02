@@ -75,7 +75,10 @@
     "selectLanguage": "Seleccionar idioma",
     "light": "Claro",
     "dark": "Oscuro",
-    "system": "Sistema"
+    "system": "Sistema",
+    "backgroundTheme": "Fondo de pantalla",
+    "noBackground": "Sin fondo",
+    "noThemesAvailable": "No hay temas disponibles"
   },
   "profile": {
     "title": "Perfil",
@@ -158,8 +161,60 @@
     "notificationsInfo": "Reciba hasta 5 notificaciones por día en los horarios y días que elija para descubrir nuevas citas inspiradoras.",
     "selectAtLeastOneDay": "Selecciona al menos un día",
     "minNotificationsRequired": "Se requiere al menos una notificación",
-    "notification": "Notificación {{number}}",
     "testNotificationSent": "Notificación de prueba enviada",
     "checkYourDevice": "Revise su dispositivo para ver la notificación"
+  },
+  "subscription": {
+    "title": "Suscripción",
+    "choosePlan": "Elige tu plan",
+    "currentPlan": "Plan actual",
+    "freeTrial": "Prueba gratuita",
+    "freeTrialDescription": "Prueba las funciones premium gratis",
+    "daysRemaining": "{{days}} días restantes",
+    "days": "días",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "perMonth": "/mes",
+    "perYear": "/año",
+    "save": "Ahorra {{percent}}%",
+    "subscribe": "Suscribirse",
+    "startTrial": "Comenzar prueba gratuita",
+    "cancelSubscription": "Cancelar suscripción",
+    "restorePurchases": "Restaurar compras",
+    "subscriptionActive": "Suscripción activa",
+    "subscriptionExpired": "Suscripción expirada",
+    "subscriptionCancelled": "Suscripción cancelada",
+    "expiresOn": "Expira el {{date}}",
+    "renewsOn": "Se renueva el {{date}}",
+    "trialStarted": "¡Prueba iniciada!",
+    "enjoyTrial": "Disfruta de tu período de prueba gratuito",
+    "features": {
+      "title": "Funciones Premium",
+      "unlimitedQuotes": "Citas ilimitadas",
+      "premiumTopics": "Acceso a temas premium",
+      "noAds": "Sin anuncios",
+      "customNotifications": "Notificaciones personalizadas",
+      "offlineAccess": "Acceso sin conexión"
+    },
+    "processing": "Procesando...",
+    "success": "¡Suscripción exitosa!",
+    "error": "Error en la suscripción",
+    "tryAgain": "Por favor, inténtalo de nuevo",
+    "termsNotice": "Al suscribirte, aceptas nuestros Términos de Servicio y Política de Privacidad",
+    "billingSummary": "Resumen de facturación",
+    "totalSpent": "Total gastado",
+    "totalPayments": "Pagos",
+    "history": "Historial de suscripciones",
+    "ongoing": "En curso",
+    "paymentHistory": "Historial de pagos",
+    "paymentSucceeded": "Exitoso",
+    "paymentPending": "Pendiente",
+    "paymentFailed": "Fallido"
+  },
+  "widget": {
+    "title": "Widget Focus",
+    "description": "Muestra una cita inspiradora en tu pantalla de inicio",
+    "defaultQuote": "Abre la app Focus para descubrir una cita inspiradora.",
+    "defaultAuthor": "Focus"
   }
 }

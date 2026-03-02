@@ -75,11 +75,16 @@
     "selectLanguage": "Select language",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "backgroundTheme": "Background",
+    "noBackground": "No background",
+    "noThemesAvailable": "No themes available",
+    "fonts": "Fonts",
+    "defaultFont": "Default Font"
   },
   "profile": {
     "title": "Profile",
-    "likedQuotes": "Liked Quotes",
+    "likedQuotes": "Favorites",
     "saved": "Saved",
     "shared": "Shared",
     "premium": "Premium Member",
@@ -92,7 +97,36 @@
     "myFavorites": "My Favorites",
     "savedQuotes": "Saved Quotes",
     "activityCalendar": "Activity Calendar",
-    "daysActive": "days active"
+    "daysActive": "days active",
+    "totalSpent": "Total Spent",
+    "subscription": "Subscription",
+    "paymentHistory": "Payment History"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "empty": "No favorites",
+    "emptySubtext": "Like quotes to find them here",
+    "removeTitle": "Remove from favorites",
+    "removeMessage": "Do you want to remove this quote from your favorites?"
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "email": "Email",
+    "emailHelper": "Email cannot be changed at this time",
+    "changePhoto": "Change photo",
+    "permissionRequired": "Permission required",
+    "permissionMessage": "We need access to your photos",
+    "success": "Profile updated",
+    "successMessage": "Your changes have been saved",
+    "errorMessage": "Unable to update profile"
+  },
+  "payments": {
+    "title": "Payment History",
+    "totalSpent": "Total Spent",
+    "empty": "No payments",
+    "emptySubtext": "Your payments will appear here"
   },
   "actions": {
     "like": "Like",
@@ -148,7 +182,22 @@
     "success": "Subscription successful!",
     "error": "Subscription failed",
     "tryAgain": "Please try again",
-    "termsNotice": "By subscribing, you agree to our Terms of Service and Privacy Policy"
+    "paymentCancelled": "Payment cancelled",
+    "paymentCancelledMessage": "You cancelled the payment",
+    "paymentSuccess": "Payment successful!",
+    "subscriptionActivated": "Your subscription is now active",
+    "checkingPayment": "Checking payment status...",
+    "pleaseWait": "Your subscription is being processed. Please wait.",
+    "termsNotice": "By subscribing, you agree to our Terms of Service and Privacy Policy",
+    "billingSummary": "Billing Summary",
+    "totalSpent": "Total Spent",
+    "totalPayments": "Payments",
+    "history": "Subscription History",
+    "ongoing": "Ongoing",
+    "paymentHistory": "Payment History",
+    "paymentSucceeded": "Succeeded",
+    "paymentPending": "Pending",
+    "paymentFailed": "Failed"
   },
   "notifications": {
     "title": "Notifications",
@@ -196,8 +245,47 @@
     "notificationsInfo": "Receive up to 5 notifications per day at the times and days you choose to discover new inspiring quotes.",
     "selectAtLeastOneDay": "Select at least one day",
     "minNotificationsRequired": "At least one notification is required",
-    "notification": "Notification {{number}}",
     "testNotificationSent": "Test notification sent",
     "checkYourDevice": "Check your device for the notification"
+  },
+  "widget": {
+    "title": "Focus Widget",
+    "description": "Display an inspiring quote on your home screen",
+    "defaultQuote": "Open the Focus app to discover an inspiring quote.",
+    "defaultAuthor": "Focus"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to Focus",
+    "welcomeSubtitle": "Discover inspiring quotes every day",
+    "choosePlan": "Choose your plan",
+    "continue": "Continue",
+    "skipForNow": "Skip for now",
+    "completeProfile": "Complete your profile",
+    "createAccount": "Create an account",
+    "createAccountSubtitle": "To continue to payment",
+    "name": "Full name",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "continueToPayment": "Continue to payment",
+    "selectedPlan": "Selected plan",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "popular": "Popular",
+    "features": {
+      "unlimitedQuotes": "Unlimited quotes",
+      "premiumTopics": "Access to premium topics",
+      "noAds": "No ads",
+      "customThemes": "Custom themes",
+      "offlineAccess": "Offline access"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Email is not valid",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
   }
 }

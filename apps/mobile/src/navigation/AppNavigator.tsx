@@ -13,6 +13,11 @@ import {
   SubscriptionScreen,
   TermsScreen,
   PrivacyScreen,
+  ThemeSelectionScreen,
+  FontSelectionScreen,
+  FavoritesScreen,
+  EditProfileScreen,
+  PaymentHistoryScreen,
 } from "../screens";
 import { navigationRef } from "../services/navigationService";
 
@@ -31,6 +36,11 @@ export type RootStackParamList = {
   Subscription: undefined;
   Terms: undefined;
   Privacy: undefined;
+  ThemeSelection: undefined;
+  FontSelection: undefined;
+  Favorites: undefined;
+  EditProfile: undefined;
+  PaymentHistory: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -56,6 +66,17 @@ export default function AppNavigator() {
           <Stack.Screen name="Subscription" component={SubscriptionScreen} />
           <Stack.Screen name="Terms" component={TermsScreen} />
           <Stack.Screen name="Privacy" component={PrivacyScreen} />
+          <Stack.Screen
+            name="ThemeSelection"
+            component={ThemeSelectionScreen}
+          />
+          <Stack.Screen name="FontSelection" component={FontSelectionScreen} />
+          <Stack.Screen name="Favorites" component={FavoritesScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen
+            name="PaymentHistory"
+            component={PaymentHistoryScreen}
+          />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

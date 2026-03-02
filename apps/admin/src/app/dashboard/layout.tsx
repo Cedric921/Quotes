@@ -14,6 +14,8 @@ import {
   AlertTriangle,
   Settings,
   CreditCard,
+  Image,
+  Type,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -42,8 +44,10 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!isAuthenticated()) {
       router.push("/login");
     }
@@ -66,6 +70,11 @@ export default function DashboardLayout({
     }
   };
 
+  // Avoid hydration mismatch by not rendering until mounted on client
+  if (!mounted) {
+    return null;
+  }
+
   if (!isAuthenticated()) {
     return null;
   }
@@ -75,6 +84,16 @@ export default function DashboardLayout({
     { href: "/dashboard/users", icon: Users, label: t.nav.users },
     { href: "/dashboard/topics", icon: BookOpen, label: t.nav.topics },
     { href: "/dashboard/quotes", icon: FileText, label: t.nav.quotes },
+    {
+      href: "/dashboard/themes",
+      icon: Image,
+      label: t.nav.themes || "Thèmes",
+    },
+    {
+      href: "/dashboard/fonts",
+      icon: Type,
+      label: t.nav.fonts || "Polices",
+    },
     {
       href: "/dashboard/subscriptions",
       icon: Settings,

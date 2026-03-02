@@ -6,6 +6,18 @@ import {
   AppConfig,
 } from "../../store/slices/subscriptionSlice";
 
+// Payment intent response
+export interface PaymentIntentResponse {
+  clientSecret: string;
+  paymentIntentId: string;
+}
+
+// Checkout session response
+export interface CheckoutSessionResponse {
+  checkoutUrl: string;
+  sessionId: string;
+}
+
 // Query keys
 export const subscriptionKeys = {
   all: ["subscriptions"] as const,
@@ -21,7 +33,7 @@ export const useSubscriptionPlans = (activeOnly: boolean = true) => {
     queryKey: [...subscriptionKeys.plans(), { activeOnly }],
     queryFn: async () => {
       const response = await apiClient.get<SubscriptionPlan[]>(
-        `/subscriptions/plans?activeOnly=${activeOnly}`
+        `/subscriptions/plans?activeOnly=${activeOnly}`,
       );
       return response.data;
     },
@@ -45,7 +57,7 @@ export const useCurrentSubscription = (enabled: boolean = true) => {
     queryKey: subscriptionKeys.current(),
     queryFn: async () => {
       const response = await apiClient.get<Subscription>(
-        "/subscriptions/my-subscription"
+        "/subscriptions/my-subscription",
       );
       return response.data;
     },
@@ -64,7 +76,7 @@ export const useSubscriptionHistory = (enabled: boolean = true) => {
     queryKey: subscriptionKeys.history(),
     queryFn: async () => {
       const response = await apiClient.get<Subscription[]>(
-        "/subscriptions/my-subscription/history"
+        "/subscriptions/my-subscription/history",
       );
       return response.data;
     },
@@ -72,36 +84,35 @@ export const useSubscriptionHistory = (enabled: boolean = true) => {
   });
 };
 
-// Start free trial mutation
-export const useStartFreeTrial = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      const response = await apiClient.post<Subscription>(
-        "/subscriptions/start-trial"
-      );
-      return response.data;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(subscriptionKeys.current(), data);
-      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-    },
-  });
-};
-
-// Create checkout session mutation
-export const useCreateCheckout = () => {
+// Create payment intent mutation (new simplified flow)
+export const useCreatePaymentIntent = () => {
   return useMutation({
     mutationFn: async (planId: string) => {
-      const response = await apiClient.post<{ url: string; sessionId: string }>(
-        "/subscriptions/checkout",
-        { planId }
+      console.log({ planId });
+      const response = await apiClient.post<PaymentIntentResponse>(
+        "/subscriptions/create-payment-intent",
+        { planId },
       );
       return response.data;
     },
   });
 };
+
+// Create checkout session mutation (opens Stripe hosted page)
+export const useCreateCheckoutSession = () => {
+  return useMutation({
+    mutationFn: async (planId: string) => {
+      const response = await apiClient.post<CheckoutSessionResponse>(
+        "/subscriptions/create-checkout-session",
+        { planId },
+      );
+      return response.data;
+    },
+  });
+};
+
+// Legacy: kept for backwards compatibility
+export const useCreateCheckout = useCreateCheckoutSession;
 
 // Cancel subscription mutation
 export const useCancelSubscription = () => {
@@ -110,7 +121,7 @@ export const useCancelSubscription = () => {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.post<Subscription>(
-        "/subscriptions/cancel"
+        "/subscriptions/cancel",
       );
       return response.data;
     },
@@ -131,12 +142,17 @@ export const useSubscriptionData = (isAuthenticated: boolean = false) => {
     config: configQuery.data ?? null,
     currentSubscription: currentQuery.data ?? null,
     isLoading: plansQuery.isLoading || configQuery.isLoading,
+    isRefetching:
+      plansQuery.isRefetching ||
+      configQuery.isRefetching ||
+      currentQuery.isRefetching,
     isError: plansQuery.isError || configQuery.isError,
-    refetch: () => {
-      plansQuery.refetch();
-      configQuery.refetch();
-      if (isAuthenticated) currentQuery.refetch();
+    refetch: async () => {
+      await Promise.all([
+        plansQuery.refetch(),
+        configQuery.refetch(),
+        isAuthenticated ? currentQuery.refetch() : Promise.resolve(),
+      ]);
     },
   };
 };
-

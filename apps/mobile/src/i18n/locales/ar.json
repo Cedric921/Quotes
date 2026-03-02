@@ -75,7 +75,10 @@
     "selectLanguage": "اختر اللغة",
     "light": "فاتح",
     "dark": "داكن",
-    "system": "النظام"
+    "system": "النظام",
+    "backgroundTheme": "خلفية الشاشة",
+    "noBackground": "بدون خلفية",
+    "noThemesAvailable": "لا توجد خلفيات متاحة"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -161,5 +164,58 @@
     "notification": "إشعار {{number}}",
     "testNotificationSent": "تم إرسال إشعار تجريبي",
     "checkYourDevice": "تحقق من جهازك للإشعار"
+  },
+  "subscription": {
+    "title": "الاشتراك",
+    "choosePlan": "اختر خطتك",
+    "currentPlan": "الخطة الحالية",
+    "freeTrial": "تجربة مجانية",
+    "freeTrialDescription": "جرب الميزات المميزة مجاناً",
+    "daysRemaining": "{{days}} أيام متبقية",
+    "days": "أيام",
+    "monthly": "شهري",
+    "yearly": "سنوي",
+    "perMonth": "/شهر",
+    "perYear": "/سنة",
+    "save": "وفر {{percent}}%",
+    "subscribe": "اشترك",
+    "startTrial": "ابدأ التجربة المجانية",
+    "cancelSubscription": "إلغاء الاشتراك",
+    "restorePurchases": "استعادة المشتريات",
+    "subscriptionActive": "الاشتراك نشط",
+    "subscriptionExpired": "انتهى الاشتراك",
+    "subscriptionCancelled": "تم إلغاء الاشتراك",
+    "expiresOn": "ينتهي في {{date}}",
+    "renewsOn": "يتجدد في {{date}}",
+    "trialStarted": "بدأت التجربة!",
+    "enjoyTrial": "استمتع بفترة التجربة المجانية",
+    "features": {
+      "title": "الميزات المميزة",
+      "unlimitedQuotes": "اقتباسات غير محدودة",
+      "premiumTopics": "الوصول إلى المواضيع المميزة",
+      "noAds": "بدون إعلانات",
+      "customNotifications": "إشعارات مخصصة",
+      "offlineAccess": "الوصول بدون إنترنت"
+    },
+    "processing": "جاري المعالجة...",
+    "success": "تم الاشتراك بنجاح!",
+    "error": "فشل الاشتراك",
+    "tryAgain": "يرجى المحاولة مرة أخرى",
+    "termsNotice": "بالاشتراك، أنت توافق على شروط الخدمة وسياسة الخصوصية",
+    "billingSummary": "ملخص الفواتير",
+    "totalSpent": "إجمالي المصروفات",
+    "totalPayments": "المدفوعات",
+    "history": "سجل الاشتراكات",
+    "ongoing": "جاري",
+    "paymentHistory": "سجل المدفوعات",
+    "paymentSucceeded": "ناجح",
+    "paymentPending": "قيد الانتظار",
+    "paymentFailed": "فشل"
+  },
+  "widget": {
+    "title": "ويدجت Focus",
+    "description": "عرض اقتباس ملهم على شاشتك الرئيسية",
+    "defaultQuote": "افتح تطبيق Focus لاكتشاف اقتباس ملهم.",
+    "defaultAuthor": "Focus"
   }
 }

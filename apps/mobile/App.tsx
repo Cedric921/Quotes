@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Platform } from "react-native";
 import { Provider, useSelector } from "react-redux";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -8,18 +8,36 @@ import { store, RootState } from "./src/store";
 import { queryClient } from "./src/api/queryClient";
 import { loadStoredAuth } from "./src/store/slices/authSlice";
 import { loadStoredTheme } from "./src/store/slices/themeSlice";
+import { loadStoredFont } from "./src/store/slices/fontSlice";
 import { useTrackActivity } from "./src/api/hooks/useUserActivity";
 import { setupNotificationChannel } from "./src/services/notificationService";
 import "./src/i18n"; // Initialiser i18n
+
+// Register Android widget task handler
+if (Platform.OS === "android") {
+  import("react-native-android-widget")
+    .then(({ registerWidgetTaskHandler }) => {
+      import("./src/widgets/widgetTaskHandler").then(
+        ({ widgetTaskHandler }) => {
+          registerWidgetTaskHandler(widgetTaskHandler);
+        },
+      );
+    })
+    .catch(() => {
+      // Widget module not available (e.g., in Expo Go)
+      console.log("[App] Android widget module not available");
+    });
+}
 
 function AppContent() {
   const token = useSelector((state: RootState) => state.auth.token);
   const trackActivity = useTrackActivity();
 
   useEffect(() => {
-    // Load stored authentication and theme on app start
+    // Load stored authentication, theme and font on app start
     store.dispatch(loadStoredAuth());
     store.dispatch(loadStoredTheme());
+    store.dispatch(loadStoredFont());
 
     // Setup notification channel for Android
     setupNotificationChannel();

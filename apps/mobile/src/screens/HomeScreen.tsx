@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect, useRef } from "react";
 import {
   View,
   FlatList,
@@ -7,8 +7,13 @@ import {
   RefreshControl,
   ActivityIndicator,
   ViewStyle,
+  ImageBackground,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import * as Sharing from "expo-sharing";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as WebBrowser from "expo-web-browser";
+import Toast from "react-native-toast-message";
 import {
   QuoteCard,
   LoadingSkeleton,
@@ -17,13 +22,23 @@ import {
   DotsIndicator,
   ActionButtons,
 } from "../components";
+import {
+  SubscriptionBottomSheet,
+  ProfileCompletionModal,
+} from "../components/onboarding";
 import { useQuotes, useToggleLikeQuote } from "../api/hooks";
+import { useCreateCheckoutSession } from "../api/hooks/useSubscriptions";
 import { Quote } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
-import { useAppSelector } from "../store/hooks";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { registerThunk } from "../store/slices/authSlice";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
+import { widgetService } from "../services/widgetService";
+import { SubscriptionPlan } from "../store/slices/subscriptionSlice";
+
+const ONBOARDING_KEY = "@focus_onboarding_shown";
 
 const { height } = Dimensions.get("window");
 
@@ -38,11 +53,23 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const backgroundTheme = useAppSelector(
+    (state) => state.theme.backgroundTheme,
+  );
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Onboarding states
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
+    null,
+  );
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // React Query hooks
   const {
@@ -56,6 +83,108 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   } = useQuotes(10);
 
   const toggleLikeMutation = useToggleLikeQuote();
+  const checkoutMutation = useCreateCheckoutSession();
+
+  // Check if onboarding should be shown (first launch)
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const hasShown = await AsyncStorage.getItem(ONBOARDING_KEY);
+        if (!hasShown && !isAuthenticated) {
+          // Delay to let the app load first
+          setTimeout(() => setShowOnboarding(true), 1000);
+        }
+      } catch (error) {
+        console.error("Error checking onboarding:", error);
+      }
+    };
+    checkOnboarding();
+  }, [isAuthenticated]);
+
+  // Handle plan selection from bottom sheet
+  const handleSelectPlan = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setShowOnboarding(false);
+    setShowProfileModal(true);
+  };
+
+  // Handle onboarding close
+  const handleCloseOnboarding = async () => {
+    setShowOnboarding(false);
+    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+  };
+
+  // Handle profile completion and checkout
+  const handleProfileComplete = async (profileData: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
+    if (!selectedPlan) return;
+
+    setIsRegistering(true);
+    try {
+      // 1. Register the user
+      await dispatch(
+        registerThunk({
+          name: profileData.name,
+          email: profileData.email,
+          password: profileData.password,
+        }),
+      ).unwrap();
+
+      // 2. Mark onboarding as completed
+      await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+
+      // 3. Create checkout session
+      const checkoutResult = await checkoutMutation.mutateAsync(
+        selectedPlan.id,
+      );
+
+      if (!checkoutResult.checkoutUrl) {
+        throw new Error("No checkout URL received");
+      }
+
+      // 4. Open Stripe Checkout
+      setShowProfileModal(false);
+      const browserResult = await WebBrowser.openBrowserAsync(
+        checkoutResult.checkoutUrl,
+        {
+          dismissButtonStyle: "cancel",
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+        },
+      );
+
+      if (browserResult.type === "cancel") {
+        Toast.show({
+          type: "info",
+          text1: t("subscription.paymentCancelled"),
+          text2: t("subscription.paymentCancelledMessage"),
+        });
+      } else {
+        Toast.show({
+          type: "success",
+          text1: t("subscription.paymentSuccess"),
+          text2: t("subscription.subscriptionActivated"),
+        });
+      }
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: t("errors.registrationFailed"),
+        text2: error.message || t("errors.tryAgain"),
+      });
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  // Handle profile modal close
+  const handleCloseProfileModal = async () => {
+    setShowProfileModal(false);
+    setSelectedPlan(null);
+    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+  };
 
   // Flatten pages into a single array of quotes
   const quotes = useMemo(() => {
@@ -112,6 +241,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     navigation.navigate("Login");
   }, [navigation]);
 
+  const lastWidgetUpdateRef = useRef<string | null>(null);
+
   const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       setCurrentIndex(viewableItems[0].index || 0);
@@ -121,6 +252,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 50,
   };
+
+  // Update widget when current quote changes
+  useEffect(() => {
+    const currentQuote = filteredQuotes[currentIndex];
+    if (currentQuote && currentQuote.id !== lastWidgetUpdateRef.current) {
+      lastWidgetUpdateRef.current = currentQuote.id;
+      widgetService.updateWidgetQuote({
+        content: currentQuote.text,
+        author: currentQuote.author,
+        topicName: currentQuote.topic?.name,
+      });
+    }
+  }, [currentIndex, filteredQuotes]);
 
   const renderItem = useCallback(
     ({ item }: { item: Quote }) => (
@@ -159,8 +303,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }
 
-  return (
-    <View style={styles.container}>
+  const content = (
+    <>
       {/* Header */}
       <Header />
 
@@ -213,8 +357,42 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           onLogin={handleLogin}
         />
       )}
-    </View>
+
+      {/* Onboarding Bottom Sheet */}
+      <SubscriptionBottomSheet
+        isVisible={showOnboarding}
+        onClose={handleCloseOnboarding}
+        onSelectPlan={handleSelectPlan}
+      />
+
+      {/* Profile Completion Modal */}
+      <ProfileCompletionModal
+        isVisible={showProfileModal}
+        onClose={handleCloseProfileModal}
+        onComplete={handleProfileComplete}
+        selectedPlan={selectedPlan}
+        isLoading={isRegistering}
+      />
+    </>
   );
+
+  // If a background theme is selected, wrap content in ImageBackground with glass effect
+  if (backgroundTheme?.imageUrl) {
+    return (
+      <ImageBackground
+        source={{ uri: backgroundTheme.imageUrl }}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        {/* Glass effect overlay using BlurView */}
+        <BlurView intensity={4} tint="dark" style={styles.glassOverlay}>
+          <View style={styles.glassInner}>{content}</View>
+        </BlurView>
+      </ImageBackground>
+    );
+  }
+
+  return <View style={styles.container}>{content}</View>;
 }
 
 const createStyles = (colors: any) =>
@@ -222,6 +400,13 @@ const createStyles = (colors: any) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    } as ViewStyle,
+    glassOverlay: {
+      flex: 1,
+    } as ViewStyle,
+    glassInner: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
     } as ViewStyle,
     footer: {
       height: height,
