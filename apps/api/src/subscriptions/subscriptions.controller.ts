@@ -76,6 +76,12 @@ export class SubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('my-payments')
+  async getMyPayments(@Request() req: AuthenticatedRequest) {
+    return this.subscriptionsService.getUserPayments(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('create-payment-intent')
   async createPaymentIntent(
     @Request() req: AuthenticatedRequest,

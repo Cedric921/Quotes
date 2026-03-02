@@ -20,6 +20,8 @@ import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "../api/hooks";
 import { useActivityStats } from "../api/hooks/useUserActivity";
+import { useUserPayments } from "../api/hooks/useUser";
+import { useCurrentSubscription } from "../api/hooks/useSubscriptions";
 
 interface ProfileScreenProps {
   readonly navigation: any;
@@ -43,6 +45,15 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   // Fetch activity stats for current month
   const token = useAppSelector((state) => state.auth.token);
   const { data: activityStats } = useActivityStats(selectedYear, selectedMonth);
+
+  // Fetch payments and subscription data
+  const { data: payments } = useUserPayments();
+  const { data: subscription } = useCurrentSubscription();
+
+  // Calculate total spent
+  const totalSpent = useMemo(() => {
+    return payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
+  }, [payments]);
 
   // Calculate calendar grid
   const calendarDays = useMemo(() => {
@@ -144,24 +155,42 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
+          <TouchableOpacity
+            style={styles.statCard}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("Favorites");
+            }}
+          >
             <MaterialIcons name="favorite" size={24} color="#ff4444" />
             <Text style={styles.statNumber}>
               {displayUser?.likedQuotesCount || 0}
             </Text>
             <Text style={styles.statLabel}>{t("profile.likedQuotes")}</Text>
-          </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.statCard}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("PaymentHistory");
+            }}
+          >
+            <MaterialIcons
+              name="account-balance-wallet"
+              size={24}
+              color="#34C759"
+            />
+            <Text style={styles.statNumber}>{totalSpent.toFixed(0)}€</Text>
+            <Text style={styles.statLabel}>{t("profile.totalSpent")}</Text>
+          </TouchableOpacity>
 
           <View style={styles.statCard}>
-            <Ionicons name="bookmark" size={24} color="#0A84FF" />
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>{t("profile.saved")}</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Ionicons name="share-social" size={24} color="#0A84FF" />
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>{t("profile.shared")}</Text>
+            <Ionicons name="diamond" size={24} color="#FFD700" />
+            <Text style={styles.statNumber}>
+              {subscription?.plan?.name?.charAt(0) || "-"}
+            </Text>
+            <Text style={styles.statLabel}>{t("profile.subscription")}</Text>
           </View>
         </View>
 
@@ -207,7 +236,13 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
         {/* Menu Items */}
         <View style={styles.section}>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("EditProfile");
+            }}
+          >
             <View style={styles.menuItemLeft}>
               <MaterialIcons name="edit" size={24} color="#0A84FF" />
               <Text style={styles.menuItemText}>
@@ -217,7 +252,13 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("Favorites");
+            }}
+          >
             <View style={styles.menuItemLeft}>
               <MaterialIcons name="favorite-border" size={24} color="#0A84FF" />
               <Text style={styles.menuItemText}>
@@ -227,11 +268,17 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("PaymentHistory");
+            }}
+          >
             <View style={styles.menuItemLeft}>
-              <Ionicons name="bookmark-outline" size={24} color="#0A84FF" />
+              <MaterialIcons name="receipt-long" size={24} color="#0A84FF" />
               <Text style={styles.menuItemText}>
-                {t("profile.savedQuotes")}
+                {t("profile.paymentHistory")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />

@@ -43,6 +43,18 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
+  /**
+   * Calcule si l'utilisateur a un abonnement premium actif
+   * Premium = isSubscribed ET subscriptionEndDate > maintenant
+   */
+  private calculateIsPremium(user: User): boolean {
+    if (!user.isSubscribed) return false;
+    if (!user.subscriptionEndDate) return false;
+    const now = new Date();
+    const endDate = new Date(user.subscriptionEndDate);
+    return endDate > now;
+  }
+
   async findOne(id: string) {
     const user = await this.usersRepository.findOne({
       where: { id },
@@ -51,11 +63,12 @@ export class UsersService {
 
     if (!user) return null;
 
-    // Return user with likedQuotesCount
+    // Return user with likedQuotesCount and isPremium
     const { likedQuotes, password, ...userWithoutPassword } = user as any;
     return {
       ...userWithoutPassword,
       likedQuotesCount: likedQuotes?.length || 0,
+      isPremium: this.calculateIsPremium(user),
     };
   }
 
@@ -67,11 +80,12 @@ export class UsersService {
 
     if (!user) return null;
 
-    // Return user with likedQuotesCount
+    // Return user with likedQuotesCount and isPremium
     const { likedQuotes, ...userWithoutLikedQuotes } = user as any;
     return {
       ...userWithoutLikedQuotes,
       likedQuotesCount: likedQuotes?.length || 0,
+      isPremium: this.calculateIsPremium(user),
     };
   }
 
@@ -225,5 +239,36 @@ export class UsersService {
         openCount: a.openCount,
       })),
     };
+  }
+
+  // ==================== Liked Quotes (Favorites) ====================
+
+  async getLikedQuotes(userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['likedQuotes', 'likedQuotes.topic'],
+    });
+
+    if (!user) return [];
+
+    return user.likedQuotes.map((quote) => ({
+      ...quote,
+      isLiked: true,
+    }));
+  }
+
+  // ==================== Profile Update ====================
+
+  async updateProfile(
+    userId: string,
+    data: { name?: string; avatar?: string },
+  ) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) return null;
+
+    if (data.name !== undefined) user.name = data.name;
+    if (data.avatar !== undefined) user.avatar = data.avatar;
+
+    return this.usersRepository.save(user);
   }
 }

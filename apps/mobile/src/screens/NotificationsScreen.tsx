@@ -7,6 +7,7 @@ import {
   Switch,
   TouchableOpacity,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -48,7 +49,12 @@ export const NotificationsScreen = ({
   // Check if user is subscribed or admin (premium feature)
   const isSubscribed = user?.isSubscribed || user?.isAdmin || false;
 
-  const { data: settings, isLoading } = useNotificationSettings();
+  const {
+    data: settings,
+    isLoading,
+    isRefetching,
+    refetch,
+  } = useNotificationSettings();
   const updateSettings = useUpdateNotificationSettings();
   const resetSettings = useResetNotificationSettings();
   const registerPushToken = useRegisterPushToken();
@@ -428,7 +434,16 @@ export const NotificationsScreen = ({
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
+            tintColor={colors.primary}
+          />
+        }
+      >
         {/* Enable/Disable Toggle */}
         <View
           style={[

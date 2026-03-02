@@ -10,7 +10,7 @@ import {
   TextStyle,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import * as Haptics from "expo-haptics";
 
 // Helper function to get gradient colors from topic color
@@ -47,6 +47,35 @@ import { useAppSelector } from "../store/hooks";
 
 const { height } = Dimensions.get("window");
 
+// Map of available system fonts that can be used
+const SYSTEM_FONTS: Record<string, string> = {
+  // iOS System Fonts
+  "San Francisco": "System",
+  "SF Pro": "System",
+  // Common cross-platform fonts
+  Georgia: "Georgia",
+  "Times New Roman": "Times New Roman",
+  "Courier New": "Courier New",
+  Helvetica: "Helvetica",
+  Arial: "Arial",
+  // Decorative fonts (iOS)
+  Papyrus: "Papyrus",
+  Copperplate: "Copperplate",
+  "American Typewriter": "American Typewriter",
+  "Marker Felt": "Marker Felt",
+  Zapfino: "Zapfino",
+  Didot: "Didot",
+  "Bodoni 72": "Bodoni 72",
+  Baskerville: "Baskerville",
+  Avenir: "Avenir",
+  Futura: "Futura",
+  Palatino: "Palatino",
+  Optima: "Optima",
+  "Gill Sans": "Gill Sans",
+  "Trebuchet MS": "Trebuchet MS",
+  Verdana: "Verdana",
+};
+
 interface Quote {
   id: string;
   text: string;
@@ -78,11 +107,30 @@ export default function QuoteCard({
   const [liked, setLiked] = useState(isLiked);
   const [lastTap, setLastTap] = useState(0);
   const selectedFont = useAppSelector((state) => state.font.selectedFont);
+  const backgroundTheme = useAppSelector(
+    (state) => state.theme.backgroundTheme,
+  );
 
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(0)).current;
 
   const gradient = getTopicGradient(quote.topic?.color);
+
+  // Check if a background theme is active (to make card transparent)
+  const hasBackgroundTheme = !!backgroundTheme?.imageUrl;
+
+  // Get the effective font family (use system fonts or fallback)
+  const effectiveFontFamily = useMemo(() => {
+    if (!selectedFont?.fontFamily) return undefined;
+
+    // Check if it's a mapped system font
+    const systemFont = SYSTEM_FONTS[selectedFont.fontFamily];
+    if (systemFont) return systemFont;
+
+    // Otherwise try to use the font family directly
+    // This will work if the font is available on the device
+    return selectedFont.fontFamily;
+  }, [selectedFont]);
 
   useEffect(() => {
     setLiked(isLiked);
@@ -135,13 +183,23 @@ export default function QuoteCard({
     }
   };
 
+  // If background theme is active, use transparent container
+  // Otherwise use the topic gradient
+  const containerStyle = hasBackgroundTheme
+    ? [styles.container, styles.transparentContainer]
+    : styles.container;
+
+  const gradientColors: [string, string, ...string[]] = hasBackgroundTheme
+    ? ["transparent", "transparent"]
+    : gradient;
+
   return (
     <TouchableWithoutFeedback onPress={handleDoubleTap}>
       <LinearGradient
-        colors={gradient}
+        colors={gradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.container}
+        style={containerStyle}
       >
         {/* Double tap heart animation */}
         <Animated.Text
@@ -160,8 +218,8 @@ export default function QuoteCard({
           <Text
             style={[
               styles.quoteText,
-              selectedFont?.fontFamily && {
-                fontFamily: selectedFont.fontFamily,
+              effectiveFontFamily && {
+                fontFamily: effectiveFontFamily,
               },
             ]}
           >
@@ -172,8 +230,8 @@ export default function QuoteCard({
             <Text
               style={[
                 styles.author,
-                selectedFont?.fontFamily && {
-                  fontFamily: selectedFont.fontFamily,
+                effectiveFontFamily && {
+                  fontFamily: effectiveFontFamily,
                 },
               ]}
             >
@@ -204,11 +262,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 30,
   } as ViewStyle,
+  transparentContainer: {
+    backgroundColor: "transparent",
+  } as ViewStyle,
   heartAnimation: {
     position: "absolute",
     fontSize: 120,
     color: "#fff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
   } as TextStyle,
@@ -223,17 +284,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 40,
     marginBottom: 30,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 5,
   } as TextStyle,
   author: {
     fontSize: 18,
     color: "#ffffff",
     opacity: 0.9,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   } as TextStyle,
   topicBadge: {
     position: "absolute",
@@ -255,7 +316,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "600" as const,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   } as TextStyle,

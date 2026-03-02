@@ -84,7 +84,7 @@
   },
   "profile": {
     "title": "Profil",
-    "likedQuotes": "Citations aimées",
+    "likedQuotes": "Favoris",
     "saved": "Enregistrées",
     "shared": "Partagées",
     "premium": "Membre Premium",
@@ -97,7 +97,36 @@
     "myFavorites": "Mes favoris",
     "savedQuotes": "Citations enregistrées",
     "activityCalendar": "Calendrier d'activité",
-    "daysActive": "jours actifs"
+    "daysActive": "jours actifs",
+    "totalSpent": "Total dépensé",
+    "subscription": "Abonnement",
+    "paymentHistory": "Historique des paiements"
+  },
+  "favorites": {
+    "title": "Mes favoris",
+    "empty": "Aucun favori",
+    "emptySubtext": "Aimez des citations pour les retrouver ici",
+    "removeTitle": "Retirer des favoris",
+    "removeMessage": "Voulez-vous retirer cette citation de vos favoris ?"
+  },
+  "editProfile": {
+    "title": "Modifier le profil",
+    "name": "Nom",
+    "namePlaceholder": "Entrez votre nom",
+    "email": "Email",
+    "emailHelper": "L'email ne peut pas être modifié pour le moment",
+    "changePhoto": "Changer la photo",
+    "permissionRequired": "Permission requise",
+    "permissionMessage": "Nous avons besoin d'accéder à vos photos",
+    "success": "Profil mis à jour",
+    "successMessage": "Vos modifications ont été enregistrées",
+    "errorMessage": "Impossible de mettre à jour le profil"
+  },
+  "payments": {
+    "title": "Historique des paiements",
+    "totalSpent": "Total dépensé",
+    "empty": "Aucun paiement",
+    "emptySubtext": "Vos paiements apparaîtront ici"
   },
   "actions": {
     "like": "J'aime",
@@ -225,5 +254,39 @@
     "description": "Affiche une citation inspirante sur votre écran d'accueil",
     "defaultQuote": "Ouvrez l'app Focus pour découvrir une citation inspirante.",
     "defaultAuthor": "Focus"
+  },
+  "onboarding": {
+    "welcomeTitle": "Bienvenue sur Focus",
+    "welcomeSubtitle": "Découvrez des citations inspirantes chaque jour",
+    "choosePlan": "Choisissez votre plan",
+    "continue": "Continuer",
+    "skipForNow": "Passer pour l'instant",
+    "completeProfile": "Complétez votre profil",
+    "createAccount": "Créer un compte",
+    "createAccountSubtitle": "Pour continuer vers le paiement",
+    "name": "Nom complet",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "continueToPayment": "Continuer vers le paiement",
+    "selectedPlan": "Plan sélectionné",
+    "perMonth": "/mois",
+    "perYear": "/an",
+    "popular": "Populaire",
+    "features": {
+      "unlimitedQuotes": "Citations illimitées",
+      "premiumTopics": "Accès aux topics premium",
+      "noAds": "Sans publicité",
+      "customThemes": "Thèmes personnalisés",
+      "offlineAccess": "Accès hors ligne"
+    },
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "L'email n'est pas valide",
+      "passwordRequired": "Le mot de passe est requis",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas"
+    }
   }
 }

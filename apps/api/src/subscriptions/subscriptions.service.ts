@@ -257,6 +257,40 @@ export class SubscriptionsService {
     });
   }
 
+  // Get user payments (subscriptions formatted as payments)
+  async getUserPayments(userId: string): Promise<any[]> {
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { userId },
+      relations: ['plan'],
+      order: { createdAt: 'DESC' },
+    });
+
+    // Format subscriptions as payments
+    return subscriptions.map((sub) => ({
+      id: sub.id,
+      planName: sub.plan?.name || 'Unknown Plan',
+      amount: sub.amountPaid || 0,
+      currency: 'EUR',
+      status:
+        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
+      stripePaymentIntentId: sub.stripePaymentIntentId,
+      paidAt: sub.startDate,
+      createdAt: sub.createdAt,
+    }));
+  }
+
+  // Get total amount spent by user
+  async getUserTotalSpent(userId: string): Promise<number> {
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { userId },
+    });
+
+    return subscriptions.reduce(
+      (total, sub) => total + Number(sub.amountPaid || 0),
+      0,
+    );
+  }
+
   // Get all payments (subscriptions formatted as payments for admin)
   async getAllPayments(
     page = 1,
@@ -289,27 +323,6 @@ export class SubscriptionsService {
     }));
 
     return { payments, total };
-  }
-
-  // Get user payments (from subscription history)
-  async getUserPayments(userId: string): Promise<any[]> {
-    const subscriptions = await this.subscriptionRepository.find({
-      where: { userId },
-      relations: ['plan'],
-      order: { createdAt: 'DESC' },
-    });
-
-    return subscriptions.map((sub) => ({
-      id: sub.id,
-      amount: sub.amountPaid || 0,
-      createdAt: sub.createdAt,
-      paidAt: sub.startDate,
-      status:
-        sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
-      subscription: {
-        plan: sub.plan ? { name: sub.plan.name } : null,
-      },
-    }));
   }
 
   // ============ STRIPE PAYMENT INTENT (Simple) ============

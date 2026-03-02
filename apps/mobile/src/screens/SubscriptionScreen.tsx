@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -48,13 +49,17 @@ export default function SubscriptionScreen({
   const isAuthenticated = !!token;
 
   // React Query hooks
-  const { plans, currentSubscription, isLoading, refetch } =
+  const { plans, currentSubscription, isLoading, isRefetching, refetch } =
     useSubscriptionData(isAuthenticated);
   const checkoutMutation = useCreateCheckoutSession();
   const { data: subscriptionHistory = [] } =
     useSubscriptionHistory(isAuthenticated);
 
   const [subscribing, setSubscribing] = useState(false);
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -206,7 +211,17 @@ export default function SubscriptionScreen({
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
+      >
         {/* Current Subscription Status */}
         {currentSubscription && (
           <View style={styles.currentPlanCard}>

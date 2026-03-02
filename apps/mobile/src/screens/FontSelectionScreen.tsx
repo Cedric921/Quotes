@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -29,7 +30,13 @@ export default function FontSelectionScreen({
   const isPremium = useAppSelector(
     (state) => state.auth.user?.isPremium || state.auth.user?.isAdmin,
   );
-  const { data: fonts, isLoading, error } = useActiveFonts();
+  const {
+    data: fonts,
+    isLoading,
+    isRefetching,
+    error,
+    refetch,
+  } = useActiveFonts();
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -143,6 +150,13 @@ export default function FontSelectionScreen({
           renderItem={renderFontItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={colors.primary}
+            />
+          }
           ListHeaderComponent={
             <TouchableOpacity
               style={[
