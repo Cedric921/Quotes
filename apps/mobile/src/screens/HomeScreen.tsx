@@ -8,10 +8,12 @@ import {
   ActivityIndicator,
   ViewStyle,
   ImageBackground,
-  Platform,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Sharing from "expo-sharing";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as WebBrowser from "expo-web-browser";
+import Toast from "react-native-toast-message";
 import {
   QuoteCard,
   LoadingSkeleton,
@@ -20,14 +22,23 @@ import {
   DotsIndicator,
   ActionButtons,
 } from "../components";
+import {
+  SubscriptionBottomSheet,
+  ProfileCompletionModal,
+} from "../components/onboarding";
 import { useQuotes, useToggleLikeQuote } from "../api/hooks";
+import { useCreateCheckoutSession } from "../api/hooks/useSubscriptions";
 import { Quote } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
-import { useAppSelector } from "../store/hooks";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { registerThunk } from "../store/slices/authSlice";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { widgetService } from "../services/widgetService";
+import { SubscriptionPlan } from "../store/slices/subscriptionSlice";
+
+const ONBOARDING_KEY = "@focus_onboarding_shown";
 
 const { height } = Dimensions.get("window");
 
@@ -42,6 +53,7 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const backgroundTheme = useAppSelector(
@@ -50,6 +62,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Onboarding states
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
+    null,
+  );
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // React Query hooks
   const {
@@ -63,6 +83,108 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   } = useQuotes(10);
 
   const toggleLikeMutation = useToggleLikeQuote();
+  const checkoutMutation = useCreateCheckoutSession();
+
+  // Check if onboarding should be shown (first launch)
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const hasShown = await AsyncStorage.getItem(ONBOARDING_KEY);
+        if (!hasShown && !isAuthenticated) {
+          // Delay to let the app load first
+          setTimeout(() => setShowOnboarding(true), 1000);
+        }
+      } catch (error) {
+        console.error("Error checking onboarding:", error);
+      }
+    };
+    checkOnboarding();
+  }, [isAuthenticated]);
+
+  // Handle plan selection from bottom sheet
+  const handleSelectPlan = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setShowOnboarding(false);
+    setShowProfileModal(true);
+  };
+
+  // Handle onboarding close
+  const handleCloseOnboarding = async () => {
+    setShowOnboarding(false);
+    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+  };
+
+  // Handle profile completion and checkout
+  const handleProfileComplete = async (profileData: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
+    if (!selectedPlan) return;
+
+    setIsRegistering(true);
+    try {
+      // 1. Register the user
+      await dispatch(
+        registerThunk({
+          name: profileData.name,
+          email: profileData.email,
+          password: profileData.password,
+        }),
+      ).unwrap();
+
+      // 2. Mark onboarding as completed
+      await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+
+      // 3. Create checkout session
+      const checkoutResult = await checkoutMutation.mutateAsync(
+        selectedPlan.id,
+      );
+
+      if (!checkoutResult.checkoutUrl) {
+        throw new Error("No checkout URL received");
+      }
+
+      // 4. Open Stripe Checkout
+      setShowProfileModal(false);
+      const browserResult = await WebBrowser.openBrowserAsync(
+        checkoutResult.checkoutUrl,
+        {
+          dismissButtonStyle: "cancel",
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+        },
+      );
+
+      if (browserResult.type === "cancel") {
+        Toast.show({
+          type: "info",
+          text1: t("subscription.paymentCancelled"),
+          text2: t("subscription.paymentCancelledMessage"),
+        });
+      } else {
+        Toast.show({
+          type: "success",
+          text1: t("subscription.paymentSuccess"),
+          text2: t("subscription.subscriptionActivated"),
+        });
+      }
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: t("errors.registrationFailed"),
+        text2: error.message || t("errors.tryAgain"),
+      });
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  // Handle profile modal close
+  const handleCloseProfileModal = async () => {
+    setShowProfileModal(false);
+    setSelectedPlan(null);
+    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+  };
 
   // Flatten pages into a single array of quotes
   const quotes = useMemo(() => {
@@ -235,6 +357,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           onLogin={handleLogin}
         />
       )}
+
+      {/* Onboarding Bottom Sheet */}
+      <SubscriptionBottomSheet
+        isVisible={showOnboarding}
+        onClose={handleCloseOnboarding}
+        onSelectPlan={handleSelectPlan}
+      />
+
+      {/* Profile Completion Modal */}
+      <ProfileCompletionModal
+        isVisible={showProfileModal}
+        onClose={handleCloseProfileModal}
+        onComplete={handleProfileComplete}
+        selectedPlan={selectedPlan}
+        isLoading={isRegistering}
+      />
     </>
   );
 

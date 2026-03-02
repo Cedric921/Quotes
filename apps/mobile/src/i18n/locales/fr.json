@@ -254,5 +254,39 @@
     "description": "Affiche une citation inspirante sur votre écran d'accueil",
     "defaultQuote": "Ouvrez l'app Focus pour découvrir une citation inspirante.",
     "defaultAuthor": "Focus"
+  },
+  "onboarding": {
+    "welcomeTitle": "Bienvenue sur Focus",
+    "welcomeSubtitle": "Découvrez des citations inspirantes chaque jour",
+    "choosePlan": "Choisissez votre plan",
+    "continue": "Continuer",
+    "skipForNow": "Passer pour l'instant",
+    "completeProfile": "Complétez votre profil",
+    "createAccount": "Créer un compte",
+    "createAccountSubtitle": "Pour continuer vers le paiement",
+    "name": "Nom complet",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "continueToPayment": "Continuer vers le paiement",
+    "selectedPlan": "Plan sélectionné",
+    "perMonth": "/mois",
+    "perYear": "/an",
+    "popular": "Populaire",
+    "features": {
+      "unlimitedQuotes": "Citations illimitées",
+      "premiumTopics": "Accès aux topics premium",
+      "noAds": "Sans publicité",
+      "customThemes": "Thèmes personnalisés",
+      "offlineAccess": "Accès hors ligne"
+    },
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "L'email n'est pas valide",
+      "passwordRequired": "Le mot de passe est requis",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas"
+    }
   }
 }

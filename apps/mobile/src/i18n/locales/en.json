@@ -253,5 +253,39 @@
     "description": "Display an inspiring quote on your home screen",
     "defaultQuote": "Open the Focus app to discover an inspiring quote.",
     "defaultAuthor": "Focus"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to Focus",
+    "welcomeSubtitle": "Discover inspiring quotes every day",
+    "choosePlan": "Choose your plan",
+    "continue": "Continue",
+    "skipForNow": "Skip for now",
+    "completeProfile": "Complete your profile",
+    "createAccount": "Create an account",
+    "createAccountSubtitle": "To continue to payment",
+    "name": "Full name",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "continueToPayment": "Continue to payment",
+    "selectedPlan": "Selected plan",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "popular": "Popular",
+    "features": {
+      "unlimitedQuotes": "Unlimited quotes",
+      "premiumTopics": "Access to premium topics",
+      "noAds": "No ads",
+      "customThemes": "Custom themes",
+      "offlineAccess": "Offline access"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Email is not valid",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
   }
 }
