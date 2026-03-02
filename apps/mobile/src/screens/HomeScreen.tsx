@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   ViewStyle,
   ImageBackground,
+  Platform,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import * as Sharing from "expo-sharing";
 import {
   QuoteCard,
@@ -236,7 +238,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     </>
   );
 
-  // If a background theme is selected, wrap content in ImageBackground
+  // If a background theme is selected, wrap content in ImageBackground with glass effect
   if (backgroundTheme?.imageUrl) {
     return (
       <ImageBackground
@@ -244,7 +246,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         style={styles.container}
         resizeMode="cover"
       >
-        <View style={styles.overlay}>{content}</View>
+        {/* Glass effect overlay using BlurView */}
+        <BlurView intensity={4} tint="dark" style={styles.glassOverlay}>
+          <View style={styles.glassInner}>{content}</View>
+        </BlurView>
       </ImageBackground>
     );
   }
@@ -258,9 +263,12 @@ const createStyles = (colors: any) =>
       flex: 1,
       backgroundColor: colors.background,
     } as ViewStyle,
-    overlay: {
+    glassOverlay: {
       flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.3)",
+    } as ViewStyle,
+    glassInner: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
     } as ViewStyle,
     footer: {
       height: height,

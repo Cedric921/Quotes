@@ -9,6 +9,7 @@ import {
   Dimensions,
   RefreshControl,
   Platform,
+  ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useCallback, useRef, useEffect } from "react";
@@ -43,9 +44,12 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const styles = createStyles(colors);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Get user from Redux
+  // Get user and background theme from Redux
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const backgroundTheme = useAppSelector(
+    (state) => state.theme.backgroundTheme,
+  );
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,
@@ -164,8 +168,8 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
     );
   }
 
-  return (
-    <View style={styles.container}>
+  const mainContent = (
+    <>
       {/* Header avec topic name et quote count */}
       <BlurView
         intensity={80}
@@ -218,8 +222,29 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
           <DotsIndicator total={quotes.length} currentIndex={currentIndex} />
         </>
       )}
-    </View>
+    </>
   );
+
+  // If a background theme is selected, wrap content in ImageBackground with glass effect
+  if (backgroundTheme?.imageUrl) {
+    return (
+      <ImageBackground
+        source={{ uri: backgroundTheme.imageUrl }}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <BlurView
+          intensity={Platform.OS === "ios" ? 20 : 10}
+          tint="dark"
+          style={styles.glassOverlay}
+        >
+          <View style={styles.glassInner}>{mainContent}</View>
+        </BlurView>
+      </ImageBackground>
+    );
+  }
+
+  return <View style={styles.container}>{mainContent}</View>;
 }
 
 const createStyles = (colors: any) =>
@@ -227,6 +252,13 @@ const createStyles = (colors: any) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    } as ViewStyle,
+    glassOverlay: {
+      flex: 1,
+    } as ViewStyle,
+    glassInner: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.15)",
     } as ViewStyle,
     headerBlur: {
       position: "absolute",
