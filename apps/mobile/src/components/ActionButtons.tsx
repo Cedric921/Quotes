@@ -1,25 +1,21 @@
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
   ViewStyle,
-  TextStyle,
+  Platform,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
+import { BlurView } from "expo-blur";
 
 interface ActionButtonsProps {
   readonly quoteId: string;
-  readonly quoteText: string;
-  readonly author: string;
   readonly isLiked?: boolean;
   readonly isAuthenticated?: boolean;
   readonly onLike: (quoteId: string) => void;
-  readonly onShare: (text: string, author: string) => void;
   readonly onSettings: () => void;
   readonly onTopics: () => void;
   readonly onLogin?: () => void;
@@ -27,23 +23,15 @@ interface ActionButtonsProps {
 
 export default function ActionButtons({
   quoteId,
-  quoteText,
-  author,
   isLiked = false,
   isAuthenticated = false,
   onLike,
-  onShare,
   onSettings,
   onTopics,
   onLogin,
 }: ActionButtonsProps) {
-  const { t } = useTranslation();
   const [liked, setLiked] = useState(isLiked);
-  const [isOpen, setIsOpen] = useState(false);
-
   const likeScale = useRef(new Animated.Value(1)).current;
-  const menuAnimation = useRef(new Animated.Value(0)).current;
-  const rotateAnimation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     setLiked(isLiked);
@@ -69,11 +57,6 @@ export default function ActionButtons({
     ]).start();
   };
 
-  const handleShare = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onShare(quoteText, author);
-  };
-
   const handleSettings = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSettings();
@@ -84,235 +67,176 @@ export default function ActionButtons({
     onTopics();
   };
 
-  const toggleMenu = () => {
-    const toValue = isOpen ? 0 : 1;
-
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    Animated.parallel([
-      Animated.spring(menuAnimation, {
-        toValue,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }),
-      Animated.spring(rotateAnimation, {
-        toValue,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }),
-    ]).start();
-
-    setIsOpen(!isOpen);
+  const handleLogin = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onLogin?.();
   };
 
-  const rotate = rotateAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "45deg"],
-  });
+  // Glass button component with liquid glass effect
+  const GlassButton = ({
+    onPress,
+    children,
+    isActive = false,
+    size = 48,
+  }: {
+    onPress: () => void;
+    children: React.ReactNode;
+    isActive?: boolean;
+    size?: number;
+  }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={[
+        styles.glassButtonOuter,
+        { width: size, height: size, borderRadius: size / 2 },
+      ]}
+    >
+      <BlurView
+        intensity={80}
+        tint="dark"
+        style={[styles.glassButtonBlur, { borderRadius: size / 2 }]}
+      >
+        <View
+          style={[
+            styles.glassButtonInner,
+            { borderRadius: size / 2 },
+            isActive && styles.glassButtonInnerActive,
+          ]}
+        >
+          {children}
+        </View>
+      </BlurView>
+    </TouchableOpacity>
+  );
 
-  const likeTranslate = menuAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -80],
-  });
+  // If not authenticated: show only Topics and User (login) buttons
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.bottomContainer}>
+        <View style={styles.buttonRow}>
+          {/* Topics Button */}
+          <GlassButton onPress={handleTopics}>
+            <Ionicons name="grid-outline" size={26} color="#ffffff" />
+          </GlassButton>
 
-  const shareTranslate = menuAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -160],
-  });
+          {/* User/Login Button */}
+          <GlassButton onPress={handleLogin} isActive>
+            <MaterialIcons name="person-outline" size={26} color="#ffffff" />
+          </GlassButton>
+        </View>
+      </View>
+    );
+  }
 
-  const settingsTranslate = menuAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -240],
-  });
-
-  const buttonOpacity = menuAnimation.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0, 0.5, 1],
-  });
-
+  // If authenticated: show Topics, Like, and User buttons
   return (
-    <>
-      {/* Right Side Buttons */}
-      <View style={styles.rightContainer}>
-        {/* If not authenticated, show only User button */}
-        {!isAuthenticated ? (
+    <View style={styles.bottomContainer}>
+      <View style={styles.buttonRow}>
+        {/* Topics Button */}
+        <GlassButton onPress={handleTopics}>
+          <Ionicons name="grid-outline" size={26} color="#ffffff" />
+        </GlassButton>
+
+        {/* Like Button (center, slightly larger) */}
+        <Animated.View style={{ transform: [{ scale: likeScale }] }}>
           <TouchableOpacity
-            style={[styles.button, styles.toggleButton]}
-            onPress={onLogin}
-            activeOpacity={0.8}
+            onPress={handleLike}
+            activeOpacity={0.7}
+            style={[styles.glassButtonOuter, styles.likeButtonOuter]}
           >
-            <MaterialIcons name="person-outline" size={28} color="#ffffff" />
-          </TouchableOpacity>
-        ) : (
-          <>
-            {/* Like Button - Animated */}
-            <Animated.View
+            <BlurView
+              intensity={80}
+              tint="systemMaterialDark"
               style={[
-                styles.animatedButton,
-                {
-                  transform: [
-                    { translateY: likeTranslate },
-                    { scale: likeScale },
-                  ],
-                  opacity: buttonOpacity,
-                },
+                styles.glassButtonBlur,
+                styles.likeButtonBlur,
+                liked && styles.likeButtonBlurActive,
               ]}
-              pointerEvents={isOpen ? "auto" : "none"}
             >
-              <TouchableOpacity
-                style={[styles.button, liked && styles.likeButtonActive]}
-                onPress={handleLike}
-                activeOpacity={0.8}
+              <View
+                style={[
+                  styles.glassButtonInner,
+                  styles.likeButtonInner,
+                  liked && styles.likeButtonInnerActive,
+                ]}
               >
                 <MaterialIcons
                   name={liked ? "favorite" : "favorite-border"}
-                  size={28}
+                  size={26}
                   color={liked ? "#ff4444" : "#ffffff"}
                 />
-              </TouchableOpacity>
-            </Animated.View>
+              </View>
+            </BlurView>
+          </TouchableOpacity>
+        </Animated.View>
 
-            {/* Share Button - Animated */}
-            <Animated.View
-              style={[
-                styles.animatedButton,
-                {
-                  transform: [{ translateY: shareTranslate }],
-                  opacity: buttonOpacity,
-                },
-              ]}
-              pointerEvents={isOpen ? "auto" : "none"}
-            >
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleShare}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="share-outline" size={26} color="#ffffff" />
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Settings Button (User Menu) - Animated */}
-            <Animated.View
-              style={[
-                styles.animatedButton,
-                {
-                  transform: [{ translateY: settingsTranslate }],
-                  opacity: buttonOpacity,
-                },
-              ]}
-              pointerEvents={isOpen ? "auto" : "none"}
-            >
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleSettings}
-                activeOpacity={0.8}
-              >
-                <MaterialIcons
-                  name="person-outline"
-                  size={28}
-                  color="#ffffff"
-                />
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Toggle Menu Button (+ / X) */}
-            <TouchableOpacity
-              style={[styles.button, styles.toggleButton]}
-              onPress={toggleMenu}
-              activeOpacity={0.8}
-            >
-              <Animated.View style={{ transform: [{ rotate }] }}>
-                <Ionicons name="add" size={32} color="#ffffff" />
-              </Animated.View>
-            </TouchableOpacity>
-          </>
-        )}
+        {/* User/Settings Button */}
+        <GlassButton onPress={handleSettings}>
+          <MaterialIcons name="person-outline" size={26} color="#ffffff" />
+        </GlassButton>
       </View>
-
-      {/* Left Side Topics Button */}
-      <View style={styles.leftContainer}>
-        <TouchableOpacity
-          style={styles.topicsButton}
-          onPress={handleTopics}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="grid-outline" size={22} color="#ffffff" />
-          <Text style={styles.topicsText}>{t("topics.title")}</Text>
-        </TouchableOpacity>
-      </View>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  rightContainer: {
+  bottomContainer: {
     position: "absolute",
-    bottom: 80,
-    right: 20,
+    bottom: Platform.OS === "ios" ? 40 : 24,
+    left: 0,
+    right: 0,
+    alignItems: "center",
     zIndex: 1000,
   } as ViewStyle,
-  leftContainer: {
-    position: "absolute",
-    bottom: 80,
-    left: 20,
-    zIndex: 1000,
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
   } as ViewStyle,
-  button: {
+  glassButtonOuter: {
+    // Outer shadow for depth
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  } as ViewStyle,
+  glassButtonBlur: {
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+    // Outer glass border
+    // borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.40)",
+  } as ViewStyle,
+  glassButtonInner: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    // Liquid glass fill - translucent white
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+  } as ViewStyle,
+  glassButtonInnerActive: {
+    backgroundColor: "rgba(100, 100, 255, 0.3)",
+  } as ViewStyle,
+  // Like button (slightly larger)
+  likeButtonOuter: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.35)",
-    // Ombres plus prononcées
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 10,
   } as ViewStyle,
-  animatedButton: {
-    position: "absolute",
-    bottom: 0,
-  } as ViewStyle,
-  toggleButton: {
-    backgroundColor: "rgba(100, 100, 255, 0.4)",
-    borderColor: "rgba(100, 100, 255, 0.5)",
-  } as ViewStyle,
-  likeButtonActive: {
-    backgroundColor: "rgba(255, 68, 68, 0.2)",
-    borderColor: "#ff4444",
-    shadowColor: "#ff4444",
-    shadowOpacity: 0.6,
-  } as ViewStyle,
-  topicsButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    columnGap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  likeButtonBlur: {
     borderRadius: 28,
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.35)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 10,
   } as ViewStyle,
-  topicsText: {
-    fontSize: 15,
-    fontWeight: "600" as const,
-    color: "#ffffff",
-    letterSpacing: 0.5,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  } as TextStyle,
+  likeButtonBlurActive: {
+    borderColor: "rgba(255, 68, 68, 0.5)",
+  } as ViewStyle,
+  likeButtonInner: {
+    borderRadius: 28,
+  } as ViewStyle,
+  likeButtonInnerActive: {
+    backgroundColor: "rgba(255, 68, 68, 0.3)",
+  } as ViewStyle,
 });

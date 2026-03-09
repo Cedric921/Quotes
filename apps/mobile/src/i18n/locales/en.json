@@ -11,7 +11,9 @@
     "close": "Close",
     "or": "or",
     "quote": "quote",
-    "quotes": "quotes"
+    "quotes": "quotes",
+    "like": "Like",
+    "liked": "Liked"
   },
   "auth": {
     "login": "Login",

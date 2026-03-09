@@ -26,6 +26,25 @@ interface TopicsListScreenProps {
   readonly navigation: any;
 }
 
+// Helper function to calculate luminance of a color (0 = dark, 1 = light)
+const getLuminance = (hex: string): number => {
+  const color = hex.replace("#", "");
+  const r = parseInt(color.substring(0, 2), 16) / 255;
+  const g = parseInt(color.substring(2, 4), 16) / 255;
+  const b = parseInt(color.substring(4, 6), 16) / 255;
+
+  const toLinear = (c: number) =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+};
+
+// Check if color is light (needs dark text)
+const isLightColor = (hex?: string): boolean => {
+  if (!hex) return false;
+  return getLuminance(hex) > 0.5;
+};
+
 // Helper function to get gradient colors from topic color
 const getTopicGradient = (color?: string): [string, string, ...string[]] => {
   if (!color) return ["#667eea", "#764ba2"];
@@ -114,9 +133,32 @@ export default function TopicsListScreen({
       item.isPremium &&
       (!isAuthenticated || (!user?.isPremium && !user?.isAdmin));
 
+    // Check if background is light - use dark text
+    const useDarkText = isLightColor(item.color);
+    const textColor = useDarkText ? "#1a1a2e" : "#fff";
+    const textColorSecondary = useDarkText
+      ? "rgba(26, 26, 46, 0.7)"
+      : "rgba(255, 255, 255, 0.7)";
+    const iconBgColor = useDarkText
+      ? "rgba(26, 26, 46, 0.15)"
+      : "rgba(255, 255, 255, 0.2)";
+    const iconBorderColor = useDarkText
+      ? "rgba(26, 26, 46, 0.25)"
+      : "rgba(255, 255, 255, 0.3)";
+
+    // Card shadow - darker for light backgrounds
+    const cardShadowStyle = useDarkText
+      ? { shadowOpacity: 0.4, shadowRadius: 6, elevation: 5 }
+      : {};
+
+    // Text shadow - remove for light backgrounds
+    const textShadowStyle = useDarkText
+      ? { textShadowColor: "transparent", textShadowRadius: 0 }
+      : {};
+
     return (
       <TouchableOpacity
-        style={styles.topicCard}
+        style={[styles.topicCard, cardShadowStyle]}
         onPress={() => handleTopicPress(item)}
         activeOpacity={0.8}
       >
@@ -127,14 +169,26 @@ export default function TopicsListScreen({
           style={styles.cardGradient}
         >
           {/* Left side: Icon */}
-          <View style={styles.iconContainer}>
-            <Ionicons name={iconName} size={22} color="#fff" />
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: iconBgColor, borderColor: iconBorderColor },
+            ]}
+          >
+            <Ionicons name={iconName} size={22} color={textColor} />
           </View>
 
           {/* Center: Content */}
           <View style={styles.cardContent}>
             <View style={styles.titleRow}>
-              <Text style={styles.topicName} numberOfLines={1}>
+              <Text
+                style={[
+                  styles.topicName,
+                  { color: textColor },
+                  textShadowStyle,
+                ]}
+                numberOfLines={1}
+              >
                 {item.title || item.name}
               </Text>
               {item.isPremium && (
@@ -144,7 +198,10 @@ export default function TopicsListScreen({
               )}
             </View>
             {item.description && (
-              <Text style={styles.topicDescription} numberOfLines={1}>
+              <Text
+                style={[styles.topicDescription, { color: textColor }]}
+                numberOfLines={1}
+              >
                 {item.description}
               </Text>
             )}
@@ -162,7 +219,7 @@ export default function TopicsListScreen({
               <Ionicons
                 name="chevron-forward"
                 size={20}
-                color="rgba(255, 255, 255, 0.7)"
+                color={textColorSecondary}
               />
             )}
           </View>

@@ -11,7 +11,9 @@
     "close": "Fermer",
     "or": "ou",
     "quote": "citation",
-    "quotes": "citations"
+    "quotes": "citations",
+    "like": "J'aime",
+    "liked": "Aimé"
   },
   "auth": {
     "login": "Connexion",

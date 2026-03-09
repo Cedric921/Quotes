@@ -7,7 +7,7 @@ import "dotenv/config";
  * To configure the API URL:
  * 1. Edit the .env file at apps/mobile/.env
  * 2. Set API_URL to your desired value:
- *    - For local development: http://localhost:3001
+ *    - For local development: https://focus-sml2.onrender.com
  *    - For physical device (same network): http://YOUR_IP:3001
  *    - For production: https://api.quote.com
  *
@@ -16,7 +16,7 @@ import "dotenv/config";
 
 export default ({ config }) => {
   // Read API_URL from environment or use default
-  const apiUrl = process.env.API_URL || "http://localhost:3001";
+  const apiUrl = process.env.API_URL || "https://focus-sml2.onrender.com";
   const apiTimeout = process.env.API_TIMEOUT || "30000";
   const quotesPerPage = process.env.QUOTES_PER_PAGE || "10";
   const paginationThreshold = process.env.PAGINATION_THRESHOLD || "0.5";
@@ -58,46 +58,22 @@ export default ({ config }) => {
     web: {
       favicon: "./assets/favicon.png",
     },
-    plugins: [
-      "expo-localization",
-      "@bacons/apple-targets",
-      [
-        "react-native-android-widget",
-        {
-          widgets: [
-            {
-              name: "FocusQuoteWidget",
-              label: "Focus Quote",
-              description: "Affiche une citation inspirante",
-              minWidth: "110dp",
-              minHeight: "40dp",
-              previewImage: "./assets/widget-preview.png",
-              resizeMode: "horizontal|vertical",
-              widgetFeatures: "reconfigurable",
-              targetCellWidth: 2,
-              targetCellHeight: 1,
-            },
-            {
-              name: "FocusQuoteWidgetLarge",
-              label: "Focus Quote (Grand)",
-              description: "Citation inspirante en grand format",
-              minWidth: "250dp",
-              minHeight: "110dp",
-              previewImage: "./assets/widget-preview-large.png",
-              resizeMode: "horizontal|vertical",
-              widgetFeatures: "reconfigurable",
-              targetCellWidth: 4,
-              targetCellHeight: 2,
-            },
-          ],
-        },
-      ],
-    ],
+    plugins: ["expo-localization"],
     extra: {
       API_URL: apiUrl,
       API_TIMEOUT: apiTimeout,
       QUOTES_PER_PAGE: quotesPerPage,
       PAGINATION_THRESHOLD: paginationThreshold,
+      eas: {
+        projectId: "17f0365b-1f51-4a37-b269-591ea43caffe",
+      },
+    },
+    owner: "cedric921",
+    runtimeVersion: {
+      policy: "sdkVersion",
+    },
+    updates: {
+      url: "https://u.expo.dev/17f0365b-1f51-4a37-b269-591ea43caffe",
     },
   };
 };
