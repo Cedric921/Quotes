@@ -82,7 +82,9 @@
     "noBackground": "No background",
     "noThemesAvailable": "No themes available",
     "fonts": "Fonts",
-    "defaultFont": "Default Font"
+    "defaultFont": "Default Font",
+    "autoTranslate": "Translate quotes",
+    "autoTranslateDesc": "Automatically translate quotes"
   },
   "profile": {
     "title": "Profile",

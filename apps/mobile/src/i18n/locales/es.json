@@ -78,7 +78,9 @@
     "system": "Sistema",
     "backgroundTheme": "Fondo de pantalla",
     "noBackground": "Sin fondo",
-    "noThemesAvailable": "No hay temas disponibles"
+    "noThemesAvailable": "No hay temas disponibles",
+    "autoTranslate": "Traducir citas",
+    "autoTranslateDesc": "Traducir automáticamente las citas"
   },
   "profile": {
     "title": "Perfil",

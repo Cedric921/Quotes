@@ -58,7 +58,40 @@ export default ({ config }) => {
     web: {
       favicon: "./assets/favicon.png",
     },
-    plugins: ["expo-localization"],
+    plugins: [
+      "expo-localization",
+      [
+        "react-native-android-widget",
+        {
+          widgets: [
+            {
+              name: "FocusQuoteWidget",
+              label: "Focus Quote",
+              minWidth: "180dp",
+              minHeight: "110dp",
+              description: "Affiche une citation inspirante",
+              previewImage: "./assets/widget-preview.png",
+              updatePeriodMillis: 1800000, // 30 minutes
+            },
+            {
+              name: "FocusQuoteWidgetLarge",
+              label: "Focus Quote (Large)",
+              minWidth: "250dp",
+              minHeight: "180dp",
+              description: "Affiche une citation inspirante en grand",
+              previewImage: "./assets/widget-preview-large.png",
+              updatePeriodMillis: 1800000,
+            },
+          ],
+        },
+      ],
+      [
+        "@bacons/apple-targets",
+        {
+          appleTeamId: process.env.APPLE_TEAM_ID || "XXXXXXXXXX",
+        },
+      ],
+    ],
     extra: {
       API_URL: apiUrl,
       API_TIMEOUT: apiTimeout,

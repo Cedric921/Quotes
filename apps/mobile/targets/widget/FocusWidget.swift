@@ -34,10 +34,21 @@ struct Provider: TimelineProvider {
     
     private func getEntryFromStorage() -> QuoteEntry {
         let defaults = UserDefaults(suiteName: appGroupId)
+
+        // Try reading as Data first (binary JSON)
         if let data = defaults?.data(forKey: "currentQuote"),
            let quote = try? JSONDecoder().decode(QuoteData.self, from: data) {
             return QuoteEntry(date: Date(), quote: quote)
         }
+
+        // Fallback: Try reading as String (from React Native)
+        if let jsonString = defaults?.string(forKey: "currentQuote"),
+           let data = jsonString.data(using: .utf8),
+           let quote = try? JSONDecoder().decode(QuoteData.self, from: data) {
+            return QuoteEntry(date: Date(), quote: quote)
+        }
+
+        // Default fallback
         return QuoteEntry(date: Date(), quote: QuoteData(
             content: "Ouvrez l'app Focus pour découvrir une citation inspirante.",
             author: "Focus",

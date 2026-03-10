@@ -8,10 +8,12 @@ import {
   TouchableOpacity,
   ViewStyle,
   TextStyle,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect, useMemo } from "react";
 import * as Haptics from "expo-haptics";
+import { useTranslatedQuote } from "../hooks";
 
 // Helper function to calculate luminance of a color (0 = dark, 1 = light)
 function getLuminance(hex: string): number {
@@ -146,6 +148,11 @@ export default function QuoteCard({
     (state) => state.theme.backgroundTheme,
   );
 
+  // Get translated quote text based on app language
+  const { translatedText, isTranslating } = useTranslatedQuote(
+    quote as import("../types").Quote,
+  );
+
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(0)).current;
 
@@ -273,17 +280,26 @@ export default function QuoteCard({
         </Animated.Text>
 
         <View style={styles.content}>
-          <Text
-            style={[
-              styles.quoteText,
-              dynamicStyles.quoteText,
-              effectiveFontFamily && {
-                fontFamily: effectiveFontFamily,
-              },
-            ]}
-          >
-            "{quote.text}"
-          </Text>
+          <View style={styles.quoteContainer}>
+            <Text
+              style={[
+                styles.quoteText,
+                dynamicStyles.quoteText,
+                effectiveFontFamily && {
+                  fontFamily: effectiveFontFamily,
+                },
+              ]}
+            >
+              "{translatedText}"
+            </Text>
+            {isTranslating && (
+              <ActivityIndicator
+                size="small"
+                color="rgba(255, 255, 255, 0.6)"
+                style={styles.translatingIndicator}
+              />
+            )}
+          </View>
 
           {Boolean(quote.author) && (
             <Text
@@ -340,6 +356,13 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 8,
     zIndex: 5,
+  } as ViewStyle,
+  quoteContainer: {
+    alignItems: "center",
+    width: "100%",
+  } as ViewStyle,
+  translatingIndicator: {
+    marginTop: 8,
   } as ViewStyle,
   quoteText: {
     fontWeight: "600" as const,
