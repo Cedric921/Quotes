@@ -184,8 +184,18 @@ export default function QuoteCard({
   // Check if a background theme is active (to make card transparent)
   const hasBackgroundTheme = !!backgroundTheme?.imageUrl;
 
-  // Get the effective font family (use system fonts or fallback)
+  // Get the effective font family - prioritize theme's font, then fallback to selectedFont
   const effectiveFontFamily = useMemo(() => {
+    // First, check if the selected background theme has a font
+    const themeFont = backgroundTheme?.fontFamily;
+    if (themeFont) {
+      // Check if it's a mapped system font
+      const systemFont = SYSTEM_FONTS[themeFont];
+      if (systemFont) return systemFont;
+      return themeFont;
+    }
+
+    // Fallback to selectedFont from fontSlice (for backwards compatibility)
     if (!selectedFont?.fontFamily) return undefined;
 
     // Check if it's a mapped system font
@@ -193,9 +203,8 @@ export default function QuoteCard({
     if (systemFont) return systemFont;
 
     // Otherwise try to use the font family directly
-    // This will work if the font is available on the device
     return selectedFont.fontFamily;
-  }, [selectedFont]);
+  }, [backgroundTheme?.fontFamily, selectedFont]);
 
   useEffect(() => {
     setLiked(isLiked);

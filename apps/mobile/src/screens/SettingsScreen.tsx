@@ -25,7 +25,11 @@ import {
 } from "../store/slices/translationSlice";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
-import { changeLanguage, getCurrentLanguage } from "../i18n";
+import {
+  changeLanguage,
+  getCurrentLanguage,
+  supportedLanguages,
+} from "../i18n";
 
 interface SettingsScreenProps {
   readonly navigation: any;
@@ -38,12 +42,25 @@ interface Language {
   flag: string;
 }
 
-const LANGUAGES: Language[] = [
-  { code: "fr", name: "French", nativeName: "Français", flag: "🇫🇷" },
-  { code: "en", name: "English", nativeName: "English", flag: "🇬🇧" },
-  { code: "es", name: "Spanish", nativeName: "Español", flag: "🇪🇸" },
-  { code: "ar", name: "Arabic", nativeName: "العربية", flag: "🇸🇦" },
-];
+// Map des drapeaux pour chaque langue
+const languageFlags: Record<string, string> = {
+  en: "🇬🇧",
+  fr: "🇫🇷",
+  es: "🇪🇸",
+  ar: "🇸🇦",
+  de: "🇩🇪",
+  it: "🇮🇹",
+  zh: "🇨🇳",
+  nl: "🇳🇱",
+  ru: "🇷🇺",
+  tr: "🇹🇷",
+};
+
+// Convertir supportedLanguages en LANGUAGES avec drapeaux
+const LANGUAGES: Language[] = supportedLanguages.map((lang) => ({
+  ...lang,
+  flag: languageFlags[lang.code] || "🌐",
+}));
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { t } = useTranslation();
@@ -284,32 +301,27 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             </View>
           </TouchableOpacity>
 
-          {/* Auto-translate toggle - only show if language is not English */}
-          {currentLanguage.code !== "en" && (
+          {/* Auto-translate toggle - only show if language is not French */}
+          {currentLanguage.code !== "fr" && (
             <View style={styles.menuItem}>
-              <View style={{ ...styles.menuItemLeft }}>
+              <View style={styles.menuItemLeft}>
                 <Ionicons name="globe-outline" size={24} color="#0A84FF" />
-                <View style={styles.menuItemTextContainer}>
-                  <Text style={styles.menuItemText}>
-                    {t("settings.autoTranslate") || "Traduire les citations"}
-                  </Text>
-                  {/* <Text style={styles.menuItemSubtext}>
-                    {t("settings.autoTranslateDesc") ||
-                      "Traduire automatiquement en " +
-                        currentLanguage.nativeName}
-                  </Text> */}
-                </View>
+                <Text style={styles.menuItemText}>
+                  {t("settings.autoTranslate") || "Traduire les citations"}
+                </Text>
               </View>
-              <Switch
-                value={autoTranslate}
-                onValueChange={handleAutoTranslateToggle}
-                trackColor={{
-                  false: "#767577",
-                  true: "rgba(10, 132, 255, 0.4)",
-                }}
-                thumbColor={autoTranslate ? "#0A84FF" : "#f4f3f4"}
-                ios_backgroundColor="#3e3e3e"
-              />
+              <View style={styles.menuItemRightSwitch}>
+                <Switch
+                  value={autoTranslate}
+                  onValueChange={handleAutoTranslateToggle}
+                  trackColor={{
+                    false: "#767577",
+                    true: "rgba(10, 132, 255, 0.4)",
+                  }}
+                  thumbColor={autoTranslate ? "#0A84FF" : "#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                />
+              </View>
             </View>
           )}
 
@@ -334,26 +346,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             <View style={styles.menuItemLeft}>
               <Ionicons name="image-outline" size={24} color="#0A84FF" />
               <Text style={styles.menuItemText}>
-                {t("settings.backgroundTheme") || "Fond d'écran"}
+                {t("settings.backgroundTheme") || "Thème et Police"}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              navigation.navigate("FontSelection");
-            }}
-          >
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="text-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>
-                {t("settings.fonts") || "Polices"}
-              </Text>
+            <View style={styles.menuItemRight}>
+              <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -373,13 +371,13 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={handleStorage}>
+          {/* <TouchableOpacity style={styles.menuItem} onPress={handleStorage}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="folder-outline" size={24} color="#0A84FF" />
               <Text style={styles.menuItemText}>{t("settings.storage")}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Company Section */}
@@ -559,40 +557,48 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           activeOpacity={1}
           onPress={() => setShowLanguageModal(false)}
         >
-          <View style={styles.modalContent}>
+          <View
+            style={[styles.modalContent, styles.languageModalContent]}
+            onStartShouldSetResponder={() => true}
+          >
             <Text style={styles.modalTitle}>
               {t("settings.selectLanguage")}
             </Text>
 
-            {LANGUAGES.map((language) => (
-              <TouchableOpacity
-                key={language.code}
-                style={[
-                  styles.themeOption,
-                  currentLanguage.code === language.code &&
-                    styles.themeOptionSelected,
-                ]}
-                onPress={() => handleLanguageSelect(language)}
-              >
-                <Text style={styles.languageFlag}>{language.flag}</Text>
-                <Text
+            <ScrollView
+              style={styles.languageScrollView}
+              showsVerticalScrollIndicator={true}
+            >
+              {LANGUAGES.map((language) => (
+                <TouchableOpacity
+                  key={language.code}
                   style={[
-                    styles.themeOptionText,
+                    styles.themeOption,
                     currentLanguage.code === language.code &&
-                      styles.themeOptionTextSelected,
+                      styles.themeOptionSelected,
                   ]}
+                  onPress={() => handleLanguageSelect(language)}
                 >
-                  {language.nativeName}
-                </Text>
-                {currentLanguage.code === language.code && (
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={24}
-                    color={colors.primary}
-                  />
-                )}
-              </TouchableOpacity>
-            ))}
+                  <Text style={styles.languageFlag}>{language.flag}</Text>
+                  <Text
+                    style={[
+                      styles.themeOptionText,
+                      currentLanguage.code === language.code &&
+                        styles.themeOptionTextSelected,
+                    ]}
+                  >
+                    {language.nativeName}
+                  </Text>
+                  {currentLanguage.code === language.code && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={24}
+                      color={colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -747,22 +753,27 @@ const createStyles = (colors: any) =>
     menuItem: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
       padding: 16,
       borderRadius: 12,
       marginBottom: 8,
       backgroundColor: colors.backgroundSecondary,
-      flex: 1,
     } as ViewStyle,
     menuItemLeft: {
       flexDirection: "row",
       alignItems: "center",
       columnGap: 12,
+      flex: 1,
     } as ViewStyle,
     menuItemRight: {
       flexDirection: "row",
       alignItems: "center",
       columnGap: 8,
+      width: 50,
+      justifyContent: "flex-end",
+    } as ViewStyle,
+    menuItemRightSwitch: {
+      width: 55,
+      alignItems: "flex-end",
     } as ViewStyle,
     menuItemText: {
       fontSize: 16,
@@ -851,4 +862,10 @@ const createStyles = (colors: any) =>
       fontSize: 24,
       marginRight: 4,
     } as TextStyle,
+    languageModalContent: {
+      maxHeight: "80%",
+    } as ViewStyle,
+    languageScrollView: {
+      flexGrow: 0,
+    } as ViewStyle,
   });
