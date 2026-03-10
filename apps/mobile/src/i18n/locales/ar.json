@@ -78,7 +78,9 @@
     "system": "النظام",
     "backgroundTheme": "خلفية الشاشة",
     "noBackground": "بدون خلفية",
-    "noThemesAvailable": "لا توجد خلفيات متاحة"
+    "noThemesAvailable": "لا توجد خلفيات متاحة",
+    "autoTranslate": "ترجمة الاقتباسات",
+    "autoTranslateDesc": "ترجمة الاقتباسات تلقائياً"
   },
   "profile": {
     "title": "الملف الشخصي",
