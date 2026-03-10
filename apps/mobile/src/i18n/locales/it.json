@@ -238,7 +238,13 @@
     "subscriptionRequired": "Abbonamento richiesto",
     "subscribeToEnableNotifications": "Abbonati per abilitare le notifiche",
     "premiumFeature": "Funzionalità Premium",
-    "notificationsInfo": "Ricevi fino a 5 notifiche al giorno negli orari e giorni che scegli."
+    "notificationsInfo": "Ricevi fino a 5 notifiche al giorno negli orari e giorni che scegli.",
+    "testNotificationSent": "Notifica di prova inviata",
+    "checkYourDevice": "Controlla il tuo dispositivo per la notifica",
+    "selectAtLeastOneDay": "Seleziona almeno un giorno",
+    "minNotificationsRequired": "È richiesta almeno una notifica",
+    "upgradeForMore": "Aggiorna per più notifiche",
+    "freeUserLimit": "Gli utenti gratuiti possono avere 1 notifica al giorno"
   },
   "widget": {
     "title": "Widget Focus",

@@ -196,7 +196,9 @@
     "selectAtLeastOneDay": "حدد يومًا واحدًا على الأقل",
     "minNotificationsRequired": "مطلوب إشعار واحد على الأقل",
     "testNotificationSent": "تم إرسال إشعار تجريبي",
-    "checkYourDevice": "تحقق من جهازك للإشعار"
+    "checkYourDevice": "تحقق من جهازك للإشعار",
+    "upgradeForMore": "قم بالترقية للحصول على المزيد من الإشعارات",
+    "freeUserLimit": "يمكن للمستخدمين المجانيين الحصول على إشعار واحد يوميًا"
   },
   "subscription": {
     "title": "الاشتراك",

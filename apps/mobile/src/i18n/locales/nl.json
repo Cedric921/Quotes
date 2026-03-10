@@ -238,7 +238,13 @@
     "subscriptionRequired": "Abonnement vereist",
     "subscribeToEnableNotifications": "Abonneer om meldingen in te schakelen",
     "premiumFeature": "Premium Functie",
-    "notificationsInfo": "Ontvang tot 5 meldingen per dag op de tijden en dagen die je kiest."
+    "notificationsInfo": "Ontvang tot 5 meldingen per dag op de tijden en dagen die je kiest.",
+    "testNotificationSent": "Testmelding verzonden",
+    "checkYourDevice": "Controleer je apparaat voor de melding",
+    "selectAtLeastOneDay": "Selecteer minstens één dag",
+    "minNotificationsRequired": "Minimaal één melding is vereist",
+    "upgradeForMore": "Upgrade voor meer meldingen",
+    "freeUserLimit": "Gratis gebruikers kunnen 1 melding per dag hebben"
   },
   "widget": {
     "title": "Focus Widget",

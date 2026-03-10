@@ -238,7 +238,13 @@
     "subscriptionRequired": "需要订阅",
     "subscribeToEnableNotifications": "订阅以启用通知",
     "premiumFeature": "高级功能",
-    "notificationsInfo": "每天在您选择的时间和日期接收最多5条通知。"
+    "notificationsInfo": "每天在您选择的时间和日期接收最多5条通知。",
+    "testNotificationSent": "测试通知已发送",
+    "checkYourDevice": "请检查您的设备以查看通知",
+    "selectAtLeastOneDay": "请至少选择一天",
+    "minNotificationsRequired": "至少需要一个通知",
+    "upgradeForMore": "升级以获取更多通知",
+    "freeUserLimit": "免费用户每天可以有1个通知"
   },
   "widget": {
     "title": "Focus 小组件",

@@ -238,7 +238,13 @@
     "subscriptionRequired": "Abonnement erforderlich",
     "subscribeToEnableNotifications": "Abonnieren Sie, um Benachrichtigungen zu aktivieren",
     "premiumFeature": "Premium-Funktion",
-    "notificationsInfo": "Erhalten Sie bis zu 5 Benachrichtigungen pro Tag zu den von Ihnen gewählten Zeiten und Tagen."
+    "notificationsInfo": "Erhalten Sie bis zu 5 Benachrichtigungen pro Tag zu den von Ihnen gewählten Zeiten und Tagen.",
+    "testNotificationSent": "Testbenachrichtigung gesendet",
+    "checkYourDevice": "Überprüfen Sie Ihr Gerät auf die Benachrichtigung",
+    "selectAtLeastOneDay": "Wählen Sie mindestens einen Tag aus",
+    "minNotificationsRequired": "Mindestens eine Benachrichtigung ist erforderlich",
+    "upgradeForMore": "Upgrade für mehr Benachrichtigungen",
+    "freeUserLimit": "Kostenlose Benutzer können 1 Benachrichtigung pro Tag haben"
   },
   "widget": {
     "title": "Focus Widget",

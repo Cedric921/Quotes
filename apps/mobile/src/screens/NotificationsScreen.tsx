@@ -47,7 +47,9 @@ export const NotificationsScreen = ({
   const user = useAppSelector((state) => state.auth.user);
 
   // Check if user is subscribed or admin (premium feature)
-  const isSubscribed = user?.isSubscribed || user?.isAdmin || false;
+  const isPremium = user?.isSubscribed || user?.isAdmin || false;
+  // Free users can have 1 notification, premium users can have up to 5
+  const maxNotifications = isPremium ? 5 : 1;
 
   const {
     data: settings,
@@ -92,16 +94,8 @@ export const NotificationsScreen = ({
   // Initialize state from settings
   useEffect(() => {
     if (settings) {
-      console.log("Settings loaded:", JSON.stringify(settings, null, 2));
       // Handle SQLite boolean (0/1) and JavaScript boolean
       const isEnabled = Boolean(settings.enabled);
-      console.log(
-        "Setting enabled to:",
-        isEnabled,
-        "(raw value:",
-        settings.enabled,
-        ")",
-      );
       setEnabled(isEnabled);
 
       if (settings.notifications) {
@@ -138,16 +132,6 @@ export const NotificationsScreen = ({
   };
 
   const handleToggleNotifications = async (value: boolean) => {
-    // Check if user is subscribed
-    if (!isSubscribed) {
-      Toast.show({
-        type: "error",
-        text1: t("notifications.subscriptionRequired"),
-        text2: t("notifications.subscribeToEnableNotifications"),
-      });
-      return;
-    }
-
     if (value) {
       // Request permissions
       const { granted } = await requestNotificationPermissions();
@@ -295,11 +279,20 @@ export const NotificationsScreen = ({
   const addNotification = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    if (notificationTimes.length >= 5) {
-      Toast.show({
-        type: "error",
-        text1: t("notifications.maxNotificationsReached"),
-      });
+    if (notificationTimes.length >= maxNotifications) {
+      if (!isPremium) {
+        // Show upgrade prompt for free users
+        Toast.show({
+          type: "info",
+          text1: t("notifications.upgradeForMore"),
+          text2: t("notifications.freeUserLimit"),
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: t("notifications.maxNotificationsReached"),
+        });
+      }
       return;
     }
 
@@ -366,35 +359,6 @@ export const NotificationsScreen = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
-
-  if (!isSubscribed) {
-    return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            {t("notifications.title")}
-          </Text>
-          <View style={styles.placeholder} />
-        </View>
-
-        <View style={styles.subscriptionRequired}>
-          <Ionicons name="lock-closed" size={64} color={colors.textSecondary} />
-          <Text style={[styles.title, { color: colors.text }]}>
-            {t("notifications.premiumFeature")}
-          </Text>
-          <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {t("notifications.subscribeToEnableNotifications")}
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   if (isLoading) {
     return (

@@ -238,7 +238,13 @@
     "subscriptionRequired": "Abonelik gerekli",
     "subscribeToEnableNotifications": "Bildirimleri etkinleştirmek için abone olun",
     "premiumFeature": "Premium Özellik",
-    "notificationsInfo": "Seçtiğiniz zaman ve günlerde günde 5 bildirime kadar alın."
+    "notificationsInfo": "Seçtiğiniz zaman ve günlerde günde 5 bildirime kadar alın.",
+    "testNotificationSent": "Test bildirimi gönderildi",
+    "checkYourDevice": "Bildirimi görmek için cihazınızı kontrol edin",
+    "selectAtLeastOneDay": "En az bir gün seçin",
+    "minNotificationsRequired": "En az bir bildirim gereklidir",
+    "upgradeForMore": "Daha fazla bildirim için yükseltin",
+    "freeUserLimit": "Ücretsiz kullanıcılar günde 1 bildirim alabilir"
   },
   "widget": {
     "title": "Focus Widget",

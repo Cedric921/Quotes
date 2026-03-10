@@ -5,7 +5,6 @@ import {
   useWindowDimensions,
   TouchableWithoutFeedback,
   Animated,
-  TouchableOpacity,
   ViewStyle,
   TextStyle,
   ActivityIndicator,
@@ -269,78 +268,84 @@ export default function QuoteCard({
 
   return (
     <TouchableWithoutFeedback onPress={handleDoubleTap}>
-      <LinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={containerStyle}
-      >
-        {/* Double tap heart animation */}
-        <Animated.Text
-          style={[
-            styles.heartAnimation,
-            {
-              transform: [{ scale: heartScale }],
-              opacity: heartOpacity,
-            },
-          ]}
+      <View style={[styles.captureContainer, dynamicStyles.container]}>
+        <LinearGradient
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={containerStyle}
         >
-          ♥
-        </Animated.Text>
+          {/* Double tap heart animation */}
+          <Animated.Text
+            style={[
+              styles.heartAnimation,
+              {
+                transform: [{ scale: heartScale }],
+                opacity: heartOpacity,
+              },
+            ]}
+          >
+            ♥
+          </Animated.Text>
 
-        <View style={styles.content}>
-          <View style={styles.quoteContainer}>
-            <Text
-              style={[
-                styles.quoteText,
-                dynamicStyles.quoteText,
-                effectiveFontFamily && {
-                  fontFamily: effectiveFontFamily,
-                },
-              ]}
-            >
-              "{translatedText}"
-            </Text>
-            {isTranslating && (
-              <ActivityIndicator
-                size="small"
-                color="rgba(255, 255, 255, 0.6)"
-                style={styles.translatingIndicator}
-              />
+          <View style={styles.content}>
+            <View style={styles.quoteContainer}>
+              <Text
+                style={[
+                  styles.quoteText,
+                  dynamicStyles.quoteText,
+                  effectiveFontFamily && {
+                    fontFamily: effectiveFontFamily,
+                  },
+                ]}
+              >
+                "{translatedText}"
+              </Text>
+              {isTranslating && (
+                <ActivityIndicator
+                  size="small"
+                  color="rgba(255, 255, 255, 0.6)"
+                  style={styles.translatingIndicator}
+                />
+              )}
+            </View>
+
+            {Boolean(quote.author) && (
+              <Text
+                style={[
+                  styles.author,
+                  dynamicStyles.authorText,
+                  effectiveFontFamily && {
+                    fontFamily: effectiveFontFamily,
+                  },
+                ]}
+              >
+                — {quote.author}
+              </Text>
             )}
           </View>
 
-          {Boolean(quote.author) && (
-            <Text
-              style={[
-                styles.author,
-                dynamicStyles.authorText,
-                effectiveFontFamily && {
-                  fontFamily: effectiveFontFamily,
-                },
-              ]}
+          {/* Topic badge with glassmorphism */}
+          {/* {quote.topic && showTopicName && (
+            <TouchableOpacity
+              style={styles.topicBadge}
+              onPress={handleTopicPress}
+              activeOpacity={0.7}
             >
-              — {quote.author}
-            </Text>
-          )}
-        </View>
-
-        {/* Topic badge with glassmorphism */}
-        {/* {quote.topic && showTopicName && (
-          <TouchableOpacity
-            style={styles.topicBadge}
-            onPress={handleTopicPress}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.topicText}>{quote.topic.name}</Text>
-          </TouchableOpacity>
-        )} */}
-      </LinearGradient>
+              <Text style={styles.topicText}>{quote.topic.name}</Text>
+            </TouchableOpacity>
+          )} */}
+        </LinearGradient>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
+  captureContainer: {
+    flex: 1,
+    width: "100%",
+  } as ViewStyle,
   container: {
     flex: 1,
     justifyContent: "center",

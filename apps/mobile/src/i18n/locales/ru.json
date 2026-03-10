@@ -238,7 +238,13 @@
     "subscriptionRequired": "Требуется подписка",
     "subscribeToEnableNotifications": "Подпишитесь для включения уведомлений",
     "premiumFeature": "Премиум функция",
-    "notificationsInfo": "Получайте до 5 уведомлений в день в выбранное время."
+    "notificationsInfo": "Получайте до 5 уведомлений в день в выбранное время.",
+    "testNotificationSent": "Тестовое уведомление отправлено",
+    "checkYourDevice": "Проверьте ваше устройство для уведомления",
+    "selectAtLeastOneDay": "Выберите хотя бы один день",
+    "minNotificationsRequired": "Требуется хотя бы одно уведомление",
+    "upgradeForMore": "Обновите для большего количества уведомлений",
+    "freeUserLimit": "Бесплатные пользователи могут иметь 1 уведомление в день"
   },
   "widget": {
     "title": "Виджет Focus",
