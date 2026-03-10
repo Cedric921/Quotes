@@ -13,6 +13,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { ThemesModule } from './themes/themes.module';
 import { FontsModule } from './fonts/fonts.module';
 import { HealthModule } from './health/health.module';
+import { TranslationsModule } from './translations/translations.module';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -32,6 +33,7 @@ import { getDatabaseConfig } from './config/database.config';
     ThemesModule,
     FontsModule,
     HealthModule,
+    TranslationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

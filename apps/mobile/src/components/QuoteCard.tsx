@@ -2,20 +2,54 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
+  useWindowDimensions,
   TouchableWithoutFeedback,
   Animated,
   TouchableOpacity,
   ViewStyle,
   TextStyle,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect, useMemo } from "react";
 import * as Haptics from "expo-haptics";
+import { useTranslatedQuote } from "../hooks";
+
+// Helper function to calculate luminance of a color (0 = dark, 1 = light)
+function getLuminance(hex: string): number {
+  const color = hex.replace("#", "");
+  const r = parseInt(color.substring(0, 2), 16) / 255;
+  const g = parseInt(color.substring(2, 4), 16) / 255;
+  const b = parseInt(color.substring(4, 6), 16) / 255;
+
+  // Convert to sRGB
+  const toLinear = (c: number) =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+
+// Check if color is light (needs darker text/overlay)
+function isLightColor(hex?: string): boolean {
+  if (!hex) return false;
+  return getLuminance(hex) > 0.5;
+}
+
+// Check if color is very light/white (luminance > 0.85)
+function isVeryLightColor(hex?: string): boolean {
+  if (!hex) return false;
+  return getLuminance(hex) > 0.85;
+}
 
 // Helper function to get gradient colors from topic color
 function getTopicGradient(color?: string): [string, string, ...string[]] {
+  // Default gradient if no color
   if (!color) return ["#667eea", "#764ba2"];
+
+  // If color is very light (white or near-white), use a dark gradient instead
+  if (isVeryLightColor(color)) {
+    return ["#1a1a2e", "#16213e"];
+  }
 
   // Create a gradient from the base color to a darker variant
   const darkenColor = (hex: string, percent: number): string => {
@@ -37,15 +71,17 @@ function getTopicGradient(color?: string): [string, string, ...string[]] {
     );
   };
 
-  const darkerColor = darkenColor(color, 30);
+  // For light colors, darken more aggressively
+  const isLight = isLightColor(color);
+  const darkenAmount = isLight ? 50 : 30;
+
+  const darkerColor = darkenColor(color, darkenAmount);
   return [color, darkerColor];
 }
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAppSelector } from "../store/hooks";
-
-const { height } = Dimensions.get("window");
 
 // Map of available system fonts that can be used
 const SYSTEM_FONTS: Record<string, string> = {
@@ -104,6 +140,7 @@ export default function QuoteCard({
   showTopicName = true,
 }: QuoteCardProps) {
   const navigation = useNavigation<NavigationProp>();
+  const { height, width } = useWindowDimensions();
   const [liked, setLiked] = useState(isLiked);
   const [lastTap, setLastTap] = useState(0);
   const selectedFont = useAppSelector((state) => state.font.selectedFont);
@@ -111,10 +148,38 @@ export default function QuoteCard({
     (state) => state.theme.backgroundTheme,
   );
 
+  // Get translated quote text based on app language
+  const { translatedText, isTranslating } = useTranslatedQuote(
+    quote as import("../types").Quote,
+  );
+
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(0)).current;
 
-  const gradient = getTopicGradient(quote.topic?.color);
+  // Get gradient based on topic color
+  const gradient = useMemo(
+    () => getTopicGradient(quote.topic?.color),
+    [quote.topic?.color],
+  );
+
+  // Dynamic styles based on screen dimensions
+  const dynamicStyles = useMemo(
+    () => ({
+      container: {
+        height: height,
+        width: width,
+      } as ViewStyle,
+      // Responsive font size based on screen width
+      quoteText: {
+        fontSize: Math.min(Math.max(width * 0.065, 22), 34),
+        lineHeight: Math.min(Math.max(width * 0.095, 32), 48),
+      } as TextStyle,
+      authorText: {
+        fontSize: Math.min(Math.max(width * 0.04, 14), 20),
+      } as TextStyle,
+    }),
+    [height, width],
+  );
 
   // Check if a background theme is active (to make card transparent)
   const hasBackgroundTheme = !!backgroundTheme?.imageUrl;
@@ -184,10 +249,10 @@ export default function QuoteCard({
   };
 
   // If background theme is active, use transparent container
-  // Otherwise use the topic gradient
+  // Otherwise use the dark gradient
   const containerStyle = hasBackgroundTheme
-    ? [styles.container, styles.transparentContainer]
-    : styles.container;
+    ? [styles.container, dynamicStyles.container, styles.transparentContainer]
+    : [styles.container, dynamicStyles.container];
 
   const gradientColors: [string, string, ...string[]] = hasBackgroundTheme
     ? ["transparent", "transparent"]
@@ -215,21 +280,32 @@ export default function QuoteCard({
         </Animated.Text>
 
         <View style={styles.content}>
-          <Text
-            style={[
-              styles.quoteText,
-              effectiveFontFamily && {
-                fontFamily: effectiveFontFamily,
-              },
-            ]}
-          >
-            "{quote.text}"
-          </Text>
+          <View style={styles.quoteContainer}>
+            <Text
+              style={[
+                styles.quoteText,
+                dynamicStyles.quoteText,
+                effectiveFontFamily && {
+                  fontFamily: effectiveFontFamily,
+                },
+              ]}
+            >
+              "{translatedText}"
+            </Text>
+            {isTranslating && (
+              <ActivityIndicator
+                size="small"
+                color="rgba(255, 255, 255, 0.6)"
+                style={styles.translatingIndicator}
+              />
+            )}
+          </View>
 
           {Boolean(quote.author) && (
             <Text
               style={[
                 styles.author,
+                dynamicStyles.authorText,
                 effectiveFontFamily && {
                   fontFamily: effectiveFontFamily,
                 },
@@ -241,7 +317,7 @@ export default function QuoteCard({
         </View>
 
         {/* Topic badge with glassmorphism */}
-        {quote.topic && showTopicName && (
+        {/* {quote.topic && showTopicName && (
           <TouchableOpacity
             style={styles.topicBadge}
             onPress={handleTopicPress}
@@ -249,7 +325,7 @@ export default function QuoteCard({
           >
             <Text style={styles.topicText}>{quote.topic.name}</Text>
           </TouchableOpacity>
-        )}
+        )} */}
       </LinearGradient>
     </TouchableWithoutFeedback>
   );
@@ -257,10 +333,10 @@ export default function QuoteCard({
 
 const styles = StyleSheet.create({
   container: {
-    height: height,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 30,
+    paddingHorizontal: 24,
   } as ViewStyle,
   transparentContainer: {
     backgroundColor: "transparent",
@@ -272,24 +348,32 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
+    zIndex: 10,
   } as TextStyle,
   content: {
     alignItems: "center",
-    maxWidth: "100%",
+    justifyContent: "center",
+    width: "100%",
+    paddingHorizontal: 8,
+    zIndex: 5,
+  } as ViewStyle,
+  quoteContainer: {
+    alignItems: "center",
+    width: "100%",
+  } as ViewStyle,
+  translatingIndicator: {
+    marginTop: 8,
   } as ViewStyle,
   quoteText: {
-    fontSize: 28,
     fontWeight: "600" as const,
     color: "#ffffff",
     textAlign: "center",
-    lineHeight: 40,
-    marginBottom: 30,
+    marginBottom: 24,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 5,
   } as TextStyle,
   author: {
-    fontSize: 18,
     color: "#ffffff",
     opacity: 0.9,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
@@ -299,7 +383,7 @@ const styles = StyleSheet.create({
   topicBadge: {
     position: "absolute",
     top: 100,
-    right: 30,
+    right: 24,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -311,6 +395,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+    zIndex: 5,
   } as ViewStyle,
   topicText: {
     color: "#ffffff",

@@ -27,7 +27,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Topics: undefined;
   Topic: {
-    topicId: number;
+    topicId: string;
     topicName: string;
   };
   Login: undefined;

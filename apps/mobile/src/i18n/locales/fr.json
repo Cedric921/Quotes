@@ -11,7 +11,9 @@
     "close": "Fermer",
     "or": "ou",
     "quote": "citation",
-    "quotes": "citations"
+    "quotes": "citations",
+    "like": "J'aime",
+    "liked": "Aimé"
   },
   "auth": {
     "login": "Connexion",
@@ -80,7 +82,9 @@
     "noBackground": "Aucun fond",
     "noThemesAvailable": "Aucun thème disponible",
     "fonts": "Polices",
-    "defaultFont": "Police par défaut"
+    "defaultFont": "Police par défaut",
+    "autoTranslate": "Traduire les citations",
+    "autoTranslateDesc": "Traduire automatiquement les citations"
   },
   "profile": {
     "title": "Profil",

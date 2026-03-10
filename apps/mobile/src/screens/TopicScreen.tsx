@@ -6,13 +6,13 @@ import {
   FlatList,
   ViewStyle,
   TextStyle,
-  Dimensions,
+  useWindowDimensions,
   RefreshControl,
   Platform,
   ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { Quote } from "../types";
 import * as Haptics from "expo-haptics";
 import { LoadingSkeleton, QuoteCard, DotsIndicator } from "../components";
@@ -24,8 +24,6 @@ import { useQuery } from "@tanstack/react-query";
 import { topicsApi } from "../services/api";
 import { useAppSelector } from "../store/hooks";
 import Toast from "react-native-toast-message";
-
-const { height } = Dimensions.get("window");
 
 interface TopicScreenProps {
   readonly navigation: any;
@@ -39,6 +37,7 @@ interface TopicScreenProps {
 
 export default function TopicScreen({ navigation, route }: TopicScreenProps) {
   const { t } = useTranslation();
+  const { height } = useWindowDimensions();
   const { topicId, topicName } = route.params;
   const { colors, isDark } = useThemeColors();
   const styles = createStyles(colors);
@@ -131,6 +130,15 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
     }
   }, []);
 
+  // Enrich quotes with topic data (for proper gradient colors)
+  const enrichedQuotes = useMemo((): Quote[] => {
+    if (!topic) return quotes;
+    return quotes.map((q) => ({
+      ...q,
+      topic: q.topic || topic,
+    }));
+  }, [quotes, topic]);
+
   const renderQuoteCard = ({ item }: { item: Quote }) => (
     <QuoteCard
       quote={item}
@@ -191,7 +199,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
       </BlurView>
 
       {/* Quotes List - Full Screen comme HomeScreen */}
-      {quotes.length === 0 ? (
+      {enrichedQuotes.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="document-text-outline" size={64} color="#a0a0a0" />
           <Text style={styles.emptyText}>{t("topics.noQuotesForTopic")}</Text>
@@ -199,7 +207,7 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
       ) : (
         <>
           <FlatList
-            data={quotes}
+            data={enrichedQuotes}
             renderItem={renderQuoteCard}
             keyExtractor={(item) => item.id.toString()}
             pagingEnabled
@@ -219,7 +227,10 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
           />
 
           {/* Dots Indicator */}
-          <DotsIndicator total={quotes.length} currentIndex={currentIndex} />
+          <DotsIndicator
+            total={enrichedQuotes.length}
+            currentIndex={currentIndex}
+          />
         </>
       )}
     </>

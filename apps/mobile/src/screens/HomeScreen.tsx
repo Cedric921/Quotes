@@ -3,14 +3,13 @@ import {
   View,
   FlatList,
   StyleSheet,
-  Dimensions,
+  useWindowDimensions,
   RefreshControl,
   ActivityIndicator,
   ViewStyle,
   ImageBackground,
 } from "react-native";
 import { BlurView } from "expo-blur";
-import * as Sharing from "expo-sharing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as WebBrowser from "expo-web-browser";
 import Toast from "react-native-toast-message";
@@ -40,8 +39,6 @@ import { SubscriptionPlan } from "../store/slices/subscriptionSlice";
 
 const ONBOARDING_KEY = "@focus_onboarding_shown";
 
-const { height } = Dimensions.get("window");
-
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "Home"
@@ -53,6 +50,7 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { t } = useTranslation();
+  const { height } = useWindowDimensions();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
@@ -60,7 +58,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     (state) => state.theme.backgroundTheme,
   );
   const { colors } = useThemeColors();
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, height);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Onboarding states
@@ -219,16 +217,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     [quotes, toggleLikeMutation],
   );
 
-  const handleShare = useCallback(async (text: string, author: string) => {
-    const shareText = `"${text}"\n\n— ${author}\n\n📱 Focus App`;
-
-    if (await Sharing.isAvailableAsync()) {
-      // Create a temporary text file to share
-      // For now, we'll just log it (you can implement file creation later)
-      console.log("Share:", shareText);
-    }
-  }, []);
-
   const handleSettings = useCallback(() => {
     navigation.navigate("Settings");
   }, [navigation]);
@@ -335,23 +323,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       />
 
       {/* Dots Indicator */}
-      {filteredQuotes.length > 0 && (
+      {/* {filteredQuotes.length > 0 && (
         <DotsIndicator
           total={filteredQuotes.length}
           currentIndex={currentIndex}
         />
-      )}
+      )} */}
 
-      {/* Fixed Action Buttons */}
-      {filteredQuotes.length > 0 && filteredQuotes[currentIndex] && (
+      {/* Fixed Bottom Navigation Bar */}
+      {filteredQuotes.length > 0 && filteredQuotes[currentIndex] ? (
         <ActionButtons
           quoteId={filteredQuotes[currentIndex].id}
-          quoteText={filteredQuotes[currentIndex].text}
-          author={filteredQuotes[currentIndex].author}
           isLiked={filteredQuotes[currentIndex].isLiked}
           isAuthenticated={isAuthenticated}
           onLike={handleLike}
-          onShare={handleShare}
+          onSettings={handleSettings}
+          onTopics={handleTopics}
+          onLogin={handleLogin}
+        />
+      ) : (
+        <ActionButtons
+          quoteId=""
+          isLiked={false}
+          isAuthenticated={isAuthenticated}
+          onLike={() => {}}
           onSettings={handleSettings}
           onTopics={handleTopics}
           onLogin={handleLogin}
@@ -395,7 +390,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   return <View style={styles.container}>{content}</View>;
 }
 
-const createStyles = (colors: any) =>
+const createStyles = (colors: any, height: number) =>
   StyleSheet.create({
     container: {
       flex: 1,

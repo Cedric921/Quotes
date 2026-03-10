@@ -11,7 +11,9 @@
     "close": "Close",
     "or": "or",
     "quote": "quote",
-    "quotes": "quotes"
+    "quotes": "quotes",
+    "like": "Like",
+    "liked": "Liked"
   },
   "auth": {
     "login": "Login",
@@ -80,7 +82,9 @@
     "noBackground": "No background",
     "noThemesAvailable": "No themes available",
     "fonts": "Fonts",
-    "defaultFont": "Default Font"
+    "defaultFont": "Default Font",
+    "autoTranslate": "Translate quotes",
+    "autoTranslateDesc": "Automatically translate quotes"
   },
   "profile": {
     "title": "Profile",

@@ -10,6 +10,7 @@ import {
   ImageStyle,
   Alert,
   Modal,
+  Switch,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,6 +19,10 @@ import { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { logoutThunk } from "../store/slices/authSlice";
 import { changeTheme } from "../store/slices/themeSlice";
+import {
+  setAutoTranslate,
+  clearTranslationCache,
+} from "../store/slices/translationSlice";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { changeLanguage, getCurrentLanguage } from "../i18n";
@@ -45,6 +50,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const theme = useAppSelector((state) => state.theme.mode);
+  const autoTranslate = useAppSelector(
+    (state) => state.translation.autoTranslate,
+  );
   const { colors } = useThemeColors();
   const [currentLanguage, setCurrentLanguage] = useState<Language>(
     LANGUAGES[0],
@@ -91,7 +99,14 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setCurrentLanguage(language);
     await changeLanguage(language.code);
+    // Clear translation cache when language changes
+    dispatch(clearTranslationCache());
     setShowLanguageModal(false);
+  };
+
+  const handleAutoTranslateToggle = (value: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    dispatch(setAutoTranslate(value));
   };
 
   const handleThemePress = () => {
@@ -268,6 +283,35 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
             </View>
           </TouchableOpacity>
+
+          {/* Auto-translate toggle - only show if language is not English */}
+          {currentLanguage.code !== "en" && (
+            <View style={styles.menuItem}>
+              <View style={{ ...styles.menuItemLeft }}>
+                <Ionicons name="globe-outline" size={24} color="#0A84FF" />
+                <View style={styles.menuItemTextContainer}>
+                  <Text style={styles.menuItemText}>
+                    {t("settings.autoTranslate") || "Traduire les citations"}
+                  </Text>
+                  {/* <Text style={styles.menuItemSubtext}>
+                    {t("settings.autoTranslateDesc") ||
+                      "Traduire automatiquement en " +
+                        currentLanguage.nativeName}
+                  </Text> */}
+                </View>
+              </View>
+              <Switch
+                value={autoTranslate}
+                onValueChange={handleAutoTranslateToggle}
+                trackColor={{
+                  false: "#767577",
+                  true: "rgba(10, 132, 255, 0.4)",
+                }}
+                thumbColor={autoTranslate ? "#0A84FF" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+              />
+            </View>
+          )}
 
           <TouchableOpacity style={styles.menuItem} onPress={handleThemePress}>
             <View style={styles.menuItemLeft}>
@@ -708,6 +752,7 @@ const createStyles = (colors: any) =>
       borderRadius: 12,
       marginBottom: 8,
       backgroundColor: colors.backgroundSecondary,
+      flex: 1,
     } as ViewStyle,
     menuItemLeft: {
       flexDirection: "row",
@@ -723,6 +768,14 @@ const createStyles = (colors: any) =>
       fontSize: 16,
       fontWeight: "500" as const,
       color: colors.text,
+    } as TextStyle,
+    menuItemTextContainer: {
+      flex: 1,
+      rowGap: 2,
+    } as ViewStyle,
+    menuItemSubtext: {
+      fontSize: 12,
+      color: colors.textTertiary,
     } as TextStyle,
     menuItemValue: {
       fontSize: 14,
