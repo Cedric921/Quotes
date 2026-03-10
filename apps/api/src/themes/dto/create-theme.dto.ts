@@ -36,4 +36,22 @@ export class CreateThemeDto {
   @Max(100)
   @IsOptional()
   order?: number;
+
+  // Font fields
+  @IsString()
+  @IsOptional()
+  fontName?: string;
+
+  @IsString()
+  @IsOptional()
+  fontFamily?: string;
+
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
+  @IsBoolean()
+  @IsOptional()
+  isPremium?: boolean;
 }

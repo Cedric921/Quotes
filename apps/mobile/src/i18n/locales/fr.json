@@ -78,7 +78,8 @@
     "light": "Clair",
     "dark": "Sombre",
     "system": "Système",
-    "backgroundTheme": "Fond d'écran",
+    "backgroundTheme": "Thème et Police",
+    "themeIncludesFont": "Le thème inclut la police",
     "noBackground": "Aucun fond",
     "noThemesAvailable": "Aucun thème disponible",
     "fonts": "Polices",
@@ -177,7 +178,7 @@
     "features": {
       "title": "Fonctionnalités Premium",
       "unlimitedQuotes": "Citations illimitées",
-      "premiumTopics": "Accès aux topics premium",
+      "premiumTopics": "Accès aux sujets premium",
       "noAds": "Sans publicité",
       "customNotifications": "Notifications personnalisées",
       "offlineAccess": "Accès hors ligne"
@@ -249,9 +250,10 @@
     "notificationsInfo": "Recevez jusqu'à 5 notifications par jour aux heures et jours que vous choisissez pour découvrir de nouvelles citations inspirantes.",
     "selectAtLeastOneDay": "Sélectionnez au moins un jour",
     "minNotificationsRequired": "Au moins une notification est requise",
-    "notification": "Notification {{number}}",
     "testNotificationSent": "Notification test envoyée",
-    "checkYourDevice": "Vérifiez votre appareil pour la notification"
+    "checkYourDevice": "Vérifiez votre appareil pour la notification",
+    "upgradeForMore": "Passez à Premium pour plus de notifications",
+    "freeUserLimit": "Les utilisateurs gratuits peuvent avoir 1 notification par jour"
   },
   "widget": {
     "title": "Widget Focus",
@@ -279,7 +281,7 @@
     "popular": "Populaire",
     "features": {
       "unlimitedQuotes": "Citations illimitées",
-      "premiumTopics": "Accès aux topics premium",
+      "premiumTopics": "Accès aux sujets premium",
       "noAds": "Sans publicité",
       "customThemes": "Thèmes personnalisés",
       "offlineAccess": "Accès hors ligne"

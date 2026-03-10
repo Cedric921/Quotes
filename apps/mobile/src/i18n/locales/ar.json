@@ -76,9 +76,12 @@
     "light": "فاتح",
     "dark": "داكن",
     "system": "النظام",
-    "backgroundTheme": "خلفية الشاشة",
+    "backgroundTheme": "السمة والخط",
+    "themeIncludesFont": "السمة تشمل الخط",
     "noBackground": "بدون خلفية",
     "noThemesAvailable": "لا توجد خلفيات متاحة",
+    "fonts": "الخطوط",
+    "defaultFont": "الخط الافتراضي",
     "autoTranslate": "ترجمة الاقتباسات",
     "autoTranslateDesc": "ترجمة الاقتباسات تلقائياً"
   },
@@ -97,7 +100,36 @@
     "myFavorites": "مفضلاتي",
     "savedQuotes": "الاقتباسات المحفوظة",
     "activityCalendar": "تقويم النشاط",
-    "daysActive": "أيام نشطة"
+    "daysActive": "أيام نشطة",
+    "totalSpent": "إجمالي المصروفات",
+    "subscription": "الاشتراك",
+    "paymentHistory": "سجل المدفوعات"
+  },
+  "favorites": {
+    "title": "مفضلاتي",
+    "empty": "لا توجد مفضلات",
+    "emptySubtext": "أعجب بالاقتباسات للعثور عليها هنا",
+    "removeTitle": "إزالة من المفضلات",
+    "removeMessage": "هل تريد إزالة هذا الاقتباس من مفضلاتك؟"
+  },
+  "editProfile": {
+    "title": "تعديل الملف الشخصي",
+    "name": "الاسم",
+    "namePlaceholder": "أدخل اسمك",
+    "email": "البريد الإلكتروني",
+    "emailHelper": "لا يمكن تغيير البريد الإلكتروني حالياً",
+    "changePhoto": "تغيير الصورة",
+    "permissionRequired": "الإذن مطلوب",
+    "permissionMessage": "نحتاج الوصول إلى صورك",
+    "success": "تم تحديث الملف الشخصي",
+    "successMessage": "تم حفظ تغييراتك",
+    "errorMessage": "تعذر تحديث الملف الشخصي"
+  },
+  "payments": {
+    "title": "سجل المدفوعات",
+    "totalSpent": "إجمالي المصروفات",
+    "empty": "لا توجد مدفوعات",
+    "emptySubtext": "ستظهر مدفوعاتك هنا"
   },
   "actions": {
     "like": "إعجاب",
@@ -163,9 +195,10 @@
     "notificationsInfo": "ستتلقى ما يصل إلى 5 إشعارات يوميًا في الأوقات والأيام التي تختارها لاكتشاف اقتباسات ملهمة جديدة.",
     "selectAtLeastOneDay": "حدد يومًا واحدًا على الأقل",
     "minNotificationsRequired": "مطلوب إشعار واحد على الأقل",
-    "notification": "إشعار {{number}}",
     "testNotificationSent": "تم إرسال إشعار تجريبي",
-    "checkYourDevice": "تحقق من جهازك للإشعار"
+    "checkYourDevice": "تحقق من جهازك للإشعار",
+    "upgradeForMore": "قم بالترقية للحصول على المزيد من الإشعارات",
+    "freeUserLimit": "يمكن للمستخدمين المجانيين الحصول على إشعار واحد يوميًا"
   },
   "subscription": {
     "title": "الاشتراك",
@@ -219,5 +252,39 @@
     "description": "عرض اقتباس ملهم على شاشتك الرئيسية",
     "defaultQuote": "افتح تطبيق Focus لاكتشاف اقتباس ملهم.",
     "defaultAuthor": "Focus"
+  },
+  "onboarding": {
+    "welcomeTitle": "مرحباً بك في Focus",
+    "welcomeSubtitle": "اكتشف اقتباسات ملهمة كل يوم",
+    "choosePlan": "اختر خطتك",
+    "continue": "متابعة",
+    "skipForNow": "تخطي الآن",
+    "completeProfile": "أكمل ملفك الشخصي",
+    "createAccount": "إنشاء حساب",
+    "createAccountSubtitle": "للمتابعة إلى الدفع",
+    "name": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "continueToPayment": "المتابعة إلى الدفع",
+    "selectedPlan": "الخطة المختارة",
+    "perMonth": "/شهر",
+    "perYear": "/سنة",
+    "popular": "شائع",
+    "features": {
+      "unlimitedQuotes": "اقتباسات غير محدودة",
+      "premiumTopics": "الوصول إلى المواضيع المميزة",
+      "noAds": "بدون إعلانات",
+      "customThemes": "سمات مخصصة",
+      "offlineAccess": "الوصول بدون إنترنت"
+    },
+    "errors": {
+      "nameRequired": "الاسم مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "البريد الإلكتروني غير صالح",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordTooShort": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
+      "passwordMismatch": "كلمات المرور غير متطابقة"
+    }
   }
 }

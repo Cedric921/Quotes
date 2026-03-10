@@ -74,6 +74,12 @@ export default function ThemeSelectionScreen({
         />
         <View style={styles.themeOverlay}>
           <Text style={styles.themeName}>{item.name}</Text>
+          {item.fontName && (
+            <View style={styles.fontBadge}>
+              <Ionicons name="text" size={10} color="#fff" />
+              <Text style={styles.fontBadgeText}>{item.fontName}</Text>
+            </View>
+          )}
           {isSelected && (
             <View
               style={[styles.checkmark, { backgroundColor: colors.primary }]}
@@ -246,6 +252,22 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
+  },
+  fontBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+  },
+  fontBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "500",
   },
   checkmark: {
     position: "absolute",

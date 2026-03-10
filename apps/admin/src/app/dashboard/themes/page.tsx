@@ -10,6 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -36,9 +43,19 @@ import {
   EyeOff,
   Upload,
   Loader2,
+  Type,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+
+interface Font {
+  id: string;
+  name: string;
+  fontFamily: string;
+  isActive: boolean;
+}
 
 interface Theme {
   id: string;
@@ -48,12 +65,16 @@ interface Theme {
   thumbnailUrl?: string;
   isActive: boolean;
   order: number;
+  fontName?: string;
+  fontFamily?: string;
+  isPremium: boolean;
   createdAt: string;
 }
 
 export default function ThemesPage() {
   const { t } = useLocale();
   const [themes, setThemes] = useState<Theme[]>([]);
+  const [fonts, setFonts] = useState<Font[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
@@ -67,6 +88,9 @@ export default function ThemesPage() {
     description: "",
     isActive: true,
     order: 0,
+    fontName: "",
+    fontFamily: "",
+    isPremium: false,
   });
 
   const fetchThemes = useCallback(async () => {
@@ -81,9 +105,19 @@ export default function ThemesPage() {
     }
   }, [t.themes.loadError]);
 
+  const fetchFonts = useCallback(async () => {
+    try {
+      const response = await apiClient.get<Font[]>("/fonts/active");
+      setFonts(response.data);
+    } catch (err) {
+      console.error("Error loading fonts:", err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchThemes();
-  }, [fetchThemes]);
+    fetchFonts();
+  }, [fetchThemes, fetchFonts]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -98,7 +132,15 @@ export default function ThemesPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", isActive: true, order: 0 });
+    setFormData({
+      name: "",
+      description: "",
+      isActive: true,
+      order: 0,
+      fontName: "",
+      fontFamily: "",
+      isPremium: false,
+    });
     setSelectedFile(null);
     setPreviewUrl(null);
     setEditingTheme(null);
@@ -122,6 +164,9 @@ export default function ThemesPage() {
       data.append("description", formData.description);
       data.append("isActive", String(formData.isActive));
       data.append("order", String(formData.order));
+      data.append("fontName", formData.fontName);
+      data.append("fontFamily", formData.fontFamily);
+      data.append("isPremium", String(formData.isPremium));
       if (selectedFile) {
         data.append("image", selectedFile);
       }
@@ -158,6 +203,9 @@ export default function ThemesPage() {
       description: theme.description || "",
       isActive: theme.isActive,
       order: theme.order,
+      fontName: theme.fontName || "",
+      fontFamily: theme.fontFamily || "",
+      isPremium: theme.isPremium || false,
     });
     setPreviewUrl(theme.thumbnailUrl || theme.imageUrl);
     setIsSheetOpen(true);
@@ -249,7 +297,7 @@ export default function ThemesPage() {
                 <h3 className="text-white font-semibold truncate">
                   {theme.name}
                 </h3>
-                <div className="flex items-center gap-1 mt-1">
+                <div className="flex items-center gap-1 mt-1 flex-wrap">
                   {theme.isActive ? (
                     <span className="text-xs text-green-400 flex items-center gap-1">
                       <Eye className="h-3 w-3" /> {t.themes.active}
@@ -258,6 +306,17 @@ export default function ThemesPage() {
                     <span className="text-xs text-gray-400 flex items-center gap-1">
                       <EyeOff className="h-3 w-3" /> {t.themes.inactive}
                     </span>
+                  )}
+                  {theme.fontName && (
+                    <span className="text-xs text-blue-300 flex items-center gap-1">
+                      <Type className="h-3 w-3" /> {theme.fontName}
+                    </span>
+                  )}
+                  {theme.isPremium && (
+                    <Badge className="text-[10px] px-1 py-0 bg-amber-500/20 text-amber-300 border-amber-500/30">
+                      <Crown className="h-2.5 w-2.5 mr-0.5" />
+                      Premium
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -408,6 +467,95 @@ export default function ThemesPage() {
                   setFormData({ ...formData, isActive: checked })
                 }
               />
+            </div>
+
+            {/* Font selection */}
+            <div className="space-y-4 border-t pt-4 mt-4">
+              <h4 className="font-medium flex items-center gap-2">
+                <Type className="h-4 w-4" />
+                {t.themes?.fontSection || "Font Settings"}
+              </h4>
+
+              <div className="space-y-2">
+                <Label htmlFor="fontSelect">
+                  {t.themes?.selectFont || "Select Font"}
+                </Label>
+                <Select
+                  value={formData.fontFamily || "none"}
+                  onValueChange={(value) => {
+                    if (value === "none") {
+                      setFormData({
+                        ...formData,
+                        fontName: "",
+                        fontFamily: "",
+                      });
+                    } else {
+                      const font = fonts.find((f) => f.fontFamily === value);
+                      if (font) {
+                        setFormData({
+                          ...formData,
+                          fontName: font.name,
+                          fontFamily: font.fontFamily,
+                        });
+                      }
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        t.themes?.selectFontPlaceholder || "Choose a font"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">
+                      {t.themes?.noFont || "Default (System)"}
+                    </SelectItem>
+                    {fonts.map((font) => (
+                      <SelectItem
+                        key={font.id}
+                        value={font.fontFamily}
+                        style={{ fontFamily: font.fontFamily }}
+                      >
+                        {font.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {formData.fontFamily && (
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {t.themes?.fontPreview || "Preview"}
+                  </p>
+                  <p
+                    style={{ fontFamily: formData.fontFamily }}
+                    className="text-lg"
+                  >
+                    The quick brown fox jumps over the lazy dog
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="isPremium">
+                    {t.themes?.isPremium || "Premium Theme"}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t.themes?.premiumHint || "Only available to premium users"}
+                  </p>
+                </div>
+                <Switch
+                  id="isPremium"
+                  checked={formData.isPremium}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, isPremium: checked })
+                  }
+                />
+              </div>
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>

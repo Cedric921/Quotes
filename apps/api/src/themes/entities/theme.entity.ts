@@ -23,5 +23,14 @@ export class Theme extends BaseEntity {
 
   @Column({ default: 0 })
   order: number;
-}
 
+  // Font fields - embedded in theme
+  @Column({ nullable: true })
+  fontName: string;
+
+  @Column({ nullable: true })
+  fontFamily: string;
+
+  @Column({ default: false })
+  isPremium: boolean;
+}

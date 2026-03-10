@@ -5,6 +5,7 @@ import {
   Animated,
   ViewStyle,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import * as Haptics from "expo-haptics";
@@ -19,6 +20,8 @@ interface ActionButtonsProps {
   readonly onSettings: () => void;
   readonly onTopics: () => void;
   readonly onLogin?: () => void;
+  readonly onShare?: () => Promise<void>;
+  readonly isSharing?: boolean;
 }
 
 export default function ActionButtons({
@@ -29,6 +32,8 @@ export default function ActionButtons({
   onSettings,
   onTopics,
   onLogin,
+  onShare,
+  isSharing = false,
 }: ActionButtonsProps) {
   const [liked, setLiked] = useState(isLiked);
   const likeScale = useRef(new Animated.Value(1)).current;
@@ -70,6 +75,12 @@ export default function ActionButtons({
   const handleLogin = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onLogin?.();
+  };
+
+  const handleShare = async () => {
+    if (isSharing || !onShare) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await onShare();
   };
 
   // Glass button component with liquid glass effect
@@ -129,7 +140,7 @@ export default function ActionButtons({
     );
   }
 
-  // If authenticated: show Topics, Like, and User buttons
+  // If authenticated: show Topics, Like, Share, and User buttons
   return (
     <View style={styles.bottomContainer}>
       <View style={styles.buttonRow}>
@@ -170,6 +181,17 @@ export default function ActionButtons({
             </BlurView>
           </TouchableOpacity>
         </Animated.View>
+
+        {/* Share Button */}
+        {onShare && (
+          <GlassButton onPress={handleShare}>
+            {isSharing ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Ionicons name="share-outline" size={24} color="#ffffff" />
+            )}
+          </GlassButton>
+        )}
 
         {/* User/Settings Button */}
         <GlassButton onPress={handleSettings}>

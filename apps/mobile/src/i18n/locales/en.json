@@ -78,7 +78,8 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System",
-    "backgroundTheme": "Background",
+    "backgroundTheme": "Theme & Font",
+    "themeIncludesFont": "Theme includes the font",
     "noBackground": "No background",
     "noThemesAvailable": "No themes available",
     "fonts": "Fonts",
@@ -250,7 +251,9 @@
     "selectAtLeastOneDay": "Select at least one day",
     "minNotificationsRequired": "At least one notification is required",
     "testNotificationSent": "Test notification sent",
-    "checkYourDevice": "Check your device for the notification"
+    "checkYourDevice": "Check your device for the notification",
+    "upgradeForMore": "Upgrade for more notifications",
+    "freeUserLimit": "Free users can have 1 notification per day"
   },
   "widget": {
     "title": "Focus Widget",

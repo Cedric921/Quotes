@@ -169,7 +169,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Text style={styles.statLabel}>{t("profile.likedQuotes")}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.statCard}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -183,7 +183,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             />
             <Text style={styles.statNumber}>{totalSpent.toFixed(0)}€</Text>
             <Text style={styles.statLabel}>{t("profile.totalSpent")}</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <View style={styles.statCard}>
             <Ionicons name="diamond" size={24} color="#FFD700" />
@@ -268,7 +268,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -282,7 +282,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </ScrollView>
     </SafeAreaView>

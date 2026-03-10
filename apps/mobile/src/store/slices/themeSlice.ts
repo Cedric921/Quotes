@@ -9,6 +9,10 @@ export interface BackgroundTheme {
   name: string;
   imageUrl: string;
   thumbnailUrl?: string;
+  // Font fields - embedded in theme
+  fontName?: string;
+  fontFamily?: string;
+  isPremium?: boolean;
 }
 
 interface ThemeState {
