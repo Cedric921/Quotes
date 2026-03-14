@@ -10,6 +10,8 @@ import {
   ViewStyle,
   TextStyle,
   ScrollView,
+  Image,
+  ImageStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -133,9 +135,11 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
         >
           {/* Logo */}
           <View style={styles.logoContainer}>
-            <Text style={styles.logo}>
-              Focus<Text style={styles.logoDot}>.</Text>
-            </Text>
+            <Image
+              source={require("../../assets/app_without_bg.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={styles.subtitle}>{t("auth.createAccount")}</Text>
           </View>
 
@@ -285,19 +289,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   } as ViewStyle,
-  logo: {
-    fontSize: 48,
-    fontWeight: "700" as const,
-    color: "#fff",
-    letterSpacing: 1,
-  } as TextStyle,
-  logoDot: {
-    color: "#FF453A",
-  } as TextStyle,
+  logoImage: {
+    width: 100,
+    height: 100,
+  } as ImageStyle,
   subtitle: {
     fontSize: 18,
     color: "rgba(255,255,255,0.8)",
-    marginTop: 8,
+    marginTop: 16,
   } as TextStyle,
   form: {
     rowGap: 16,

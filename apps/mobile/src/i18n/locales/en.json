@@ -63,6 +63,8 @@
     "settings": "SETTINGS",
     "language": "Language",
     "theme": "Theme",
+    "mode": "Mode",
+    "selectMode": "Select mode",
     "storage": "Storage",
     "notifications": "Notifications",
     "about": "ABOUT",
@@ -85,7 +87,8 @@
     "fonts": "Fonts",
     "defaultFont": "Default Font",
     "autoTranslate": "Auto-translate content",
-    "autoTranslateDesc": "Automatically translate quotes and topics"
+    "autoTranslateDesc": "Automatically translate quotes and topics",
+    "unlockAll": "Unlock All"
   },
   "profile": {
     "title": "Profile",

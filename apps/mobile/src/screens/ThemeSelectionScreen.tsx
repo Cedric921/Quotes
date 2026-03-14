@@ -10,6 +10,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { changeBackgroundTheme } from "../store/slices/themeSlice";
@@ -33,6 +34,9 @@ export default function ThemeSelectionScreen({
   const dispatch = useAppDispatch();
   const { colors } = useThemeColors();
   const selectedTheme = useAppSelector((state) => state.theme.backgroundTheme);
+  const user = useAppSelector((state) => state.auth.user);
+  const isPremium = user?.isPremium || user?.isAdmin;
+
   const {
     data: themes,
     isLoading,
@@ -54,6 +58,11 @@ export default function ThemeSelectionScreen({
   const handleClearTheme = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     dispatch(changeBackgroundTheme(null));
+  };
+
+  const handleUnlockAll = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    navigation.navigate("Subscription");
   };
 
   const renderThemeItem = ({ item }: { item: BackgroundTheme }) => {
@@ -137,35 +146,60 @@ export default function ThemeSelectionScreen({
             />
           }
           ListHeaderComponent={
-            <TouchableOpacity
-              style={[
-                styles.clearButton,
-                { backgroundColor: colors.card, borderColor: colors.border },
-                !selectedTheme && {
-                  borderColor: colors.primary,
-                  borderWidth: 2,
-                },
-              ]}
-              onPress={handleClearTheme}
-            >
-              <Ionicons
-                name="close-circle-outline"
-                size={32}
-                color={!selectedTheme ? colors.primary : colors.textSecondary}
-              />
-              <Text
+            <>
+              {/* Unlock All Button - Only show if not premium */}
+              {!isPremium && (
+                <TouchableOpacity
+                  style={styles.unlockButton}
+                  onPress={handleUnlockAll}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={["#FFD700", "#FFA500", "#FF8C00"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.unlockButtonGradient}
+                  >
+                    <Ionicons name="lock-open" size={24} color="#fff" />
+                    <Text style={styles.unlockButtonText}>
+                      {t("settings.unlockAll") || "Tout débloquer"}
+                    </Text>
+                    <Ionicons name="chevron-forward" size={20} color="#fff" />
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+
+              {/* Clear Theme Button */}
+              <TouchableOpacity
                 style={[
-                  styles.clearButtonText,
-                  {
-                    color: !selectedTheme
-                      ? colors.primary
-                      : colors.textSecondary,
+                  styles.clearButton,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                  !selectedTheme && {
+                    borderColor: colors.primary,
+                    borderWidth: 2,
                   },
                 ]}
+                onPress={handleClearTheme}
               >
-                {t("settings.noBackground") || "Aucun fond"}
-              </Text>
-            </TouchableOpacity>
+                <Ionicons
+                  name="close-circle-outline"
+                  size={32}
+                  color={!selectedTheme ? colors.primary : colors.textSecondary}
+                />
+                <Text
+                  style={[
+                    styles.clearButtonText,
+                    {
+                      color: !selectedTheme
+                        ? colors.primary
+                        : colors.textSecondary,
+                    },
+                  ]}
+                >
+                  {t("settings.noBackground") || "Aucun fond"}
+                </Text>
+              </TouchableOpacity>
+            </>
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
@@ -292,6 +326,29 @@ const styles = StyleSheet.create({
   clearButtonText: {
     fontSize: 16,
     fontWeight: "500",
+  },
+  unlockButton: {
+    marginBottom: 16,
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#FFD700",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  unlockButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    gap: 12,
+  },
+  unlockButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+    flex: 1,
   },
   emptyContainer: {
     flex: 1,

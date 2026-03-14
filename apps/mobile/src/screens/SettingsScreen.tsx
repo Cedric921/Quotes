@@ -333,7 +333,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <TouchableOpacity style={styles.menuItem} onPress={handleThemePress}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="contrast-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>{t("settings.theme")}</Text>
+              <Text style={styles.menuItemText}>
+                {t("settings.mode") || "Mode"}
+              </Text>
             </View>
             <View style={styles.menuItemRight}>
               <Text style={styles.menuItemValue}>{getThemeLabel()}</Text>
@@ -445,7 +447,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Theme Selection Modal */}
+      {/* Mode Selection Modal */}
       <Modal
         visible={showThemeModal}
         transparent
@@ -458,7 +460,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           onPress={() => setShowThemeModal(false)}
         >
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t("settings.selectTheme")}</Text>
+            <Text style={styles.modalTitle}>
+              {t("settings.selectMode") || "Mode"}
+            </Text>
 
             <TouchableOpacity
               style={[
