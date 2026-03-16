@@ -88,7 +88,8 @@
     "defaultFont": "Police par défaut",
     "autoTranslate": "Traduction automatique",
     "autoTranslateDesc": "Traduire automatiquement les citations et les sujets",
-    "unlockAll": "Tout débloquer"
+    "unlockAll": "Tout débloquer",
+    "unlockThemes": "Débloquer les thèmes"
   },
   "profile": {
     "title": "Profil",
@@ -215,11 +216,17 @@
     "notificationsInactive": "Notifications désactivées",
     "enableDescription": "Recevez des citations inspirantes aux moments que vous choisissez",
     "disableDescription": "Vous ne recevrez plus de notifications",
+    "timeWindow": "Plage horaire",
+    "timeWindowDescription": "Choisissez la période pendant laquelle vous souhaitez recevoir des notifications",
+    "startTime": "Heure de début",
+    "endTime": "Heure de fin",
+    "maxPerDay": "Notifications par jour",
+    "maxPerDayDescription": "Nombre maximum de citations que vous recevrez chaque jour",
     "notification": "Notification {{number}}",
     "addNotification": "Ajouter une notification",
     "removeNotification": "Supprimer",
-    "maxNotificationsReached": "Maximum de 5 notifications atteint",
-    "selectDays": "Sélectionner les jours",
+    "maxNotificationsReached": "Maximum de notifications atteint",
+    "selectDays": "Jours actifs",
     "selectTime": "Sélectionner l'heure",
     "days": {
       "monday": "Lun",
@@ -250,13 +257,13 @@
     "subscriptionRequired": "Abonnement requis",
     "subscribeToEnableNotifications": "Abonnez-vous pour activer les notifications",
     "premiumFeature": "Fonctionnalité Premium",
-    "notificationsInfo": "Recevez jusqu'à 5 notifications par jour aux heures et jours que vous choisissez pour découvrir de nouvelles citations inspirantes.",
+    "notificationsInfo": "Recevez des citations inspirantes de manière aléatoire pendant votre plage horaire choisie.",
     "selectAtLeastOneDay": "Sélectionnez au moins un jour",
     "minNotificationsRequired": "Au moins une notification est requise",
     "testNotificationSent": "Notification test envoyée",
     "checkYourDevice": "Vérifiez votre appareil pour la notification",
     "upgradeForMore": "Passez à Premium pour plus de notifications",
-    "freeUserLimit": "Les utilisateurs gratuits peuvent avoir 1 notification par jour"
+    "freeUserLimit": "Les utilisateurs gratuits peuvent avoir 3 notifications par jour"
   },
   "widget": {
     "title": "Widget Focus",
@@ -268,7 +275,11 @@
     "welcomeTitle": "Bienvenue sur Focus",
     "welcomeSubtitle": "Découvrez des citations inspirantes chaque jour",
     "choosePlan": "Choisissez votre plan",
+    "choosePlanSubtitle": "Sélectionnez l'offre qui vous convient",
     "continue": "Continuer",
+    "subscribe": "S'abonner",
+    "notNow": "Pas maintenant",
+    "dontShowAgain": "Ne plus afficher",
     "skipForNow": "Passer pour l'instant",
     "completeProfile": "Complétez votre profil",
     "createAccount": "Créer un compte",

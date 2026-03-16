@@ -33,7 +33,7 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Notifications: undefined;
-  Subscription: undefined;
+  Subscription: { fromProfile?: boolean } | undefined;
   Terms: undefined;
   Privacy: undefined;
   ThemeSelection: undefined;

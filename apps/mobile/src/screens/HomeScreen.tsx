@@ -42,6 +42,7 @@ import { widgetService } from "../services/widgetService";
 import { SubscriptionPlan } from "../store/slices/subscriptionSlice";
 
 const ONBOARDING_KEY = "@focus_onboarding_shown";
+const DONT_SHOW_ONBOARDING_KEY = "@focus_dont_show_onboarding";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -58,6 +59,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const isSubscribed = user?.isSubscribed ?? false;
+  const isAdmin = user?.isAdmin ?? false;
   const backgroundTheme = useAppSelector(
     (state) => state.theme.backgroundTheme,
   );
@@ -92,21 +95,32 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const toggleLikeMutation = useToggleLikeQuote();
   const checkoutMutation = useCreateCheckoutSession();
 
-  // Check if onboarding should be shown (first launch)
+  // Check if onboarding should be shown
+  // Show on every app open if user is not subscribed (unless "don't show again" is checked)
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
-        const hasShown = await AsyncStorage.getItem(ONBOARDING_KEY);
-        if (!hasShown && !isAuthenticated) {
-          // Delay to let the app load first
-          setTimeout(() => setShowOnboarding(true), 1000);
+        // Don't show if user is subscribed or admin
+        if (isSubscribed || isAdmin) {
+          return;
         }
+
+        // Check if user has opted out of seeing the popup
+        const dontShowAgain = await AsyncStorage.getItem(
+          DONT_SHOW_ONBOARDING_KEY,
+        );
+        if (dontShowAgain === "true") {
+          return;
+        }
+
+        // Show the onboarding popup after a short delay
+        setTimeout(() => setShowOnboarding(true), 1000);
       } catch (error) {
         console.error("Error checking onboarding:", error);
       }
     };
     checkOnboarding();
-  }, [isAuthenticated]);
+  }, [isSubscribed, isAdmin]);
 
   // Handle plan selection from bottom sheet
   const handleSelectPlan = (plan: SubscriptionPlan) => {
@@ -118,7 +132,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   // Handle onboarding close
   const handleCloseOnboarding = async () => {
     setShowOnboarding(false);
-    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    // Don't set ONBOARDING_KEY anymore - we want to show it every time
+    // unless user explicitly opts out via "don't show again"
   };
 
   // Handle profile completion and checkout
@@ -227,8 +242,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   );
 
   const handleProfile = useCallback(() => {
-    navigation.navigate("Profile");
-  }, [navigation]);
+    // If user is not subscribed, redirect to subscription screen first
+    const isPremium = user?.isSubscribed || user?.isAdmin;
+    if (!isPremium) {
+      navigation.navigate("Subscription", { fromProfile: true });
+    } else {
+      navigation.navigate("Profile");
+    }
+  }, [navigation, user?.isSubscribed, user?.isAdmin]);
 
   const handleTopics = useCallback(() => {
     navigation.navigate("Topics");

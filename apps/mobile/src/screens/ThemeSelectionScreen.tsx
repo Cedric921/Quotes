@@ -55,11 +55,6 @@ export default function ThemeSelectionScreen({
     dispatch(changeBackgroundTheme(theme));
   };
 
-  const handleClearTheme = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    dispatch(changeBackgroundTheme(null));
-  };
-
   const handleUnlockAll = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate("Subscription");
@@ -145,61 +140,27 @@ export default function ThemeSelectionScreen({
               tintColor={colors.primary}
             />
           }
-          ListHeaderComponent={
-            <>
-              {/* Unlock All Button - Only show if not premium */}
-              {!isPremium && (
-                <TouchableOpacity
-                  style={styles.unlockButton}
-                  onPress={handleUnlockAll}
-                  activeOpacity={0.8}
-                >
-                  <LinearGradient
-                    colors={["#FFD700", "#FFA500", "#FF8C00"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.unlockButtonGradient}
-                  >
-                    <Ionicons name="lock-open" size={24} color="#fff" />
-                    <Text style={styles.unlockButtonText}>
-                      {t("settings.unlockAll") || "Tout débloquer"}
-                    </Text>
-                    <Ionicons name="chevron-forward" size={20} color="#fff" />
-                  </LinearGradient>
-                </TouchableOpacity>
-              )}
-
-              {/* Clear Theme Button */}
+          ListFooterComponent={
+            !isPremium ? (
               <TouchableOpacity
-                style={[
-                  styles.clearButton,
-                  { backgroundColor: colors.card, borderColor: colors.border },
-                  !selectedTheme && {
-                    borderColor: colors.primary,
-                    borderWidth: 2,
-                  },
-                ]}
-                onPress={handleClearTheme}
+                style={styles.unlockButton}
+                onPress={handleUnlockAll}
+                activeOpacity={0.8}
               >
-                <Ionicons
-                  name="close-circle-outline"
-                  size={32}
-                  color={!selectedTheme ? colors.primary : colors.textSecondary}
-                />
-                <Text
-                  style={[
-                    styles.clearButtonText,
-                    {
-                      color: !selectedTheme
-                        ? colors.primary
-                        : colors.textSecondary,
-                    },
-                  ]}
+                <LinearGradient
+                  colors={["#FFD700", "#FFA500", "#FF8C00"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.unlockButtonGradient}
                 >
-                  {t("settings.noBackground") || "Aucun fond"}
-                </Text>
+                  <Ionicons name="lock-open" size={24} color="#fff" />
+                  <Text style={styles.unlockButtonText}>
+                    {t("settings.unlockThemes") || "Débloquer les thèmes"}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={20} color="#fff" />
+                </LinearGradient>
               </TouchableOpacity>
-            </>
+            ) : null
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
@@ -312,20 +273,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-  },
-  clearButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
-    gap: 8,
-  },
-  clearButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
   },
   unlockButton: {
     marginBottom: 16,
