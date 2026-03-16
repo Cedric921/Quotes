@@ -116,9 +116,12 @@ export class UsersService {
       settings = this.notificationSettingsRepository.create({
         userId,
         enabled: false,
-        notifications:
-          '[{"time":"09:00","days":[0,1,2,3,4,5,6]},{"time":"18:00","days":[0,1,2,3,4,5,6]}]',
+        startTime: '09:00',
+        endTime: '18:00',
+        maxNotificationsPerDay: 3,
+        activeDays: '[0,1,2,3,4,5,6]',
         timezone: 'UTC',
+        dailyNotificationTracker: '{"date":"","count":0,"times":[]}',
       });
       await this.notificationSettingsRepository.save(settings);
     }
@@ -134,10 +137,10 @@ export class UsersService {
       where: { userId },
     });
 
-    // Convert notifications array to JSON string if provided
+    // Convert activeDays array to JSON string if provided
     const updateData: Record<string, unknown> = { ...updateDto };
-    if (updateDto.notifications) {
-      updateData.notifications = JSON.stringify(updateDto.notifications);
+    if (updateDto.activeDays) {
+      updateData.activeDays = JSON.stringify(updateDto.activeDays);
     }
 
     if (!settings) {
@@ -159,9 +162,12 @@ export class UsersService {
 
     if (settings) {
       settings.enabled = false;
-      settings.notifications =
-        '[{"time":"09:00","days":[0,1,2,3,4,5,6]},{"time":"18:00","days":[0,1,2,3,4,5,6]}]';
+      settings.startTime = '09:00';
+      settings.endTime = '18:00';
+      settings.maxNotificationsPerDay = 3;
+      settings.activeDays = '[0,1,2,3,4,5,6]';
       settings.timezone = 'UTC';
+      settings.dailyNotificationTracker = '{"date":"","count":0,"times":[]}';
       return this.notificationSettingsRepository.save(settings);
     }
 

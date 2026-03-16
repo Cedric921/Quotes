@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
@@ -29,7 +30,6 @@ import {
 } from "../api/hooks/usePushToken";
 import {
   requestNotificationPermissions,
-  scheduleDailyNotifications,
   cancelAllNotifications,
   sendTestNotification,
   getExpoPushToken,
@@ -48,8 +48,8 @@ export const NotificationsScreen = ({
 
   // Check if user is subscribed or admin (premium feature)
   const isPremium = user?.isSubscribed || user?.isAdmin || false;
-  // Free users can have 1 notification, premium users can have up to 5
-  const maxNotifications = isPremium ? 5 : 1;
+  // Free users can have max 3 notifications, premium users up to 10
+  const maxAllowed = isPremium ? 10 : 3;
 
   const {
     data: settings,
@@ -63,63 +63,63 @@ export const NotificationsScreen = ({
   const unregisterAllPushTokens = useUnregisterAllPushTokens();
   const sendServerTestNotification = useSendTestNotification();
 
-  interface NotificationTime {
-    id: string;
-    time: Date;
-    days: number[]; // Days for this specific notification
-    showPicker: boolean;
-    isExpanded: boolean;
-  }
-
+  // State for notification settings
   const [enabled, setEnabled] = useState(false);
-  const [notificationTimes, setNotificationTimes] = useState<
-    NotificationTime[]
-  >([
-    {
-      id: "1",
-      time: new Date(new Date().setHours(9, 0, 0, 0)),
-      days: [0, 1, 2, 3, 4, 5, 6], // All days by default
-      showPicker: false,
-      isExpanded: true,
-    },
-    {
-      id: "2",
-      time: new Date(new Date().setHours(18, 0, 0, 0)),
-      days: [0, 1, 2, 3, 4, 5, 6], // All days by default
-      showPicker: false,
-      isExpanded: true,
-    },
-  ]);
+  const [startTime, setStartTime] = useState(
+    new Date(new Date().setHours(9, 0, 0, 0)),
+  );
+  const [endTime, setEndTime] = useState(
+    new Date(new Date().setHours(18, 0, 0, 0)),
+  );
+  const [maxNotificationsPerDay, setMaxNotificationsPerDay] = useState(3);
+  const [activeDays, setActiveDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
   // Initialize state from settings
   useEffect(() => {
     if (settings) {
-      // Handle SQLite boolean (0/1) and JavaScript boolean
       const isEnabled = Boolean(settings.enabled);
       setEnabled(isEnabled);
 
-      if (settings.notifications) {
+      // Parse start time
+      if (settings.startTime) {
+        const [hours, minutes] = settings.startTime.split(":");
+        const date = new Date();
+        date.setHours(
+          Number.parseInt(hours, 10),
+          Number.parseInt(minutes, 10),
+          0,
+          0,
+        );
+        setStartTime(date);
+      }
+
+      // Parse end time
+      if (settings.endTime) {
+        const [hours, minutes] = settings.endTime.split(":");
+        const date = new Date();
+        date.setHours(
+          Number.parseInt(hours, 10),
+          Number.parseInt(minutes, 10),
+          0,
+          0,
+        );
+        setEndTime(date);
+      }
+
+      // Parse max notifications
+      if (settings.maxNotificationsPerDay) {
+        setMaxNotificationsPerDay(settings.maxNotificationsPerDay);
+      }
+
+      // Parse active days
+      if (settings.activeDays) {
         try {
-          const notificationsConfig = JSON.parse(settings.notifications);
-          const newNotificationTimes: NotificationTime[] =
-            notificationsConfig.map(
-              (config: { time: string; days: number[] }, index: number) => {
-                const [hours, minutes] = config.time.split(":");
-                const date = new Date();
-                date.setHours(Number.parseInt(hours, 10));
-                date.setMinutes(Number.parseInt(minutes, 10));
-                return {
-                  id: String(index + 1),
-                  time: date,
-                  days: config.days || [0, 1, 2, 3, 4, 5, 6],
-                  showPicker: false,
-                  isExpanded: true,
-                };
-              },
-            );
-          setNotificationTimes(newNotificationTimes);
+          const days = JSON.parse(settings.activeDays);
+          setActiveDays(days);
         } catch (error) {
-          console.error("Failed to parse notifications:", error);
+          console.error("Failed to parse activeDays:", error);
         }
       }
     }
@@ -169,21 +169,16 @@ export const NotificationsScreen = ({
 
     setEnabled(value);
 
-    const notificationsConfig = notificationTimes.map((nt) => ({
-      time: formatTime(nt.time),
-      days: nt.days,
-    }));
-
-    // Update settings
+    // Update settings on server
     await updateSettings.mutateAsync({
       enabled: value,
-      notifications: notificationsConfig,
+      startTime: formatTime(startTime),
+      endTime: formatTime(endTime),
+      maxNotificationsPerDay,
+      activeDays,
     });
 
     if (value) {
-      // Local notifications are now optional - server will send push notifications
-      // But we keep them as backup for when the app is offline
-      await scheduleDailyNotifications(notificationsConfig);
       Toast.show({
         type: "success",
         text1: t("notifications.notificationsEnabled"),
@@ -197,162 +192,79 @@ export const NotificationsScreen = ({
     }
   };
 
-  const handleTimeChange = async (
-    id: string,
-    _event: any,
-    selectedDate?: Date,
-  ) => {
+  const handleStartTimeChange = async (_event: any, selectedDate?: Date) => {
     if (Platform.OS === "android") {
-      // Close all pickers on Android
-      setNotificationTimes((prev) =>
-        prev.map((nt) => ({ ...nt, showPicker: false })),
-      );
+      setShowStartPicker(false);
     }
 
     if (selectedDate) {
-      // Update the specific notification time
-      setNotificationTimes((prev) =>
-        prev.map((nt) => (nt.id === id ? { ...nt, time: selectedDate } : nt)),
-      );
+      setStartTime(selectedDate);
 
-      // Update settings if notifications are enabled
       if (enabled) {
-        const updatedNotifications = notificationTimes.map((nt) => ({
-          time: nt.id === id ? formatTime(selectedDate) : formatTime(nt.time),
-          days: nt.days,
-        }));
-
         await updateSettings.mutateAsync({
-          notifications: updatedNotifications,
+          startTime: formatTime(selectedDate),
         });
-
-        await scheduleDailyNotifications(updatedNotifications);
       }
     }
   };
 
-  const toggleDay = async (notificationId: string, day: number) => {
+  const handleEndTimeChange = async (_event: any, selectedDate?: Date) => {
+    if (Platform.OS === "android") {
+      setShowEndPicker(false);
+    }
+
+    if (selectedDate) {
+      setEndTime(selectedDate);
+
+      if (enabled) {
+        await updateSettings.mutateAsync({
+          endTime: formatTime(selectedDate),
+        });
+      }
+    }
+  };
+
+  const handleMaxNotificationsChange = async (value: number) => {
+    const roundedValue = Math.round(value);
+    setMaxNotificationsPerDay(roundedValue);
+  };
+
+  const handleMaxNotificationsSlidingComplete = async (value: number) => {
+    const roundedValue = Math.round(value);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    const notification = notificationTimes.find(
-      (nt) => nt.id === notificationId,
-    );
-    if (!notification) return;
+    if (enabled) {
+      await updateSettings.mutateAsync({
+        maxNotificationsPerDay: roundedValue,
+      });
+    }
+  };
+
+  const toggleDay = async (day: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     let newDays: number[];
-    if (notification.days.includes(day)) {
+    if (activeDays.includes(day)) {
       // Don't allow deselecting all days
-      if (notification.days.length === 1) {
+      if (activeDays.length === 1) {
         Toast.show({
           type: "error",
           text1: t("notifications.selectAtLeastOneDay"),
         });
         return;
       }
-      newDays = notification.days.filter((d) => d !== day);
+      newDays = activeDays.filter((d) => d !== day);
     } else {
-      newDays = [...notification.days, day].sort((a, b) => a - b);
+      newDays = [...activeDays, day].sort((a, b) => a - b);
     }
 
-    // Update the notification's days
-    setNotificationTimes((prev) =>
-      prev.map((nt) =>
-        nt.id === notificationId ? { ...nt, days: newDays } : nt,
-      ),
-    );
+    setActiveDays(newDays);
 
-    // Update settings if notifications are enabled
     if (enabled) {
-      const updatedNotifications = notificationTimes.map((nt) => ({
-        time: formatTime(nt.time),
-        days: nt.id === notificationId ? newDays : nt.days,
-      }));
-
       await updateSettings.mutateAsync({
-        notifications: updatedNotifications,
+        activeDays: newDays,
       });
-
-      await scheduleDailyNotifications(updatedNotifications);
     }
-  };
-
-  const addNotification = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    if (notificationTimes.length >= maxNotifications) {
-      if (!isPremium) {
-        // Show upgrade prompt for free users
-        Toast.show({
-          type: "info",
-          text1: t("notifications.upgradeForMore"),
-          text2: t("notifications.freeUserLimit"),
-        });
-      } else {
-        Toast.show({
-          type: "error",
-          text1: t("notifications.maxNotificationsReached"),
-        });
-      }
-      return;
-    }
-
-    const newId = String(Date.now());
-    const newTime = new Date(new Date().setHours(12, 0, 0, 0));
-
-    setNotificationTimes((prev) => [
-      ...prev,
-      {
-        id: newId,
-        time: newTime,
-        days: [0, 1, 2, 3, 4, 5, 6], // All days by default
-        showPicker: false,
-        isExpanded: true,
-      },
-    ]);
-  };
-
-  const removeNotification = async (id: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    if (notificationTimes.length <= 1) {
-      Toast.show({
-        type: "error",
-        text1: t("notifications.minNotificationsRequired"),
-      });
-      return;
-    }
-
-    const newTimes = notificationTimes.filter((nt) => nt.id !== id);
-    setNotificationTimes(newTimes);
-
-    // Update settings if notifications are enabled
-    if (enabled) {
-      const updatedNotifications = newTimes.map((nt) => ({
-        time: formatTime(nt.time),
-        days: nt.days,
-      }));
-
-      await updateSettings.mutateAsync({
-        notifications: updatedNotifications,
-      });
-
-      await scheduleDailyNotifications(updatedNotifications);
-    }
-  };
-
-  const toggleCardExpanded = (id: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setNotificationTimes((prev) =>
-      prev.map((nt) =>
-        nt.id === id ? { ...nt, isExpanded: !nt.isExpanded } : nt,
-      ),
-    );
-  };
-
-  const togglePicker = (id: string, show: boolean) => {
-    setNotificationTimes((prev) =>
-      prev.map((nt) => (nt.id === id ? { ...nt, showPicker: show } : nt)),
-    );
   };
 
   const handleBack = () => {
@@ -431,170 +343,232 @@ export const NotificationsScreen = ({
           </View>
         </View>
 
-        {/* Notification Cards */}
+        {/* Time Range Section */}
         {enabled && (
           <>
-            {notificationTimes.map((notification, index) => (
-              <View
-                key={notification.id}
-                style={[
-                  styles.section,
-                  { backgroundColor: colors.backgroundSecondary },
-                ]}
+            {/* Time Window */}
+            <View
+              style={[
+                styles.section,
+                { backgroundColor: colors.backgroundSecondary },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  {t("notifications.timeWindow")}
+                </Text>
+              </View>
+
+              <Text
+                style={[styles.description, { color: colors.textSecondary }]}
               >
+                {t("notifications.timeWindowDescription")}
+              </Text>
+
+              {/* Start Time */}
+              <View style={styles.timeRow}>
+                <Text style={[styles.timeLabel, { color: colors.text }]}>
+                  {t("notifications.startTime")}
+                </Text>
                 <TouchableOpacity
-                  style={styles.cardHeader}
-                  onPress={() => toggleCardExpanded(notification.id)}
+                  style={[styles.timePicker, { borderColor: colors.border }]}
+                  onPress={() => setShowStartPicker(true)}
                 >
-                  <View style={styles.cardHeaderLeft}>
-                    <Ionicons
-                      name="time-outline"
-                      size={20}
-                      color={colors.primary}
-                    />
+                  <Ionicons
+                    name="time-outline"
+                    size={18}
+                    color={colors.primary}
+                  />
+                  <Text style={[styles.timeText, { color: colors.text }]}>
+                    {formatTime(startTime)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {(showStartPicker || Platform.OS === "ios") && (
+                <DateTimePicker
+                  value={startTime}
+                  mode="time"
+                  is24Hour={true}
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={handleStartTimeChange}
+                  themeVariant={isDark ? "dark" : "light"}
+                />
+              )}
+
+              {/* End Time */}
+              <View style={styles.timeRow}>
+                <Text style={[styles.timeLabel, { color: colors.text }]}>
+                  {t("notifications.endTime")}
+                </Text>
+                <TouchableOpacity
+                  style={[styles.timePicker, { borderColor: colors.border }]}
+                  onPress={() => setShowEndPicker(true)}
+                >
+                  <Ionicons
+                    name="time-outline"
+                    size={18}
+                    color={colors.primary}
+                  />
+                  <Text style={[styles.timeText, { color: colors.text }]}>
+                    {formatTime(endTime)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {(showEndPicker || Platform.OS === "ios") && (
+                <DateTimePicker
+                  value={endTime}
+                  mode="time"
+                  is24Hour={true}
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={handleEndTimeChange}
+                  themeVariant={isDark ? "dark" : "light"}
+                />
+              )}
+            </View>
+
+            {/* Max Notifications Per Day */}
+            <View
+              style={[
+                styles.section,
+                { backgroundColor: colors.backgroundSecondary },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="analytics-outline"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  {t("notifications.maxPerDay")}
+                </Text>
+              </View>
+
+              <Text
+                style={[styles.description, { color: colors.textSecondary }]}
+              >
+                {t("notifications.maxPerDayDescription")}
+              </Text>
+
+              <View style={styles.sliderContainer}>
+                <Text style={[styles.sliderValue, { color: colors.primary }]}>
+                  {maxNotificationsPerDay}
+                </Text>
+                <Slider
+                  style={styles.slider}
+                  minimumValue={1}
+                  maximumValue={maxAllowed}
+                  step={1}
+                  value={maxNotificationsPerDay}
+                  onValueChange={handleMaxNotificationsChange}
+                  onSlidingComplete={handleMaxNotificationsSlidingComplete}
+                  minimumTrackTintColor={colors.primary}
+                  maximumTrackTintColor={colors.border}
+                  thumbTintColor={colors.primary}
+                />
+                <View style={styles.sliderLabels}>
+                  <Text
+                    style={[
+                      styles.sliderLabel,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    1
+                  </Text>
+                  <Text
+                    style={[
+                      styles.sliderLabel,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    {maxAllowed}
+                  </Text>
+                </View>
+              </View>
+
+              {!isPremium && maxNotificationsPerDay >= 3 && (
+                <View
+                  style={[
+                    styles.premiumHint,
+                    { backgroundColor: colors.primary + "20" },
+                  ]}
+                >
+                  <Ionicons name="star" size={16} color={colors.primary} />
+                  <Text
+                    style={[styles.premiumHintText, { color: colors.primary }]}
+                  >
+                    {t("notifications.upgradeForMore")}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Active Days */}
+            <View
+              style={[
+                styles.section,
+                { backgroundColor: colors.backgroundSecondary },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  {t("notifications.selectDays")}
+                </Text>
+              </View>
+
+              <View style={styles.daysContainer}>
+                {[
+                  { day: 0, label: t("notifications.days.sunday") },
+                  { day: 1, label: t("notifications.days.monday") },
+                  { day: 2, label: t("notifications.days.tuesday") },
+                  { day: 3, label: t("notifications.days.wednesday") },
+                  { day: 4, label: t("notifications.days.thursday") },
+                  { day: 5, label: t("notifications.days.friday") },
+                  { day: 6, label: t("notifications.days.saturday") },
+                ].map(({ day, label }) => (
+                  <TouchableOpacity
+                    key={day}
+                    style={[
+                      styles.dayButton,
+                      {
+                        backgroundColor: activeDays.includes(day)
+                          ? colors.primary
+                          : colors.backgroundSecondary,
+                        borderColor: activeDays.includes(day)
+                          ? colors.primary
+                          : colors.border,
+                      },
+                    ]}
+                    onPress={() => toggleDay(day)}
+                  >
                     <Text
                       style={[
-                        styles.sectionTitle,
-                        { color: colors.text, marginBottom: 0 },
+                        styles.dayButtonText,
+                        {
+                          color: activeDays.includes(day)
+                            ? "#fff"
+                            : colors.textSecondary,
+                        },
                       ]}
                     >
-                      {t("notifications.notification", { number: index + 1 })}
+                      {label}
                     </Text>
-                  </View>
-                  <View style={styles.cardHeaderRight}>
-                    {notificationTimes.length > 1 && (
-                      <TouchableOpacity
-                        onPress={() => removeNotification(notification.id)}
-                        style={styles.removeButton}
-                      >
-                        <Ionicons
-                          name="trash-outline"
-                          size={18}
-                          color={colors.error || "#FF3B30"}
-                        />
-                      </TouchableOpacity>
-                    )}
-                    <Ionicons
-                      name={
-                        notification.isExpanded ? "chevron-up" : "chevron-down"
-                      }
-                      size={20}
-                      color={colors.textSecondary}
-                    />
-                  </View>
-                </TouchableOpacity>
-
-                {notification.isExpanded && (
-                  <>
-                    {/* Time Picker */}
-                    <TouchableOpacity
-                      style={[
-                        styles.timePicker,
-                        { borderColor: colors.border },
-                      ]}
-                      onPress={() => togglePicker(notification.id, true)}
-                    >
-                      <Ionicons
-                        name="time-outline"
-                        size={20}
-                        color={colors.primary}
-                      />
-                      <Text style={[styles.timeText, { color: colors.text }]}>
-                        {formatTime(notification.time)}
-                      </Text>
-                    </TouchableOpacity>
-
-                    {(notification.showPicker || Platform.OS === "ios") && (
-                      <DateTimePicker
-                        value={notification.time}
-                        mode="time"
-                        is24Hour={true}
-                        display={Platform.OS === "ios" ? "spinner" : "default"}
-                        onChange={(event, date) =>
-                          handleTimeChange(notification.id, event, date)
-                        }
-                        themeVariant={isDark ? "dark" : "light"}
-                      />
-                    )}
-
-                    {/* Days Selector for this notification */}
-                    <View style={styles.daysSection}>
-                      <View style={styles.sectionHeader}>
-                        <Ionicons
-                          name="calendar-outline"
-                          size={18}
-                          color={colors.primary}
-                        />
-                        <Text
-                          style={[
-                            styles.daysSectionTitle,
-                            { color: colors.text },
-                          ]}
-                        >
-                          {t("notifications.selectDays")}
-                        </Text>
-                      </View>
-                      <View style={styles.daysContainer}>
-                        {[
-                          { day: 0, label: t("notifications.days.sunday") },
-                          { day: 1, label: t("notifications.days.monday") },
-                          { day: 2, label: t("notifications.days.tuesday") },
-                          { day: 3, label: t("notifications.days.wednesday") },
-                          { day: 4, label: t("notifications.days.thursday") },
-                          { day: 5, label: t("notifications.days.friday") },
-                          { day: 6, label: t("notifications.days.saturday") },
-                        ].map(({ day, label }) => (
-                          <TouchableOpacity
-                            key={day}
-                            style={[
-                              styles.dayButton,
-                              {
-                                backgroundColor: notification.days.includes(day)
-                                  ? colors.primary
-                                  : colors.backgroundSecondary,
-                                borderColor: notification.days.includes(day)
-                                  ? colors.primary
-                                  : colors.border,
-                              },
-                            ]}
-                            onPress={() => toggleDay(notification.id, day)}
-                          >
-                            <Text
-                              style={[
-                                styles.dayButtonText,
-                                {
-                                  color: notification.days.includes(day)
-                                    ? "#fff"
-                                    : colors.textSecondary,
-                                },
-                              ]}
-                            >
-                              {label}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
-                  </>
-                )}
+                  </TouchableOpacity>
+                ))}
               </View>
-            ))}
-
-            {/* Add Notification Button */}
-            {notificationTimes.length < 5 && (
-              <TouchableOpacity
-                style={[
-                  styles.addButton,
-                  { backgroundColor: colors.backgroundSecondary },
-                ]}
-                onPress={addNotification}
-              >
-                <Ionicons name="add-circle" size={24} color={colors.primary} />
-                <Text style={[styles.addButtonText, { color: colors.primary }]}>
-                  {t("notifications.addNotification")}
-                </Text>
-              </TouchableOpacity>
-            )}
+            </View>
           </>
         )}
 
@@ -847,8 +821,52 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   description: {
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  timeLabel: {
     fontSize: 16,
-    textAlign: "center",
+    fontWeight: "500",
+  },
+  sliderContainer: {
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+  sliderValue: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  slider: {
+    width: "100%",
+    height: 40,
+  },
+  sliderLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 4,
+  },
+  sliderLabel: {
+    fontSize: 12,
+  },
+  premiumHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  premiumHintText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
   loading: {
     textAlign: "center",
