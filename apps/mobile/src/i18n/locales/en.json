@@ -88,7 +88,8 @@
     "defaultFont": "Default Font",
     "autoTranslate": "Auto-translate content",
     "autoTranslateDesc": "Automatically translate quotes and topics",
-    "unlockAll": "Unlock All"
+    "unlockAll": "Unlock All",
+    "unlockThemes": "Unlock Themes"
   },
   "profile": {
     "title": "Profile",
@@ -274,7 +275,11 @@
     "welcomeTitle": "Welcome to Focus",
     "welcomeSubtitle": "Discover inspiring quotes every day",
     "choosePlan": "Choose your plan",
+    "choosePlanSubtitle": "Select the offer that suits you",
     "continue": "Continue",
+    "subscribe": "Subscribe",
+    "notNow": "Not now",
+    "dontShowAgain": "Don't show again",
     "skipForNow": "Skip for now",
     "completeProfile": "Complete your profile",
     "createAccount": "Create an account",

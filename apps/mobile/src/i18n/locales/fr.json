@@ -88,7 +88,8 @@
     "defaultFont": "Police par défaut",
     "autoTranslate": "Traduction automatique",
     "autoTranslateDesc": "Traduire automatiquement les citations et les sujets",
-    "unlockAll": "Tout débloquer"
+    "unlockAll": "Tout débloquer",
+    "unlockThemes": "Débloquer les thèmes"
   },
   "profile": {
     "title": "Profil",
@@ -274,7 +275,11 @@
     "welcomeTitle": "Bienvenue sur Focus",
     "welcomeSubtitle": "Découvrez des citations inspirantes chaque jour",
     "choosePlan": "Choisissez votre plan",
+    "choosePlanSubtitle": "Sélectionnez l'offre qui vous convient",
     "continue": "Continuer",
+    "subscribe": "S'abonner",
+    "notNow": "Pas maintenant",
+    "dontShowAgain": "Ne plus afficher",
     "skipForNow": "Passer pour l'instant",
     "completeProfile": "Complétez votre profil",
     "createAccount": "Créer un compte",

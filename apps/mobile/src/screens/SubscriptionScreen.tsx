@@ -20,6 +20,7 @@ import { setSelectedPlan } from "../store/slices/subscriptionSlice";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
+import { useRoute, RouteProp } from "@react-navigation/native";
 import {
   useSubscriptionData,
   useCreateCheckoutSession,
@@ -30,10 +31,16 @@ import {
   SubscriptionPlan,
 } from "../store/slices/subscriptionSlice";
 import { TranslatedPlanCard } from "../components";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
 interface SubscriptionScreenProps {
   readonly navigation: any;
 }
+
+type SubscriptionScreenRouteProp = RouteProp<
+  RootStackParamList,
+  "Subscription"
+>;
 
 export default function SubscriptionScreen({
   navigation,
@@ -42,6 +49,10 @@ export default function SubscriptionScreen({
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
   const dispatch = useAppDispatch();
+  const route = useRoute<SubscriptionScreenRouteProp>();
+
+  // Check if coming from profile button
+  const fromProfile = route.params?.fromProfile ?? false;
 
   const token = useAppSelector((state) => state.auth.token);
   const selectedPlanId = useAppSelector(
@@ -64,7 +75,12 @@ export default function SubscriptionScreen({
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.goBack();
+    // If coming from profile button, navigate to Profile instead of going back
+    if (fromProfile) {
+      navigation.navigate("Profile");
+    } else {
+      navigation.goBack();
+    }
   };
 
   const handleSelectPlan = (planId: string) => {

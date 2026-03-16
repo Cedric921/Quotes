@@ -48,8 +48,8 @@ export const NotificationsScreen = ({
 
   // Check if user is subscribed or admin (premium feature)
   const isPremium = user?.isSubscribed || user?.isAdmin || false;
-  // Free users can have max 3 notifications, premium users up to 10
-  const maxAllowed = isPremium ? 10 : 3;
+  // Free users can have max 2 notifications, premium users up to 10
+  const maxAllowed = isPremium ? 10 : 2;
 
   const {
     data: settings,
