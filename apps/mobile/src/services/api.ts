@@ -170,6 +170,10 @@ export interface BackgroundTheme {
   thumbnailUrl?: string;
   order: number;
   isActive: boolean;
+  // Font fields - embedded in theme
+  fontName?: string;
+  fontFamily?: string;
+  isPremium?: boolean;
 }
 
 export const themesApi = {

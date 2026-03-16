@@ -10,6 +10,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { changeBackgroundTheme } from "../store/slices/themeSlice";
@@ -33,6 +34,9 @@ export default function ThemeSelectionScreen({
   const dispatch = useAppDispatch();
   const { colors } = useThemeColors();
   const selectedTheme = useAppSelector((state) => state.theme.backgroundTheme);
+  const user = useAppSelector((state) => state.auth.user);
+  const isPremium = user?.isPremium || user?.isAdmin;
+
   const {
     data: themes,
     isLoading,
@@ -51,9 +55,9 @@ export default function ThemeSelectionScreen({
     dispatch(changeBackgroundTheme(theme));
   };
 
-  const handleClearTheme = () => {
+  const handleUnlockAll = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    dispatch(changeBackgroundTheme(null));
+    navigation.navigate("Subscription");
   };
 
   const renderThemeItem = ({ item }: { item: BackgroundTheme }) => {
@@ -74,6 +78,12 @@ export default function ThemeSelectionScreen({
         />
         <View style={styles.themeOverlay}>
           <Text style={styles.themeName}>{item.name}</Text>
+          {item.fontName && (
+            <View style={styles.fontBadge}>
+              <Ionicons name="text" size={10} color="#fff" />
+              <Text style={styles.fontBadgeText}>{item.fontName}</Text>
+            </View>
+          )}
           {isSelected && (
             <View
               style={[styles.checkmark, { backgroundColor: colors.primary }]}
@@ -130,36 +140,27 @@ export default function ThemeSelectionScreen({
               tintColor={colors.primary}
             />
           }
-          ListHeaderComponent={
-            <TouchableOpacity
-              style={[
-                styles.clearButton,
-                { backgroundColor: colors.card, borderColor: colors.border },
-                !selectedTheme && {
-                  borderColor: colors.primary,
-                  borderWidth: 2,
-                },
-              ]}
-              onPress={handleClearTheme}
-            >
-              <Ionicons
-                name="close-circle-outline"
-                size={32}
-                color={!selectedTheme ? colors.primary : colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.clearButtonText,
-                  {
-                    color: !selectedTheme
-                      ? colors.primary
-                      : colors.textSecondary,
-                  },
-                ]}
+          ListFooterComponent={
+            !isPremium ? (
+              <TouchableOpacity
+                style={styles.unlockButton}
+                onPress={handleUnlockAll}
+                activeOpacity={0.8}
               >
-                {t("settings.noBackground") || "Aucun fond"}
-              </Text>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={["#FFD700", "#FFA500", "#FF8C00"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.unlockButtonGradient}
+                >
+                  <Ionicons name="lock-open" size={24} color="#fff" />
+                  <Text style={styles.unlockButtonText}>
+                    {t("settings.unlockThemes") || "Débloquer les thèmes"}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={20} color="#fff" />
+                </LinearGradient>
+              </TouchableOpacity>
+            ) : null
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
@@ -247,6 +248,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
+  fontBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+  },
+  fontBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "500",
+  },
   checkmark: {
     position: "absolute",
     top: -30,
@@ -257,19 +274,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  clearButton: {
+  unlockButton: {
+    marginBottom: 16,
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#FFD700",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  unlockButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
-    gap: 8,
+    gap: 12,
   },
-  clearButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
+  unlockButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+    flex: 1,
   },
   emptyContainer: {
     flex: 1,

@@ -116,7 +116,7 @@ export default function QuotesPage() {
         author: formData.author,
         ...(formData.topicId &&
           formData.topicId !== "none" && {
-            topicId: Number.parseInt(formData.topicId),
+            topicId: formData.topicId,
           }),
       };
 

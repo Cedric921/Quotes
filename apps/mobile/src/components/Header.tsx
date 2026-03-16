@@ -1,14 +1,17 @@
-import { View, Text, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet, Platform, Image } from "react-native";
 import { BlurView } from "expo-blur";
 
 export default function Header() {
   return (
     <BlurView intensity={80} tint="dark" style={styles.container}>
       <View style={styles.content}>
-        {/* Logo */}
+        {/* Logo - Aligned to the left */}
         <View style={styles.logoContainer}>
-          <Text style={styles.logo}>Focus</Text>
-          <View style={styles.logoDot} />
+          <Image
+            source={require("../../assets/logo_home.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
         </View>
       </View>
     </BlurView>
@@ -30,24 +33,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-  logo: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    letterSpacing: -0.5,
-    color: "#fff",
-  },
-  logoDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginLeft: 2,
-    backgroundColor: "#FF453A",
+  logoImage: {
+    width: 100,
+    height: 40,
   },
 });

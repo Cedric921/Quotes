@@ -142,12 +142,79 @@ export class NotificationsService {
     }
   }
 
+  // Helper to convert "HH:mm" to minutes since midnight
+  private timeToMinutes(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  // Helper to check if current time is within the notification window
+  private isWithinTimeWindow(
+    currentMinutes: number,
+    startMinutes: number,
+    endMinutes: number,
+  ): boolean {
+    // Handle case where window crosses midnight (e.g., 22:00 to 06:00)
+    if (startMinutes > endMinutes) {
+      return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+    }
+    return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+  }
+
+  // Helper to calculate random notification times for a user
+  private calculateRandomNotificationTimes(
+    startTime: string,
+    endTime: string,
+    count: number,
+  ): string[] {
+    const startMinutes = this.timeToMinutes(startTime);
+    const endMinutes = this.timeToMinutes(endTime);
+
+    // Calculate window duration (handle midnight crossing)
+    let windowDuration = endMinutes - startMinutes;
+    if (windowDuration < 0) {
+      windowDuration += 24 * 60; // Add 24 hours in minutes
+    }
+
+    // Generate random times spread across the window
+    const times: number[] = [];
+    const minInterval = Math.floor(windowDuration / (count + 1)); // Minimum interval between notifications
+
+    for (let i = 0; i < count; i++) {
+      let randomMinute: number;
+      let attempts = 0;
+
+      do {
+        // Generate random time within the window
+        const randomOffset = Math.floor(Math.random() * windowDuration);
+        randomMinute = (startMinutes + randomOffset) % (24 * 60);
+        attempts++;
+      } while (
+        times.some((t) => Math.abs(t - randomMinute) < minInterval) &&
+        attempts < 10
+      );
+
+      times.push(randomMinute);
+    }
+
+    // Convert minutes back to "HH:mm" format
+    return times.map((m) => {
+      const hours = Math.floor(m / 60);
+      const minutes = m % 60;
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    });
+  }
+
   // Cron job that runs every minute to check for notifications to send
   @Cron(CronExpression.EVERY_MINUTE)
   async handleScheduledNotifications(): Promise<void> {
     const now = new Date();
     const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTime = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+    const currentMinutes = currentHour * 60 + currentMinute;
+    const today = now.toISOString().split('T')[0]; // "YYYY-MM-DD"
 
     this.logger.debug(
       `Checking notifications for day ${currentDay}, time ${currentTime}`,
@@ -159,25 +226,84 @@ export class NotificationsService {
     });
 
     // Filter users who should receive notifications now
-    const usersToNotify: string[] = [];
+    const usersToNotify: { userId: string; settingsId: string }[] = [];
 
     for (const settings of allSettings) {
       try {
-        const notifications = JSON.parse(settings.notifications || '[]');
+        // Parse active days
+        const activeDays: number[] = JSON.parse(settings.activeDays || '[]');
 
-        for (const notification of notifications) {
-          // Check if current time matches and current day is in the days array
-          if (
-            notification.time === currentTime &&
-            notification.days?.includes(currentDay)
-          ) {
-            usersToNotify.push(settings.userId);
-            break; // Only add user once even if multiple notifications match
+        // Check if today is an active day
+        if (!activeDays.includes(currentDay)) {
+          continue;
+        }
+
+        // Check if within time window
+        const startMinutes = this.timeToMinutes(settings.startTime);
+        const endMinutes = this.timeToMinutes(settings.endTime);
+
+        if (
+          !this.isWithinTimeWindow(currentMinutes, startMinutes, endMinutes)
+        ) {
+          continue;
+        }
+
+        // Parse daily tracker
+        let tracker = JSON.parse(
+          settings.dailyNotificationTracker ||
+            '{"date":"","count":0,"times":[]}',
+        );
+
+        // Reset tracker if it's a new day
+        if (tracker.date !== today) {
+          tracker = { date: today, count: 0, times: [] };
+        }
+
+        // Check if max notifications reached for today
+        if (tracker.count >= settings.maxNotificationsPerDay) {
+          continue;
+        }
+
+        // Calculate probability of sending notification this minute
+        // Based on remaining notifications and remaining time in the window
+        const remainingNotifications =
+          settings.maxNotificationsPerDay - tracker.count;
+        let remainingMinutes: number;
+
+        if (startMinutes > endMinutes) {
+          // Window crosses midnight
+          if (currentMinutes >= startMinutes) {
+            remainingMinutes = 24 * 60 - currentMinutes + endMinutes;
+          } else {
+            remainingMinutes = endMinutes - currentMinutes;
           }
+        } else {
+          remainingMinutes = endMinutes - currentMinutes;
+        }
+
+        // Ensure we don't divide by zero
+        remainingMinutes = Math.max(remainingMinutes, 1);
+
+        // Probability: we want to spread notifications evenly
+        // If 3 notifications remain in 180 minutes, probability = 3/180 = ~1.67% per minute
+        const probability = remainingNotifications / remainingMinutes;
+
+        // Random check based on probability
+        if (Math.random() < probability) {
+          usersToNotify.push({
+            userId: settings.userId,
+            settingsId: settings.id,
+          });
+
+          // Update tracker
+          tracker.count++;
+          tracker.times.push(currentTime);
+          settings.dailyNotificationTracker = JSON.stringify(tracker);
+          await this.notificationSettingsRepository.save(settings);
         }
       } catch (error) {
         this.logger.error(
-          `Error parsing notifications for user ${settings.userId}`,
+          `Error processing notifications for user ${settings.userId}`,
           error,
         );
       }
@@ -191,48 +317,47 @@ export class NotificationsService {
       `Sending notifications to ${usersToNotify.length} users at ${currentTime}`,
     );
 
-    // Get a random quote
-    const quote = await this.getRandomQuote();
+    // Send notification to each user with a different random quote
+    for (const { userId } of usersToNotify) {
+      const quote = await this.getRandomQuote();
 
-    if (!quote) {
-      this.logger.warn('No quotes available to send');
-      return;
+      if (!quote) {
+        this.logger.warn('No quotes available to send');
+        continue;
+      }
+
+      const pushTokens = await this.pushTokenRepository.find({
+        where: { userId, isActive: true },
+      });
+
+      if (pushTokens.length === 0) {
+        continue;
+      }
+
+      const tokens = pushTokens.map((pt) => pt.token);
+
+      await this.sendPushNotifications(
+        tokens,
+        '📖 Citation du moment',
+        quote.text.length > 100
+          ? quote.text.substring(0, 97) + '...'
+          : quote.text,
+        {
+          quoteId: quote.id,
+          author: quote.author,
+          topicId: quote.topic?.id,
+        },
+      );
+
+      // Update lastUsedAt for tokens
+      await this.pushTokenRepository.update(
+        { token: tokens as any },
+        { lastUsedAt: new Date() },
+      );
     }
-
-    // Get push tokens for all users to notify
-    const pushTokens = await this.pushTokenRepository.find({
-      where: usersToNotify.map((userId) => ({ userId, isActive: true })),
-    });
-
-    if (pushTokens.length === 0) {
-      this.logger.warn('No active push tokens found for users to notify');
-      return;
-    }
-
-    const tokens = pushTokens.map((pt) => pt.token);
-
-    // Send notifications
-    await this.sendPushNotifications(
-      tokens,
-      '📖 Citation du moment',
-      quote.text.length > 100
-        ? quote.text.substring(0, 97) + '...'
-        : quote.text,
-      {
-        quoteId: quote.id,
-        author: quote.author,
-        topicId: quote.topic?.id,
-      },
-    );
-
-    // Update lastUsedAt for tokens
-    await this.pushTokenRepository.update(
-      { token: tokens as any },
-      { lastUsedAt: new Date() },
-    );
 
     this.logger.log(
-      `Successfully sent notifications to ${tokens.length} devices`,
+      `Successfully sent notifications to ${usersToNotify.length} users`,
     );
   }
 

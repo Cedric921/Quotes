@@ -3,24 +3,32 @@ import { API_CONFIG } from "../../constants/config";
 import { useAppSelector } from "../../store/hooks";
 import { handleTokenExpired } from "../../services/authService";
 
-export interface NotificationConfig {
-  time: string; // "HH:mm" format (e.g., "09:00")
-  days: number[]; // Array of day numbers (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+export interface DailyNotificationTracker {
+  date: string; // "YYYY-MM-DD"
+  count: number;
+  times: string[]; // Times when notifications were sent today
 }
 
 export interface NotificationSettings {
   id: string;
   userId: string;
   enabled: boolean;
-  notifications: string; // JSON string of NotificationConfig[]
+  startTime: string; // "HH:mm" format (e.g., "09:00")
+  endTime: string; // "HH:mm" format (e.g., "18:00")
+  maxNotificationsPerDay: number; // 1-10
+  activeDays: string; // JSON string of number[] (0 = Sunday, ..., 6 = Saturday)
   timezone: string;
+  dailyNotificationTracker: string; // JSON string of DailyNotificationTracker
   createdAt: string;
   updatedAt: string;
 }
 
 export interface UpdateNotificationSettingsDto {
   enabled?: boolean;
-  notifications?: NotificationConfig[];
+  startTime?: string;
+  endTime?: string;
+  maxNotificationsPerDay?: number;
+  activeDays?: number[];
   timezone?: string;
 }
 

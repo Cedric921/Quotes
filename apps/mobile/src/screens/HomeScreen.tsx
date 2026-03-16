@@ -8,10 +8,14 @@ import {
   ActivityIndicator,
   ViewStyle,
   ImageBackground,
+  Platform,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as WebBrowser from "expo-web-browser";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system";
+import { captureRef } from "react-native-view-shot";
 import Toast from "react-native-toast-message";
 import {
   QuoteCard,
@@ -38,6 +42,7 @@ import { widgetService } from "../services/widgetService";
 import { SubscriptionPlan } from "../store/slices/subscriptionSlice";
 
 const ONBOARDING_KEY = "@focus_onboarding_shown";
+const DONT_SHOW_ONBOARDING_KEY = "@focus_dont_show_onboarding";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -54,12 +59,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const isSubscribed = user?.isSubscribed ?? false;
+  const isAdmin = user?.isAdmin ?? false;
   const backgroundTheme = useAppSelector(
     (state) => state.theme.backgroundTheme,
   );
   const { colors } = useThemeColors();
   const styles = createStyles(colors, height);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Sharing state and ref
+  const [isSharing, setIsSharing] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const screenRef = useRef<View>(null);
 
   // Onboarding states
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -83,21 +95,32 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const toggleLikeMutation = useToggleLikeQuote();
   const checkoutMutation = useCreateCheckoutSession();
 
-  // Check if onboarding should be shown (first launch)
+  // Check if onboarding should be shown
+  // Show on every app open if user is not subscribed (unless "don't show again" is checked)
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
-        const hasShown = await AsyncStorage.getItem(ONBOARDING_KEY);
-        if (!hasShown && !isAuthenticated) {
-          // Delay to let the app load first
-          setTimeout(() => setShowOnboarding(true), 1000);
+        // Don't show if user is subscribed or admin
+        if (isSubscribed || isAdmin) {
+          return;
         }
+
+        // Check if user has opted out of seeing the popup
+        const dontShowAgain = await AsyncStorage.getItem(
+          DONT_SHOW_ONBOARDING_KEY,
+        );
+        if (dontShowAgain === "true") {
+          return;
+        }
+
+        // Show the onboarding popup after a short delay
+        setTimeout(() => setShowOnboarding(true), 1000);
       } catch (error) {
         console.error("Error checking onboarding:", error);
       }
     };
     checkOnboarding();
-  }, [isAuthenticated]);
+  }, [isSubscribed, isAdmin]);
 
   // Handle plan selection from bottom sheet
   const handleSelectPlan = (plan: SubscriptionPlan) => {
@@ -109,7 +132,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   // Handle onboarding close
   const handleCloseOnboarding = async () => {
     setShowOnboarding(false);
-    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    // Don't set ONBOARDING_KEY anymore - we want to show it every time
+    // unless user explicitly opts out via "don't show again"
   };
 
   // Handle profile completion and checkout
@@ -217,9 +241,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     [quotes, toggleLikeMutation],
   );
 
-  const handleSettings = useCallback(() => {
-    navigation.navigate("Settings");
-  }, [navigation]);
+  const handleProfile = useCallback(() => {
+    // If user is not subscribed, redirect to subscription screen first
+    const isPremium = user?.isSubscribed || user?.isAdmin;
+    if (!isPremium) {
+      navigation.navigate("Subscription", { fromProfile: true });
+    } else {
+      navigation.navigate("Profile");
+    }
+  }, [navigation, user?.isSubscribed, user?.isAdmin]);
 
   const handleTopics = useCallback(() => {
     navigation.navigate("Topics");
@@ -228,6 +258,71 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const handleLogin = useCallback(() => {
     navigation.navigate("Login");
   }, [navigation]);
+
+  // Handle share - capture the screen and share as image
+  const handleShare = useCallback(async () => {
+    if (!screenRef.current || isSharing) return;
+
+    try {
+      setIsSharing(true);
+
+      // Hide buttons before capture
+      setIsCapturing(true);
+
+      // Small delay to ensure buttons are hidden
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Capture the screen as an image
+      const uri = await captureRef(screenRef, {
+        format: "png",
+        quality: 1,
+        result: "tmpfile",
+      });
+
+      // Show buttons again
+      setIsCapturing(false);
+
+      // Check if sharing is available
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Toast.show({
+          type: "error",
+          text1: t("common.error"),
+          text2: "Sharing is not available on this device",
+        });
+        return;
+      }
+
+      // Share the image
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: t("common.share"),
+        UTI: "public.png",
+      });
+
+      // Clean up the temporary file after sharing
+      if (Platform.OS !== "web") {
+        try {
+          const file = new FileSystem.File(uri);
+          if (file.exists) {
+            file.delete();
+          }
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+    } catch (error) {
+      console.error("Error sharing quote:", error);
+      setIsCapturing(false);
+      Toast.show({
+        type: "error",
+        text1: t("common.error"),
+        text2: "Failed to share quote",
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  }, [isSharing, t]);
 
   const lastWidgetUpdateRef = useRef<string | null>(null);
 
@@ -293,8 +388,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const content = (
     <>
-      {/* Header */}
-      <Header />
+      {/* Header - Hidden during capture */}
+      {!isCapturing && <Header />}
 
       {/* Quotes List */}
       <FlatList
@@ -330,28 +425,31 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         />
       )} */}
 
-      {/* Fixed Bottom Navigation Bar */}
-      {filteredQuotes.length > 0 && filteredQuotes[currentIndex] ? (
-        <ActionButtons
-          quoteId={filteredQuotes[currentIndex].id}
-          isLiked={filteredQuotes[currentIndex].isLiked}
-          isAuthenticated={isAuthenticated}
-          onLike={handleLike}
-          onSettings={handleSettings}
-          onTopics={handleTopics}
-          onLogin={handleLogin}
-        />
-      ) : (
-        <ActionButtons
-          quoteId=""
-          isLiked={false}
-          isAuthenticated={isAuthenticated}
-          onLike={() => {}}
-          onSettings={handleSettings}
-          onTopics={handleTopics}
-          onLogin={handleLogin}
-        />
-      )}
+      {/* Fixed Bottom Navigation Bar - Hidden during capture */}
+      {!isCapturing &&
+        (filteredQuotes.length > 0 && filteredQuotes[currentIndex] ? (
+          <ActionButtons
+            quoteId={filteredQuotes[currentIndex].id}
+            isLiked={filteredQuotes[currentIndex].isLiked}
+            isAuthenticated={isAuthenticated}
+            onLike={handleLike}
+            onSettings={handleProfile}
+            onTopics={handleTopics}
+            onLogin={handleLogin}
+            onShare={handleShare}
+            isSharing={isSharing}
+          />
+        ) : (
+          <ActionButtons
+            quoteId=""
+            isLiked={false}
+            isAuthenticated={isAuthenticated}
+            onLike={() => {}}
+            onSettings={handleProfile}
+            onTopics={handleTopics}
+            onLogin={handleLogin}
+          />
+        ))}
 
       {/* Onboarding Bottom Sheet */}
       <SubscriptionBottomSheet
@@ -374,20 +472,26 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   // If a background theme is selected, wrap content in ImageBackground with glass effect
   if (backgroundTheme?.imageUrl) {
     return (
-      <ImageBackground
-        source={{ uri: backgroundTheme.imageUrl }}
-        style={styles.container}
-        resizeMode="cover"
-      >
-        {/* Glass effect overlay using BlurView */}
-        <BlurView intensity={4} tint="dark" style={styles.glassOverlay}>
-          <View style={styles.glassInner}>{content}</View>
-        </BlurView>
-      </ImageBackground>
+      <View ref={screenRef} collapsable={false} style={styles.container}>
+        <ImageBackground
+          source={{ uri: backgroundTheme.imageUrl }}
+          style={styles.container}
+          resizeMode="cover"
+        >
+          {/* Glass effect overlay using BlurView */}
+          <BlurView intensity={4} tint="dark" style={styles.glassOverlay}>
+            <View style={styles.glassInner}>{content}</View>
+          </BlurView>
+        </ImageBackground>
+      </View>
     );
   }
 
-  return <View style={styles.container}>{content}</View>;
+  return (
+    <View ref={screenRef} collapsable={false} style={styles.container}>
+      {content}
+    </View>
+  );
 }
 
 const createStyles = (colors: any, height: number) =>

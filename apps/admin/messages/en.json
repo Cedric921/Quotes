@@ -311,7 +311,14 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "sheetDescriptionEdit": "Edit theme information",
-    "sheetDescriptionNew": "Add a new wallpaper"
+    "sheetDescriptionNew": "Add a new wallpaper",
+    "fontSection": "Font Settings",
+    "selectFont": "Associated Font",
+    "selectFontPlaceholder": "Choose a font",
+    "noFont": "Default (System)",
+    "fontPreview": "Preview",
+    "isPremium": "Premium Theme",
+    "premiumHint": "Only available to premium users"
   },
   "fonts": {
     "title": "Fonts Management",

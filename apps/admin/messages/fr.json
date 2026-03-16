@@ -311,7 +311,14 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "sheetDescriptionEdit": "Modifiez les informations du thème",
-    "sheetDescriptionNew": "Ajoutez un nouveau fond d'écran"
+    "sheetDescriptionNew": "Ajoutez un nouveau fond d'écran",
+    "fontSection": "Paramètres de police",
+    "selectFont": "Police associée",
+    "selectFontPlaceholder": "Choisir une police",
+    "noFont": "Par défaut (Système)",
+    "fontPreview": "Aperçu",
+    "isPremium": "Thème Premium",
+    "premiumHint": "Disponible uniquement pour les utilisateurs premium"
   },
   "fonts": {
     "title": "Gestion des Polices",

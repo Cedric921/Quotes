@@ -190,9 +190,9 @@ export default function TopicScreen({ navigation, route }: TopicScreenProps) {
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>{topic?.name || topicName}</Text>
-            <Text style={styles.headerSubtitle}>
+            {/* <Text style={styles.headerSubtitle}>
               {quotes.length} {quotes.length === 1 ? "quote" : "quotes"}
-            </Text>
+            </Text> */}
           </View>
           <View style={styles.placeholder} />
         </View>

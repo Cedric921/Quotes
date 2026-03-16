@@ -76,9 +76,12 @@
     "light": "Claro",
     "dark": "Oscuro",
     "system": "Sistema",
-    "backgroundTheme": "Fondo de pantalla",
+    "backgroundTheme": "Tema y Fuente",
+    "themeIncludesFont": "El tema incluye la fuente",
     "noBackground": "Sin fondo",
     "noThemesAvailable": "No hay temas disponibles",
+    "fonts": "Fuentes",
+    "defaultFont": "Fuente predeterminada",
     "autoTranslate": "Traducir citas",
     "autoTranslateDesc": "Traducir automáticamente las citas"
   },
@@ -97,7 +100,36 @@
     "myFavorites": "Mis favoritos",
     "savedQuotes": "Citas guardadas",
     "activityCalendar": "Calendario de actividad",
-    "daysActive": "días activos"
+    "daysActive": "días activos",
+    "totalSpent": "Total gastado",
+    "subscription": "Suscripción",
+    "paymentHistory": "Historial de pagos"
+  },
+  "favorites": {
+    "title": "Mis favoritos",
+    "empty": "Sin favoritos",
+    "emptySubtext": "Dale me gusta a las citas para encontrarlas aquí",
+    "removeTitle": "Eliminar de favoritos",
+    "removeMessage": "¿Quieres eliminar esta cita de tus favoritos?"
+  },
+  "editProfile": {
+    "title": "Editar perfil",
+    "name": "Nombre",
+    "namePlaceholder": "Ingresa tu nombre",
+    "email": "Correo electrónico",
+    "emailHelper": "El correo no puede cambiarse en este momento",
+    "changePhoto": "Cambiar foto",
+    "permissionRequired": "Permiso requerido",
+    "permissionMessage": "Necesitamos acceso a tus fotos",
+    "success": "Perfil actualizado",
+    "successMessage": "Tus cambios han sido guardados",
+    "errorMessage": "No se pudo actualizar el perfil"
+  },
+  "payments": {
+    "title": "Historial de pagos",
+    "totalSpent": "Total gastado",
+    "empty": "Sin pagos",
+    "emptySubtext": "Tus pagos aparecerán aquí"
   },
   "actions": {
     "like": "Me gusta",
@@ -164,7 +196,9 @@
     "selectAtLeastOneDay": "Selecciona al menos un día",
     "minNotificationsRequired": "Se requiere al menos una notificación",
     "testNotificationSent": "Notificación de prueba enviada",
-    "checkYourDevice": "Revise su dispositivo para ver la notificación"
+    "checkYourDevice": "Revise su dispositivo para ver la notificación",
+    "upgradeForMore": "Actualiza para más notificaciones",
+    "freeUserLimit": "Los usuarios gratuitos pueden tener 1 notificación por día"
   },
   "subscription": {
     "title": "Suscripción",
@@ -218,5 +252,39 @@
     "description": "Muestra una cita inspiradora en tu pantalla de inicio",
     "defaultQuote": "Abre la app Focus para descubrir una cita inspiradora.",
     "defaultAuthor": "Focus"
+  },
+  "onboarding": {
+    "welcomeTitle": "Bienvenido a Focus",
+    "welcomeSubtitle": "Descubre citas inspiradoras cada día",
+    "choosePlan": "Elige tu plan",
+    "continue": "Continuar",
+    "skipForNow": "Saltar por ahora",
+    "completeProfile": "Completa tu perfil",
+    "createAccount": "Crear cuenta",
+    "createAccountSubtitle": "Para continuar al pago",
+    "name": "Nombre completo",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "continueToPayment": "Continuar al pago",
+    "selectedPlan": "Plan seleccionado",
+    "perMonth": "/mes",
+    "perYear": "/año",
+    "popular": "Popular",
+    "features": {
+      "unlimitedQuotes": "Citas ilimitadas",
+      "premiumTopics": "Acceso a temas premium",
+      "noAds": "Sin anuncios",
+      "customThemes": "Temas personalizados",
+      "offlineAccess": "Acceso sin conexión"
+    },
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El correo es obligatorio",
+      "emailInvalid": "El correo no es válido",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+      "passwordMismatch": "Las contraseñas no coinciden"
+    }
   }
 }
