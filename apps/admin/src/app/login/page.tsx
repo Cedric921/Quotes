@@ -15,9 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { login, type LoginCredentials } from "@/lib/auth";
-import { Sparkles, Mail, Lock, LogIn, AlertCircle, Shield } from "lucide-react";
+import { Sparkles, Mail, Lock, LogIn, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { Logo } from "@/components/Logo";
 
 export default function LoginPage() {
   const { t } = useLocale();
@@ -63,11 +64,9 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/20 rounded-lg blur-xl -z-10" />
 
         <CardHeader className="space-y-4 pb-8">
-          {/* Logo/Icon */}
+          {/* Logo */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-              <Shield className="w-9 h-9 text-primary-foreground" />
-            </div>
+            <Logo size="xl" />
           </div>
 
           {/* Title */}

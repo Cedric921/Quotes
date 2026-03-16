@@ -5,3 +5,5 @@ export { default as ErrorMessage } from "./ErrorMessage";
 export { default as Header } from "./Header";
 export { default as DotsIndicator } from "./DotsIndicator";
 export { default as ActionButtons } from "./ActionButtons";
+export { default as TranslatedTopicCard } from "./TranslatedTopicCard";
+export { default as TranslatedPlanCard } from "./TranslatedPlanCard";

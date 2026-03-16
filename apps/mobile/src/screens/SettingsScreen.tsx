@@ -301,14 +301,19 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             </View>
           </TouchableOpacity>
 
-          {/* Auto-translate toggle - only show if language is not French */}
+          {/* Auto-translate toggle - only show if language is not French (content is in French) */}
           {currentLanguage.code !== "fr" && (
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
                 <Ionicons name="globe-outline" size={24} color="#0A84FF" />
-                <Text style={styles.menuItemText}>
-                  {t("settings.autoTranslate") || "Traduire les citations"}
-                </Text>
+                <View style={styles.menuItemTextContainer}>
+                  <Text style={styles.menuItemText}>
+                    {t("settings.autoTranslate")}
+                  </Text>
+                  <Text style={styles.menuItemSubtext}>
+                    {t("settings.autoTranslateDesc")}
+                  </Text>
+                </View>
               </View>
               <View style={styles.menuItemRightSwitch}>
                 <Switch
@@ -328,7 +333,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <TouchableOpacity style={styles.menuItem} onPress={handleThemePress}>
             <View style={styles.menuItemLeft}>
               <Ionicons name="contrast-outline" size={24} color="#0A84FF" />
-              <Text style={styles.menuItemText}>{t("settings.theme")}</Text>
+              <Text style={styles.menuItemText}>
+                {t("settings.mode") || "Mode"}
+              </Text>
             </View>
             <View style={styles.menuItemRight}>
               <Text style={styles.menuItemValue}>{getThemeLabel()}</Text>
@@ -440,7 +447,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Theme Selection Modal */}
+      {/* Mode Selection Modal */}
       <Modal
         visible={showThemeModal}
         transparent
@@ -453,7 +460,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           onPress={() => setShowThemeModal(false)}
         >
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t("settings.selectTheme")}</Text>
+            <Text style={styles.modalTitle}>
+              {t("settings.selectMode") || "Mode"}
+            </Text>
 
             <TouchableOpacity
               style={[

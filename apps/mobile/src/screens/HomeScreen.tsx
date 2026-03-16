@@ -226,8 +226,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     [quotes, toggleLikeMutation],
   );
 
-  const handleSettings = useCallback(() => {
-    navigation.navigate("Settings");
+  const handleProfile = useCallback(() => {
+    navigation.navigate("Profile");
   }, [navigation]);
 
   const handleTopics = useCallback(() => {
@@ -412,7 +412,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             isLiked={filteredQuotes[currentIndex].isLiked}
             isAuthenticated={isAuthenticated}
             onLike={handleLike}
-            onSettings={handleSettings}
+            onSettings={handleProfile}
             onTopics={handleTopics}
             onLogin={handleLogin}
             onShare={handleShare}
@@ -424,7 +424,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             isLiked={false}
             isAuthenticated={isAuthenticated}
             onLike={() => {}}
-            onSettings={handleSettings}
+            onSettings={handleProfile}
             onTopics={handleTopics}
             onLogin={handleLogin}
           />

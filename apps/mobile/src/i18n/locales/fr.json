@@ -63,6 +63,8 @@
     "settings": "PARAMÈTRES",
     "language": "Langues",
     "theme": "Thème",
+    "mode": "Mode",
+    "selectMode": "Sélectionner un mode",
     "storage": "Espace",
     "notifications": "Notifications",
     "about": "À PROPOS",
@@ -84,8 +86,9 @@
     "noThemesAvailable": "Aucun thème disponible",
     "fonts": "Polices",
     "defaultFont": "Police par défaut",
-    "autoTranslate": "Traduire les citations",
-    "autoTranslateDesc": "Traduire automatiquement les citations"
+    "autoTranslate": "Traduction automatique",
+    "autoTranslateDesc": "Traduire automatiquement les citations et les sujets",
+    "unlockAll": "Tout débloquer"
   },
   "profile": {
     "title": "Profil",

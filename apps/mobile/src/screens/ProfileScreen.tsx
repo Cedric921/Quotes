@@ -50,6 +50,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { data: payments } = useUserPayments();
   const { data: subscription } = useCurrentSubscription();
 
+  const handleSubscription = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("Subscription");
+  };
+
   // Calculate total spent
   const totalSpent = useMemo(() => {
     return payments?.reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
@@ -80,6 +85,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     navigation.goBack();
   };
 
+  const handleSettings = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("Settings");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -88,7 +98,12 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("profile.title")}</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity
+          onPress={handleSettings}
+          style={styles.settingsButton}
+        >
+          <Ionicons name="settings-outline" size={24} color={colors.text} />
+        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -193,6 +208,19 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             <Text style={styles.statLabel}>{t("profile.subscription")}</Text>
           </View>
         </View>
+
+        <TouchableOpacity
+          style={{ ...styles.menuItem, marginHorizontal: 20 }}
+          onPress={handleSubscription}
+        >
+          <View style={styles.menuItemLeft}>
+            <Ionicons name="diamond-outline" size={24} color="#FFD700" />
+            <Text style={styles.menuItemText}>
+              {t("settings.subscription")}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
+        </TouchableOpacity>
 
         {/* Activity Calendar */}
         {token && activityStats && (
@@ -316,8 +344,11 @@ const createStyles = (colors: any) =>
       fontWeight: "600" as const,
       color: colors.text,
     } as TextStyle,
-    placeholder: {
+    settingsButton: {
       width: 40,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
     } as ViewStyle,
     content: {
       flex: 1,

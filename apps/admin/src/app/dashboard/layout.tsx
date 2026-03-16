@@ -10,7 +10,6 @@ import {
   FileText,
   BookOpen,
   LayoutDashboard,
-  Sparkles,
   AlertTriangle,
   Settings,
   CreditCard,
@@ -22,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { Logo } from "@/components/Logo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,10 +112,8 @@ export default function DashboardLayout({
       <aside className="w-64 bg-card/95 backdrop-blur-sm border-r border-border/50 flex flex-col shadow-lg">
         {/* Logo Section */}
         <div className="p-6 border-b border-border/50">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-md">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
+          <div className="flex items-center gap-3">
+            <Logo size="md" />
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {t.app.name}

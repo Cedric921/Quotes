@@ -1,53 +1,53 @@
-import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddTopicFields1707000000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Add title column
-    await queryRunner.addColumn(
-      'topic',
-      new TableColumn({
-        name: 'title',
-        type: 'varchar',
-        isNullable: true,
-      }),
-    );
+    // Helper function to check if column exists
+    const columnExists = async (
+      table: string,
+      column: string,
+    ): Promise<boolean> => {
+      const result = await queryRunner.query(`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = '${table}' AND column_name = '${column}'
+      `);
+      return result.length > 0;
+    };
 
-    // Add icon column
-    await queryRunner.addColumn(
-      'topic',
-      new TableColumn({
-        name: 'icon',
-        type: 'varchar',
-        isNullable: true,
-      }),
-    );
+    // Add title column if not exists
+    if (!(await columnExists('topic', 'title'))) {
+      await queryRunner.query(`ALTER TABLE "topic" ADD "title" varchar`);
+    }
 
-    // Add color column
-    await queryRunner.addColumn(
-      'topic',
-      new TableColumn({
-        name: 'color',
-        type: 'varchar',
-        isNullable: true,
-      }),
-    );
+    // Add icon column if not exists
+    if (!(await columnExists('topic', 'icon'))) {
+      await queryRunner.query(`ALTER TABLE "topic" ADD "icon" varchar`);
+    }
 
-    // Add isPremium column
-    await queryRunner.addColumn(
-      'topic',
-      new TableColumn({
-        name: 'isPremium',
-        type: 'boolean',
-        default: false,
-      }),
-    );
+    // Add color column if not exists
+    if (!(await columnExists('topic', 'color'))) {
+      await queryRunner.query(`ALTER TABLE "topic" ADD "color" varchar`);
+    }
+
+    // Add isPremium column if not exists
+    if (!(await columnExists('topic', 'isPremium'))) {
+      await queryRunner.query(
+        `ALTER TABLE "topic" ADD "isPremium" boolean DEFAULT false`,
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn('topic', 'title');
-    await queryRunner.dropColumn('topic', 'icon');
-    await queryRunner.dropColumn('topic', 'color');
-    await queryRunner.dropColumn('topic', 'isPremium');
+    await queryRunner.query(
+      `ALTER TABLE "topic" DROP COLUMN IF EXISTS "title"`,
+    );
+    await queryRunner.query(`ALTER TABLE "topic" DROP COLUMN IF EXISTS "icon"`);
+    await queryRunner.query(
+      `ALTER TABLE "topic" DROP COLUMN IF EXISTS "color"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "topic" DROP COLUMN IF EXISTS "isPremium"`,
+    );
   }
 }
-

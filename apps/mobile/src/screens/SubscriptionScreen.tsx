@@ -29,6 +29,7 @@ import {
   Subscription,
   SubscriptionPlan,
 } from "../store/slices/subscriptionSlice";
+import { TranslatedPlanCard } from "../components";
 
 interface SubscriptionScreenProps {
   readonly navigation: any;
@@ -293,39 +294,14 @@ export default function SubscriptionScreen({
         {/* Plans */}
         <Text style={styles.sectionTitle}>{t("subscription.choosePlan")}</Text>
 
-        {/* All Available Plans */}
+        {/* All Available Plans with Translation */}
         {plans.map((plan: SubscriptionPlan) => (
-          <TouchableOpacity
+          <TranslatedPlanCard
             key={plan.id}
-            style={[
-              styles.planCard,
-              selectedPlanId === plan.id && styles.planCardSelected,
-            ]}
+            plan={plan}
+            isSelected={selectedPlanId === plan.id}
             onPress={() => handleSelectPlan(plan.id)}
-          >
-            <View style={styles.planHeader}>
-              <Text style={styles.planName}>{plan.name}</Text>
-              {selectedPlanId === plan.id && (
-                <Ionicons
-                  name="checkmark-circle"
-                  size={24}
-                  color={colors.primary}
-                />
-              )}
-            </View>
-            {plan.description && (
-              <Text style={styles.planDescription}>{plan.description}</Text>
-            )}
-            <View style={styles.planPricing}>
-              <Text style={styles.planPrice}>
-                €{Number(plan.price).toFixed(2)}
-              </Text>
-              <Text style={styles.planPeriod}>
-                / {plan.durationMonths}{" "}
-                {plan.durationMonths === 1 ? "mois" : "mois"}
-              </Text>
-            </View>
-          </TouchableOpacity>
+          />
         ))}
 
         {/* Subscribe Button */}

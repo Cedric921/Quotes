@@ -8,8 +8,10 @@ import {
   ViewStyle,
   TextStyle,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import { useState, useRef, useEffect, useMemo } from "react";
 import * as Haptics from "expo-haptics";
 import { useTranslatedQuote } from "../hooks";
@@ -160,6 +162,11 @@ export default function QuoteCard({
     () => getTopicGradient(quote.topic?.color),
     [quote.topic?.color],
   );
+
+  const handleSubscription = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("Subscription");
+  };
 
   // Dynamic styles based on screen dimensions
   const dynamicStyles = useMemo(
@@ -326,15 +333,15 @@ export default function QuoteCard({
           </View>
 
           {/* Topic badge with glassmorphism */}
-          {/* {quote.topic && showTopicName && (
+          {quote.topic && showTopicName && (
             <TouchableOpacity
               style={styles.topicBadge}
-              onPress={handleTopicPress}
+              onPress={handleSubscription}
               activeOpacity={0.7}
             >
-              <Text style={styles.topicText}>{quote.topic.name}</Text>
+              <Ionicons name="diamond-outline" size={24} color="#FFD700" />
             </TouchableOpacity>
-          )} */}
+          )}
         </LinearGradient>
       </View>
     </TouchableWithoutFeedback>
