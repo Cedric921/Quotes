@@ -301,14 +301,19 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             </View>
           </TouchableOpacity>
 
-          {/* Auto-translate toggle - only show if language is not French */}
+          {/* Auto-translate toggle - only show if language is not French (content is in French) */}
           {currentLanguage.code !== "fr" && (
             <View style={styles.menuItem}>
               <View style={styles.menuItemLeft}>
                 <Ionicons name="globe-outline" size={24} color="#0A84FF" />
-                <Text style={styles.menuItemText}>
-                  {t("settings.autoTranslate") || "Traduire les citations"}
-                </Text>
+                <View style={styles.menuItemTextContainer}>
+                  <Text style={styles.menuItemText}>
+                    {t("settings.autoTranslate")}
+                  </Text>
+                  <Text style={styles.menuItemSubtext}>
+                    {t("settings.autoTranslateDesc")}
+                  </Text>
+                </View>
               </View>
               <View style={styles.menuItemRightSwitch}>
                 <Switch

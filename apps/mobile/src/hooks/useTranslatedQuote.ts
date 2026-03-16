@@ -43,12 +43,12 @@ export function useTranslatedQuote(quote: Quote): UseTranslatedQuoteResult {
   const needsTranslation = useMemo(() => {
     // Don't translate if:
     // - Auto-translate is disabled
-    // - Language is English (assuming quotes are stored in English)
+    // - Language is French (quotes are stored in French)
     // - Already cached
     // - Currently translating
     return (
       autoTranslate &&
-      currentLang !== "en" &&
+      currentLang !== "fr" &&
       !cachedTranslation &&
       !isTranslating
     );
@@ -61,7 +61,8 @@ export function useTranslatedQuote(quote: Quote): UseTranslatedQuoteResult {
     dispatch(setQuoteLoading(cacheKey));
 
     try {
-      const translated = await translateText(quote.text, currentLang, "en");
+      // Quotes are in French, translate to current language
+      const translated = await translateText(quote.text, currentLang, "fr");
       // Only cache if translation is different from original (successful translation)
       // If translation failed, translateText returns the original text
       if (translated && translated !== quote.text) {
@@ -88,8 +89,8 @@ export function useTranslatedQuote(quote: Quote): UseTranslatedQuoteResult {
 
   // Return the appropriate text
   const translatedText = useMemo(() => {
-    // If language is English or auto-translate is disabled, return original
-    if (currentLang === "en" || !autoTranslate) {
+    // If language is French or auto-translate is disabled, return original
+    if (currentLang === "fr" || !autoTranslate) {
       return quote.text;
     }
     // Return cached translation or original text while loading
@@ -97,7 +98,7 @@ export function useTranslatedQuote(quote: Quote): UseTranslatedQuoteResult {
   }, [currentLang, autoTranslate, cachedTranslation, quote.text]);
 
   const isTranslated = useMemo(() => {
-    return currentLang !== "en" && autoTranslate && !!cachedTranslation;
+    return currentLang !== "fr" && autoTranslate && !!cachedTranslation;
   }, [currentLang, autoTranslate, cachedTranslation]);
 
   return {

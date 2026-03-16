@@ -84,8 +84,8 @@
     "noThemesAvailable": "No themes available",
     "fonts": "Fonts",
     "defaultFont": "Default Font",
-    "autoTranslate": "Translate quotes",
-    "autoTranslateDesc": "Automatically translate quotes"
+    "autoTranslate": "Auto-translate content",
+    "autoTranslateDesc": "Automatically translate quotes and topics"
   },
   "profile": {
     "title": "Profile",

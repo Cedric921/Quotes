@@ -144,11 +144,12 @@ const translateWithMyMemory = async (
 /**
  * Main translation function with caching and fallback
  * Priority: 1. Cache -> 2. Backend (DeepL) -> 3. MyMemory (fallback)
+ * Note: Default source language is French since quotes are in French
  */
 export const translateText = async (
   text: string,
   targetLang: string,
-  sourceLang: string = "en",
+  sourceLang: string = "fr",
 ): Promise<string> => {
   // Don't translate if target is same as source
   if (targetLang === sourceLang) {
@@ -189,6 +190,7 @@ export const translateText = async (
 
 /**
  * Translate a quote (text only, author name is kept as-is)
+ * Note: Quotes are in French, so we translate FROM French to target language
  */
 export const translateQuote = async (
   text: string,
@@ -197,12 +199,12 @@ export const translateQuote = async (
 ): Promise<{ text: string; author: string }> => {
   const lang = targetLang || i18n.language || "en";
 
-  // Don't translate if language is English (assuming quotes are in English)
-  if (lang === "en") {
+  // Don't translate if language is French (quotes are already in French)
+  if (lang === "fr") {
     return { text, author };
   }
 
-  const translatedText = await translateText(text, lang, "en");
+  const translatedText = await translateText(text, lang, "fr");
 
   return {
     text: translatedText,
