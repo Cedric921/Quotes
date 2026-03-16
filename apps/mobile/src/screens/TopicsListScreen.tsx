@@ -273,7 +273,7 @@ export default function TopicsListScreen({
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Topics</Text>
+          <Text style={styles.headerTitle}>Sujet</Text>
           <View style={styles.placeholder} />
         </View>
       </BlurView>
