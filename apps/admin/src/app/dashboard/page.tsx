@@ -1,8 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { apiClient } from "@/lib/auth";
-import { seedDatabase } from "@/lib/data";
 import { useLocale } from "@/contexts/LocaleContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +13,6 @@ import {
   Users,
   BookOpen,
   FileText,
-  Database,
   TrendingUp,
   Sparkles,
   DollarSign,
@@ -34,6 +30,7 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
+  Database,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -44,158 +41,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-interface Stats {
-  users: number;
-  topics: number;
-  quotes: number;
-}
-
-interface SubscriptionStats {
-  totalRevenue: number;
-  monthlyRevenue: number;
-  premiumUsers: number;
-  freeUsers: number;
-  totalUsers: number;
-  premiumPercentage: number;
-  revenueGrowth: number;
-  recentTransactions: Array<{
-    id: string;
-    userName: string;
-    userEmail: string;
-    planName: string;
-    amount: number;
-    date: string;
-    status: string;
-  }>;
-}
-
-interface ServiceStatus {
-  status: "connected" | "disconnected" | "error" | "not_configured";
-  message?: string;
-  latency?: number;
-}
-
-interface StripeStatus extends ServiceStatus {
-  mode?: "test" | "live";
-  webhookConfigured?: boolean;
-  apiKeyConfigured?: boolean;
-}
-
-interface DatabaseStatus extends ServiceStatus {
-  type?: "postgres" | "sqlite";
-  provider?: "supabase" | "direct" | "local";
-}
-
-interface HealthCheckResponse {
-  status: "healthy" | "degraded" | "unhealthy";
-  timestamp: string;
-  services: {
-    database: DatabaseStatus;
-    stripe: StripeStatus;
-    cloudinary: ServiceStatus;
-  };
-}
+import {
+  useDashboardStats,
+  useSubscriptionStats,
+  useHealthStatus,
+} from "@/api/hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { statsKeys } from "@/api/hooks/useStats";
 
 export default function DashboardPage() {
   const { t } = useLocale();
-  const [isSeeding, setIsSeeding] = useState(false);
-  const [seedResult, setSeedResult] = useState<string>("");
-  const [stats, setStats] = useState<Stats>({ users: 0, topics: 0, quotes: 0 });
-  const [subscriptionStats, setSubscriptionStats] =
-    useState<SubscriptionStats | null>(null);
-  const [healthStatus, setHealthStatus] = useState<HealthCheckResponse | null>(
-    null,
-  );
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
-  const [isLoadingSubStats, setIsLoadingSubStats] = useState(true);
-  const [isLoadingHealth, setIsLoadingHealth] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchStats();
-    fetchSubscriptionStats();
-    fetchHealthStatus();
-  }, []);
-
-  const fetchStats = async () => {
-    try {
-      const [usersRes, topicsRes, quotesRes] = await Promise.all([
-        apiClient.get("/users"),
-        apiClient.get("/topics"),
-        apiClient.get("/quotes"),
-      ]);
-      setStats({
-        users: usersRes.data.length,
-        topics: topicsRes.data.length,
-        quotes: quotesRes.data.length,
-      });
-    } catch (error) {
-      console.error("Failed to fetch stats", error);
-    } finally {
-      setIsLoadingStats(false);
-    }
-  };
-
-  const fetchSubscriptionStats = async () => {
-    try {
-      const res = await apiClient.get("/subscriptions/stats");
-      setSubscriptionStats(res.data);
-    } catch (error) {
-      console.error("Failed to fetch subscription stats", error);
-    } finally {
-      setIsLoadingSubStats(false);
-    }
-  };
-
-  const fetchHealthStatus = async () => {
-    try {
-      const res = await apiClient.get("/health");
-      setHealthStatus(res.data);
-    } catch (error) {
-      console.error("Failed to fetch health status", error);
-      // Set a fallback status when health endpoint fails
-      setHealthStatus({
-        status: "unhealthy",
-        timestamp: new Date().toISOString(),
-        services: {
-          database: {
-            status: "error",
-            message: "Unable to check",
-            type: "sqlite",
-            provider: "local",
-          },
-          stripe: {
-            status: "error",
-            message: "Unable to check",
-            apiKeyConfigured: false,
-            webhookConfigured: false,
-          },
-          cloudinary: { status: "error", message: "Unable to check" },
-        },
-      });
-    } finally {
-      setIsLoadingHealth(false);
-    }
-  };
-
-  const handleSeed = async () => {
-    setIsSeeding(true);
-    setSeedResult("");
-
-    try {
-      const result = await seedDatabase(apiClient);
-      if (result.success) {
-        setSeedResult(t.dashboard.seedSuccess);
-        fetchStats(); // Refresh stats after seeding
-      } else {
-        setSeedResult(t.dashboard.seedError);
-      }
-    } catch (error) {
-      setSeedResult(t.dashboard.seedErrorDetails);
-    } finally {
-      setIsSeeding(false);
-    }
-  };
+  // React Query hooks
+  const {
+    data: stats = { users: 0, topics: 0, quotes: 0 },
+    isLoading: isLoadingStats,
+  } = useDashboardStats();
+  const { data: subscriptionStats, isLoading: isLoadingSubStats } =
+    useSubscriptionStats();
+  const { data: healthStatus, isLoading: isLoadingHealth } = useHealthStatus();
 
   const statCards = [
     {
@@ -554,13 +419,14 @@ export default function DashboardPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setIsLoadingHealth(true);
-                    fetchHealthStatus();
+                    queryClient.invalidateQueries({
+                      queryKey: statsKeys.health(),
+                    });
                   }}
                   disabled={isLoadingHealth}
                   className="h-8 w-8 p-0"
                 >
-                  <ArrowUpRight
+                  <RefreshCw
                     className={`w-4 h-4 ${isLoadingHealth ? "animate-spin" : ""}`}
                   />
                 </Button>
@@ -752,8 +618,9 @@ export default function DashboardPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setIsLoadingHealth(true);
-                  fetchHealthStatus();
+                  queryClient.invalidateQueries({
+                    queryKey: statsKeys.health(),
+                  });
                 }}
                 disabled={isLoadingHealth}
                 className="h-8 w-8 p-0"

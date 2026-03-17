@@ -208,4 +208,40 @@ export const fontsApi = {
   },
 };
 
+// Social Network types
+export interface SocialNetwork {
+  id: string;
+  name: string;
+  url: string;
+  icon: string;
+  color?: string;
+}
+
+export const socialApi = {
+  /**
+   * Get all active social networks
+   */
+  getActiveSocials: async (): Promise<SocialNetwork[]> => {
+    const response = await apiClient.get<SocialNetwork[]>("/social/active");
+    return response.data;
+  },
+};
+
+// Contact types
+export interface ContactMessageInput {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export const contactApi = {
+  /**
+   * Send a contact message
+   */
+  sendMessage: async (data: ContactMessageInput): Promise<void> => {
+    await apiClient.post("/contact", data);
+  },
+};
+
 export default apiClient;
