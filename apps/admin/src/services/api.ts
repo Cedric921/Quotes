@@ -159,7 +159,7 @@ export const usersApi = {
     return response.data;
   },
   update: async (id: string, data: Partial<User>): Promise<User> => {
-    const response = await apiClient.put<User>(`/users/${id}`, data);
+    const response = await apiClient.patch<User>(`/users/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<void> => {
@@ -206,7 +206,7 @@ export const topicsApi = {
     return response.data;
   },
   update: async (id: string, data: Partial<Topic>): Promise<Topic> => {
-    const response = await apiClient.put<Topic>(`/topics/${id}`, data);
+    const response = await apiClient.patch<Topic>(`/topics/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<void> => {
@@ -224,7 +224,7 @@ export const quotesApi = {
     return response.data;
   },
   update: async (id: string, data: Partial<Quote>): Promise<Quote> => {
-    const response = await apiClient.put<Quote>(`/quotes/${id}`, data);
+    const response = await apiClient.patch<Quote>(`/quotes/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<void> => {
