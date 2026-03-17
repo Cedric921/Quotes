@@ -253,7 +253,7 @@ export const themesApi = {
     await apiClient.delete(`/themes/${id}`);
   },
   toggleActive: async (id: string): Promise<Theme> => {
-    const response = await apiClient.put<Theme>(`/themes/${id}/toggle-active`);
+    const response = await apiClient.post<Theme>(`/themes/${id}/toggle-active`);
     return response.data;
   },
 };
@@ -279,7 +279,7 @@ export const fontsApi = {
     await apiClient.delete(`/fonts/${id}`);
   },
   toggleActive: async (id: string): Promise<Font> => {
-    const response = await apiClient.put<Font>(`/fonts/${id}/toggle-active`);
+    const response = await apiClient.post<Font>(`/fonts/${id}/toggle-active`);
     return response.data;
   },
 };

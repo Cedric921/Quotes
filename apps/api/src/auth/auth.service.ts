@@ -31,4 +31,12 @@ export class AuthService {
       user: userWithoutPassword,
     };
   }
+
+  async verifyPassword(userId: string, password: string): Promise<boolean> {
+    const user = await this.usersService.findOne(userId);
+    if (!user || !user.password) {
+      return false;
+    }
+    return bcrypt.compare(password, user.password);
+  }
 }
