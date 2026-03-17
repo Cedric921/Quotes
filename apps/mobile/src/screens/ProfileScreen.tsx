@@ -311,8 +311,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
-          </TouchableOpacity> */}
-
+          </TouchableOpacity> 
+          
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => {
@@ -339,7 +339,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <Text style={styles.menuItemText}>{t("about.title")}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </ScrollView>
     </SafeAreaView>
