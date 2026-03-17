@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
 } from '@nestjs/common';
@@ -31,6 +32,11 @@ export class TopicsController {
   }
 
   @Patch(':id')
+  updatePatch(@Param('id') id: string, @Body() updateTopicDto: UpdateTopicDto) {
+    return this.topicsService.update(id, updateTopicDto);
+  }
+
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateTopicDto: UpdateTopicDto) {
     return this.topicsService.update(id, updateTopicDto);
   }
