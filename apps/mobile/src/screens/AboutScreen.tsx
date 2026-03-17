@@ -68,10 +68,10 @@ export default function AboutScreen({ navigation }: AboutScreenProps) {
         </View>
 
         {/* Description */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("about.aboutUsTitle")}</Text>
           <Text style={styles.description}>{t("about.description")}</Text>
-        </View>
+        </View> */}
 
         {/* Social Networks */}
         <View style={styles.section}>
@@ -175,6 +175,7 @@ const createStyles = (colors: any) =>
       marginBottom: 32,
     },
     sectionTitle: {
+      textAlign: "center",
       fontSize: 18,
       fontWeight: "600",
       color: colors.text,

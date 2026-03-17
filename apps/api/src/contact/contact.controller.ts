@@ -9,10 +9,20 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ContactService } from './contact.service';
 import { CreateContactMessageDto } from './dto/create-contact-message.dto';
 import { UpdateContactMessageDto } from './dto/update-contact-message.dto';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user?: {
+    userId: string;
+    id: string;
+    email: string;
+    isAdmin: boolean;
+  };
+}
 
 @Controller('contact')
 export class ContactController {
@@ -20,7 +30,10 @@ export class ContactController {
 
   // Public endpoint - anyone can send a message
   @Post()
-  async create(@Body() dto: CreateContactMessageDto, @Request() req) {
+  async create(
+    @Body() dto: CreateContactMessageDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
     const userId = req.user?.id;
     return this.contactService.create(dto, userId);
   }
@@ -28,7 +41,7 @@ export class ContactController {
   // Admin endpoints
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(@Request() req) {
+  async findAll(@Request() req: AuthenticatedRequest) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
     }
@@ -37,7 +50,7 @@ export class ContactController {
 
   @UseGuards(JwtAuthGuard)
   @Get('unread-count')
-  async getUnreadCount(@Request() req) {
+  async getUnreadCount(@Request() req: AuthenticatedRequest) {
     if (!req.user?.isAdmin) {
       return { count: 0 };
     }
@@ -47,7 +60,7 @@ export class ContactController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string, @Request() req) {
+  async findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
     }
@@ -61,7 +74,7 @@ export class ContactController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateContactMessageDto,
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
   ) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
@@ -71,7 +84,10 @@ export class ContactController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id/mark-unread')
-  async markAsUnread(@Param('id') id: string, @Request() req) {
+  async markAsUnread(
+    @Param('id') id: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
     }
@@ -80,7 +96,7 @@ export class ContactController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Request() req) {
+  async remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
     }
@@ -88,4 +104,3 @@ export class ContactController {
     return { success: true };
   }
 }
-

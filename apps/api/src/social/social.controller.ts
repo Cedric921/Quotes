@@ -9,10 +9,19 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SocialService } from './social.service';
 import { CreateSocialNetworkDto } from './dto/create-social-network.dto';
 import { UpdateSocialNetworkDto } from './dto/update-social-network.dto';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user?: {
+    userId: string;
+    email: string;
+    isAdmin: boolean;
+  };
+}
 
 @Controller('social')
 export class SocialController {
@@ -27,7 +36,7 @@ export class SocialController {
   // Admin endpoints
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(@Request() req) {
+  async findAll(@Request() req: AuthenticatedRequest) {
     if (!req.user?.isAdmin) {
       return this.socialService.findAllActive();
     }
@@ -36,7 +45,10 @@ export class SocialController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() dto: CreateSocialNetworkDto, @Request() req) {
+  async create(
+    @Body() dto: CreateSocialNetworkDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
     }
@@ -54,7 +66,7 @@ export class SocialController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateSocialNetworkDto,
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
   ) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
@@ -64,7 +76,10 @@ export class SocialController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id/toggle-active')
-  async toggleActive(@Param('id') id: string, @Request() req) {
+  async toggleActive(
+    @Param('id') id: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
     }
@@ -73,7 +88,7 @@ export class SocialController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Request() req) {
+  async remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     if (!req.user?.isAdmin) {
       return { error: 'Unauthorized' };
     }
@@ -81,4 +96,3 @@ export class SocialController {
     return { success: true };
   }
 }
-

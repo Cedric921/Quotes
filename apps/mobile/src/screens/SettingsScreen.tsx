@@ -168,14 +168,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handleContact = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Open Contact form
-    Alert.alert("Contact", "Contact form coming soon!");
+    navigation.navigate("Contact");
   };
 
   const handleAbout = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Navigate to About screen
-    Alert.alert("About", "About Focus coming soon!");
+    navigation.navigate("About");
   };
 
   const handleLogout = () => {
