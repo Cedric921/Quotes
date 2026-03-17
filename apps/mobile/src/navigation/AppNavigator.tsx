@@ -18,6 +18,8 @@ import {
   FavoritesScreen,
   EditProfileScreen,
   PaymentHistoryScreen,
+  ContactScreen,
+  AboutScreen,
 } from "../screens";
 import { navigationRef } from "../services/navigationService";
 
@@ -41,6 +43,8 @@ export type RootStackParamList = {
   Favorites: undefined;
   EditProfile: undefined;
   PaymentHistory: undefined;
+  Contact: undefined;
+  About: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -77,6 +81,8 @@ export default function AppNavigator() {
             name="PaymentHistory"
             component={PaymentHistoryScreen}
           />
+          <Stack.Screen name="Contact" component={ContactScreen} />
+          <Stack.Screen name="About" component={AboutScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

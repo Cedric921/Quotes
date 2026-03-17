@@ -12,7 +12,9 @@
     "themes": "Themes",
     "fonts": "Fonts",
     "subscriptions": "Subscriptions",
-    "payments": "Payments"
+    "payments": "Payments",
+    "contact": "Messages",
+    "social": "Social Networks"
   },
   "common": {
     "loading": "Loading...",
@@ -30,7 +32,10 @@
     "yes": "Yes",
     "no": "No",
     "theme": "Theme",
-    "language": "Language"
+    "language": "Language",
+    "active": "Active",
+    "inactive": "Inactive",
+    "create": "Create"
   },
   "auth": {
     "login": "Login",
@@ -174,7 +179,7 @@
   },
   "topics": {
     "title": "Topics Management",
-    "description": "Manage all application topics",
+    "subtitle": "Manage all application topics",
     "addTopic": "Add Topic",
     "editTopic": "Edit Topic",
     "deleteTopic": "Delete Topic",
@@ -722,5 +727,49 @@
         "p1": "For any questions regarding these Terms or your personal data:"
       }
     }
+  },
+  "social": {
+    "title": "Social Networks",
+    "subtitle": "Manage social network links displayed in the app",
+    "add": "Add Network",
+    "edit": "Edit Network",
+    "name": "Name",
+    "url": "URL",
+    "icon": "Icon",
+    "color": "Color",
+    "order": "Order",
+    "status": "Status",
+    "visible": "Visible in app",
+    "noSocials": "No social networks",
+    "formDescription": "Configure social network details",
+    "loadError": "Error loading",
+    "created": "Social network created",
+    "updated": "Social network updated",
+    "deleted": "Social network deleted",
+    "toggled": "Visibility updated",
+    "error": "Error during operation",
+    "deleteError": "Error deleting",
+    "deleteTitle": "Delete Social Network",
+    "deleteConfirm": "Are you sure you want to delete this social network?"
+  },
+  "contact": {
+    "title": "Contact Messages",
+    "subtitle": "Manage messages received from users",
+    "noMessages": "No messages",
+    "from": "From",
+    "subject": "Subject",
+    "message": "Message",
+    "date": "Date",
+    "status": "Status",
+    "unread": "Unread",
+    "read": "Read",
+    "markAsUnread": "Mark as unread",
+    "viewMessage": "View message",
+    "loadError": "Error loading",
+    "deleted": "Message deleted",
+    "deleteError": "Error deleting",
+    "deleteTitle": "Delete Message",
+    "deleteConfirm": "Are you sure you want to delete this message?",
+    "markedAsUnread": "Marked as unread"
   }
 }

@@ -116,10 +116,17 @@ export const NotificationsScreen = ({
       // Parse active days
       if (settings.activeDays) {
         try {
-          const days = JSON.parse(settings.activeDays);
-          setActiveDays(days);
+          // activeDays can be either an array or a JSON string
+          if (Array.isArray(settings.activeDays)) {
+            setActiveDays(settings.activeDays);
+          } else if (typeof settings.activeDays === "string") {
+            const days = JSON.parse(settings.activeDays);
+            setActiveDays(days);
+          }
         } catch (error) {
           console.error("Failed to parse activeDays:", error);
+          // Default to all days if parsing fails
+          setActiveDays([0, 1, 2, 3, 4, 5, 6]);
         }
       }
     }

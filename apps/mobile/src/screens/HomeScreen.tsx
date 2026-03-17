@@ -36,7 +36,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { registerThunk } from "../store/slices/authSlice";
-import { useThemeColors } from "../hooks";
+import { useThemeColors, usePermissions } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { widgetService } from "../services/widgetService";
 import { SubscriptionPlan } from "../store/slices/subscriptionSlice";
@@ -67,6 +67,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { colors } = useThemeColors();
   const styles = createStyles(colors, height);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Request permissions on first install
+  usePermissions();
 
   // Sharing state and ref
   const [isSharing, setIsSharing] = useState(false);

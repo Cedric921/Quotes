@@ -13,7 +13,15 @@
     "quote": "citation",
     "quotes": "citations",
     "like": "J'aime",
-    "liked": "Aimé"
+    "liked": "Aimé",
+    "send": "Envoyer",
+    "success": "Succès",
+    "required": "Requis"
+  },
+  "permissions": {
+    "notificationsTitle": "Notifications",
+    "notificationsMessage": "Autorisez les notifications pour recevoir des citations inspirantes tout au long de la journée.",
+    "openSettings": "Ouvrir les paramètres"
   },
   "auth": {
     "login": "Connexion",
@@ -198,6 +206,7 @@
     "checkingPayment": "Vérification du paiement en cours...",
     "pleaseWait": "Votre abonnement est en cours de traitement. Veuillez patienter.",
     "termsNotice": "En vous abonnant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité",
+    "notNow": "Pas maintenant",
     "billingSummary": "Résumé de facturation",
     "totalSpent": "Total dépensé",
     "totalPayments": "Paiements",
@@ -308,5 +317,30 @@
       "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
       "passwordMismatch": "Les mots de passe ne correspondent pas"
     }
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Vous avez une question, une suggestion ou un problème ? N'hésitez pas à nous contacter.",
+    "name": "Nom",
+    "namePlaceholder": "Votre nom",
+    "email": "Email",
+    "emailPlaceholder": "votre@email.com",
+    "subject": "Sujet",
+    "subjectPlaceholder": "Sujet de votre message",
+    "message": "Message",
+    "messagePlaceholder": "Écrivez votre message ici...",
+    "fillAllFields": "Veuillez remplir tous les champs",
+    "messageTooShort": "Le message doit contenir au moins 10 caractères",
+    "messageSent": "Votre message a été envoyé avec succès",
+    "sendError": "Erreur lors de l'envoi du message"
+  },
+  "about": {
+    "title": "À propos",
+    "tagline": "Des citations inspirantes pour chaque jour",
+    "aboutUsTitle": "Notre mission",
+    "description": "Focus est une application conçue pour vous inspirer au quotidien avec des citations soigneusement sélectionnées. Notre mission est de vous aider à rester motivé et concentré sur vos objectifs.",
+    "followUs": "Suivez-nous",
+    "noSocials": "Aucun réseau social disponible",
+    "version": "Version"
   }
 }
