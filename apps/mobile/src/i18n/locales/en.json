@@ -13,7 +13,15 @@
     "quote": "quote",
     "quotes": "quotes",
     "like": "Like",
-    "liked": "Liked"
+    "liked": "Liked",
+    "send": "Send",
+    "success": "Success",
+    "required": "Required"
+  },
+  "permissions": {
+    "notificationsTitle": "Notifications",
+    "notificationsMessage": "Allow notifications to receive inspiring quotes throughout the day.",
+    "openSettings": "Open Settings"
   },
   "auth": {
     "login": "Login",
@@ -198,6 +206,7 @@
     "checkingPayment": "Checking payment status...",
     "pleaseWait": "Your subscription is being processed. Please wait.",
     "termsNotice": "By subscribing, you agree to our Terms of Service and Privacy Policy",
+    "notNow": "Not now",
     "billingSummary": "Billing Summary",
     "totalSpent": "Total Spent",
     "totalPayments": "Payments",
@@ -308,5 +317,30 @@
       "passwordTooShort": "Password must be at least 6 characters",
       "passwordMismatch": "Passwords do not match"
     }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Have a question, suggestion, or issue? Feel free to reach out to us.",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "Subject of your message",
+    "message": "Message",
+    "messagePlaceholder": "Write your message here...",
+    "fillAllFields": "Please fill in all fields",
+    "messageTooShort": "Message must be at least 10 characters",
+    "messageSent": "Your message has been sent successfully",
+    "sendError": "Error sending message"
+  },
+  "about": {
+    "title": "About",
+    "tagline": "Inspiring quotes for every day",
+    "aboutUsTitle": "Our Mission",
+    "description": "Focus is an app designed to inspire you daily with carefully selected quotes. Our mission is to help you stay motivated and focused on your goals.",
+    "followUs": "Follow Us",
+    "noSocials": "No social networks available",
+    "version": "Version"
   }
 }

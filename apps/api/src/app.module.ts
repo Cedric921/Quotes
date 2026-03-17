@@ -14,6 +14,8 @@ import { ThemesModule } from './themes/themes.module';
 import { FontsModule } from './fonts/fonts.module';
 import { HealthModule } from './health/health.module';
 import { TranslationsModule } from './translations/translations.module';
+import { ContactModule } from './contact/contact.module';
+import { SocialModule } from './social/social.module';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -34,6 +36,8 @@ import { getDatabaseConfig } from './config/database.config';
     FontsModule,
     HealthModule,
     TranslationsModule,
+    ContactModule,
+    SocialModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -403,6 +403,17 @@ export default function SubscriptionScreen({
           </>
         )}
 
+        {/* Not Now Link */}
+        <TouchableOpacity
+          style={styles.notNowButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate("Home");
+          }}
+        >
+          <Text style={styles.notNowText}>{t("subscription.notNow")}</Text>
+        </TouchableOpacity>
+
         {/* Terms Notice */}
         <Text style={styles.termsNotice}>{t("subscription.termsNotice")}</Text>
       </ScrollView>
@@ -693,6 +704,16 @@ const createStyles = (colors: any) =>
       fontSize: 14,
       fontWeight: "600" as const,
       color: colors.primary,
+    } as TextStyle,
+    notNowButton: {
+      marginTop: 16,
+      alignItems: "center",
+      padding: 12,
+    } as ViewStyle,
+    notNowText: {
+      fontSize: 14,
+      color: colors.textTertiary,
+      textDecorationLine: "underline",
     } as TextStyle,
     termsNotice: {
       fontSize: 12,

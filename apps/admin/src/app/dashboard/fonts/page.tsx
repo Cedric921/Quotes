@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { apiClient } from "@/lib/auth";
+import { useState } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,28 +45,27 @@ import {
   Crown,
 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Font {
-  id: string;
-  name: string;
-  fontFamily: string;
-  description?: string;
-  previewText?: string;
-  isActive: boolean;
-  isPremium: boolean;
-  order: number;
-  createdAt: string;
-}
+import {
+  useFonts,
+  useCreateFont,
+  useUpdateFont,
+  useDeleteFont,
+  useToggleFontActive,
+} from "@/api/hooks";
+import { Font } from "@/services/api";
 
 export default function FontsPage() {
   const { t } = useLocale();
-  const [fonts, setFonts] = useState<Font[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: fonts = [], isLoading } = useFonts();
+  const createFontMutation = useCreateFont();
+  const updateFontMutation = useUpdateFont();
+  const deleteFontMutation = useDeleteFont();
+  const toggleActiveMutation = useToggleFontActive();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingFont, setEditingFont] = useState<Font | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fontToDelete, setFontToDelete] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     fontFamily: "",
@@ -77,26 +75,6 @@ export default function FontsPage() {
     isPremium: true,
     order: 0,
   });
-
-  const fetchFonts = useCallback(async () => {
-    try {
-      const response = await apiClient.get<Font[]>("/fonts");
-      setFonts(response.data);
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(
-        error.response?.data?.message ||
-          t.fonts?.loadError ||
-          "Error loading fonts",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchFonts();
-  }, [fetchFonts]);
 
   const resetForm = () => {
     setFormData({
@@ -120,7 +98,6 @@ export default function FontsPage() {
       return;
     }
 
-    setIsSubmitting(true);
     const toastId = toast.loading(
       editingFont
         ? t.fonts?.updating || "Updating..."
@@ -129,27 +106,20 @@ export default function FontsPage() {
 
     try {
       if (editingFont) {
-        await apiClient.put(`/fonts/${editingFont.id}`, formData);
+        await updateFontMutation.mutateAsync({
+          id: editingFont.id,
+          data: formData,
+        });
         toast.success(t.fonts?.fontUpdated || "Font updated", { id: toastId });
       } else {
-        await apiClient.post("/fonts", formData);
+        await createFontMutation.mutateAsync(formData);
         toast.success(t.fonts?.fontCreated || "Font created", { id: toastId });
       }
       setIsSheetOpen(false);
       resetForm();
-      fetchFonts();
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(
-        error.response?.data?.message ||
-          t.fonts?.saveError ||
-          "Error saving font",
-        {
-          id: toastId,
-        },
-      );
-    } finally {
-      setIsSubmitting(false);
+      const message = err instanceof Error ? err.message : "Error saving font";
+      toast.error(message, { id: toastId });
     }
   };
 
@@ -172,19 +142,12 @@ export default function FontsPage() {
     if (!fontToDelete) return;
     const toastId = toast.loading(t.fonts?.deleting || "Deleting...");
     try {
-      await apiClient.delete(`/fonts/${fontToDelete}`);
+      await deleteFontMutation.mutateAsync(fontToDelete);
       toast.success(t.fonts?.fontDeleted || "Font deleted", { id: toastId });
-      fetchFonts();
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(
-        error.response?.data?.message ||
-          t.fonts?.deleteError ||
-          "Error deleting font",
-        {
-          id: toastId,
-        },
-      );
+      const message =
+        err instanceof Error ? err.message : "Error deleting font";
+      toast.error(message, { id: toastId });
     } finally {
       setDeleteDialogOpen(false);
       setFontToDelete(null);
@@ -194,24 +157,17 @@ export default function FontsPage() {
   const handleToggleActive = async (font: Font) => {
     const toastId = toast.loading(t.fonts?.updating || "Updating...");
     try {
-      await apiClient.post(`/fonts/${font.id}/toggle-active`);
+      await toggleActiveMutation.mutateAsync(font.id);
       toast.success(
         font.isActive
           ? t.fonts?.fontDeactivated || "Font deactivated"
           : t.fonts?.fontActivated || "Font activated",
         { id: toastId },
       );
-      fetchFonts();
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(
-        error.response?.data?.message ||
-          t.fonts?.toggleError ||
-          "Error toggling font",
-        {
-          id: toastId,
-        },
-      );
+      const message =
+        err instanceof Error ? err.message : "Error toggling font";
+      toast.error(message, { id: toastId });
     }
   };
 
@@ -502,8 +458,15 @@ export default function FontsPage() {
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && (
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                createFontMutation.isPending || updateFontMutation.isPending
+              }
+            >
+              {(createFontMutation.isPending ||
+                updateFontMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               {editingFont

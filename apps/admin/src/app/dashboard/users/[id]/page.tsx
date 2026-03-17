@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiClient } from "@/lib/auth";
 import { UserDetailSkeleton } from "@/components/skeletons";
 import {
   Card,
@@ -45,7 +44,6 @@ import {
   Mail,
   Shield,
   ShieldCheck,
-  Calendar,
   DollarSign,
   CreditCard,
   Clock,
@@ -54,116 +52,63 @@ import {
   CheckCircle,
   XCircle,
   Receipt,
-  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
-
-interface User {
-  id: number;
-  email: string;
-  name?: string;
-  isAdmin: boolean;
-  isSubscribed: boolean;
-  subscriptionEndDate: string | null;
-  subscriptionStartDate?: string | null;
-}
-
-interface Payment {
-  id: string;
-  amount: number;
-  createdAt: string;
-  paidAt?: string;
-  status: "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
-  subscription?: {
-    plan?: { name: string };
-  };
-}
-
-interface Subscription {
-  id: string;
-  status: "ACTIVE" | "CANCELLED" | "EXPIRED" | "TRIAL" | "PAST_DUE";
-  startDate: string;
-  endDate: string;
-  plan?: {
-    name: string;
-    type: string;
-    price: number;
-  };
-}
+import {
+  useUser,
+  useUserActiveSubscription,
+  useUserPayments,
+  useUpdateUser,
+  useVerifyPassword,
+} from "@/api/hooks";
 
 export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
   const userId = params.id as string;
 
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  // React Query hooks
+  const { data: user, isLoading, error: userError } = useUser(userId);
+  const { data: activeSubscription } = useUserActiveSubscription(userId);
+  const { data: payments = [] } = useUserPayments(userId);
+  const updateUserMutation = useUpdateUser();
+  const verifyPasswordMutation = useVerifyPassword();
 
   // Edit user states
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editIsAdmin, setEditIsAdmin] = useState(false);
+  const [hasInitializedForm, setHasInitializedForm] = useState(false);
 
   // Password confirmation dialog
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // Real data from API
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [activeSubscription, setActiveSubscription] =
-    useState<Subscription | null>(null);
-
   // Calculate total spent
   const totalSpent = payments
     .filter((p) => p.status === "SUCCEEDED")
     .reduce((sum, p) => sum + p.amount, 0);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await apiClient.get<User>(`/users/${userId}`);
-        setUser(response.data);
-        setEditName(response.data.name || "");
-        setEditIsAdmin(response.data.isAdmin);
-      } catch (err: any) {
-        setError(err.response?.data?.message || "Failed to fetch user");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Initialize edit form when user data loads (only once)
+  if (user && !hasInitializedForm) {
+    setEditName(user.name || "");
+    setEditIsAdmin(user.isAdmin);
+    setHasInitializedForm(true);
+  }
 
-    const fetchSubscriptionData = async () => {
-      try {
-        // Fetch user's subscription history
-        const subResponse = await apiClient.get<Subscription[]>(
-          `/subscriptions/users/${userId}/subscription/history`,
-        );
-        setSubscriptions(subResponse.data);
-
-        // Fetch active subscription
-        const activeResponse = await apiClient.get<Subscription>(
-          `/subscriptions/users/${userId}/subscription`,
-        );
-        setActiveSubscription(activeResponse.data);
-
-        // Fetch user's payments
-        const payResponse = await apiClient.get<Payment[]>(
-          `/subscriptions/users/${userId}/payments`,
-        );
-        setPayments(payResponse.data);
-      } catch (err) {
-        console.error("Failed to fetch subscription data:", err);
-      }
-    };
-
-    fetchUser();
-    fetchSubscriptionData();
-  }, [userId]);
+  const error = userError
+    ? userError instanceof Error
+      ? userError.message
+      : "Failed to fetch user"
+    : "";
 
   const handleEditClick = () => {
+    // Reset form to current user values when opening
+    if (user) {
+      setEditName(user.name || "");
+      setEditIsAdmin(user.isAdmin);
+    }
     setIsEditSheetOpen(true);
   };
 
@@ -185,23 +130,23 @@ export default function UserDetailPage() {
 
     try {
       // First verify the admin password
-      await apiClient.post("/auth/verify-password", {
-        password: confirmPassword,
-      });
+      await verifyPasswordMutation.mutateAsync(confirmPassword);
 
       // Then update the user
-      const response = await apiClient.put(`/users/${userId}`, {
-        name: editName,
-        isAdmin: editIsAdmin,
+      await updateUserMutation.mutateAsync({
+        id: userId,
+        data: {
+          name: editName,
+          isAdmin: editIsAdmin,
+        },
       });
 
-      setUser(response.data);
       toast.success("User updated successfully!", { id: toastId });
       setIsPasswordDialogOpen(false);
       setConfirmPassword("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err.response?.data?.message || "Failed to update user";
+        err instanceof Error ? err.message : "Failed to update user";
       setPasswordError(errorMessage);
       toast.error(errorMessage, { id: toastId });
     }

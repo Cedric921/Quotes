@@ -82,7 +82,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.goBack();
+    // Always navigate to Home to avoid being stuck between Profile and Subscription
+    navigation.navigate("Home");
   };
 
   const handleSettings = () => {
@@ -311,6 +312,34 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             </View>
             <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity> */}
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("Contact");
+            }}
+          >
+            <View style={styles.menuItemLeft}>
+              <MaterialIcons name="mail-outline" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>{t("contact.title")}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("About");
+            }}
+          >
+            <View style={styles.menuItemLeft}>
+              <MaterialIcons name="info-outline" size={24} color="#0A84FF" />
+              <Text style={styles.menuItemText}>{t("about.title")}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

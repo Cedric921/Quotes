@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiClient } from "@/lib/auth";
+import { useState } from "react";
 import { QuotesSkeleton } from "@/components/skeletons/QuotesSkeleton";
 import {
   Card,
@@ -47,27 +46,24 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Quote {
-  id: string;
-  text: string;
-  author?: string;
-  topic?: {
-    id: string;
-    name: string;
-  };
-}
-
-interface Topic {
-  id: string;
-  name: string;
-}
+import {
+  useQuotes,
+  useCreateQuote,
+  useUpdateQuote,
+  useDeleteQuote,
+  useTopics,
+} from "@/api/hooks";
+import { Quote } from "@/services/api";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function QuotesPage() {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const { t } = useLocale();
+  const { data: quotes = [], isLoading, error } = useQuotes();
+  const { data: topics = [] } = useTopics();
+  const createQuoteMutation = useCreateQuote();
+  const updateQuoteMutation = useUpdateQuote();
+  const deleteQuoteMutation = useDeleteQuote();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -78,36 +74,11 @@ export default function QuotesPage() {
     topicId: "none",
   });
 
-  const fetchQuotes = async () => {
-    try {
-      const response = await apiClient.get<Quote[]>("/quotes");
-      setQuotes(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to fetch quotes");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchTopics = async () => {
-    try {
-      const response = await apiClient.get<Topic[]>("/topics");
-      setTopics(response.data);
-    } catch (err: any) {
-      console.error("Failed to fetch topics", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchQuotes();
-    fetchTopics();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const toastId = toast.loading(
-      editingQuote ? "Updating quote..." : "Creating quote...",
+      editingQuote ? t.quotes.updating : t.quotes.creating,
     );
 
     try {
@@ -121,21 +92,27 @@ export default function QuotesPage() {
       };
 
       if (editingQuote) {
-        await apiClient.patch(`/quotes/${editingQuote.id}`, payload);
-        toast.success("Quote updated successfully!", { id: toastId });
+        await updateQuoteMutation.mutateAsync({
+          id: editingQuote.id,
+          data: payload,
+        });
+        toast.success(t.quotes.updated, { id: toastId });
       } else {
-        await apiClient.post("/quotes", payload);
-        toast.success("Quote created successfully!", { id: toastId });
+        await createQuoteMutation.mutateAsync(payload);
+        toast.success(t.quotes.created, { id: toastId });
       }
 
       setFormData({ text: "", author: "", topicId: "none" });
       setIsSheetOpen(false);
       setEditingQuote(null);
-      fetchQuotes();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to save quote", {
-        id: toastId,
-      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : editingQuote
+            ? t.quotes.updateFailed
+            : t.quotes.createFailed;
+      toast.error(message, { id: toastId });
     }
   };
 
@@ -144,7 +121,7 @@ export default function QuotesPage() {
     setFormData({
       text: quote.text || "",
       author: quote.author || "",
-      topicId: quote.topic?.id || "none",
+      topicId: quote.topicId || "none",
     });
     setIsSheetOpen(true);
   };
@@ -163,23 +140,30 @@ export default function QuotesPage() {
   const handleDeleteConfirm = async () => {
     if (!quoteToDelete) return;
 
-    const toastId = toast.loading("Deleting quote...");
+    const toastId = toast.loading(t.quotes.deleting);
 
     try {
-      await apiClient.delete(`/quotes/${quoteToDelete}`);
-      toast.success("Quote deleted successfully!", { id: toastId });
+      await deleteQuoteMutation.mutateAsync(quoteToDelete);
+      toast.success(t.quotes.deleted, { id: toastId });
       setDeleteDialogOpen(false);
       setQuoteToDelete(null);
-      fetchQuotes();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete quote", {
-        id: toastId,
-      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : t.quotes.deleteFailed;
+      toast.error(message, { id: toastId });
     }
   };
 
   if (isLoading) {
     return <QuotesSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+        {error instanceof Error ? error.message : "Failed to fetch quotes"}
+      </div>
+    );
   }
 
   return (
@@ -189,10 +173,10 @@ export default function QuotesPage() {
         <div className="flex justify-between items-center pb-4 border-b">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Quotes Management
+              {t.quotes.title}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Manage your inspirational quotes
+              {t.quotes.subtitle}
             </p>
           </div>
           <Button
@@ -201,16 +185,9 @@ export default function QuotesPage() {
             className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
           >
             <Plus className="w-4 h-4" />
-            Add Quote
+            {t.quotes.addQuote}
           </Button>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-lg border-2 border-destructive/20 animate-in fade-in slide-in-from-top-2">
-            {error}
-          </div>
-        )}
 
         {/* Quotes Grid */}
         <div className="grid gap-6">
@@ -279,10 +256,9 @@ export default function QuotesPage() {
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
               <QuoteIcon className="w-12 h-12 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold mb-2">No quotes yet</h3>
+            <h3 className="text-2xl font-bold mb-2">{t.quotes.noQuotes}</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-md">
-              Get started by creating your first inspirational quote to share
-              with your users
+              {t.quotes.startAdding}
             </p>
             <Button
               onClick={handleAddNew}
@@ -290,7 +266,7 @@ export default function QuotesPage() {
               className="gap-2 shadow-lg"
             >
               <Plus className="w-5 h-5" />
-              Add Your First Quote
+              {t.quotes.addQuote}
             </Button>
           </div>
         )}
@@ -306,12 +282,10 @@ export default function QuotesPage() {
               </div>
               <div>
                 <SheetTitle className="text-2xl">
-                  {editingQuote ? "Edit Quote" : "Add New Quote"}
+                  {editingQuote ? t.quotes.editQuote : t.quotes.addQuote}
                 </SheetTitle>
                 <SheetDescription className="text-base">
-                  {editingQuote
-                    ? "Make changes to your quote here."
-                    : "Fill in the details to create a new quote."}
+                  {t.quotes.description}
                 </SheetDescription>
               </div>
             </div>
@@ -324,7 +298,7 @@ export default function QuotesPage() {
                 className="text-base font-semibold flex items-center gap-2"
               >
                 <QuoteIcon className="w-4 h-4 text-primary" />
-                Quote Text *
+                {t.quotes.text} *
               </Label>
               <Textarea
                 id="text"
@@ -332,7 +306,7 @@ export default function QuotesPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, text: e.target.value })
                 }
-                placeholder="Enter the inspirational quote..."
+                placeholder={t.quotes.quoteText}
                 className="min-h-[140px] text-base resize-none border-2 focus:border-primary transition-colors"
                 required
               />
@@ -343,7 +317,7 @@ export default function QuotesPage() {
 
             <div className="space-y-3">
               <Label htmlFor="author" className="text-base font-semibold">
-                Author
+                {t.quotes.author}
               </Label>
               <Input
                 id="author"
@@ -351,7 +325,7 @@ export default function QuotesPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, author: e.target.value })
                 }
-                placeholder="e.g., Albert Einstein"
+                placeholder={t.quotes.authorName}
                 className="border-2 focus:border-primary transition-colors"
               />
             </div>
@@ -362,7 +336,7 @@ export default function QuotesPage() {
                 className="text-base font-semibold flex items-center gap-2"
               >
                 <BookOpen className="w-4 h-4 text-primary" />
-                Topic
+                {t.quotes.topic}
               </Label>
               <Select
                 value={formData.topicId}
@@ -371,10 +345,10 @@ export default function QuotesPage() {
                 }
               >
                 <SelectTrigger className="border-2 focus:border-primary transition-colors">
-                  <SelectValue placeholder="Select a topic (optional)" />
+                  <SelectValue placeholder={t.quotes.selectTopic} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No Topic</SelectItem>
+                  <SelectItem value="none">{t.quotes.noTopic}</SelectItem>
                   {topics.map((topic) => (
                     <SelectItem key={topic.id} value={topic.id}>
                       {topic.name}
@@ -392,12 +366,12 @@ export default function QuotesPage() {
                 {editingQuote ? (
                   <>
                     <Pencil className="w-4 h-4" />
-                    Update Quote
+                    {t.quotes.editQuote}
                   </>
                 ) : (
                   <>
                     <Plus className="w-4 h-4" />
-                    Create Quote
+                    {t.quotes.addQuote}
                   </>
                 )}
               </Button>
@@ -407,7 +381,7 @@ export default function QuotesPage() {
                 onClick={() => setIsSheetOpen(false)}
                 className="flex-1 border-2"
               >
-                Cancel
+                {t.common.cancel}
               </Button>
             </div>
           </form>
@@ -423,22 +397,22 @@ export default function QuotesPage() {
                 <AlertTriangle className="w-6 h-6 text-destructive" />
               </div>
               <AlertDialogTitle className="text-xl">
-                Delete Quote
+                {t.quotes.deleteTitle}
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-base">
-              Are you sure you want to delete this quote? This action cannot be
-              undone and the quote will be permanently removed from the
-              database.
+              {t.quotes.deleteConfirm}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-2">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-2">
+              {t.common.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
-              Delete Quote
+              {t.quotes.deleteQuote}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
-import { apiClient } from "@/lib/auth";
 import {
   CreditCard,
   CheckCircle,
@@ -27,49 +26,17 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-interface Payment {
-  id: string;
-  userId: string;
-  user?: { email: string };
-  subscriptionId?: string;
-  subscription?: {
-    plan?: { name: string; type: string };
-  };
-  amount: number;
-  currency: string;
-  status: "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
-  stripePaymentIntentId?: string;
-  paidAt?: string;
-  createdAt: string;
-}
+import { usePayments } from "@/api/hooks";
+import type { Payment } from "@/services/api";
 
 export default function PaymentsPage() {
   const { t } = useLocale();
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const limit = 20;
 
-  useEffect(() => {
-    fetchPayments();
-  }, [page]);
-
-  const fetchPayments = async () => {
-    setLoading(true);
-    try {
-      const response = await apiClient.get(`/subscriptions/payments`, {
-        params: { page, limit },
-      });
-      setPayments(response.data.payments);
-      setTotal(response.data.total);
-    } catch (error) {
-      console.error("Failed to fetch payments:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, isLoading } = usePayments(page, limit);
+  const payments = data?.payments ?? [];
+  const total = data?.total ?? 0;
 
   const getStatusBadge = (status: Payment["status"]) => {
     switch (status) {
@@ -143,7 +110,7 @@ export default function PaymentsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
               {t.common?.loading || "Loading..."}
             </div>

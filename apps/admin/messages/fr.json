@@ -12,7 +12,9 @@
     "themes": "Thèmes",
     "fonts": "Polices",
     "subscriptions": "Abonnements",
-    "payments": "Paiements"
+    "payments": "Paiements",
+    "contact": "Messages",
+    "social": "Réseaux sociaux"
   },
   "common": {
     "loading": "Chargement...",
@@ -30,7 +32,10 @@
     "yes": "Oui",
     "no": "Non",
     "theme": "Thème",
-    "language": "Langue"
+    "language": "Langue",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "create": "Créer"
   },
   "auth": {
     "login": "Connexion",
@@ -174,7 +179,7 @@
   },
   "topics": {
     "title": "Gestion des Sujets",
-    "description": "Gérer tous les sujets de l'application",
+    "subtitle": "Gérer tous les sujets de l'application",
     "addTopic": "Ajouter un sujet",
     "editTopic": "Modifier le sujet",
     "deleteTopic": "Supprimer le sujet",
@@ -191,10 +196,18 @@
     "updateFailed": "Échec de la mise à jour",
     "deleting": "Suppression en cours...",
     "deleted": "Sujet supprimé avec succès !",
-    "deleteFailed": "Échec de la suppression"
+    "deleteFailed": "Échec de la suppression",
+    "displayTitle": "Titre d'affichage",
+    "icon": "Icône",
+    "color": "Couleur",
+    "premium": "Premium",
+    "premiumOnly": "Réservé Premium",
+    "deleteTitle": "Supprimer le sujet ?",
+    "deleteConfirm": "Cette action est irréversible. Toutes les citations liées seront également supprimées."
   },
   "quotes": {
     "title": "Gestion des Citations",
+    "subtitle": "Gérer toutes les citations inspirantes",
     "description": "Gérer toutes les citations de l'application",
     "addQuote": "Ajouter une citation",
     "editQuote": "Modifier la citation",
@@ -203,6 +216,7 @@
     "author": "Auteur",
     "topic": "Sujet",
     "selectTopic": "Sélectionner un sujet",
+    "noTopic": "Sans sujet",
     "noQuotes": "Aucune citation pour le moment",
     "startAdding": "Commencez par ajouter votre première citation",
     "creating": "Création en cours...",
@@ -213,7 +227,11 @@
     "updateFailed": "Échec de la mise à jour",
     "deleting": "Suppression en cours...",
     "deleted": "Citation supprimée avec succès !",
-    "deleteFailed": "Échec de la suppression"
+    "deleteFailed": "Échec de la suppression",
+    "deleteTitle": "Supprimer la citation ?",
+    "deleteConfirm": "Cette action est irréversible. La citation sera définitivement supprimée.",
+    "quoteText": "Texte de la citation",
+    "authorName": "Nom de l'auteur"
   },
   "subscriptions": {
     "title": "Plans d'abonnement",
@@ -272,7 +290,9 @@
     "cancelled": "Annulé",
     "expired": "Expiré",
     "trial": "Essai",
-    "pastDue": "En retard"
+    "pastDue": "En retard",
+    "createFirstPlan": "Commencez par créer votre premier plan d'abonnement",
+    "noPlan": "Aucun plan"
   },
   "themes": {
     "title": "Thèmes",
@@ -722,5 +742,49 @@
         "p1": "Pour toute question relative aux présentes Conditions ou à vos données personnelles :"
       }
     }
+  },
+  "social": {
+    "title": "Réseaux Sociaux",
+    "subtitle": "Gérer les liens des réseaux sociaux affichés dans l'app",
+    "add": "Ajouter un réseau",
+    "edit": "Modifier le réseau",
+    "name": "Nom",
+    "url": "URL",
+    "icon": "Icône",
+    "color": "Couleur",
+    "order": "Ordre",
+    "status": "Statut",
+    "visible": "Visible dans l'app",
+    "noSocials": "Aucun réseau social",
+    "formDescription": "Configurez les détails du réseau social",
+    "loadError": "Erreur lors du chargement",
+    "created": "Réseau social créé",
+    "updated": "Réseau social mis à jour",
+    "deleted": "Réseau social supprimé",
+    "toggled": "Visibilité mise à jour",
+    "error": "Erreur lors de l'opération",
+    "deleteError": "Erreur lors de la suppression",
+    "deleteTitle": "Supprimer le réseau social",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce réseau social ?"
+  },
+  "contact": {
+    "title": "Messages de Contact",
+    "subtitle": "Gérer les messages reçus des utilisateurs",
+    "noMessages": "Aucun message",
+    "from": "De",
+    "subject": "Sujet",
+    "message": "Message",
+    "date": "Date",
+    "status": "Statut",
+    "unread": "Non lu",
+    "read": "Lu",
+    "markAsUnread": "Marquer comme non lu",
+    "viewMessage": "Voir le message",
+    "loadError": "Erreur lors du chargement",
+    "deleted": "Message supprimé",
+    "deleteError": "Erreur lors de la suppression",
+    "deleteTitle": "Supprimer le message",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce message ?",
+    "markedAsUnread": "Marqué comme non lu"
   }
 }

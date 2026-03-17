@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiClient } from "@/lib/auth";
+import { useState } from "react";
 import { TopicsSkeleton } from "@/components/skeletons/TopicsSkeleton";
 import {
   Card,
@@ -44,21 +43,22 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { getLucideIcon } from "@/lib/icon-helper";
-
-interface Topic {
-  id: string;
-  name: string;
-  description: string;
-  title?: string;
-  icon?: string;
-  color?: string;
-  isPremium?: boolean;
-}
+import {
+  useTopics,
+  useCreateTopic,
+  useUpdateTopic,
+  useDeleteTopic,
+} from "@/api/hooks";
+import { Topic } from "@/services/api";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function TopicsPage() {
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const { t } = useLocale();
+  const { data: topics = [], isLoading, error } = useTopics();
+  const createTopicMutation = useCreateTopic();
+  const updateTopicMutation = useUpdateTopic();
+  const deleteTopicMutation = useDeleteTopic();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -72,35 +72,23 @@ export default function TopicsPage() {
     isPremium: false,
   });
 
-  const fetchTopics = async () => {
-    try {
-      const response = await apiClient.get<Topic[]>("/topics");
-      setTopics(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to fetch topics");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTopics();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const toastId = toast.loading(
-      editingTopic ? "Updating topic..." : "Creating topic...",
+      editingTopic ? t.topics.updating : t.topics.creating,
     );
 
     try {
       if (editingTopic) {
-        await apiClient.patch(`/topics/${editingTopic.id}`, formData);
-        toast.success("Topic updated successfully!", { id: toastId });
+        await updateTopicMutation.mutateAsync({
+          id: editingTopic.id,
+          data: formData,
+        });
+        toast.success(t.topics.updated, { id: toastId });
       } else {
-        await apiClient.post("/topics", formData);
-        toast.success("Topic created successfully!", { id: toastId });
+        await createTopicMutation.mutateAsync(formData);
+        toast.success(t.topics.created, { id: toastId });
       }
 
       setFormData({
@@ -113,11 +101,14 @@ export default function TopicsPage() {
       });
       setIsSheetOpen(false);
       setEditingTopic(null);
-      fetchTopics();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to save topic", {
-        id: toastId,
-      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : editingTopic
+            ? t.topics.updateFailed
+            : t.topics.createFailed;
+      toast.error(message, { id: toastId });
     }
   };
 
@@ -155,23 +146,30 @@ export default function TopicsPage() {
   const handleDeleteConfirm = async () => {
     if (!topicToDelete) return;
 
-    const toastId = toast.loading("Deleting topic...");
+    const toastId = toast.loading(t.topics.deleting);
 
     try {
-      await apiClient.delete(`/topics/${topicToDelete}`);
-      toast.success("Topic deleted successfully!", { id: toastId });
+      await deleteTopicMutation.mutateAsync(topicToDelete);
+      toast.success(t.topics.deleted, { id: toastId });
       setDeleteDialogOpen(false);
       setTopicToDelete(null);
-      fetchTopics();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete topic", {
-        id: toastId,
-      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : t.topics.deleteFailed;
+      toast.error(message, { id: toastId });
     }
   };
 
   if (isLoading) {
     return <TopicsSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+        {error instanceof Error ? error.message : "Failed to fetch topics"}
+      </div>
+    );
   }
 
   return (
@@ -181,10 +179,10 @@ export default function TopicsPage() {
         <div className="flex justify-between items-center pb-4 border-b">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Topics Management
+              {t.topics.title}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Organize your quotes by topics
+              {t.topics.subtitle}
             </p>
           </div>
           <Button
@@ -193,16 +191,9 @@ export default function TopicsPage() {
             className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
           >
             <Plus className="w-4 h-4" />
-            Add Topic
+            {t.topics.addTopic}
           </Button>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-lg border-2 border-destructive/20 animate-in fade-in slide-in-from-top-2">
-            {error}
-          </div>
-        )}
 
         {/* Topics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -250,7 +241,7 @@ export default function TopicsPage() {
                     className="flex-1 hover:bg-primary hover:text-primary-foreground hover:scale-105 transition-all shadow-md"
                   >
                     <Pencil className="w-3 h-3 mr-1" />
-                    Edit
+                    {t.common.edit}
                   </Button>
                   <Button
                     variant="outline"
@@ -259,7 +250,7 @@ export default function TopicsPage() {
                     className="flex-1 hover:bg-destructive hover:text-destructive-foreground hover:scale-105 transition-all shadow-md"
                   >
                     <Trash2 className="w-3 h-3 mr-1" />
-                    Delete
+                    {t.common.delete}
                   </Button>
                 </div>
               </CardHeader>
@@ -273,9 +264,9 @@ export default function TopicsPage() {
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
               <Tag className="w-12 h-12 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold mb-2">No topics yet</h3>
+            <h3 className="text-2xl font-bold mb-2">{t.topics.noTopics}</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-md">
-              Create your first topic to organize and categorize your quotes
+              {t.topics.startAdding}
             </p>
             <Button
               onClick={handleAddNew}
@@ -283,7 +274,7 @@ export default function TopicsPage() {
               className="gap-2 shadow-lg"
             >
               <Plus className="w-5 h-5" />
-              Add Your First Topic
+              {t.topics.addTopic}
             </Button>
           </div>
         )}
@@ -299,12 +290,10 @@ export default function TopicsPage() {
               </div>
               <div>
                 <SheetTitle className="text-2xl">
-                  {editingTopic ? "Edit Topic" : "Add New Topic"}
+                  {editingTopic ? t.topics.editTopic : t.topics.addTopic}
                 </SheetTitle>
                 <SheetDescription className="text-base">
-                  {editingTopic
-                    ? "Make changes to your topic here."
-                    : "Fill in the details to create a new topic."}
+                  {t.topics.subtitle}
                 </SheetDescription>
               </div>
             </div>
@@ -317,7 +306,7 @@ export default function TopicsPage() {
                 className="text-base font-semibold flex items-center gap-2"
               >
                 <Tag className="w-4 h-4 text-primary" />
-                Topic Name *
+                {t.topics.name} *
               </Label>
               <Input
                 id="name"
@@ -333,7 +322,7 @@ export default function TopicsPage() {
 
             <div className="space-y-3">
               <Label htmlFor="description" className="text-base font-semibold">
-                Description
+                {t.topics.description}
               </Label>
               <Textarea
                 id="description"
@@ -355,7 +344,7 @@ export default function TopicsPage() {
                 className="text-base font-semibold flex items-center gap-2"
               >
                 <Sparkles className="w-4 h-4 text-primary" />
-                Display Title
+                {t.topics.displayTitle}
               </Label>
               <Input
                 id="title"
@@ -378,7 +367,7 @@ export default function TopicsPage() {
                   className="text-base font-semibold flex items-center gap-2"
                 >
                   <Tag className="w-4 h-4 text-primary" />
-                  Icon
+                  {t.topics.icon}
                 </Label>
                 <IconPicker
                   value={formData.icon}
@@ -397,7 +386,7 @@ export default function TopicsPage() {
                   className="text-base font-semibold flex items-center gap-2"
                 >
                   <Palette className="w-4 h-4 text-primary" />
-                  Color
+                  {t.topics.color}
                 </Label>
                 <div className="flex gap-2">
                   <Input
@@ -431,10 +420,10 @@ export default function TopicsPage() {
                   className="text-base font-semibold flex items-center gap-2 cursor-pointer"
                 >
                   <Crown className="w-4 h-4 text-yellow-500" />
-                  Premium Topic
+                  {t.topics.premium}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Only accessible to premium users
+                  {t.topics.premiumOnly}
                 </p>
               </div>
               <Switch
@@ -454,12 +443,12 @@ export default function TopicsPage() {
                 {editingTopic ? (
                   <>
                     <Pencil className="w-4 h-4" />
-                    Update Topic
+                    {t.topics.editTopic}
                   </>
                 ) : (
                   <>
                     <Plus className="w-4 h-4" />
-                    Create Topic
+                    {t.topics.addTopic}
                   </>
                 )}
               </Button>
@@ -469,7 +458,7 @@ export default function TopicsPage() {
                 onClick={() => setIsSheetOpen(false)}
                 className="flex-1 border-2"
               >
-                Cancel
+                {t.common.cancel}
               </Button>
             </div>
           </form>
@@ -485,22 +474,22 @@ export default function TopicsPage() {
                 <AlertTriangle className="w-6 h-6 text-destructive" />
               </div>
               <AlertDialogTitle className="text-xl">
-                Delete Topic
+                {t.topics.deleteTitle}
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-base">
-              Are you sure you want to delete this topic? This action cannot be
-              undone and the topic will be permanently removed from the
-              database.
+              {t.topics.deleteConfirm}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-2">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-2">
+              {t.common.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
-              Delete Topic
+              {t.topics.deleteTopic}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

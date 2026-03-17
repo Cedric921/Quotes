@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { apiClient } from "@/lib/auth";
+import { useState } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,38 +48,29 @@ import {
 import { toast } from "sonner";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-
-interface Font {
-  id: string;
-  name: string;
-  fontFamily: string;
-  isActive: boolean;
-}
-
-interface Theme {
-  id: string;
-  name: string;
-  description?: string;
-  imageUrl: string;
-  thumbnailUrl?: string;
-  isActive: boolean;
-  order: number;
-  fontName?: string;
-  fontFamily?: string;
-  isPremium: boolean;
-  createdAt: string;
-}
+import {
+  useThemes,
+  useCreateTheme,
+  useUpdateTheme,
+  useDeleteTheme,
+  useToggleThemeActive,
+  useActiveFonts,
+} from "@/api/hooks";
+import { Theme } from "@/services/api";
 
 export default function ThemesPage() {
   const { t } = useLocale();
-  const [themes, setThemes] = useState<Theme[]>([]);
-  const [fonts, setFonts] = useState<Font[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: themes = [], isLoading } = useThemes();
+  const { data: fonts = [] } = useActiveFonts();
+  const createThemeMutation = useCreateTheme();
+  const updateThemeMutation = useUpdateTheme();
+  const deleteThemeMutation = useDeleteTheme();
+  const toggleActiveMutation = useToggleThemeActive();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [themeToDelete, setThemeToDelete] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -92,32 +82,6 @@ export default function ThemesPage() {
     fontFamily: "",
     isPremium: false,
   });
-
-  const fetchThemes = useCallback(async () => {
-    try {
-      const response = await apiClient.get<Theme[]>("/themes");
-      setThemes(response.data);
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || t.themes.loadError);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t.themes.loadError]);
-
-  const fetchFonts = useCallback(async () => {
-    try {
-      const response = await apiClient.get<Font[]>("/fonts/active");
-      setFonts(response.data);
-    } catch (err) {
-      console.error("Error loading fonts:", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchThemes();
-    fetchFonts();
-  }, [fetchThemes, fetchFonts]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -153,7 +117,6 @@ export default function ThemesPage() {
       return;
     }
 
-    setIsSubmitting(true);
     const toastId = toast.loading(
       editingTheme ? t.themes.updating : t.themes.creating,
     );
@@ -172,27 +135,21 @@ export default function ThemesPage() {
       }
 
       if (editingTheme) {
-        await apiClient.put(`/themes/${editingTheme.id}`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
+        await updateThemeMutation.mutateAsync({
+          id: editingTheme.id,
+          data,
         });
         toast.success(t.themes.themeUpdated, { id: toastId });
       } else {
-        await apiClient.post("/themes", data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await createThemeMutation.mutateAsync(data);
         toast.success(t.themes.themeCreated, { id: toastId });
       }
 
       setIsSheetOpen(false);
       resetForm();
-      fetchThemes();
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || t.themes.error, {
-        id: toastId,
-      });
-    } finally {
-      setIsSubmitting(false);
+      const message = err instanceof Error ? err.message : t.themes.error;
+      toast.error(message, { id: toastId });
     }
   };
 
@@ -215,14 +172,11 @@ export default function ThemesPage() {
     if (!themeToDelete) return;
     const toastId = toast.loading(t.themes.deleting);
     try {
-      await apiClient.delete(`/themes/${themeToDelete}`);
+      await deleteThemeMutation.mutateAsync(themeToDelete);
       toast.success(t.themes.themeDeleted, { id: toastId });
-      fetchThemes();
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || t.themes.error, {
-        id: toastId,
-      });
+      const message = err instanceof Error ? err.message : t.themes.error;
+      toast.error(message, { id: toastId });
     } finally {
       setDeleteDialogOpen(false);
       setThemeToDelete(null);
@@ -232,17 +186,14 @@ export default function ThemesPage() {
   const handleToggleActive = async (theme: Theme) => {
     const toastId = toast.loading(t.themes.updating);
     try {
-      await apiClient.post(`/themes/${theme.id}/toggle-active`);
+      await toggleActiveMutation.mutateAsync(theme.id);
       toast.success(
         theme.isActive ? t.themes.themeDeactivated : t.themes.themeActivated,
         { id: toastId },
       );
-      fetchThemes();
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || t.themes.error, {
-        id: toastId,
-      });
+      const message = err instanceof Error ? err.message : t.themes.error;
+      toast.error(message, { id: toastId });
     }
   };
 
@@ -558,8 +509,15 @@ export default function ThemesPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting && (
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                createThemeMutation.isPending || updateThemeMutation.isPending
+              }
+            >
+              {(createThemeMutation.isPending ||
+                updateThemeMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               {editingTheme ? t.themes.updateTheme : t.themes.createTheme}

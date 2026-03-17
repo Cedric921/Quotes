@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiClient } from "@/lib/auth";
 import { useLocale } from "@/contexts/LocaleContext";
 import {
   Card,
@@ -20,35 +18,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { UsersSkeleton } from "@/components/skeletons/UsersSkeleton";
-
-interface User {
-  id: number;
-  email: string;
-  isAdmin: boolean;
-  isSubscribed: boolean;
-  subscriptionEndDate: string | null;
-}
+import { useUsers } from "@/api/hooks";
 
 export default function UsersPage() {
   const { t } = useLocale();
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>("");
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await apiClient.get<User[]>("/users");
-        setUsers(response.data);
-      } catch (err: any) {
-        setError(err.response?.data?.message || "Failed to fetch users");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, []);
+  const { data: users = [], isLoading, error } = useUsers();
 
   if (isLoading) {
     return <UsersSkeleton />;
@@ -57,7 +31,7 @@ export default function UsersPage() {
   if (error) {
     return (
       <div className="p-4 text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
-        {error}
+        {error instanceof Error ? error.message : "Failed to fetch users"}
       </div>
     );
   }

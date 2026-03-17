@@ -14,3 +14,5 @@ export { default as FontSelectionScreen } from "./FontSelectionScreen";
 export { default as FavoritesScreen } from "./FavoritesScreen";
 export { default as EditProfileScreen } from "./EditProfileScreen";
 export { default as PaymentHistoryScreen } from "./PaymentHistoryScreen";
+export { default as ContactScreen } from "./ContactScreen";
+export { default as AboutScreen } from "./AboutScreen";

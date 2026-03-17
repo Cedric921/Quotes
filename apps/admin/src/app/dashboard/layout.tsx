@@ -15,6 +15,8 @@ import {
   CreditCard,
   Image,
   Type,
+  Mail,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -103,6 +105,16 @@ export default function DashboardLayout({
       href: "/dashboard/payments",
       icon: CreditCard,
       label: t.nav.payments || "Payments",
+    },
+    {
+      href: "/dashboard/contact",
+      icon: Mail,
+      label: t.nav.contact || "Messages",
+    },
+    {
+      href: "/dashboard/social",
+      icon: Share2,
+      label: t.nav.social || "Social Networks",
     },
   ];
 
