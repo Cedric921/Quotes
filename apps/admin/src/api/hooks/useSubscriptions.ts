@@ -1,11 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { subscriptionsApi, paymentsApi, SubscriptionPlan } from "@/services/api";
+import {
+  subscriptionsApi,
+  paymentsApi,
+  SubscriptionPlan,
+} from "@/services/api";
 
 // Query keys
 export const subscriptionKeys = {
   all: ["subscriptions"] as const,
   plans: () => [...subscriptionKeys.all, "plans"] as const,
-  payments: () => [...subscriptionKeys.all, "payments"] as const,
+  payments: (page?: number, limit?: number) =>
+    [...subscriptionKeys.all, "payments", { page, limit }] as const,
+  subscriptions: () => [...subscriptionKeys.all, "list"] as const,
 };
 
 // Get all subscription plans
@@ -59,11 +65,19 @@ export const useDeleteSubscriptionPlan = () => {
   });
 };
 
-// Get all payments
-export const usePayments = () => {
+// Get all subscriptions
+export const useSubscriptions = () => {
   return useQuery({
-    queryKey: subscriptionKeys.payments(),
-    queryFn: paymentsApi.getAll,
+    queryKey: subscriptionKeys.subscriptions(),
+    queryFn: subscriptionsApi.getAll,
+    select: (data) => data.subscriptions,
   });
 };
 
+// Get all payments
+export const usePayments = (page: number = 1, limit: number = 20) => {
+  return useQuery({
+    queryKey: subscriptionKeys.payments(page, limit),
+    queryFn: () => paymentsApi.getAll(page, limit),
+  });
+};

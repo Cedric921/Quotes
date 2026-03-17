@@ -290,7 +290,9 @@
     "cancelled": "Annulé",
     "expired": "Expiré",
     "trial": "Essai",
-    "pastDue": "En retard"
+    "pastDue": "En retard",
+    "createFirstPlan": "Commencez par créer votre premier plan d'abonnement",
+    "noPlan": "Aucun plan"
   },
   "themes": {
     "title": "Thèmes",

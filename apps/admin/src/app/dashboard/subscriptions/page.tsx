@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
-import { apiClient } from "@/lib/auth";
 import { toast } from "sonner";
 import {
   CreditCard,
@@ -55,40 +54,30 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-
-interface Plan {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  durationMonths: number;
-  isActive: boolean;
-}
-
-interface Subscription {
-  id: string;
-  userId: string;
-  planId: string;
-  status: "ACTIVE" | "EXPIRED" | "CANCELLED";
-  startDate: string;
-  endDate: string;
-  amountPaid: number;
-  stripePaymentIntentId?: string;
-  createdAt: string;
-  user?: { email: string };
-  plan?: { name: string };
-}
+import {
+  useSubscriptionPlans,
+  useSubscriptions,
+  useCreateSubscriptionPlan,
+  useUpdateSubscriptionPlan,
+  useDeleteSubscriptionPlan,
+} from "@/api/hooks";
+import { SubscriptionPlan } from "@/services/api";
 
 export default function SubscriptionsPage() {
   const { t } = useLocale();
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // React Query hooks
+  const { data: plans = [], isLoading: plansLoading } = useSubscriptionPlans();
+  const { data: subscriptions = [], isLoading: subscriptionsLoading } =
+    useSubscriptions();
+  const createPlanMutation = useCreateSubscriptionPlan();
+  const updatePlanMutation = useUpdateSubscriptionPlan();
+  const deletePlanMutation = useDeleteSubscriptionPlan();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [planForm, setPlanForm] = useState({
     name: "",
     description: "",
@@ -97,30 +86,7 @@ export default function SubscriptionsPage() {
     isActive: true,
   });
 
-  const fetchPlans = useCallback(async () => {
-    try {
-      const response = await apiClient.get("/subscriptions/plans");
-      setPlans(response.data);
-    } catch (error) {
-      console.error("Failed to fetch plans:", error);
-      toast.error(t.subscriptions?.loadError || "Erreur lors du chargement");
-    }
-  }, [t.subscriptions?.loadError]);
-
-  const fetchSubscriptions = useCallback(async () => {
-    try {
-      const response = await apiClient.get("/subscriptions/all");
-      setSubscriptions(response.data.subscriptions || []);
-    } catch (error) {
-      console.error("Failed to fetch subscriptions:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    Promise.all([fetchPlans(), fetchSubscriptions()]).finally(() =>
-      setLoading(false),
-    );
-  }, [fetchPlans, fetchSubscriptions]);
+  const isLoading = plansLoading || subscriptionsLoading;
 
   const resetForm = () => {
     setPlanForm({
@@ -133,7 +99,7 @@ export default function SubscriptionsPage() {
     setEditingPlan(null);
   };
 
-  const openPlanSheet = (plan?: Plan) => {
+  const openPlanSheet = (plan?: SubscriptionPlan) => {
     if (plan) {
       setEditingPlan(plan);
       setPlanForm({
@@ -155,7 +121,6 @@ export default function SubscriptionsPage() {
       return;
     }
 
-    setIsSubmitting(true);
     const toastId = toast.loading(
       editingPlan
         ? t.subscriptions?.updating || "Mise à jour..."
@@ -164,24 +129,24 @@ export default function SubscriptionsPage() {
 
     try {
       if (editingPlan) {
-        await apiClient.put(`/subscriptions/plans/${editingPlan.id}`, planForm);
+        await updatePlanMutation.mutateAsync({
+          id: editingPlan.id,
+          data: planForm,
+        });
         toast.success(t.subscriptions?.planUpdated || "Plan mis à jour !", {
           id: toastId,
         });
       } else {
-        await apiClient.post("/subscriptions/plans", planForm);
+        await createPlanMutation.mutateAsync(planForm);
         toast.success(t.subscriptions?.planCreated || "Plan créé !", {
           id: toastId,
         });
       }
       setIsSheetOpen(false);
       resetForm();
-      fetchPlans();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       toast.error(err.response?.data?.message || "Erreur", { id: toastId });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -192,11 +157,10 @@ export default function SubscriptionsPage() {
       t.subscriptions?.deleting || "Suppression...",
     );
     try {
-      await apiClient.delete(`/subscriptions/plans/${planToDelete}`);
+      await deletePlanMutation.mutateAsync(planToDelete);
       toast.success(t.subscriptions?.planDeleted || "Plan supprimé !", {
         id: toastId,
       });
-      fetchPlans();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       toast.error(err.response?.data?.message || "Erreur", { id: toastId });
@@ -214,7 +178,7 @@ export default function SubscriptionsPage() {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -261,7 +225,8 @@ export default function SubscriptionsPage() {
               <div>
                 <CardTitle>{t.subscriptions?.plans || "Plans"}</CardTitle>
                 <CardDescription>
-                  Plans affichés aux utilisateurs sur l'app mobile
+                  {t.subscriptions?.plansDescription ||
+                    "Plans displayed to users on the mobile app"}
                 </CardDescription>
               </div>
               <Button onClick={() => openPlanSheet()} className="gap-2">
@@ -275,7 +240,8 @@ export default function SubscriptionsPage() {
                   <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Aucun plan</h3>
                   <p className="text-muted-foreground mb-4">
-                    Commencez par créer votre premier plan d'abonnement
+                    {t.subscriptions?.createFirstPlan ||
+                      "Start by creating your first subscription plan"}
                   </p>
                   <Button onClick={() => openPlanSheet()}>
                     <Plus className="w-4 h-4 mr-2" />
@@ -524,12 +490,17 @@ export default function SubscriptionsPage() {
             <Button
               onClick={savePlan}
               className="w-full"
-              disabled={isSubmitting}
+              disabled={
+                createPlanMutation.isPending || updatePlanMutation.isPending
+              }
             >
-              {isSubmitting && (
+              {(createPlanMutation.isPending ||
+                updatePlanMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editingPlan ? "Mettre à jour" : "Créer le plan"}
+              {editingPlan
+                ? t.subscriptions?.updatePlan || "Mettre à jour"
+                : t.subscriptions?.createPlan || "Créer le plan"}
             </Button>
           </div>
         </SheetContent>
