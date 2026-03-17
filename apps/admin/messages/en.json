@@ -196,10 +196,18 @@
     "updateFailed": "Failed to update topic",
     "deleting": "Deleting...",
     "deleted": "Topic deleted successfully!",
-    "deleteFailed": "Failed to delete topic"
+    "deleteFailed": "Failed to delete topic",
+    "displayTitle": "Display Title",
+    "icon": "Icon",
+    "color": "Color",
+    "premium": "Premium",
+    "premiumOnly": "Premium Only",
+    "deleteTitle": "Delete Topic?",
+    "deleteConfirm": "This action is irreversible. All associated quotes will also be deleted."
   },
   "quotes": {
     "title": "Quotes Management",
+    "subtitle": "Manage all inspirational quotes",
     "description": "Manage all application quotes",
     "addQuote": "Add Quote",
     "editQuote": "Edit Quote",
@@ -208,6 +216,7 @@
     "author": "Author",
     "topic": "Topic",
     "selectTopic": "Select a topic",
+    "noTopic": "No topic",
     "noQuotes": "No quotes yet",
     "startAdding": "Start by adding your first quote",
     "creating": "Creating...",
@@ -218,7 +227,11 @@
     "updateFailed": "Failed to update quote",
     "deleting": "Deleting...",
     "deleted": "Quote deleted successfully!",
-    "deleteFailed": "Failed to delete quote"
+    "deleteFailed": "Failed to delete quote",
+    "deleteTitle": "Delete Quote?",
+    "deleteConfirm": "This action is irreversible. The quote will be permanently deleted.",
+    "quoteText": "Quote text",
+    "authorName": "Author name"
   },
   "subscriptions": {
     "title": "Subscription Plans",

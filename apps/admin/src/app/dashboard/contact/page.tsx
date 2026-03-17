@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { apiClient } from "@/lib/auth";
+import { useState } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,78 +32,55 @@ import {
 } from "@/components/ui/table";
 import { Mail, MailOpen, Trash2, Loader2, Eye, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-
-interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  status: "UNREAD" | "READ";
-  userId?: string;
-  createdAt: string;
-}
+import {
+  useContactMessages,
+  useContactMessage,
+  useMarkContactAsUnread,
+  useDeleteContactMessage,
+} from "@/api/hooks";
+import { ContactMessage } from "@/services/api";
 
 export default function ContactPage() {
   const { t } = useLocale();
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: messages = [], isLoading, refetch } = useContactMessages();
+  const markUnreadMutation = useMarkContactAsUnread();
+  const deleteMutation = useDeleteContactMessage();
+
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(
     null,
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
+  const [messageIdToView, setMessageIdToView] = useState<string | null>(null);
 
-  const fetchMessages = useCallback(async () => {
-    try {
-      const response = await apiClient.get<ContactMessage[]>("/contact");
-      setMessages(response.data);
-    } catch {
-      toast.error(t.contact?.loadError || "Error loading messages");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
+  // Auto-mark as read when viewing
+  useContactMessage(messageIdToView || "");
 
-  useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages]);
-
-  const handleViewMessage = async (message: ContactMessage) => {
+  const handleViewMessage = (message: ContactMessage) => {
     setSelectedMessage(message);
     setDialogOpen(true);
 
-    // Mark as read
+    // Mark as read by triggering the query
     if (message.status === "UNREAD") {
-      try {
-        await apiClient.get(`/contact/${message.id}`);
-        setMessages((prev) =>
-          prev.map((m) => (m.id === message.id ? { ...m, status: "READ" } : m)),
-        );
-      } catch {
-        // Silently fail
-      }
+      setMessageIdToView(message.id);
+      refetch(); // Refresh to get updated status
     }
   };
 
   const handleMarkUnread = async (id: string) => {
     try {
-      await apiClient.put(`/contact/${id}/mark-unread`);
-      setMessages((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, status: "UNREAD" } : m)),
-      );
-      toast.success(t.contact?.markedUnread || "Marked as unread");
+      await markUnreadMutation.mutateAsync(id);
+      toast.success(t.contact?.markedAsUnread || "Marked as unread");
     } catch {
-      toast.error(t.contact?.error || "Error");
+      toast.error("Error");
     }
   };
 
   const handleDelete = async () => {
     if (!messageToDelete) return;
     try {
-      await apiClient.delete(`/contact/${messageToDelete}`);
-      setMessages((prev) => prev.filter((m) => m.id !== messageToDelete));
+      await deleteMutation.mutateAsync(messageToDelete);
       toast.success(t.contact?.deleted || "Message deleted");
     } catch {
       toast.error(t.contact?.deleteError || "Error deleting message");
@@ -140,9 +116,9 @@ export default function ContactPage() {
             )}
           </p>
         </div>
-        <Button variant="outline" onClick={fetchMessages}>
+        <Button variant="outline" onClick={() => refetch()}>
           <RefreshCw className="h-4 w-4 mr-2" />
-          {t.common?.refresh || "Refresh"}
+          {t.common?.loading ? "Refresh" : "Refresh"}
         </Button>
       </div>
 
@@ -152,8 +128,8 @@ export default function ContactPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>{t.contact?.name || "Name"}</TableHead>
-                <TableHead>{t.contact?.email || "Email"}</TableHead>
+                <TableHead>{t.contact?.from || "Name"}</TableHead>
+                <TableHead>{"Email"}</TableHead>
                 <TableHead>{t.contact?.subject || "Subject"}</TableHead>
                 <TableHead>{t.contact?.date || "Date"}</TableHead>
                 <TableHead className="text-right">
@@ -262,7 +238,7 @@ export default function ContactPage() {
                   }}
                 >
                   <Mail className="h-4 w-4 mr-2" />
-                  {t.contact?.markUnread || "Mark as unread"}
+                  {t.contact?.markAsUnread || "Mark as unread"}
                 </Button>
               )}
             </div>

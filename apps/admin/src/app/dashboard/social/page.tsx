@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { apiClient } from "@/lib/auth";
+import { useState } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,29 +43,29 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
-
-interface SocialNetwork {
-  id: string;
-  name: string;
-  url: string;
-  icon: string;
-  color?: string;
-  isActive: boolean;
-  order: number;
-  createdAt: string;
-}
+import {
+  useSocialNetworks,
+  useCreateSocialNetwork,
+  useUpdateSocialNetwork,
+  useDeleteSocialNetwork,
+  useToggleSocialNetworkActive,
+} from "@/api/hooks";
+import { SocialNetwork } from "@/services/api";
 
 export default function SocialPage() {
   const { t } = useLocale();
-  const [socials, setSocials] = useState<SocialNetwork[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: socials = [], isLoading } = useSocialNetworks();
+  const createMutation = useCreateSocialNetwork();
+  const updateMutation = useUpdateSocialNetwork();
+  const deleteMutation = useDeleteSocialNetwork();
+  const toggleActiveMutation = useToggleSocialNetworkActive();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingSocial, setEditingSocial] = useState<SocialNetwork | null>(
     null,
   );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [socialToDelete, setSocialToDelete] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -75,21 +74,6 @@ export default function SocialPage() {
     isActive: true,
     order: 0,
   });
-
-  const fetchSocials = useCallback(async () => {
-    try {
-      const response = await apiClient.get<SocialNetwork[]>("/social");
-      setSocials(response.data);
-    } catch {
-      toast.error(t.social?.loadError || "Error loading social networks");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchSocials();
-  }, [fetchSocials]);
 
   const resetForm = () => {
     setFormData({
@@ -122,32 +106,28 @@ export default function SocialPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     try {
       if (editingSocial) {
-        await apiClient.put(`/social/${editingSocial.id}`, formData);
+        await updateMutation.mutateAsync({
+          id: editingSocial.id,
+          data: formData,
+        });
         toast.success(t.social?.updated || "Social network updated");
       } else {
-        await apiClient.post("/social", formData);
+        await createMutation.mutateAsync(formData);
         toast.success(t.social?.created || "Social network created");
       }
-      fetchSocials();
       setIsSheetOpen(false);
       resetForm();
     } catch {
       toast.error(t.social?.error || "Error saving social network");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleToggleActive = async (id: string) => {
     try {
-      await apiClient.put(`/social/${id}/toggle-active`);
-      setSocials((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s)),
-      );
+      await toggleActiveMutation.mutateAsync(id);
       toast.success(t.social?.toggled || "Visibility updated");
     } catch {
       toast.error(t.social?.error || "Error");
@@ -157,8 +137,7 @@ export default function SocialPage() {
   const handleDelete = async () => {
     if (!socialToDelete) return;
     try {
-      await apiClient.delete(`/social/${socialToDelete}`);
-      setSocials((prev) => prev.filter((s) => s.id !== socialToDelete));
+      await deleteMutation.mutateAsync(socialToDelete);
       toast.success(t.social?.deleted || "Social network deleted");
     } catch {
       toast.error(t.social?.deleteError || "Error deleting");
@@ -167,6 +146,8 @@ export default function SocialPage() {
       setSocialToDelete(null);
     }
   };
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   if (isLoading) {
     return (

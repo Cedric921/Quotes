@@ -196,10 +196,18 @@
     "updateFailed": "Échec de la mise à jour",
     "deleting": "Suppression en cours...",
     "deleted": "Sujet supprimé avec succès !",
-    "deleteFailed": "Échec de la suppression"
+    "deleteFailed": "Échec de la suppression",
+    "displayTitle": "Titre d'affichage",
+    "icon": "Icône",
+    "color": "Couleur",
+    "premium": "Premium",
+    "premiumOnly": "Réservé Premium",
+    "deleteTitle": "Supprimer le sujet ?",
+    "deleteConfirm": "Cette action est irréversible. Toutes les citations liées seront également supprimées."
   },
   "quotes": {
     "title": "Gestion des Citations",
+    "subtitle": "Gérer toutes les citations inspirantes",
     "description": "Gérer toutes les citations de l'application",
     "addQuote": "Ajouter une citation",
     "editQuote": "Modifier la citation",
@@ -208,6 +216,7 @@
     "author": "Auteur",
     "topic": "Sujet",
     "selectTopic": "Sélectionner un sujet",
+    "noTopic": "Sans sujet",
     "noQuotes": "Aucune citation pour le moment",
     "startAdding": "Commencez par ajouter votre première citation",
     "creating": "Création en cours...",
@@ -218,7 +227,11 @@
     "updateFailed": "Échec de la mise à jour",
     "deleting": "Suppression en cours...",
     "deleted": "Citation supprimée avec succès !",
-    "deleteFailed": "Échec de la suppression"
+    "deleteFailed": "Échec de la suppression",
+    "deleteTitle": "Supprimer la citation ?",
+    "deleteConfirm": "Cette action est irréversible. La citation sera définitivement supprimée.",
+    "quoteText": "Texte de la citation",
+    "authorName": "Nom de l'auteur"
   },
   "subscriptions": {
     "title": "Plans d'abonnement",
