@@ -4,12 +4,12 @@
     "slug": "focus-quotes",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/app_without_bg.png",
+    "icon": "./assets/images/app-icon-all.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "scheme": "focus-quotes",
     "splash": {
-      "image": "./assets/app_without_bg.png",
+      "image": "./assets/images/splash-logo-all.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -18,6 +18,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.focus.quotes",
       "buildNumber": "1",
+      "icon": "./assets/images/app-icon-all.png",
       "infoPlist": {
         "NSCameraUsageDescription": "Cette application utilise la caméra pour vous permettre de prendre une photo de profil.",
         "NSPhotoLibraryUsageDescription": "Cette application accède à votre galerie pour vous permettre de choisir une photo de profil.",
@@ -26,7 +27,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app_without_bg.png",
+        "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "icon": "./assets/images/app-icon-android-legacy.png",
+      "splash": {
+        "image": "./assets/images/splash-logo-android-universal.png",
+        "resizeMode": "contain",
         "backgroundColor": "#000000"
       },
       "package": "com.focus.quotes",
