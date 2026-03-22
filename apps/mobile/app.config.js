@@ -3,34 +3,56 @@ import "dotenv/config";
 /**
  * Dynamic Expo Configuration
  *
- * This file reads environment variables from .env file and passes them to the app.
- * To configure the API URL:
- * 1. Edit the .env file at apps/mobile/.env
- * 2. Set API_URL to your desired value:
- *    - For local development: https://focus-sml2.onrender.com
- *    - For physical device (same network): http://YOUR_IP:3001
- *    - For production: https://api.quote.com
+ * All values are configurable via .env file.
+ * See .env.example for all available options.
  *
- * The app will automatically use the value from .env
+ * Usage:
+ * 1. Copy .env.example to .env: cp .env.example .env
+ * 2. Update the values in .env
+ * 3. Run the app: npm start
  */
 
 export default ({ config }) => {
-  // Read environment variables or use defaults
+  // ===========================================
+  // EAS / Expo Configuration
+  // ===========================================
+  const easProjectId =
+    process.env.EAS_PROJECT_ID || "035730c8-2c0a-4ade-9b34-f902e800ebfa";
+  const easOwner = process.env.EAS_OWNER || "focus-application";
+  const appSlug = process.env.APP_SLUG || "focus-quotes-app";
+  const appName = process.env.APP_NAME || "Focus";
+  const appVersion = process.env.APP_VERSION || "1.0.0";
+
+  // ===========================================
+  // Platform-specific Configuration
+  // ===========================================
+  const iosBundleId = process.env.IOS_BUNDLE_ID || "com.focus.quotes";
+  const androidPackage = process.env.ANDROID_PACKAGE || "com.focus.quotes";
+  const appleTeamId = process.env.APPLE_TEAM_ID || "XXXXXXXXXX";
+
+  // ===========================================
+  // API Configuration
+  // ===========================================
   const apiUrl = process.env.API_URL || "https://focus-sml2.onrender.com";
   const apiTimeout = process.env.API_TIMEOUT || "30000";
+
+  // ===========================================
+  // App Behavior Configuration
+  // ===========================================
   const quotesPerPage = process.env.QUOTES_PER_PAGE || "10";
   const paginationThreshold = process.env.PAGINATION_THRESHOLD || "0.5";
-  const easProjectId =
-    process.env.EAS_PROJECT_ID || "17f0365b-1f51-4a37-b269-591ea43caffe";
+  const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY || "";
 
+  // Log configuration (useful for debugging)
+  console.log(`[Config] APP: ${appName} v${appVersion} (${appSlug})`);
+  console.log(`[Config] EAS: ${easOwner}/${easProjectId}`);
   console.log(`[Config] API_URL: ${apiUrl}`);
-  console.log(`[Config] EAS_PROJECT_ID: ${easProjectId}`);
 
   return {
     ...config,
-    name: "Focus",
-    slug: "focus-quotes",
-    version: "1.0.0",
+    name: appName,
+    slug: appSlug,
+    version: appVersion,
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -42,10 +64,10 @@ export default ({ config }) => {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.focus.quotes",
+      bundleIdentifier: iosBundleId,
       entitlements: {
         "com.apple.security.application-groups": [
-          "group.com.focus.quotes.widget",
+          `group.${iosBundleId}.widget`,
         ],
       },
     },
@@ -56,7 +78,7 @@ export default ({ config }) => {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      package: "com.focus.quotes",
+      package: androidPackage,
     },
     web: {
       favicon: "./assets/favicon.png",
@@ -69,7 +91,7 @@ export default ({ config }) => {
           widgets: [
             {
               name: "FocusQuoteWidget",
-              label: "Focus Quote",
+              label: `${appName} Quote`,
               minWidth: "180dp",
               minHeight: "110dp",
               description: "Affiche une citation inspirante",
@@ -78,7 +100,7 @@ export default ({ config }) => {
             },
             {
               name: "FocusQuoteWidgetLarge",
-              label: "Focus Quote (Large)",
+              label: `${appName} Quote (Large)`,
               minWidth: "250dp",
               minHeight: "180dp",
               description: "Affiche une citation inspirante en grand",
@@ -91,26 +113,32 @@ export default ({ config }) => {
       [
         "@bacons/apple-targets",
         {
-          appleTeamId: process.env.APPLE_TEAM_ID || "XXXXXXXXXX",
+          appleTeamId: appleTeamId,
         },
       ],
     ],
     extra: {
+      // API Configuration
       API_URL: apiUrl,
       API_TIMEOUT: apiTimeout,
+      // App Behavior
       QUOTES_PER_PAGE: quotesPerPage,
       PAGINATION_THRESHOLD: paginationThreshold,
+      // EAS
       EAS_PROJECT_ID: easProjectId,
+      // Stripe
+      STRIPE_PUBLISHABLE_KEY: stripePublishableKey,
+      // EAS internal config
       eas: {
         projectId: easProjectId,
       },
     },
-    owner: "cedric921",
+    owner: easOwner,
     runtimeVersion: {
       policy: "sdkVersion",
     },
     updates: {
-      url: "https://u.expo.dev/17f0365b-1f51-4a37-b269-591ea43caffe",
+      url: `https://u.expo.dev/${easProjectId}`,
     },
   };
 };

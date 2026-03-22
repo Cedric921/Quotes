@@ -4,8 +4,8 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * Migration to synchronize all entities with the production database.
  * This creates all missing tables and columns based on the current entity definitions.
  */
-export class SyncAllEntities1710200000000 implements MigrationInterface {
-  name = 'SyncAllEntities1710200000000';
+export class SyncAllEntities1700000000000 implements MigrationInterface {
+  name = 'SyncAllEntities1700000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Enable uuid-ossp extension for UUID generation
