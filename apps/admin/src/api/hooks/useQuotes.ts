@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { quotesApi, Quote } from "@/services/api";
+import { quotesApi, Quote, QuoteImportItem } from "@/services/api";
 
 // Query keys
 export const quoteKeys = {
@@ -55,3 +55,20 @@ export const useDeleteQuote = () => {
   });
 };
 
+// Bulk import quotes
+export const useBulkImportQuotes = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      topicId,
+      quotes,
+    }: {
+      topicId: string;
+      quotes: QuoteImportItem[];
+    }) => quotesApi.bulkImport(topicId, quotes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: quoteKeys.lists() });
+    },
+  });
+};

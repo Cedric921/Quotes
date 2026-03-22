@@ -13,14 +13,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeColors } from "../../hooks";
 import { useTranslation } from "react-i18next";
 import { useSubscriptionPlans } from "../../api/hooks/useSubscriptions";
 import { SubscriptionPlan } from "../../store/slices/subscriptionSlice";
+import { useAppSelector } from "../../store/hooks";
+import { navigate } from "../../services/navigationService";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const DONT_SHOW_AGAIN_KEY = "@focus_dont_show_onboarding";
 
 interface SubscriptionBottomSheetProps {
   isVisible: boolean;
@@ -37,6 +37,7 @@ export default function SubscriptionBottomSheet({
   const { colors } = useThemeColors();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [step, setStep] = useState<"welcome" | "plans">("welcome");
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const { data: plans = [], isLoading } = useSubscriptionPlans(true);
 
@@ -62,13 +63,12 @@ export default function SubscriptionBottomSheet({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setStep("welcome");
     onClose();
-  };
-
-  const handleDontShowAgain = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await AsyncStorage.setItem(DONT_SHOW_AGAIN_KEY, "true");
-    setStep("welcome");
-    onClose();
+    // Navigate based on authentication status
+    if (isAuthenticated) {
+      navigate("Profile");
+    } else {
+      navigate("Signup");
+    }
   };
 
   const styles = createStyles(colors);
@@ -243,16 +243,6 @@ export default function SubscriptionBottomSheet({
                     {t("onboarding.notNow")}
                   </Text>
                 </TouchableOpacity>
-
-                {/* Don't show again - Very subtle */}
-                <TouchableOpacity
-                  style={styles.dontShowAgainButton}
-                  onPress={handleDontShowAgain}
-                >
-                  <Text style={styles.dontShowAgainText}>
-                    {t("onboarding.dontShowAgain")}
-                  </Text>
-                </TouchableOpacity>
               </View>
             </>
           )}
@@ -406,16 +396,5 @@ const createStyles = (colors: any) =>
       fontSize: 14,
       color: colors.textTertiary,
       opacity: 0.7,
-    },
-    dontShowAgainButton: {
-      paddingVertical: 8,
-      alignItems: "center",
-      marginTop: 4,
-    },
-    dontShowAgainText: {
-      fontSize: 12,
-      color: colors.textTertiary,
-      opacity: 0.5,
-      textDecorationLine: "underline",
     },
   });

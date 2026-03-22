@@ -214,6 +214,17 @@ export const topicsApi = {
   },
 };
 
+export interface QuoteImportItem {
+  text: string;
+  author?: string;
+}
+
+export interface BulkImportResult {
+  message: string;
+  count: number;
+  quotes: Quote[];
+}
+
 export const quotesApi = {
   getAll: async (): Promise<Quote[]> => {
     const response = await apiClient.get<Quote[]>("/quotes");
@@ -229,6 +240,16 @@ export const quotesApi = {
   },
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/quotes/${id}`);
+  },
+  bulkImport: async (
+    topicId: string,
+    quotes: QuoteImportItem[],
+  ): Promise<BulkImportResult> => {
+    const response = await apiClient.post<BulkImportResult>(
+      "/quotes/bulk-import",
+      { topicId, quotes },
+    );
+    return response.data;
   },
 };
 
