@@ -408,7 +408,12 @@ export default function SubscriptionScreen({
           style={styles.notNowButton}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate("Home");
+            // Navigate based on authentication status and source
+            if (fromProfile || isAuthenticated) {
+              navigation.navigate("Profile");
+            } else {
+              navigation.navigate("Signup");
+            }
           }}
         >
           <Text style={styles.notNowText}>{t("subscription.notNow")}</Text>
