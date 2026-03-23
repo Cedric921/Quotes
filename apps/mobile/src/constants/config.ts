@@ -58,4 +58,10 @@ export const APP_CONFIG = {
   PAGINATION_THRESHOLD: Number.parseFloat(
     getEnvVar("PAGINATION_THRESHOLD", "0.5"),
   ),
+
+  // EAS Project ID for push notifications
+  EAS_PROJECT_ID: getEnvVar(
+    "EAS_PROJECT_ID",
+    "17f0365b-1f51-4a37-b269-591ea43caffe",
+  ),
 };

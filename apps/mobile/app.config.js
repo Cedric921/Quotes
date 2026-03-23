@@ -15,13 +15,16 @@ import "dotenv/config";
  */
 
 export default ({ config }) => {
-  // Read API_URL from environment or use default
+  // Read environment variables or use defaults
   const apiUrl = process.env.API_URL || "https://focus-sml2.onrender.com";
   const apiTimeout = process.env.API_TIMEOUT || "30000";
   const quotesPerPage = process.env.QUOTES_PER_PAGE || "10";
   const paginationThreshold = process.env.PAGINATION_THRESHOLD || "0.5";
+  const easProjectId =
+    process.env.EAS_PROJECT_ID || "17f0365b-1f51-4a37-b269-591ea43caffe";
 
   console.log(`[Config] API_URL: ${apiUrl}`);
+  console.log(`[Config] EAS_PROJECT_ID: ${easProjectId}`);
 
   return {
     ...config,
@@ -97,8 +100,9 @@ export default ({ config }) => {
       API_TIMEOUT: apiTimeout,
       QUOTES_PER_PAGE: quotesPerPage,
       PAGINATION_THRESHOLD: paginationThreshold,
+      EAS_PROJECT_ID: easProjectId,
       eas: {
-        projectId: "17f0365b-1f51-4a37-b269-591ea43caffe",
+        projectId: easProjectId,
       },
     },
     owner: "cedric921",
