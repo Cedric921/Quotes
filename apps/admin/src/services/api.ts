@@ -159,7 +159,7 @@ export const usersApi = {
     return response.data;
   },
   update: async (id: string, data: Partial<User>): Promise<User> => {
-    const response = await apiClient.put<User>(`/users/${id}`, data);
+    const response = await apiClient.patch<User>(`/users/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<void> => {
@@ -206,13 +206,24 @@ export const topicsApi = {
     return response.data;
   },
   update: async (id: string, data: Partial<Topic>): Promise<Topic> => {
-    const response = await apiClient.put<Topic>(`/topics/${id}`, data);
+    const response = await apiClient.patch<Topic>(`/topics/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/topics/${id}`);
   },
 };
+
+export interface QuoteImportItem {
+  text: string;
+  author?: string;
+}
+
+export interface BulkImportResult {
+  message: string;
+  count: number;
+  quotes: Quote[];
+}
 
 export const quotesApi = {
   getAll: async (): Promise<Quote[]> => {
@@ -224,11 +235,21 @@ export const quotesApi = {
     return response.data;
   },
   update: async (id: string, data: Partial<Quote>): Promise<Quote> => {
-    const response = await apiClient.put<Quote>(`/quotes/${id}`, data);
+    const response = await apiClient.patch<Quote>(`/quotes/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/quotes/${id}`);
+  },
+  bulkImport: async (
+    topicId: string,
+    quotes: QuoteImportItem[],
+  ): Promise<BulkImportResult> => {
+    const response = await apiClient.post<BulkImportResult>(
+      "/quotes/bulk-import",
+      { topicId, quotes },
+    );
+    return response.data;
   },
 };
 
@@ -253,7 +274,7 @@ export const themesApi = {
     await apiClient.delete(`/themes/${id}`);
   },
   toggleActive: async (id: string): Promise<Theme> => {
-    const response = await apiClient.put<Theme>(`/themes/${id}/toggle-active`);
+    const response = await apiClient.post<Theme>(`/themes/${id}/toggle-active`);
     return response.data;
   },
 };
@@ -279,7 +300,7 @@ export const fontsApi = {
     await apiClient.delete(`/fonts/${id}`);
   },
   toggleActive: async (id: string): Promise<Font> => {
-    const response = await apiClient.put<Font>(`/fonts/${id}/toggle-active`);
+    const response = await apiClient.post<Font>(`/fonts/${id}/toggle-active`);
     return response.data;
   },
 };

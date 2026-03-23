@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
+import { BulkImportQuotesDto } from './dto/bulk-import-quotes.dto';
 import { Quote } from './entities/quote.entity';
 import { User } from '../users/entities/user.entity';
 
@@ -22,6 +23,26 @@ export class QuotesService {
       ...(topicId && { topic: { id: topicId } }),
     });
     return this.quotesRepository.save(quote);
+  }
+
+  async bulkImport(bulkImportDto: BulkImportQuotesDto) {
+    const { topicId, quotes } = bulkImportDto;
+
+    const quotesToCreate = quotes.map((quoteData) =>
+      this.quotesRepository.create({
+        text: quoteData.text,
+        author: quoteData.author,
+        topic: { id: topicId },
+      }),
+    );
+
+    const savedQuotes = await this.quotesRepository.save(quotesToCreate);
+
+    return {
+      message: `Successfully imported ${savedQuotes.length} quotes`,
+      count: savedQuotes.length,
+      quotes: savedQuotes,
+    };
   }
 
   async findAll(

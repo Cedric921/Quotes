@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { QuotesSkeleton } from "@/components/skeletons/QuotesSkeleton";
 import {
   Card,
@@ -44,6 +44,8 @@ import {
   Quote as QuoteIcon,
   BookOpen,
   AlertTriangle,
+  Upload,
+  FileJson,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -52,8 +54,9 @@ import {
   useUpdateQuote,
   useDeleteQuote,
   useTopics,
+  useBulkImportQuotes,
 } from "@/api/hooks";
-import { Quote } from "@/services/api";
+import { Quote, QuoteImportItem } from "@/services/api";
 import { useLocale } from "@/contexts/LocaleContext";
 
 export default function QuotesPage() {
@@ -63,8 +66,10 @@ export default function QuotesPage() {
   const createQuoteMutation = useCreateQuote();
   const updateQuoteMutation = useUpdateQuote();
   const deleteQuoteMutation = useDeleteQuote();
+  const bulkImportMutation = useBulkImportQuotes();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [quoteToDelete, setQuoteToDelete] = useState<string | null>(null);
@@ -73,6 +78,9 @@ export default function QuotesPage() {
     author: "",
     topicId: "none",
   });
+  const [importTopicId, setImportTopicId] = useState<string>("none");
+  const [importPreview, setImportPreview] = useState<QuoteImportItem[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,6 +162,74 @@ export default function QuotesPage() {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        let parsedQuotes: QuoteImportItem[] = [];
+
+        if (file.name.endsWith(".json")) {
+          const json = JSON.parse(content);
+          parsedQuotes = Array.isArray(json) ? json : json.quotes || [];
+        } else if (file.name.endsWith(".csv")) {
+          const lines = content.split("\n").filter((line) => line.trim());
+          const hasHeader =
+            lines[0]?.toLowerCase().includes("text") ||
+            lines[0]?.toLowerCase().includes("author");
+          const startIndex = hasHeader ? 1 : 0;
+
+          parsedQuotes = lines.slice(startIndex).map((line) => {
+            const parts = line
+              .split(",")
+              .map((p) => p.trim().replace(/^"|"$/g, ""));
+            return { text: parts[0] || "", author: parts[1] || "" };
+          });
+        }
+
+        setImportPreview(parsedQuotes.filter((q) => q.text));
+        toast.success(
+          `${parsedQuotes.filter((q) => q.text).length} citations détectées`,
+        );
+      } catch {
+        toast.error("Erreur lors de la lecture du fichier");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleBulkImport = async () => {
+    if (importTopicId === "none" || importPreview.length === 0) {
+      toast.error("Sélectionnez un topic et importez un fichier");
+      return;
+    }
+
+    const toastId = toast.loading(
+      `Import de ${importPreview.length} citations...`,
+    );
+
+    try {
+      const result = await bulkImportMutation.mutateAsync({
+        topicId: importTopicId,
+        quotes: importPreview,
+      });
+      toast.success(`${result.count} citations importées avec succès`, {
+        id: toastId,
+      });
+      setIsImportSheetOpen(false);
+      setImportPreview([]);
+      setImportTopicId("none");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Erreur lors de l'import";
+      toast.error(message, { id: toastId });
+    }
+  };
+
   if (isLoading) {
     return <QuotesSkeleton />;
   }
@@ -179,14 +255,25 @@ export default function QuotesPage() {
               {t.quotes.subtitle}
             </p>
           </div>
-          <Button
-            onClick={handleAddNew}
-            size="lg"
-            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <Plus className="w-4 h-4" />
-            {t.quotes.addQuote}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsImportSheetOpen(true)}
+              size="lg"
+              variant="outline"
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <Upload className="w-4 h-4" />
+              Import
+            </Button>
+            <Button
+              onClick={handleAddNew}
+              size="lg"
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <Plus className="w-4 h-4" />
+              {t.quotes.addQuote}
+            </Button>
+          </div>
         </div>
 
         {/* Quotes Grid */}
@@ -417,6 +504,127 @@ export default function QuotesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Import Sheet */}
+      <Sheet open={isImportSheetOpen} onOpenChange={setIsImportSheetOpen}>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto bg-gradient-to-br from-background to-muted/20">
+          <SheetHeader className="space-y-3 pb-6 border-b">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-lg">
+                <FileJson className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <SheetTitle className="text-2xl">Import en masse</SheetTitle>
+                <SheetDescription className="text-base">
+                  Importez plusieurs citations depuis un fichier JSON ou CSV
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <div className="space-y-6 mt-8">
+            {/* Topic Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-primary" />
+                Topic de destination *
+              </Label>
+              <Select value={importTopicId} onValueChange={setImportTopicId}>
+                <SelectTrigger className="border-2 focus:border-primary transition-colors">
+                  <SelectValue placeholder="Sélectionner un topic" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">-- Sélectionner --</SelectItem>
+                  {topics.map((topic) => (
+                    <SelectItem key={topic.id} value={topic.id}>
+                      {topic.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* File Upload */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold flex items-center gap-2">
+                <Upload className="w-4 h-4 text-primary" />
+                Fichier (JSON ou CSV)
+              </Label>
+              <Input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,.csv"
+                onChange={handleFileSelect}
+                className="border-2 focus:border-primary transition-colors cursor-pointer"
+              />
+              <p className="text-xs text-muted-foreground">
+                Format JSON: [{`{"text": "...", "author": "..."}`}] <br />
+                Format CSV: text,author (une ligne par citation)
+              </p>
+            </div>
+
+            {/* Preview */}
+            {importPreview.length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">
+                  Aperçu ({importPreview.length} citations)
+                </Label>
+                <div className="max-h-64 overflow-y-auto space-y-2 border rounded-lg p-3 bg-muted/30">
+                  {importPreview.slice(0, 10).map((quote, i) => (
+                    <div
+                      key={i}
+                      className="p-2 bg-background rounded border text-sm"
+                    >
+                      <p className="font-medium truncate">
+                        &ldquo;{quote.text}&rdquo;
+                      </p>
+                      {quote.author && (
+                        <p className="text-muted-foreground text-xs">
+                          — {quote.author}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                  {importPreview.length > 10 && (
+                    <p className="text-center text-muted-foreground text-sm py-2">
+                      + {importPreview.length - 10} autres citations...
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-6 border-t">
+              <Button
+                onClick={handleBulkImport}
+                disabled={
+                  importTopicId === "none" ||
+                  importPreview.length === 0 ||
+                  bulkImportMutation.isPending
+                }
+                className="flex-1 gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <Upload className="w-4 h-4" />
+                Importer{" "}
+                {importPreview.length > 0 ? `(${importPreview.length})` : ""}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsImportSheetOpen(false);
+                  setImportPreview([]);
+                  setImportTopicId("none");
+                }}
+                className="flex-1 border-2"
+              >
+                {t.common.cancel}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

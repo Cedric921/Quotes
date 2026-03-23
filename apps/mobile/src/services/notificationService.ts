@@ -1,5 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { APP_CONFIG } from "../constants/config";
 
 // Configure how notifications should be handled when the app is in foreground
 Notifications.setNotificationHandler({
@@ -137,9 +138,9 @@ export const getExpoPushToken = async (): Promise<string | null> => {
       return null;
     }
 
-    // Get the token
+    // Get the token using the EAS project ID from config
     const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: "your-project-id", // This will be replaced by EAS project ID in production
+      projectId: APP_CONFIG.EAS_PROJECT_ID,
     });
 
     console.log("Expo Push Token:", tokenData.data);
