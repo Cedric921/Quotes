@@ -9,11 +9,22 @@ import {
   Query,
   UseGuards,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Request as ExpressRequest } from 'express';
 import { QuotesService } from './quotes.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
+import { BulkImportQuotesDto } from './dto/bulk-import-quotes.dto';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    userId: string;
+    email: string;
+    isAdmin: boolean;
+  };
+}
 
 @Controller('quotes')
 export class QuotesController {
@@ -22,6 +33,18 @@ export class QuotesController {
   @Post()
   create(@Body() createQuoteDto: CreateQuoteDto) {
     return this.quotesService.create(createQuoteDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('bulk-import')
+  bulkImport(
+    @Body() bulkImportDto: BulkImportQuotesDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.quotesService.bulkImport(bulkImportDto);
   }
 
   @Get()
