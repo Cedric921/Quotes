@@ -22,6 +22,7 @@
     "db:reset": "rm -f database.sqlite && echo '✅ Database reset! Start the server to create a new database with UUID.'",
     "db:seed": "ts-node -r tsconfig-paths/register src/seeds/seed-database.ts",
     "db:seed:admin": "ts-node -r tsconfig-paths/register src/seeds/seed-admin.ts",
+    "db:migrate-data": "ts-node -r tsconfig-paths/register src/seeds/migrate-data.ts",
     "migration:run": "npx typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
     "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
     "migration:show": "npx typeorm-ts-node-commonjs migration:show -d typeorm.config.ts",
