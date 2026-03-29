@@ -11,7 +11,8 @@
     "close": "Cerrar",
     "or": "o",
     "quote": "cita",
-    "quotes": "citas"
+    "quotes": "citas",
+    "reset": "Restablecer"
   },
   "auth": {
     "login": "Iniciar sesión",

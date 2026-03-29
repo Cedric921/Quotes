@@ -7,3 +7,4 @@ export { default as DotsIndicator } from "./DotsIndicator";
 export { default as ActionButtons } from "./ActionButtons";
 export { default as TranslatedTopicCard } from "./TranslatedTopicCard";
 export { default as TranslatedPlanCard } from "./TranslatedPlanCard";
+export { default as ThemeSelectionModal } from "./ThemeSelectionModal";

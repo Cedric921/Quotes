@@ -13,7 +13,8 @@
     "quote": "citaat",
     "quotes": "citaten",
     "like": "Leuk",
-    "liked": "Leuk gevonden"
+    "liked": "Leuk gevonden",
+    "reset": "Herstellen"
   },
   "auth": {
     "login": "Inloggen",

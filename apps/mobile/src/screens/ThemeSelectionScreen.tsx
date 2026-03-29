@@ -4,10 +4,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Image,
   Dimensions,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -62,6 +62,8 @@ export default function ThemeSelectionScreen({
 
   const renderThemeItem = ({ item }: { item: BackgroundTheme }) => {
     const isSelected = selectedTheme?.id === item.id;
+    const imageUri = item.thumbnailUrl || item.imageUrl;
+
     return (
       <TouchableOpacity
         style={[
@@ -72,7 +74,8 @@ export default function ThemeSelectionScreen({
         activeOpacity={0.8}
       >
         <Image
-          source={{ uri: item.thumbnailUrl || item.imageUrl }}
+          key={`theme-image-${item.id}`}
+          source={{ uri: imageUri, cache: "force-cache" }}
           style={styles.themeImage}
           resizeMode="cover"
         />

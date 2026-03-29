@@ -130,6 +130,7 @@ interface QuoteCardProps {
   readonly onLike: (quoteId: string) => void;
   readonly isLiked?: boolean;
   readonly showTopicName?: boolean;
+  readonly onThemePress?: () => void;
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -139,6 +140,7 @@ export default function QuoteCard({
   onLike,
   isLiked = false,
   showTopicName = true,
+  onThemePress,
 }: QuoteCardProps) {
   const navigation = useNavigation<NavigationProp>();
   const { height, width } = useWindowDimensions();
@@ -332,7 +334,18 @@ export default function QuoteCard({
             )}
           </View>
 
-          {/* Topic badge with glassmorphism */}
+          {/* Theme change button - left side */}
+          {onThemePress && (
+            <TouchableOpacity
+              style={styles.themeButton}
+              onPress={onThemePress}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="image-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          )}
+
+          {/* Topic badge - right side */}
           {quote.topic && showTopicName && (
             <TouchableOpacity
               style={styles.topicBadge}
@@ -405,25 +418,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 100,
     right: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: "transparent",
+    padding: 8,
     zIndex: 5,
   } as ViewStyle,
-  topicText: {
-    color: "#ffffff",
-    fontSize: 14,
-    fontWeight: "600" as const,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  } as TextStyle,
+  themeButton: {
+    position: "absolute",
+    top: 100,
+    left: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    padding: 10,
+    borderRadius: 20,
+    zIndex: 5,
+  } as ViewStyle,
 });
