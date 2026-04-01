@@ -62,6 +62,6 @@ export const APP_CONFIG = {
   // EAS Project ID for push notifications
   EAS_PROJECT_ID: getEnvVar(
     "EAS_PROJECT_ID",
-    "17f0365b-1f51-4a37-b269-591ea43caffe",
+    "035730c8-2c0a-4ade-9b34-f902e800ebfa",
   ),
 };
