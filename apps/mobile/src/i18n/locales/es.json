@@ -11,7 +11,8 @@
     "close": "Cerrar",
     "or": "o",
     "quote": "cita",
-    "quotes": "citas"
+    "quotes": "citas",
+    "reset": "Restablecer"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -67,7 +68,7 @@
     "privacyPolicy": "Política de privacidad",
     "termsOfService": "Términos de servicio",
     "contactUs": "Contáctanos",
-    "aboutUs": "Acerca de nosotros",
+    "aboutUs": "Síguenos",
     "version": "Versión",
     "logout": "Cerrar sesión",
     "logoutConfirmation": "¿Estás seguro de que quieres cerrar sesión?",

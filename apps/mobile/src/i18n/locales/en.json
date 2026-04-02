@@ -16,7 +16,8 @@
     "liked": "Liked",
     "send": "Send",
     "success": "Success",
-    "required": "Required"
+    "required": "Required",
+    "reset": "Reset"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -79,7 +80,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "contactUs": "Contact Us",
-    "aboutUs": "About Us",
+    "aboutUs": "Follow Us",
     "version": "Version",
     "logout": "Logout",
     "logoutConfirmation": "Are you sure you want to logout?",

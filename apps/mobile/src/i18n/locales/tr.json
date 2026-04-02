@@ -13,7 +13,8 @@
     "quote": "alıntı",
     "quotes": "alıntılar",
     "like": "Beğen",
-    "liked": "Beğenildi"
+    "liked": "Beğenildi",
+    "reset": "Sıfırla"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -69,7 +70,7 @@
     "privacyPolicy": "Gizlilik Politikası",
     "termsOfService": "Kullanım Koşulları",
     "contactUs": "Bize Ulaşın",
-    "aboutUs": "Hakkımızda",
+    "aboutUs": "Bizi Takip Edin",
     "version": "Sürüm",
     "logout": "Çıkış Yap",
     "logoutConfirmation": "Çıkış yapmak istediğinizden emin misiniz?",

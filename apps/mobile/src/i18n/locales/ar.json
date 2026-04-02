@@ -11,7 +11,8 @@
     "close": "إغلاق",
     "or": "أو",
     "quote": "اقتباس",
-    "quotes": "اقتباسات"
+    "quotes": "اقتباسات",
+    "reset": "إعادة تعيين"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -67,7 +68,7 @@
     "privacyPolicy": "سياسة الخصوصية",
     "termsOfService": "شروط الخدمة",
     "contactUs": "اتصل بنا",
-    "aboutUs": "معلومات عنا",
+    "aboutUs": "تابعنا",
     "version": "الإصدار",
     "logout": "تسجيل الخروج",
     "logoutConfirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",

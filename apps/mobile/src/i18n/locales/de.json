@@ -13,7 +13,8 @@
     "quote": "Zitat",
     "quotes": "Zitate",
     "like": "Gefällt mir",
-    "liked": "Gefällt"
+    "liked": "Gefällt",
+    "reset": "Zurücksetzen"
   },
   "auth": {
     "login": "Anmelden",
@@ -69,7 +70,7 @@
     "privacyPolicy": "Datenschutzrichtlinie",
     "termsOfService": "Nutzungsbedingungen",
     "contactUs": "Kontaktieren Sie uns",
-    "aboutUs": "Über uns",
+    "aboutUs": "Folgen Sie uns",
     "version": "Version",
     "logout": "Abmelden",
     "logoutConfirmation": "Möchten Sie sich wirklich abmelden?",

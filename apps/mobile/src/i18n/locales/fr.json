@@ -16,7 +16,8 @@
     "liked": "Aimé",
     "send": "Envoyer",
     "success": "Succès",
-    "required": "Requis"
+    "required": "Requis",
+    "reset": "Réinitialiser"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -54,8 +55,8 @@
     "refreshing": "Actualisation..."
   },
   "topics": {
-    "title": "Topics",
-    "allTopics": "Tous les topics",
+    "title": "Sujets",
+    "allTopics": "Tous les sujets",
     "premiumContent": "Contenu Premium",
     "loginToAccess": "Connectez-vous pour accéder à ce contenu premium",
     "subscribeToAccess": "Abonnez-vous pour accéder à ce contenu premium",
@@ -79,7 +80,7 @@
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
     "contactUs": "Contactez-nous",
-    "aboutUs": "À propos de nous",
+    "aboutUs": "Suivez-nous",
     "version": "Version",
     "logout": "Déconnexion",
     "logoutConfirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
