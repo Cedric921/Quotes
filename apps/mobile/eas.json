@@ -12,6 +12,10 @@
       },
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "API_URL": "https://focus-sml2.onrender.com",
+        "APP_NAME": "Focus Dev"
       }
     },
     "preview": {
@@ -21,6 +25,9 @@
       },
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "API_URL": "https://focus-sml2.onrender.com"
       }
     },
     "preview-apk": {
@@ -28,6 +35,9 @@
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
+      },
+      "env": {
+        "API_URL": "https://focus-sml2.onrender.com"
       }
     },
     "production": {
@@ -37,19 +47,26 @@
       "android": {
         "buildType": "app-bundle"
       },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "API_URL": "https://focus-sml2.onrender.com",
+        "IOS_BUNDLE_ID": "com.mindset.focus",
+        "ANDROID_PACKAGE": "com.mindset.focus",
+        "APPLE_TEAM_ID": "XA9AGYDNGM"
+      }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "appleId": "YOUR_APPLE_ID",
-        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID"
+        "appleId": "focusmindsetapp@gmail.com",
+        "ascAppId": "6761561417",
+        "appleTeamId": "XA9AGYDNGM"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "internal"
+        "track": "internal",
+        "releaseStatus": "draft"
       }
     }
   }

@@ -1,0 +1,90 @@
+name: EAS Build & Submit to Stores
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/mobile/**"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform to build"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+      submit:
+        description: "Submit to stores after build"
+        required: true
+        default: true
+        type: boolean
+
+env:
+  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+jobs:
+  build-and-submit:
+    name: Build & Submit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+
+    steps:
+      - name: 🏗 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: 🏗 Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔐 Setup Google Service Account
+        if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' || github.event_name == 'push'
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}' > google-service-account.json
+
+      - name: 🍎 Build & Submit iOS
+        if: github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all' || github.event_name == 'push'
+        run: |
+          # Build iOS (wait for completion)
+          eas build --platform ios --profile production --non-interactive --wait
+
+          # Submit to App Store if enabled
+          if [[ "${{ github.event_name }}" == "push" ]] || [[ "${{ github.event.inputs.submit }}" == "true" ]]; then
+            echo "📤 Submitting iOS build to App Store..."
+            eas submit --platform ios --latest --non-interactive || echo "⚠️ iOS submit failed, continuing..."
+          fi
+        env:
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+
+      - name: 🤖 Build & Submit Android
+        if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' || github.event_name == 'push'
+        run: |
+          # Build Android (wait for completion)
+          eas build --platform android --profile production --non-interactive --wait
+
+          # Submit to Play Store if enabled
+          if [[ "${{ github.event_name }}" == "push" ]] || [[ "${{ github.event.inputs.submit }}" == "true" ]]; then
+            echo "📤 Submitting Android build to Play Store..."
+            eas submit --platform android --latest --non-interactive || echo "⚠️ Android submit failed, continuing..."
+          fi
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: rm -f google-service-account.json

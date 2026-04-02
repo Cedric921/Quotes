@@ -22,7 +22,8 @@ const getEnvVar = (key: string, fallback: string | number): string => {
 };
 
 // Read API URL from environment
-const API_URL = getEnvVar("API_URL", "http://localhost:3001");
+// Default to production URL for builds
+const API_URL = getEnvVar("API_URL", "https://focus-sml2.onrender.com");
 
 // Log configuration on app start (only once)
 console.log("===========================================");

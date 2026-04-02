@@ -26,8 +26,8 @@ export default ({ config }) => {
   // ===========================================
   // Platform-specific Configuration
   // ===========================================
-  const iosBundleId = process.env.IOS_BUNDLE_ID || "com.focus.quotes";
-  const androidPackage = process.env.ANDROID_PACKAGE || "com.focus.quotes";
+  const iosBundleId = process.env.IOS_BUNDLE_ID || "com.mindset.focus";
+  const androidPackage = process.env.ANDROID_PACKAGE || "com.mindset.focus";
   const appleTeamId = process.env.APPLE_TEAM_ID || "XXXXXXXXXX";
 
   // ===========================================
@@ -65,6 +65,9 @@ export default ({ config }) => {
     ios: {
       supportsTablet: true,
       bundleIdentifier: iosBundleId,
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
       entitlements: {
         "com.apple.security.application-groups": [
           `group.${iosBundleId}.widget`,

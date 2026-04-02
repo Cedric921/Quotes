@@ -10,7 +10,15 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Cette application utilise la camera pour vous permettre de prendre une photo de profil.",
         "NSPhotoLibraryUsageDescription": "Cette application accede a votre galerie pour vous permettre de choisir une photo de profil.",
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": ["remote-notification"],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mindset.focus",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.mindset.focus.widget"
+        ]
       }
     },
     "android": {
