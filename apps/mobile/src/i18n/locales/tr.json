@@ -13,7 +13,8 @@
     "quote": "alıntı",
     "quotes": "alıntılar",
     "like": "Beğen",
-    "liked": "Beğenildi"
+    "liked": "Beğenildi",
+    "reset": "Sıfırla"
   },
   "auth": {
     "login": "Giriş Yap",

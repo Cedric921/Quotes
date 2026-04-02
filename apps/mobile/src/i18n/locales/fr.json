@@ -16,7 +16,8 @@
     "liked": "Aimé",
     "send": "Envoyer",
     "success": "Succès",
-    "required": "Requis"
+    "required": "Requis",
+    "reset": "Réinitialiser"
   },
   "permissions": {
     "notificationsTitle": "Notifications",

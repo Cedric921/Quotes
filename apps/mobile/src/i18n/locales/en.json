@@ -16,7 +16,8 @@
     "liked": "Liked",
     "send": "Send",
     "success": "Success",
-    "required": "Required"
+    "required": "Required",
+    "reset": "Reset"
   },
   "permissions": {
     "notificationsTitle": "Notifications",

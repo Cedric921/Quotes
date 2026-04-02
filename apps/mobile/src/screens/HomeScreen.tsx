@@ -24,6 +24,7 @@ import {
   Header,
   DotsIndicator,
   ActionButtons,
+  ThemeSelectionModal,
 } from "../components";
 import {
   SubscriptionBottomSheet,
@@ -79,6 +80,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   // Onboarding states
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
     null,
   );
@@ -352,11 +354,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   }, [currentIndex, filteredQuotes]);
 
+  const handleOpenThemeModal = useCallback(() => {
+    setShowThemeModal(true);
+  }, []);
+
   const renderItem = useCallback(
     ({ item }: { item: Quote }) => (
-      <QuoteCard quote={item} onLike={handleLike} isLiked={item.isLiked} />
+      <QuoteCard
+        quote={item}
+        onLike={handleLike}
+        isLiked={item.isLiked}
+        onThemePress={handleOpenThemeModal}
+      />
     ),
-    [handleLike],
+    [handleLike, handleOpenThemeModal],
   );
 
   const handleLoadMore = useCallback(() => {
@@ -468,6 +479,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onComplete={handleProfileComplete}
         selectedPlan={selectedPlan}
         isLoading={isRegistering}
+      />
+
+      {/* Theme Selection Modal */}
+      <ThemeSelectionModal
+        isVisible={showThemeModal}
+        onClose={() => setShowThemeModal(false)}
       />
     </>
   );

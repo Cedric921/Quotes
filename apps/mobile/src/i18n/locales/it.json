@@ -13,7 +13,8 @@
     "quote": "citazione",
     "quotes": "citazioni",
     "like": "Mi piace",
-    "liked": "Piaciuto"
+    "liked": "Piaciuto",
+    "reset": "Ripristina"
   },
   "auth": {
     "login": "Accedi",
