@@ -26,12 +26,10 @@ import {
 import {
   useRegisterPushToken,
   useUnregisterAllPushTokens,
-  useSendTestNotification,
 } from "../api/hooks/usePushToken";
 import {
   requestNotificationPermissions,
   cancelAllNotifications,
-  sendTestNotification,
   getExpoPushToken,
 } from "../services/notificationService";
 
@@ -61,7 +59,6 @@ export const NotificationsScreen = ({
   const resetSettings = useResetNotificationSettings();
   const registerPushToken = useRegisterPushToken();
   const unregisterAllPushTokens = useUnregisterAllPushTokens();
-  const sendServerTestNotification = useSendTestNotification();
 
   // State for notification settings
   const [enabled, setEnabled] = useState(false);
@@ -582,43 +579,6 @@ export const NotificationsScreen = ({
         {/* Action Buttons */}
         {enabled && (
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: colors.primary }]}
-              onPress={async () => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                try {
-                  // Try server notification first
-                  const result = await sendServerTestNotification.mutateAsync();
-                  if (result.sent > 0) {
-                    Toast.show({
-                      type: "success",
-                      text1: t("notifications.testNotificationSent"),
-                      text2: t("notifications.checkYourDevice"),
-                    });
-                  } else {
-                    // Fallback to local notification
-                    await sendTestNotification();
-                    Toast.show({
-                      type: "success",
-                      text1: t("notifications.testNotificationSent"),
-                    });
-                  }
-                } catch {
-                  // Fallback to local notification
-                  await sendTestNotification();
-                  Toast.show({
-                    type: "success",
-                    text1: t("notifications.testNotificationSent"),
-                  });
-                }
-              }}
-            >
-              <Ionicons name="send" size={20} color="#fff" />
-              <Text style={styles.buttonText}>
-                {t("notifications.sendTestNotification")}
-              </Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={[
                 styles.button,
