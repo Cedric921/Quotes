@@ -19,7 +19,7 @@ module.exports = (config) => ({
   // App Groups for sharing data between app and widget
   entitlements: {
     "com.apple.security.application-groups": [
-      `group.${config.ios?.bundleIdentifier || "com.focus.quotes"}.widget`
+      `group.${config.ios?.bundleIdentifier || "com.mindset.focus"}.widget`
     ],
   },
 });

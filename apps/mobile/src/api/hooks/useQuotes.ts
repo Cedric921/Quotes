@@ -23,12 +23,19 @@ export const quoteKeys = {
 export const useQuotes = (pageSize: number = 10) => {
   return useInfiniteQuery({
     queryKey: quoteKeys.list({ pageSize }),
-    queryFn: ({ pageParam = 1 }) => quotesApi.getQuotes(pageParam, pageSize),
+    queryFn: async ({ pageParam = 1 }) => {
+      const result = await quotesApi.getQuotes(pageParam, pageSize);
+      return result || [];
+    },
     getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length < pageSize) return undefined;
+      if (!lastPage || lastPage.length < pageSize) return undefined;
       return allPages.length + 1;
     },
     initialPageParam: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes - réduire les requêtes
+    gcTime: 1000 * 60 * 30, // 30 minutes cache
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 

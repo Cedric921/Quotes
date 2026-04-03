@@ -22,7 +22,6 @@ import {
   LoadingSkeleton,
   ErrorMessage,
   Header,
-  DotsIndicator,
   ActionButtons,
   ThemeSelectionModal,
 } from "../components";
@@ -385,12 +384,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }, [isLoading, isRefetching, styles.footer]);
 
-  // Show loading skeleton on initial load
+  // Show loading skeleton on initial load (only if no error)
   if (isLoading && filteredQuotes.length === 0 && !error) {
     return <LoadingSkeleton />;
   }
 
-  // Show error message if there's an error and no quotes
+  // Show error message if fetch failed and no data
   if (error && filteredQuotes.length === 0) {
     return (
       <ErrorMessage
@@ -439,31 +438,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         />
       )} */}
 
-      {/* Fixed Bottom Navigation Bar - Hidden during capture */}
-      {!isCapturing &&
-        (filteredQuotes.length > 0 && filteredQuotes[currentIndex] ? (
-          <ActionButtons
-            quoteId={filteredQuotes[currentIndex].id}
-            isLiked={filteredQuotes[currentIndex].isLiked}
-            isAuthenticated={isAuthenticated}
-            onLike={handleLike}
-            onSettings={handleProfile}
-            onTopics={handleTopics}
-            onLogin={handleLogin}
-            onShare={handleShare}
-            isSharing={isSharing}
-          />
-        ) : (
-          <ActionButtons
-            quoteId=""
-            isLiked={false}
-            isAuthenticated={isAuthenticated}
-            onLike={() => {}}
-            onSettings={handleProfile}
-            onTopics={handleTopics}
-            onLogin={handleLogin}
-          />
-        ))}
+      {/* Fixed Bottom Navigation Bar - Always visible (not during capture) */}
+      {!isCapturing && (
+        <ActionButtons
+          quoteId={filteredQuotes[currentIndex]?.id || ""}
+          isLiked={filteredQuotes[currentIndex]?.isLiked || false}
+          isAuthenticated={isAuthenticated}
+          onLike={handleLike}
+          onSettings={handleProfile}
+          onTopics={handleTopics}
+          onLogin={handleLogin}
+          onShare={filteredQuotes.length > 0 ? handleShare : undefined}
+          isSharing={isSharing}
+        />
+      )}
 
       {/* Onboarding Bottom Sheet */}
       <SubscriptionBottomSheet

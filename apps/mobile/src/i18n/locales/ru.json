@@ -179,7 +179,7 @@
     "features": {
       "title": "Премиум функции",
       "unlimitedQuotes": "Безлимитные цитаты",
-      "premiumTopics": "Доступ к премиум темам",
+      "premiumSubjects": "Доступ к премиум темам",
       "noAds": "Без рекламы",
       "customNotifications": "Настраиваемые уведомления",
       "offlineAccess": "Офлайн доступ"
@@ -273,7 +273,7 @@
     "popular": "Популярный",
     "features": {
       "unlimitedQuotes": "Безлимитные цитаты",
-      "premiumTopics": "Доступ к премиум темам",
+      "premiumSubjects": "Доступ к премиум темам",
       "noAds": "Без рекламы",
       "customThemes": "Настраиваемые темы",
       "offlineAccess": "Офлайн доступ"

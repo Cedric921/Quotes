@@ -179,7 +179,7 @@
     "features": {
       "title": "高级功能",
       "unlimitedQuotes": "无限名言",
-      "premiumTopics": "访问高级主题",
+      "premiumSubjects": "访问高级主题",
       "noAds": "无广告",
       "customNotifications": "自定义通知",
       "offlineAccess": "离线访问"
@@ -273,7 +273,7 @@
     "popular": "热门",
     "features": {
       "unlimitedQuotes": "无限名言",
-      "premiumTopics": "访问高级主题",
+      "premiumSubjects": "访问高级主题",
       "noAds": "无广告",
       "customThemes": "自定义主题",
       "offlineAccess": "离线访问"

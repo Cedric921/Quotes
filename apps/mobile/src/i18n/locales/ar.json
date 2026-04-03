@@ -228,7 +228,7 @@
     "features": {
       "title": "الميزات المميزة",
       "unlimitedQuotes": "اقتباسات غير محدودة",
-      "premiumTopics": "الوصول إلى المواضيع المميزة",
+      "premiumSubjects": "الوصول إلى المواضيع المميزة",
       "noAds": "بدون إعلانات",
       "customNotifications": "إشعارات مخصصة",
       "offlineAccess": "الوصول بدون إنترنت"
@@ -274,7 +274,7 @@
     "popular": "شائع",
     "features": {
       "unlimitedQuotes": "اقتباسات غير محدودة",
-      "premiumTopics": "الوصول إلى المواضيع المميزة",
+      "premiumSubjects": "الوصول إلى المواضيع المميزة",
       "noAds": "بدون إعلانات",
       "customThemes": "سمات مخصصة",
       "offlineAccess": "الوصول بدون إنترنت"

@@ -14,8 +14,20 @@
         "buildType": "apk"
       },
       "env": {
-        "API_URL": "https://focus-sml2.onrender.com",
+        "API_URL": "https://focus-app-1.onrender.com",
         "APP_NAME": "Focus Dev"
+      }
+    },
+    "simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true,
+        "resourceClass": "m-medium"
+      },
+      "env": {
+        "API_URL": "https://focus-app-1.onrender.com",
+        "APP_NAME": "Focus Simulator"
       }
     },
     "preview": {
@@ -27,7 +39,7 @@
         "buildType": "apk"
       },
       "env": {
-        "API_URL": "https://focus-sml2.onrender.com"
+        "API_URL": "https://focus-app-1.onrender.com"
       }
     },
     "preview-apk": {
@@ -37,7 +49,7 @@
         "gradleCommand": ":app:assembleRelease"
       },
       "env": {
-        "API_URL": "https://focus-sml2.onrender.com"
+        "API_URL": "https://focus-app-1.onrender.com"
       }
     },
     "production": {
@@ -49,7 +61,7 @@
       },
       "autoIncrement": true,
       "env": {
-        "API_URL": "https://focus-sml2.onrender.com",
+        "API_URL": "https://focus-app-1.onrender.com",
         "IOS_BUNDLE_ID": "com.mindset.focus",
         "ANDROID_PACKAGE": "com.mindset.focus",
         "APPLE_TEAM_ID": "XA9AGYDNGM"

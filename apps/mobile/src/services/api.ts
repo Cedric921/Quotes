@@ -99,7 +99,11 @@ export const quotesApi = {
         ...(userId && { userId }),
       },
     });
-    return response.data;
+    // Handle case where response.data might be wrapped in an object
+    const quotes = Array.isArray(response.data)
+      ? response.data
+      : (response.data as any)?.quotes || (response.data as any)?.data || [];
+    return quotes;
   },
 
   /**

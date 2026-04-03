@@ -10,7 +10,7 @@ interface QuoteData {
 
 // Constants
 const WIDGET_QUOTE_KEY = "@focus_widget_quote";
-const IOS_APP_GROUP = "group.com.focus.quotes.widget";
+const IOS_APP_GROUP = "group.com.mindset.focus.widget";
 
 /**
  * Widget Service
@@ -100,7 +100,7 @@ class WidgetService {
           author: quote.author,
           topicName: quote.topicName || null,
         }),
-        "com.focus.quotes.widget",
+        "com.mindset.focus.widget",
       );
 
       // Request widget update
