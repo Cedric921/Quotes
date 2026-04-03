@@ -32,20 +32,8 @@ export const supportedLanguages = [
 
 const supportedLanguageCodes = supportedLanguages.map((l) => l.code);
 
-// Détection de la langue du système
-const getDeviceLanguage = (): string => {
-  try {
-    const locales = Localization.getLocales();
-    const locale =
-      locales && locales.length > 0 ? locales[0].languageCode || "en" : "en";
-
-    // Vérifier si la langue est supportée
-    return supportedLanguageCodes.includes(locale) ? locale : "en";
-  } catch (error) {
-    console.error("Error detecting device language:", error);
-    return "en";
-  }
-};
+// Langue par défaut: Français
+const DEFAULT_LANGUAGE = "fr";
 
 // Initialiser i18n de manière synchrone d'abord
 i18n.use(initReactI18next).init({
@@ -61,8 +49,8 @@ i18n.use(initReactI18next).init({
     ru: { translation: ru },
     tr: { translation: tr },
   },
-  lng: getDeviceLanguage(),
-  fallbackLng: "en",
+  lng: DEFAULT_LANGUAGE,
+  fallbackLng: "fr",
   interpolation: {
     escapeValue: false,
   },
@@ -95,7 +83,7 @@ export const changeLanguage = async (language: string) => {
 
 // Fonction pour obtenir la langue actuelle
 export const getCurrentLanguage = (): string => {
-  return i18n.language || "en";
+  return i18n.language || "fr";
 };
 
 // Fonction pour vérifier si la langue est RTL

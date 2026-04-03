@@ -20,11 +20,20 @@ export const quoteKeys = {
 };
 
 // Fetch all quotes with pagination
-export const useQuotes = (pageSize: number = 10) => {
+// includePremium: false for non-authenticated users, true for authenticated users
+export const useQuotes = (
+  pageSize: number = 10,
+  includePremium: boolean = true,
+) => {
   return useInfiniteQuery({
-    queryKey: quoteKeys.list({ pageSize }),
+    queryKey: quoteKeys.list({ pageSize, includePremium }),
     queryFn: async ({ pageParam = 1 }) => {
-      const result = await quotesApi.getQuotes(pageParam, pageSize);
+      const result = await quotesApi.getQuotes(
+        pageParam,
+        pageSize,
+        undefined,
+        includePremium,
+      );
       return result || [];
     },
     getNextPageParam: (lastPage, allPages) => {

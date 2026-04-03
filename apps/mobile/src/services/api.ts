@@ -84,11 +84,13 @@ export const quotesApi = {
    * @param page - Page number (default: 1)
    * @param limit - Number of quotes per page (default: 10)
    * @param topicId - Optional topic filter
+   * @param includePremium - Whether to include premium quotes (default: true)
    */
   getQuotes: async (
     page: number = 1,
     limit: number = 10,
     topicId?: string,
+    includePremium: boolean = true,
   ): Promise<Quote[]> => {
     const userId = await getUserIdFromToken();
     const response = await apiClient.get<Quote[]>("/quotes", {
@@ -97,6 +99,7 @@ export const quotesApi = {
         limit,
         ...(topicId && { topicId }),
         ...(userId && { userId }),
+        includePremium,
       },
     });
     // Handle case where response.data might be wrapped in an object

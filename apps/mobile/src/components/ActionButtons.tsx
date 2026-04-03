@@ -121,26 +121,16 @@ export default function ActionButtons({
     </TouchableOpacity>
   );
 
-  // If not authenticated: show only Topics and User (login) buttons
-  if (!isAuthenticated) {
-    return (
-      <View style={styles.bottomContainer}>
-        <View style={styles.buttonRow}>
-          {/* Topics Button */}
-          <GlassButton onPress={handleTopics}>
-            <Ionicons name="grid-outline" size={26} color="#ffffff" />
-          </GlassButton>
+  // Handle like - redirect to login if not authenticated
+  const handleLikeWithAuth = () => {
+    if (!isAuthenticated) {
+      onLogin?.();
+      return;
+    }
+    handleLike();
+  };
 
-          {/* User/Login Button */}
-          <GlassButton onPress={handleLogin} isActive>
-            <MaterialIcons name="person-outline" size={26} color="#ffffff" />
-          </GlassButton>
-        </View>
-      </View>
-    );
-  }
-
-  // If authenticated: show Topics, Like, Share, and User buttons
+  // Show all buttons for all users (authenticated or not)
   return (
     <View style={styles.bottomContainer}>
       <View style={styles.buttonRow}>
@@ -152,7 +142,7 @@ export default function ActionButtons({
         {/* Like Button (center, slightly larger) */}
         <Animated.View style={{ transform: [{ scale: likeScale }] }}>
           <TouchableOpacity
-            onPress={handleLike}
+            onPress={handleLikeWithAuth}
             activeOpacity={0.7}
             style={[styles.glassButtonOuter, styles.likeButtonOuter]}
           >
@@ -193,8 +183,8 @@ export default function ActionButtons({
           </GlassButton>
         )}
 
-        {/* User/Settings Button */}
-        <GlassButton onPress={handleSettings}>
+        {/* User/Settings Button - shows login if not authenticated */}
+        <GlassButton onPress={isAuthenticated ? handleSettings : handleLogin}>
           <MaterialIcons name="person-outline" size={26} color="#ffffff" />
         </GlassButton>
       </View>

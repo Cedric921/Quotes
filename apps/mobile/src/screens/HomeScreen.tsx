@@ -86,6 +86,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [isRegistering, setIsRegistering] = useState(false);
 
   // React Query hooks
+  // Pass includePremium=true only for authenticated users
   const {
     data,
     isLoading,
@@ -94,7 +95,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = useQuotes(10);
+  } = useQuotes(10, isAuthenticated);
 
   const toggleLikeMutation = useToggleLikeQuote();
   const checkoutMutation = useCreateCheckoutSession();
@@ -213,20 +214,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   // Flatten pages into a single array of quotes
-  const quotes = useMemo(() => {
+  // Server already filters based on includePremium parameter
+  const filteredQuotes = useMemo(() => {
     return data?.pages.flat() || [];
   }, [data]);
-
-  // Filter out quotes from premium topics if user is not authenticated or not premium/admin
-  const filteredQuotes = useMemo(() => {
-    return quotes.filter((quote) => {
-      // If topic is not premium, show it
-      if (!quote.topic?.isPremium) return true;
-
-      // If topic is premium, only show if user is authenticated AND (premium OR admin)
-      return isAuthenticated && (user?.isPremium || user?.isAdmin);
-    });
-  }, [quotes, isAuthenticated, user]);
 
   const handleRetry = useCallback(() => {
     refetch();
@@ -234,7 +225,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const handleLike = useCallback(
     (quoteId: string) => {
-      const quote = quotes.find((q) => q.id === quoteId);
+      const quote = filteredQuotes.find((q: Quote) => q.id === quoteId);
       if (!quote) return;
 
       toggleLikeMutation.mutate({
@@ -242,7 +233,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         isLiked: quote.isLiked || false,
       });
     },
-    [quotes, toggleLikeMutation],
+    [filteredQuotes, toggleLikeMutation],
   );
 
   const handleProfile = useCallback(() => {
