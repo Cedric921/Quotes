@@ -179,7 +179,7 @@
     "features": {
       "title": "Premium Functies",
       "unlimitedQuotes": "Onbeperkte citaten",
-      "premiumTopics": "Toegang tot premium onderwerpen",
+      "premiumSubjects": "Toegang tot premium onderwerpen",
       "noAds": "Geen advertenties",
       "customNotifications": "Aangepaste meldingen",
       "offlineAccess": "Offline toegang"
@@ -273,7 +273,7 @@
     "popular": "Populair",
     "features": {
       "unlimitedQuotes": "Onbeperkte citaten",
-      "premiumTopics": "Toegang tot premium onderwerpen",
+      "premiumSubjects": "Toegang tot premium onderwerpen",
       "noAds": "Geen advertenties",
       "customThemes": "Aangepaste thema's",
       "offlineAccess": "Offline toegang"

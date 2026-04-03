@@ -53,10 +53,19 @@ export class QuotesController {
     @Query('limit') limit?: string,
     @Query('topicId') topicId?: string,
     @Query('userId') userId?: string,
+    @Query('includePremium') includePremium?: string,
   ) {
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
-    return this.quotesService.findAll(pageNum, limitNum, topicId, userId);
+    // Default to true if not specified
+    const includePremiumBool = includePremium !== 'false';
+    return this.quotesService.findAll(
+      pageNum,
+      limitNum,
+      topicId,
+      userId,
+      includePremiumBool,
+    );
   }
 
   @Get(':id')

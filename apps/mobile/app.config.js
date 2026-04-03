@@ -33,7 +33,7 @@ export default ({ config }) => {
   // ===========================================
   // API Configuration
   // ===========================================
-  const apiUrl = process.env.API_URL || "https://focus-sml2.onrender.com";
+  const apiUrl = process.env.API_URL || "https://focus-app-1.onrender.com";
   const apiTimeout = process.env.API_TIMEOUT || "30000";
 
   // ===========================================
@@ -67,11 +67,6 @@ export default ({ config }) => {
       bundleIdentifier: iosBundleId,
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
-      },
-      entitlements: {
-        "com.apple.security.application-groups": [
-          `group.${iosBundleId}.widget`,
-        ],
       },
     },
     android: {

@@ -55,14 +55,14 @@
     "refreshing": "Refreshing..."
   },
   "topics": {
-    "title": "Topics",
-    "allTopics": "All topics",
+    "title": "Subjects",
+    "allTopics": "All subjects",
     "premiumContent": "Premium Content",
     "loginToAccess": "Login to access this premium content",
     "subscribeToAccess": "Subscribe to access this premium content",
-    "noTopics": "No topics available",
-    "failedToLoad": "Failed to load topics",
-    "noQuotesForTopic": "No quotes found for this topic"
+    "noTopics": "No subjects available",
+    "failedToLoad": "Failed to load subjects",
+    "noQuotesForTopic": "No quotes found for this subject"
   },
   "settings": {
     "title": "Settings",
@@ -96,7 +96,7 @@
     "fonts": "Fonts",
     "defaultFont": "Default Font",
     "autoTranslate": "Auto-translate content",
-    "autoTranslateDesc": "Automatically translate quotes and topics",
+    "autoTranslateDesc": "Automatically translate quotes and subjects",
     "unlockAll": "Unlock All",
     "unlockThemes": "Unlock Themes"
   },
@@ -191,7 +191,7 @@
     "features": {
       "title": "Premium Features",
       "unlimitedQuotes": "Unlimited quotes",
-      "premiumTopics": "Access to premium topics",
+      "premiumSubjects": "Access to premium subjects",
       "noAds": "No advertisements",
       "customNotifications": "Custom notifications",
       "offlineAccess": "Offline access"
@@ -305,7 +305,7 @@
     "popular": "Popular",
     "features": {
       "unlimitedQuotes": "Unlimited quotes",
-      "premiumTopics": "Access to premium topics",
+      "premiumSubjects": "Access to premium subjects",
       "noAds": "No ads",
       "customThemes": "Custom themes",
       "offlineAccess": "Offline access"

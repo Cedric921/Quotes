@@ -2,6 +2,7 @@
   "$schema": "https://docs.expo.dev/versions/latest/config/app/",
   "_comment": "Dynamic values (name, version, owner, projectId, bundleId, package) are loaded from .env via app.config.js",
   "expo": {
+    "entryPoint": "./index.ts",
     "scheme": "focus-quotes",
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -14,12 +15,7 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "supportsTablet": true,
-      "bundleIdentifier": "com.mindset.focus",
-      "entitlements": {
-        "com.apple.security.application-groups": [
-          "group.com.mindset.focus.widget"
-        ]
-      }
+      "bundleIdentifier": "com.mindset.focus"
     },
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",

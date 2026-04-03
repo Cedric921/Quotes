@@ -22,7 +22,6 @@ import {
   LoadingSkeleton,
   ErrorMessage,
   Header,
-  DotsIndicator,
   ActionButtons,
   ThemeSelectionModal,
 } from "../components";
@@ -87,6 +86,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [isRegistering, setIsRegistering] = useState(false);
 
   // React Query hooks
+  // Pass includePremium=true only for authenticated users
   const {
     data,
     isLoading,
@@ -95,7 +95,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = useQuotes(10);
+  } = useQuotes(10, isAuthenticated);
 
   const toggleLikeMutation = useToggleLikeQuote();
   const checkoutMutation = useCreateCheckoutSession();
@@ -214,20 +214,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   // Flatten pages into a single array of quotes
-  const quotes = useMemo(() => {
+  // Server already filters based on includePremium parameter
+  const filteredQuotes = useMemo(() => {
     return data?.pages.flat() || [];
   }, [data]);
-
-  // Filter out quotes from premium topics if user is not authenticated or not premium/admin
-  const filteredQuotes = useMemo(() => {
-    return quotes.filter((quote) => {
-      // If topic is not premium, show it
-      if (!quote.topic?.isPremium) return true;
-
-      // If topic is premium, only show if user is authenticated AND (premium OR admin)
-      return isAuthenticated && (user?.isPremium || user?.isAdmin);
-    });
-  }, [quotes, isAuthenticated, user]);
 
   const handleRetry = useCallback(() => {
     refetch();
@@ -235,7 +225,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const handleLike = useCallback(
     (quoteId: string) => {
-      const quote = quotes.find((q) => q.id === quoteId);
+      const quote = filteredQuotes.find((q: Quote) => q.id === quoteId);
       if (!quote) return;
 
       toggleLikeMutation.mutate({
@@ -243,7 +233,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         isLiked: quote.isLiked || false,
       });
     },
-    [quotes, toggleLikeMutation],
+    [filteredQuotes, toggleLikeMutation],
   );
 
   const handleProfile = useCallback(() => {
@@ -385,12 +375,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }, [isLoading, isRefetching, styles.footer]);
 
-  // Show loading skeleton on initial load
+  // Show loading skeleton on initial load (only if no error)
   if (isLoading && filteredQuotes.length === 0 && !error) {
     return <LoadingSkeleton />;
   }
 
-  // Show error message if there's an error and no quotes
+  // Show error message if fetch failed and no data
   if (error && filteredQuotes.length === 0) {
     return (
       <ErrorMessage
@@ -439,31 +429,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         />
       )} */}
 
-      {/* Fixed Bottom Navigation Bar - Hidden during capture */}
-      {!isCapturing &&
-        (filteredQuotes.length > 0 && filteredQuotes[currentIndex] ? (
-          <ActionButtons
-            quoteId={filteredQuotes[currentIndex].id}
-            isLiked={filteredQuotes[currentIndex].isLiked}
-            isAuthenticated={isAuthenticated}
-            onLike={handleLike}
-            onSettings={handleProfile}
-            onTopics={handleTopics}
-            onLogin={handleLogin}
-            onShare={handleShare}
-            isSharing={isSharing}
-          />
-        ) : (
-          <ActionButtons
-            quoteId=""
-            isLiked={false}
-            isAuthenticated={isAuthenticated}
-            onLike={() => {}}
-            onSettings={handleProfile}
-            onTopics={handleTopics}
-            onLogin={handleLogin}
-          />
-        ))}
+      {/* Fixed Bottom Navigation Bar - Always visible (not during capture) */}
+      {!isCapturing && (
+        <ActionButtons
+          quoteId={filteredQuotes[currentIndex]?.id || ""}
+          isLiked={filteredQuotes[currentIndex]?.isLiked || false}
+          isAuthenticated={isAuthenticated}
+          onLike={handleLike}
+          onSettings={handleProfile}
+          onTopics={handleTopics}
+          onLogin={handleLogin}
+          onShare={filteredQuotes.length > 0 ? handleShare : undefined}
+          isSharing={isSharing}
+        />
+      )}
 
       {/* Onboarding Bottom Sheet */}
       <SubscriptionBottomSheet

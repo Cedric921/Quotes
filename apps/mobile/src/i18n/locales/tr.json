@@ -179,7 +179,7 @@
     "features": {
       "title": "Premium Özellikler",
       "unlimitedQuotes": "Sınırsız alıntı",
-      "premiumTopics": "Premium konulara erişim",
+      "premiumSubjects": "Premium konulara erişim",
       "noAds": "Reklamsız",
       "customNotifications": "Özel bildirimler",
       "offlineAccess": "Çevrimdışı erişim"
@@ -273,7 +273,7 @@
     "popular": "Popüler",
     "features": {
       "unlimitedQuotes": "Sınırsız alıntı",
-      "premiumTopics": "Premium konulara erişim",
+      "premiumSubjects": "Premium konulara erişim",
       "noAds": "Reklamsız",
       "customThemes": "Özel temalar",
       "offlineAccess": "Çevrimdışı erişim"

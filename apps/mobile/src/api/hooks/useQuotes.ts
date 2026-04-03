@@ -20,15 +20,31 @@ export const quoteKeys = {
 };
 
 // Fetch all quotes with pagination
-export const useQuotes = (pageSize: number = 10) => {
+// includePremium: false for non-authenticated users, true for authenticated users
+export const useQuotes = (
+  pageSize: number = 10,
+  includePremium: boolean = true,
+) => {
   return useInfiniteQuery({
-    queryKey: quoteKeys.list({ pageSize }),
-    queryFn: ({ pageParam = 1 }) => quotesApi.getQuotes(pageParam, pageSize),
+    queryKey: quoteKeys.list({ pageSize, includePremium }),
+    queryFn: async ({ pageParam = 1 }) => {
+      const result = await quotesApi.getQuotes(
+        pageParam,
+        pageSize,
+        undefined,
+        includePremium,
+      );
+      return result || [];
+    },
     getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length < pageSize) return undefined;
+      if (!lastPage || lastPage.length < pageSize) return undefined;
       return allPages.length + 1;
     },
     initialPageParam: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes - réduire les requêtes
+    gcTime: 1000 * 60 * 30, // 30 minutes cache
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
