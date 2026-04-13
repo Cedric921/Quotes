@@ -84,9 +84,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     null,
   );
   const [isRegistering, setIsRegistering] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
 
   // React Query hooks
-  // Pass includePremium=true only for authenticated users
+  // Always include all quotes for better UX - filtering is just for premium features
   const {
     data,
     isLoading,
@@ -95,7 +96,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = useQuotes(10, isAuthenticated);
+  } = useQuotes(10, true);
+
+  // Timeout for loading - show error after 15 seconds
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (isLoading && !data) {
+      timeoutId = setTimeout(() => {
+        setLoadingTimeout(true);
+      }, 15000);
+    } else {
+      setLoadingTimeout(false);
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isLoading, data]);
 
   const toggleLikeMutation = useToggleLikeQuote();
   const checkoutMutation = useCreateCheckoutSession();
@@ -375,19 +391,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }, [isLoading, isRefetching, styles.footer]);
 
-  // Show loading skeleton on initial load (only if no error)
-  if (isLoading && filteredQuotes.length === 0 && !error) {
-    return <LoadingSkeleton />;
-  }
-
-  // Show error message if fetch failed and no data
-  if (error && filteredQuotes.length === 0) {
+  // Show error message if fetch failed, timeout, or no data after loading
+  if ((error || loadingTimeout) && filteredQuotes.length === 0) {
     return (
       <ErrorMessage
         message={t("errors.failedToLoadQuotes")}
-        onRetry={handleRetry}
+        onRetry={() => {
+          setLoadingTimeout(false);
+          handleRetry();
+        }}
       />
     );
+  }
+
+  // Show loading skeleton on initial load (only if no error and no timeout)
+  if (isLoading && filteredQuotes.length === 0 && !error && !loadingTimeout) {
+    return <LoadingSkeleton />;
   }
 
   const content = (

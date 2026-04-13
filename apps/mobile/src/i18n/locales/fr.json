@@ -161,6 +161,7 @@
     "forbidden": "Accès interdit",
     "failedToLoadTopic": "Échec du chargement du sujet",
     "failedToLoadQuotes": "Impossible de charger les citations. Vérifiez votre connexion.",
+    "connectionError": "Connexion impossible. Vérifiez votre réseau et réessayez.",
     "sessionExpired": "Session expirée",
     "pleaseReconnect": "Veuillez vous reconnecter"
   },

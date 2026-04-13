@@ -161,6 +161,7 @@
     "forbidden": "Access forbidden",
     "failedToLoadTopic": "Failed to load topic data",
     "failedToLoadQuotes": "Failed to load quotes. Check your connection.",
+    "connectionError": "Connection failed. Please check your network and try again.",
     "sessionExpired": "Session expired",
     "pleaseReconnect": "Please log in again"
   },

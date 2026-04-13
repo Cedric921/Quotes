@@ -6,10 +6,11 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 interface ErrorMessageProps {
-  readonly message: string;
+  readonly message?: string;
   readonly onRetry?: () => void;
 }
 
@@ -18,10 +19,17 @@ export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.errorText}>⚠️</Text>
-      <Text style={styles.message}>{message}</Text>
+      <Ionicons
+        name="refresh-outline"
+        size={48}
+        color="rgba(255,255,255,0.6)"
+      />
+      <Text style={styles.message}>
+        {message || t("errors.connectionError")}
+      </Text>
       {onRetry && (
         <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
+          <Ionicons name="reload" size={18} color="#fff" />
           <Text style={styles.retryText}>{t("common.retry")}</Text>
         </TouchableOpacity>
       )}
@@ -34,28 +42,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 40,
     backgroundColor: "#000",
   } as ViewStyle,
-  errorText: {
-    fontSize: 48,
-    marginBottom: 16,
-  } as TextStyle,
   message: {
-    fontSize: 16,
-    color: "#fff",
+    fontSize: 15,
+    color: "rgba(255,255,255,0.7)",
     textAlign: "center",
+    marginTop: 16,
     marginBottom: 24,
+    lineHeight: 22,
   } as TextStyle,
   retryButton: {
-    backgroundColor: "#fff",
-    paddingHorizontal: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 25,
+    gap: 8,
   } as ViewStyle,
   retryText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "600" as const,
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "500" as const,
   } as TextStyle,
 });

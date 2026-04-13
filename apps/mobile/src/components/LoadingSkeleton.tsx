@@ -1,9 +1,8 @@
-import { View, StyleSheet, Dimensions, Animated } from "react-native";
-import { useEffect, useRef } from "react";
-
-const { height } = Dimensions.get("window");
+import { View, StyleSheet, Animated, useWindowDimensions } from "react-native";
+import { useEffect, useRef, useMemo } from "react";
 
 export default function LoadingSkeleton() {
+  const { height, width } = useWindowDimensions();
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -21,15 +20,26 @@ export default function LoadingSkeleton() {
         }),
       ]),
     ).start();
-  }, []);
+  }, [pulseAnim]);
 
   const opacity = pulseAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0.3, 0.7],
   });
 
+  // Dynamic styles for iPad/different screen sizes
+  const dynamicStyles = useMemo(
+    () => ({
+      container: {
+        height,
+        width,
+      },
+    }),
+    [height, width],
+  );
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, dynamicStyles.container]}>
       {/* Logo animé */}
       <Animated.View style={[styles.logoContainer, { opacity }]}>
         <View style={styles.logoCircle}>
@@ -71,7 +81,7 @@ export default function LoadingSkeleton() {
 
 const styles = StyleSheet.create({
   container: {
-    height,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 30,

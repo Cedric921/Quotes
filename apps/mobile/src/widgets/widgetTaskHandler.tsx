@@ -18,12 +18,11 @@ async function getQuoteFromStorage(): Promise<{
   topicName?: string;
 }> {
   try {
-    const { SharedGroupPreferences } = await import(
-      "react-native-android-widget"
-    );
+    const { SharedGroupPreferences } =
+      await import("react-native-android-widget");
     const data = await SharedGroupPreferences.getItem(
       "widgetQuote",
-      "com.focus.quotes.widget"
+      "com.mindset.focus.widget",
     );
 
     if (data) {
@@ -85,4 +84,3 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       return null;
   }
 }
-
