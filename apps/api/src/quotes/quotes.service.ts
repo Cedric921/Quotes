@@ -50,6 +50,7 @@ export class QuotesService {
     limit?: number,
     topicId?: string,
     userId?: string,
+    includePremium: boolean = true,
   ) {
     const queryBuilder = this.quotesRepository
       .createQueryBuilder('quote')
@@ -57,7 +58,15 @@ export class QuotesService {
       .orderBy('quote.createdAt', 'DESC');
 
     if (topicId) {
-      queryBuilder.where('topic.id = :topicId', { topicId });
+      queryBuilder.andWhere('topic.id = :topicId', { topicId });
+    }
+
+    // Filter out premium quotes if includePremium is false
+    if (!includePremium) {
+      queryBuilder.andWhere(
+        '(topic.isPremium = :isPremium OR topic.isPremium IS NULL)',
+        { isPremium: false },
+      );
     }
 
     if (page && limit) {

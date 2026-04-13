@@ -228,7 +228,7 @@
     "features": {
       "title": "Funciones Premium",
       "unlimitedQuotes": "Citas ilimitadas",
-      "premiumTopics": "Acceso a temas premium",
+      "premiumSubjects": "Acceso a temas premium",
       "noAds": "Sin anuncios",
       "customNotifications": "Notificaciones personalizadas",
       "offlineAccess": "Acceso sin conexión"
@@ -274,7 +274,7 @@
     "popular": "Popular",
     "features": {
       "unlimitedQuotes": "Citas ilimitadas",
-      "premiumTopics": "Acceso a temas premium",
+      "premiumSubjects": "Acceso a temas premium",
       "noAds": "Sin anuncios",
       "customThemes": "Temas personalizados",
       "offlineAccess": "Acceso sin conexión"

@@ -10,7 +10,7 @@ interface TranslationState {
 }
 
 const initialState: TranslationState = {
-  autoTranslate: true, // Enabled by default
+  autoTranslate: false, // Disabled by default - quotes are in French
   translationCache: {},
   loadingQuotes: [],
 };
@@ -61,4 +61,3 @@ export const {
 } = translationSlice.actions;
 
 export default translationSlice.reducer;
-

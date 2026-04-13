@@ -109,7 +109,7 @@ export default function SubscriptionBottomSheet({
                   },
                   {
                     icon: "star",
-                    text: t("subscription.features.premiumTopics"),
+                    text: t("subscription.features.premiumSubjects"),
                   },
                   {
                     icon: "notifications",

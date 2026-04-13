@@ -193,17 +193,19 @@ const createStyles = (colors: any) =>
       paddingVertical: 20,
     },
     socialGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
+      flexDirection: "column",
       gap: 12,
+      width: "100%",
     },
     socialButton: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
       paddingHorizontal: 20,
-      paddingVertical: 14,
+      paddingVertical: 16,
       borderRadius: 12,
       gap: 10,
+      width: "100%",
     },
     socialName: {
       fontSize: 15,

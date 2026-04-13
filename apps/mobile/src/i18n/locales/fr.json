@@ -60,9 +60,9 @@
     "premiumContent": "Contenu Premium",
     "loginToAccess": "Connectez-vous pour accéder à ce contenu premium",
     "subscribeToAccess": "Abonnez-vous pour accéder à ce contenu premium",
-    "noTopics": "Aucun topic disponible",
-    "failedToLoad": "Échec du chargement des topics",
-    "noQuotesForTopic": "Aucune citation trouvée pour ce topic"
+    "noTopics": "Aucun sujet disponible",
+    "failedToLoad": "Échec du chargement des sujets",
+    "noQuotesForTopic": "Aucune citation trouvée pour ce sujet"
   },
   "settings": {
     "title": "Paramètres",
@@ -191,7 +191,7 @@
     "features": {
       "title": "Fonctionnalités Premium",
       "unlimitedQuotes": "Citations illimitées",
-      "premiumTopics": "Accès aux sujets premium",
+      "premiumSubjects": "Accès aux sujets premium",
       "noAds": "Sans publicité",
       "customNotifications": "Notifications personnalisées",
       "offlineAccess": "Accès hors ligne"
@@ -305,7 +305,7 @@
     "popular": "Populaire",
     "features": {
       "unlimitedQuotes": "Citations illimitées",
-      "premiumTopics": "Accès aux sujets premium",
+      "premiumSubjects": "Accès aux sujets premium",
       "noAds": "Sans publicité",
       "customThemes": "Thèmes personnalisés",
       "offlineAccess": "Accès hors ligne"

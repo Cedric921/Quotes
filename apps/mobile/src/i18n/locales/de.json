@@ -179,7 +179,7 @@
     "features": {
       "title": "Premium-Funktionen",
       "unlimitedQuotes": "Unbegrenzte Zitate",
-      "premiumTopics": "Zugang zu Premium-Themen",
+      "premiumSubjects": "Zugang zu Premium-Themen",
       "noAds": "Keine Werbung",
       "customNotifications": "Benutzerdefinierte Benachrichtigungen",
       "offlineAccess": "Offline-Zugang"
@@ -273,7 +273,7 @@
     "popular": "Beliebt",
     "features": {
       "unlimitedQuotes": "Unbegrenzte Zitate",
-      "premiumTopics": "Zugang zu Premium-Themen",
+      "premiumSubjects": "Zugang zu Premium-Themen",
       "noAds": "Keine Werbung",
       "customThemes": "Benutzerdefinierte Designs",
       "offlineAccess": "Offline-Zugang"
