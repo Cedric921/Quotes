@@ -28,23 +28,30 @@ export const useQuotes = (
   return useInfiniteQuery({
     queryKey: quoteKeys.list({ pageSize, includePremium }),
     queryFn: async ({ pageParam = 1 }) => {
-      const result = await quotesApi.getQuotes(
-        pageParam,
-        pageSize,
-        undefined,
-        includePremium,
-      );
-      return result || [];
+      try {
+        const result = await quotesApi.getQuotes(
+          pageParam,
+          pageSize,
+          undefined,
+          includePremium,
+        );
+        return result || [];
+      } catch (error) {
+        console.error("[useQuotes] Error fetching quotes:", error);
+        throw error;
+      }
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < pageSize) return undefined;
       return allPages.length + 1;
     },
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes - réduire les requêtes
+    staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes cache
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: 5, // More retries for cold starts on Render
+    retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 10000),
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 };
 

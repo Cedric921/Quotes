@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ViewStyle,
   TextStyle,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -16,13 +17,14 @@ interface ErrorMessageProps {
 
 export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
   const { t } = useTranslation();
+  const { height } = useWindowDimensions();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { height: height - 120 }]}>
       <Ionicons
-        name="refresh-outline"
-        size={48}
-        color="rgba(255,255,255,0.6)"
+        name="cloud-offline-outline"
+        size={56}
+        color="rgba(255,255,255,0.4)"
       />
       <Text style={styles.message}>
         {message || t("errors.connectionError")}
@@ -43,28 +45,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 40,
-    backgroundColor: "#000",
   } as ViewStyle,
   message: {
-    fontSize: 15,
-    color: "rgba(255,255,255,0.7)",
+    fontSize: 16,
+    color: "rgba(255,255,255,0.6)",
     textAlign: "center",
-    marginTop: 16,
-    marginBottom: 24,
-    lineHeight: 22,
+    marginTop: 20,
+    marginBottom: 28,
+    lineHeight: 24,
+    paddingHorizontal: 20,
   } as TextStyle,
   retryButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.15)",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 30,
+    gap: 10,
   } as ViewStyle,
   retryText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "500" as const,
   } as TextStyle,
 });

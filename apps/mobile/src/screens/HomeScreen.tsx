@@ -391,62 +391,52 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }, [isLoading, isRefetching, styles.footer]);
 
-  // Show error message if fetch failed, timeout, or no data after loading
-  if ((error || loadingTimeout) && filteredQuotes.length === 0) {
-    return (
-      <ErrorMessage
-        message={t("errors.failedToLoadQuotes")}
-        onRetry={() => {
-          setLoadingTimeout(false);
-          handleRetry();
-        }}
-      />
-    );
-  }
-
-  // Show loading skeleton on initial load (only if no error and no timeout)
-  if (isLoading && filteredQuotes.length === 0 && !error && !loadingTimeout) {
-    return <LoadingSkeleton />;
-  }
+  // Determine if we're in initial loading state
+  const isInitialLoading = isLoading && filteredQuotes.length === 0 && !error;
+  const showError = (error || loadingTimeout) && filteredQuotes.length === 0;
 
   const content = (
     <>
       {/* Header - Hidden during capture */}
       {!isCapturing && <Header />}
 
-      {/* Quotes List */}
-      <FlatList
-        data={filteredQuotes}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        pagingEnabled
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        onViewableItemsChanged={handleViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={() => refetch()}
-            tintColor="#0A84FF"
-          />
-        }
-        ListFooterComponent={renderFooter}
-        getItemLayout={(_data, index) => ({
-          length: height,
-          offset: height * index,
-          index,
-        })}
-      />
-
-      {/* Dots Indicator */}
-      {/* {filteredQuotes.length > 0 && (
-        <DotsIndicator
-          total={filteredQuotes.length}
-          currentIndex={currentIndex}
+      {/* Main Content Area */}
+      {showError ? (
+        <ErrorMessage
+          message={t("errors.failedToLoadQuotes")}
+          onRetry={() => {
+            setLoadingTimeout(false);
+            handleRetry();
+          }}
         />
-      )} */}
+      ) : isInitialLoading ? (
+        <LoadingSkeleton />
+      ) : (
+        <FlatList
+          data={filteredQuotes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          pagingEnabled
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          onViewableItemsChanged={handleViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor="#0A84FF"
+            />
+          }
+          ListFooterComponent={renderFooter}
+          getItemLayout={(_data, index) => ({
+            length: height,
+            offset: height * index,
+            index,
+          })}
+        />
+      )}
 
       {/* Fixed Bottom Navigation Bar - Always visible (not during capture) */}
       {!isCapturing && (
