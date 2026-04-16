@@ -28,6 +28,7 @@ export const useQuotes = (
   return useInfiniteQuery({
     queryKey: quoteKeys.list({ pageSize, includePremium }),
     queryFn: async ({ pageParam = 1 }) => {
+      console.log("[useQuotes] Fetching page:", pageParam);
       try {
         const result = await quotesApi.getQuotes(
           pageParam,
@@ -35,6 +36,7 @@ export const useQuotes = (
           undefined,
           includePremium,
         );
+        console.log("[useQuotes] Received quotes:", result?.length || 0);
         return result || [];
       } catch (error) {
         console.error("[useQuotes] Error fetching quotes:", error);
@@ -50,8 +52,9 @@ export const useQuotes = (
     gcTime: 1000 * 60 * 30, // 30 minutes cache
     retry: 5, // More retries for cold starts on Render
     retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 10000),
-    refetchOnMount: true,
+    refetchOnMount: "always", // Always refetch on mount to ensure fresh data
     refetchOnWindowFocus: false,
+    enabled: true, // Always enabled - no conditions
   });
 };
 

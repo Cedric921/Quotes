@@ -91,17 +91,33 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const {
     data,
     isLoading,
+    isFetching,
     isRefetching,
     error,
     fetchNextPage,
     hasNextPage,
     refetch,
+    status,
   } = useQuotes(10, true);
+
+  // Debug log for tracking fetch status
+  useEffect(() => {
+    console.log("[HomeScreen] Query status:", {
+      status,
+      isLoading,
+      isFetching,
+      hasData: !!data,
+      pagesCount: data?.pages?.length,
+      quotesCount: data?.pages?.flat()?.length,
+      error: error?.message,
+    });
+  }, [status, isLoading, isFetching, data, error]);
 
   // Timeout for loading - show error after 15 seconds
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    if (isLoading && !data) {
+    // Use isFetching instead of isLoading for more accurate state
+    if ((isLoading || isFetching) && !data?.pages?.length) {
       timeoutId = setTimeout(() => {
         setLoadingTimeout(true);
       }, 15000);
@@ -111,7 +127,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isLoading, data]);
+  }, [isLoading, isFetching, data]);
 
   const toggleLikeMutation = useToggleLikeQuote();
   const checkoutMutation = useCreateCheckoutSession();
@@ -391,9 +407,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }, [isLoading, isRefetching, styles.footer]);
 
-  // Determine if we're in initial loading state
-  const isInitialLoading = isLoading && filteredQuotes.length === 0 && !error;
-  const showError = (error || loadingTimeout) && filteredQuotes.length === 0;
+  // Determine display state - be more careful about the conditions
+  // Show loading if: fetching data AND no data yet AND no error
+  const hasQuotes = filteredQuotes.length > 0;
+  const isInitialLoading = (isLoading || isFetching) && !hasQuotes && !error;
+  const showError = (error || loadingTimeout) && !hasQuotes;
+  // Show empty state skeleton if not loading, no error, but also no data (shouldn't happen normally)
+  const showEmptyLoading =
+    !isLoading && !isFetching && !error && !hasQuotes && !loadingTimeout;
 
   const content = (
     <>
@@ -409,7 +430,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             handleRetry();
           }}
         />
-      ) : isInitialLoading ? (
+      ) : isInitialLoading || showEmptyLoading ? (
         <LoadingSkeleton />
       ) : (
         <FlatList
