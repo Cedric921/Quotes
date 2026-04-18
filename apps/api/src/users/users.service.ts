@@ -1,6 +1,14 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
@@ -89,15 +97,15 @@ export class UsersService {
     };
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(id);
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
+    const user: User = await this.findOne(id);
     if (!user) return null;
 
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
     Object.assign(user, updateUserDto);
-    return this.usersRepository.save(user);
+    return (await this.usersRepository.save(user)) as User;
   }
 
   remove(id: string) {
@@ -133,7 +141,7 @@ export class UsersService {
     userId: string,
     updateDto: UpdateNotificationSettingsDto,
   ) {
-    let settings = await this.notificationSettingsRepository.findOne({
+    const settings = await this.notificationSettingsRepository.findOne({
       where: { userId },
     });
 
@@ -276,5 +284,40 @@ export class UsersService {
     if (data.avatar !== undefined) user.avatar = data.avatar;
 
     return this.usersRepository.save(user);
+  }
+
+  // ==================== Account Deletion ====================
+
+  async deleteAccount(userId: string, password: string): Promise<void> {
+    if (!password) {
+      throw new BadRequestException('Password is required');
+    }
+
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Verify password
+    if (!user.password) {
+      throw new BadRequestException(
+        'Cannot delete account: no password set (OAuth account)',
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    // Delete related data in order
+    // 1. Delete notification settings
+    await this.notificationSettingsRepository.delete({ userId });
+
+    // 2. Delete user activities
+    await this.activityRepository.delete({ userId });
+
+    // 3. Delete the user (this will cascade delete liked quotes relation)
+    await this.usersRepository.delete(userId);
   }
 }
