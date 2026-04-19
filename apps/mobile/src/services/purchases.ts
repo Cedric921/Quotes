@@ -5,10 +5,13 @@ import Purchases, {
   LOG_LEVEL,
 } from "react-native-purchases";
 import { Platform } from "react-native";
+import Constants from "expo-constants";
 
-// RevenueCat API keys (same for iOS and Android in test mode)
-const REVENUECAT_API_KEY_IOS = "test_RYsvRKTIJlNHpUxlXPRCLbvjcKC";
-const REVENUECAT_API_KEY_ANDROID = "test_RYsvRKTIJlNHpUxlXPRCLbvjcKC";
+// RevenueCat API keys from environment variables (app.config.js extra)
+const REVENUECAT_API_KEY_IOS =
+  Constants.expoConfig?.extra?.REVENUECAT_API_KEY_IOS || "";
+const REVENUECAT_API_KEY_ANDROID =
+  Constants.expoConfig?.extra?.REVENUECAT_API_KEY_ANDROID || "";
 
 // Entitlement identifier (configured in RevenueCat dashboard)
 export const ENTITLEMENT_ID = "Focus Pro";
