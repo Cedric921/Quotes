@@ -569,4 +569,129 @@ export class SubscriptionsService {
     await this.activateSubscription(userId, planId, session.id, amountPaid);
     console.log(`✅ Subscription activated for user ${userId} via checkout`);
   }
+
+  // ============ REVENUECAT INTEGRATION ============
+
+  async handleRevenueCatWebhook(event: any): Promise<void> {
+    console.log('📱 RevenueCat webhook received:', event.event?.type);
+
+    const eventType = event.event?.type;
+    const appUserId = event.event?.app_user_id;
+    const entitlements = event.event?.entitlement_ids || [];
+
+    if (!appUserId) {
+      console.log('⚠️ No app_user_id in RevenueCat event');
+      return;
+    }
+
+    switch (eventType) {
+      case 'INITIAL_PURCHASE':
+      case 'RENEWAL':
+      case 'PRODUCT_CHANGE':
+        await this.activateRevenueCatSubscription(
+          appUserId,
+          entitlements,
+          event,
+        );
+        break;
+      case 'CANCELLATION':
+      case 'EXPIRATION':
+        await this.deactivateRevenueCatSubscription(appUserId);
+        break;
+      default:
+        console.log(`ℹ️ Unhandled RevenueCat event type: ${eventType}`);
+    }
+  }
+
+  async activateRevenueCatSubscription(
+    userId: string,
+    entitlements: string[],
+    event: any,
+  ): Promise<void> {
+    // Find the user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      console.log(`⚠️ User ${userId} not found for RevenueCat subscription`);
+      return;
+    }
+
+    // Mark user as premium
+    user.isPremium = true;
+    await this.userRepository.save(user);
+
+    // Get or create a default premium plan for RevenueCat subscriptions
+    let plan = await this.planRepository.findOne({
+      where: { name: 'RevenueCat Premium' },
+    });
+
+    if (!plan) {
+      plan = this.planRepository.create({
+        name: 'RevenueCat Premium',
+        description: 'Premium subscription via App Store / Google Play',
+        price: 0, // Price managed by stores
+        durationMonths: 1,
+        isActive: true,
+      });
+      await this.planRepository.save(plan);
+    }
+
+    // Create subscription record
+    const expirationDate = event.event?.expiration_at_ms
+      ? new Date(event.event.expiration_at_ms)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
+
+    const subscription = this.subscriptionRepository.create({
+      user,
+      plan,
+      status: SubscriptionStatus.ACTIVE,
+      startDate: new Date(),
+      endDate: expirationDate,
+      stripePaymentIntentId: `rc_${event.event?.id || Date.now()}`,
+      amountPaid: event.event?.price || 0,
+    });
+
+    await this.subscriptionRepository.save(subscription);
+    console.log(`✅ RevenueCat subscription activated for user ${userId}`);
+  }
+
+  async deactivateRevenueCatSubscription(userId: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) return;
+
+    user.isPremium = false;
+    await this.userRepository.save(user);
+
+    // Mark active subscriptions as cancelled
+    const activeSubscriptions = await this.subscriptionRepository.find({
+      where: { user: { id: userId }, status: SubscriptionStatus.ACTIVE },
+    });
+
+    for (const subscription of activeSubscriptions) {
+      subscription.status = SubscriptionStatus.CANCELLED;
+      await this.subscriptionRepository.save(subscription);
+    }
+
+    console.log(`✅ RevenueCat subscription deactivated for user ${userId}`);
+  }
+
+  async syncRevenueCatEntitlements(
+    userId: string,
+    revenueCatUserId: string,
+    entitlements: string[],
+  ): Promise<{ synced: boolean; isPremium: boolean }> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hasPremium = entitlements.includes('premium');
+
+    if (user.isPremium !== hasPremium) {
+      user.isPremium = hasPremium;
+      await this.userRepository.save(user);
+      console.log(`✅ User ${userId} premium status synced: ${hasPremium}`);
+    }
+
+    return { synced: true, isPremium: hasPremium };
+  }
 }

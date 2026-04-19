@@ -43,6 +43,10 @@ export default ({ config }) => {
   const paginationThreshold = process.env.PAGINATION_THRESHOLD || "0.5";
   const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY || "";
 
+  // RevenueCat Configuration
+  const revenueCatApiKeyIos = process.env.REVENUECAT_API_KEY_IOS || "";
+  const revenueCatApiKeyAndroid = process.env.REVENUECAT_API_KEY_ANDROID || "";
+
   // Log configuration (useful for debugging)
   console.log(`[Config] APP: ${appName} v${appVersion} (${appSlug})`);
   console.log(`[Config] EAS: ${easOwner}/${easProjectId}`);
@@ -83,6 +87,7 @@ export default ({ config }) => {
     },
     plugins: [
       "expo-localization",
+      "react-native-purchases",
       [
         "react-native-android-widget",
         {
@@ -124,8 +129,11 @@ export default ({ config }) => {
       PAGINATION_THRESHOLD: paginationThreshold,
       // EAS
       EAS_PROJECT_ID: easProjectId,
-      // Stripe
+      // Stripe (legacy)
       STRIPE_PUBLISHABLE_KEY: stripePublishableKey,
+      // RevenueCat
+      REVENUECAT_API_KEY_IOS: revenueCatApiKeyIos,
+      REVENUECAT_API_KEY_ANDROID: revenueCatApiKeyAndroid,
       // EAS internal config
       eas: {
         projectId: easProjectId,

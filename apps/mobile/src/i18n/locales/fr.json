@@ -233,7 +233,13 @@
     "paymentHistory": "Historique des paiements",
     "paymentSucceeded": "Réussi",
     "paymentPending": "En attente",
-    "paymentFailed": "Échoué"
+    "paymentFailed": "Échoué",
+    "premium": "Premium",
+    "month": "mois",
+    "year": "an",
+    "restoreSuccess": "Achats restaurés",
+    "noSubscription": "Aucun abonnement actif",
+    "noPurchasesToRestore": "Aucun achat précédent à restaurer"
   },
   "notifications": {
     "title": "Notifications",
