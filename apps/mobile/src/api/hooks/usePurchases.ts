@@ -12,6 +12,7 @@ import {
   restorePurchases,
   getCustomerInfo,
   isPremiumActive,
+  hasActiveEntitlement,
   addCustomerInfoListener,
   loginUser,
   logoutUser,
@@ -72,7 +73,7 @@ export const useCustomerInfo = () => {
   return {
     customerInfo,
     isLoading: customerInfo === null,
-    isPremium: customerInfo?.entitlements.active["premium"] !== undefined,
+    isPremium: customerInfo ? hasActiveEntitlement(customerInfo) : false,
     refetch: async () => {
       const info = await getCustomerInfo();
       setCustomerInfo(info);
@@ -154,11 +155,14 @@ export const useRestorePurchases = () => {
 export const useRevenueCatAuth = () => {
   const queryClient = useQueryClient();
 
-  const login = useCallback(async (userId: string) => {
-    const info = await loginUser(userId);
-    queryClient.invalidateQueries({ queryKey: purchasesKeys.all });
-    return info;
-  }, [queryClient]);
+  const login = useCallback(
+    async (userId: string) => {
+      const info = await loginUser(userId);
+      queryClient.invalidateQueries({ queryKey: purchasesKeys.all });
+      return info;
+    },
+    [queryClient],
+  );
 
   const logout = useCallback(async () => {
     const info = await logoutUser();
@@ -168,4 +172,3 @@ export const useRevenueCatAuth = () => {
 
   return { login, logout };
 };
-

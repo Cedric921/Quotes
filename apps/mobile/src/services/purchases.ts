@@ -5,13 +5,13 @@ import Purchases, {
   LOG_LEVEL,
 } from "react-native-purchases";
 import { Platform } from "react-native";
-import Constants from "expo-constants";
 
-// Get RevenueCat API keys from config
-const REVENUECAT_API_KEY_IOS =
-  Constants.expoConfig?.extra?.REVENUECAT_API_KEY_IOS || "";
-const REVENUECAT_API_KEY_ANDROID =
-  Constants.expoConfig?.extra?.REVENUECAT_API_KEY_ANDROID || "";
+// RevenueCat API keys (same for iOS and Android in test mode)
+const REVENUECAT_API_KEY_IOS = "test_RYsvRKTIJlNHpUxlXPRCLbvjcKC";
+const REVENUECAT_API_KEY_ANDROID = "test_RYsvRKTIJlNHpUxlXPRCLbvjcKC";
+
+// Entitlement identifier (configured in RevenueCat dashboard)
+export const ENTITLEMENT_ID = "Focus Pro";
 
 /**
  * Initialize RevenueCat SDK
@@ -24,22 +24,20 @@ export const initializePurchases = async (userId?: string): Promise<void> => {
   if (!apiKey) {
     console.warn(
       "[Purchases] RevenueCat API key not configured for",
-      Platform.OS
+      Platform.OS,
     );
     return;
   }
 
   try {
-    // Enable debug logs in development
-    if (__DEV__) {
-      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-    }
+    // Enable verbose logs in development
+    Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.VERBOSE : LOG_LEVEL.ERROR);
 
     // Configure with user ID if available
     if (userId) {
-      await Purchases.configure({ apiKey, appUserID: userId });
+      Purchases.configure({ apiKey, appUserID: userId });
     } else {
-      await Purchases.configure({ apiKey });
+      Purchases.configure({ apiKey });
     }
 
     console.log("[Purchases] RevenueCat initialized successfully");
@@ -101,7 +99,7 @@ export const getPackages = async (): Promise<PurchasesPackage[]> => {
  * Purchase a package
  */
 export const purchasePackage = async (
-  pkg: PurchasesPackage
+  pkg: PurchasesPackage,
 ): Promise<CustomerInfo> => {
   try {
     const { customerInfo } = await Purchases.purchasePackage(pkg);
@@ -139,23 +137,37 @@ export const getCustomerInfo = async (): Promise<CustomerInfo> => {
 };
 
 /**
- * Check if user has active premium entitlement
+ * Check if user has active premium entitlement (Focus Pro)
  */
 export const isPremiumActive = async (): Promise<boolean> => {
-  const customerInfo = await getCustomerInfo();
-  // Check for "premium" entitlement (configure this name in RevenueCat dashboard)
-  return customerInfo.entitlements.active["premium"] !== undefined;
+  try {
+    const customerInfo = await getCustomerInfo();
+    return (
+      typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined"
+    );
+  } catch (error) {
+    console.error("[Purchases] Failed to check entitlement:", error);
+    return false;
+  }
+};
+
+/**
+ * Check if customer info has active premium entitlement (sync helper)
+ */
+export const hasActiveEntitlement = (customerInfo: CustomerInfo): boolean => {
+  return (
+    typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined"
+  );
 };
 
 /**
  * Add listener for customer info updates
  */
 export const addCustomerInfoListener = (
-  listener: (customerInfo: CustomerInfo) => void
+  listener: (customerInfo: CustomerInfo) => void,
 ): (() => void) => {
   Purchases.addCustomerInfoUpdateListener(listener);
   return () => {
     // RevenueCat SDK handles cleanup internally
   };
 };
-
