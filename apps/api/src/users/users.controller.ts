@@ -196,4 +196,16 @@ export class UsersController {
   ) {
     return this.usersService.updateProfile(req.user.userId, updateDto);
   }
+
+  // ==================== Account Deletion ====================
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me/account')
+  async deleteMyAccount(
+    @Request() req: AuthenticatedRequest,
+    @Body('password') password: string,
+  ) {
+    await this.usersService.deleteAccount(req.user.userId, password);
+    return { message: 'Account deleted successfully' };
+  }
 }

@@ -9,8 +9,8 @@
       "buildNumber": "1",
       "icon": "./assets/images/app-icon-all.png",
       "infoPlist": {
-        "NSCameraUsageDescription": "Cette application utilise la camera pour vous permettre de prendre une photo de profil.",
-        "NSPhotoLibraryUsageDescription": "Cette application accede a votre galerie pour vous permettre de choisir une photo de profil.",
+        "NSCameraUsageDescription": "Focus utilise votre caméra pour vous permettre de prendre une photo de profil personnalisée qui sera affichée sur votre compte.",
+        "NSPhotoLibraryUsageDescription": "Focus a besoin d'accéder à votre photothèque pour vous permettre de sélectionner une image existante comme photo de profil. Par exemple, vous pouvez choisir une photo de vous-même pour personnaliser votre compte.",
         "UIBackgroundModes": ["remote-notification"],
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -53,8 +53,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "L'application accede a vos photos pour vous permettre de choisir une photo de profil.",
-          "cameraPermission": "L'application accede a votre camera pour vous permettre de prendre une photo de profil."
+          "photosPermission": "Focus a besoin d'accéder à votre photothèque pour vous permettre de sélectionner une image existante comme photo de profil. Par exemple, vous pouvez choisir une photo de vous-même pour personnaliser votre compte.",
+          "cameraPermission": "Focus utilise votre caméra pour vous permettre de prendre une photo de profil personnalisée qui sera affichée sur votre compte."
         }
       ],
       "expo-font"

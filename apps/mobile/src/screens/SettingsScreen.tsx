@@ -30,6 +30,7 @@ import {
   getCurrentLanguage,
   supportedLanguages,
 } from "../i18n";
+import DeleteAccountModal from "../components/DeleteAccountModal";
 
 interface SettingsScreenProps {
   readonly navigation: any;
@@ -76,6 +77,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   );
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
   // Create dynamic styles based on theme
   const styles = createStyles(colors);
@@ -192,6 +194,19 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         },
       },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    setShowDeleteAccountModal(true);
+  };
+
+  const handleAccountDeleted = () => {
+    navigation.navigate("Home");
+    Alert.alert(
+      t("settings.accountDeleted"),
+      t("settings.accountDeletedMessage"),
+    );
   };
 
   return (
@@ -441,6 +456,20 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           </TouchableOpacity>
         </View>
 
+        {/* Delete Account Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t("settings.dangerZone")}</Text>
+          <TouchableOpacity
+            style={styles.deleteAccountButton}
+            onPress={handleDeleteAccount}
+          >
+            <Ionicons name="trash-outline" size={24} color="#ff4444" />
+            <Text style={styles.deleteAccountText}>
+              {t("settings.deleteAccount")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -609,6 +638,13 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        visible={showDeleteAccountModal}
+        onClose={() => setShowDeleteAccountModal(false)}
+        onDeleted={handleAccountDeleted}
+      />
     </View>
   );
 }
@@ -813,6 +849,22 @@ const createStyles = (colors: any) =>
     logoutText: {
       fontSize: 16,
       fontWeight: "600" as const,
+      color: "#ff4444",
+    } as TextStyle,
+    deleteAccountButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      columnGap: 12,
+      padding: 16,
+      borderRadius: 12,
+      backgroundColor: "rgba(255, 68, 68, 0.05)",
+      borderWidth: 1,
+      borderColor: "rgba(255, 68, 68, 0.2)",
+    } as ViewStyle,
+    deleteAccountText: {
+      fontSize: 14,
+      fontWeight: "500" as const,
       color: "#ff4444",
     } as TextStyle,
     bottomSpacing: {

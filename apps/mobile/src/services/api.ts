@@ -251,4 +251,16 @@ export const contactApi = {
   },
 };
 
+// Account API
+export const accountApi = {
+  /**
+   * Delete user account permanently (requires password confirmation)
+   */
+  deleteAccount: async (password: string): Promise<void> => {
+    await apiClient.delete("/users/me/account", {
+      data: { password },
+    });
+  },
+};
+
 export default apiClient;
