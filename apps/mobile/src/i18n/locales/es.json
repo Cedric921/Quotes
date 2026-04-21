@@ -262,7 +262,13 @@
     "paymentHistory": "Historial de pagos",
     "paymentSucceeded": "Exitoso",
     "paymentPending": "Pendiente",
-    "paymentFailed": "Fallido"
+    "paymentFailed": "Fallido",
+    "premium": "Premium",
+    "month": "mes",
+    "year": "año",
+    "restoreSuccess": "Compras restauradas",
+    "noSubscription": "Sin suscripción activa",
+    "noPurchasesToRestore": "No hay compras anteriores para restaurar"
   },
   "widget": {
     "title": "Widget Focus",

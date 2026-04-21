@@ -8,29 +8,27 @@ import {
   TextStyle,
   ActivityIndicator,
   RefreshControl,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
-import { useAppSelector, useAppDispatch } from "../store/hooks";
-import { setSelectedPlan } from "../store/slices/subscriptionSlice";
+import { useState, useEffect } from "react";
+import { useAppSelector } from "../store/hooks";
 import { useThemeColors } from "../hooks";
 import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
 import { useRoute, RouteProp } from "@react-navigation/native";
+import { PurchasesPackage } from "react-native-purchases";
 import {
-  useSubscriptionData,
-  useCreateCheckoutSession,
-  useSubscriptionHistory,
-} from "../api/hooks/useSubscriptions";
-import {
-  Subscription,
-  SubscriptionPlan,
-} from "../store/slices/subscriptionSlice";
-import { TranslatedPlanCard } from "../components";
+  usePackages,
+  useCustomerInfo,
+  usePurchase,
+  useRestorePurchases,
+} from "../api/hooks/usePurchases";
+import { Subscription } from "../store/slices/subscriptionSlice";
+import { useSubscriptionHistory } from "../api/hooks/useSubscriptions";
 import { RootStackParamList } from "../navigation/AppNavigator";
 
 interface SubscriptionScreenProps {
@@ -48,34 +46,48 @@ export default function SubscriptionScreen({
   const { t } = useTranslation();
   const { colors } = useThemeColors();
   const styles = createStyles(colors);
-  const dispatch = useAppDispatch();
   const route = useRoute<SubscriptionScreenRouteProp>();
 
   // Check if coming from profile button
   const fromProfile = route.params?.fromProfile ?? false;
 
   const token = useAppSelector((state) => state.auth.token);
-  const selectedPlanId = useAppSelector(
-    (state) => state.subscription.selectedPlanId,
-  );
   const isAuthenticated = !!token;
 
-  // React Query hooks
-  const { plans, currentSubscription, isLoading, isRefetching, refetch } =
-    useSubscriptionData(isAuthenticated);
-  const checkoutMutation = useCreateCheckoutSession();
+  // RevenueCat hooks
+  const {
+    data: packages = [],
+    isLoading: packagesLoading,
+    refetch: refetchPackages,
+  } = usePackages();
+  const {
+    customerInfo,
+    isPremium,
+    refetch: refetchCustomerInfo,
+  } = useCustomerInfo();
+  const purchaseMutation = usePurchase();
+  const restoreMutation = useRestorePurchases();
+
+  // Legacy subscription history from backend
   const { data: subscriptionHistory = [] } =
     useSubscriptionHistory(isAuthenticated);
 
-  const [subscribing, setSubscribing] = useState(false);
+  // Selected package state
+  const [selectedPackage, setSelectedPackage] =
+    useState<PurchasesPackage | null>(null);
+  const [isRefetching, setIsRefetching] = useState(false);
 
   const handleRefresh = async () => {
-    await refetch();
+    setIsRefetching(true);
+    try {
+      await Promise.all([refetchPackages(), refetchCustomerInfo()]);
+    } finally {
+      setIsRefetching(false);
+    }
   };
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // If coming from profile button, navigate to Profile instead of going back
     if (fromProfile) {
       navigation.navigate("Profile");
     } else {
@@ -83,131 +95,89 @@ export default function SubscriptionScreen({
     }
   };
 
-  const handleSelectPlan = (planId: string) => {
+  const handleSelectPackage = (pkg: PurchasesPackage) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    dispatch(setSelectedPlan(planId));
+    setSelectedPackage(pkg);
   };
 
   const handleSubscribe = async () => {
-    if (!selectedPlanId || !token) {
-      if (!token) {
-        navigation.navigate("Login");
-      }
+    if (!selectedPackage) {
       return;
     }
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSubscribing(true);
 
     try {
-      // 1. Create checkout session on backend
-      const result = await checkoutMutation.mutateAsync(selectedPlanId);
-
-      if (!result.checkoutUrl) {
-        throw new Error("No checkout URL received");
-      }
-
-      // 2. Open Stripe Checkout in browser
-      const browserResult = await WebBrowser.openBrowserAsync(
-        result.checkoutUrl,
-        {
-          dismissButtonStyle: "cancel",
-          presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
-        },
-      );
-
-      // 3. When browser closes, check if payment was successful
-      if (browserResult.type === "cancel") {
+      await purchaseMutation.mutateAsync(selectedPackage);
+      Toast.show({
+        type: "success",
+        text1: t("subscription.paymentSuccess"),
+        text2: t("subscription.subscriptionActivated"),
+      });
+    } catch (error: any) {
+      if (error.userCancelled) {
         Toast.show({
           type: "info",
           text1: t("subscription.paymentCancelled"),
           text2: t("subscription.paymentCancelledMessage"),
         });
-        return;
+      } else {
+        Toast.show({
+          type: "error",
+          text1: t("subscription.error"),
+          text2: error.message || t("subscription.tryAgain"),
+        });
       }
+    }
+  };
 
-      // 4. Browser was dismissed - check if subscription was created by webhook
-      Toast.show({
-        type: "info",
-        text1: t("subscription.processing"),
-        text2: t("subscription.checkingPayment"),
-      });
-
-      // Poll to check if subscription was created (webhook may take a moment)
-      let attempts = 0;
-      const maxAttempts = 5;
-      const checkSubscription = async () => {
-        attempts++;
-        const result = await refetch();
-
-        if (result.data?.currentSubscription) {
-          Toast.show({
-            type: "success",
-            text1: t("subscription.paymentSuccess"),
-            text2: t("subscription.subscriptionActivated"),
-          });
-          return true;
-        }
-
-        if (attempts < maxAttempts) {
-          // Wait and retry
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          return checkSubscription();
-        }
-
-        // No subscription found after all attempts - may still be processing
+  const handleRestorePurchases = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      const info = await restoreMutation.mutateAsync();
+      if (info.entitlements.active["premium"]) {
+        Toast.show({
+          type: "success",
+          text1: t("subscription.restoreSuccess"),
+          text2: t("subscription.subscriptionActivated"),
+        });
+      } else {
         Toast.show({
           type: "info",
-          text1: t("subscription.processing"),
-          text2:
-            t("subscription.pleaseWait") ||
-            "Your subscription is being processed. Please refresh shortly.",
+          text1: t("subscription.noSubscription"),
+          text2: t("subscription.noPurchasesToRestore"),
         });
-        return false;
-      };
-
-      await checkSubscription();
+      }
     } catch (error: any) {
       Toast.show({
         type: "error",
         text1: t("subscription.error"),
         text2: error.message || t("subscription.tryAgain"),
       });
-    } finally {
-      setSubscribing(false);
     }
   };
 
   const getStatusBadge = () => {
-    if (!currentSubscription) return null;
-
-    const statusColors: Record<string, { bg: string; text: string }> = {
-      ACTIVE: { bg: "rgba(34, 197, 94, 0.1)", text: "#22c55e" },
-      CANCELLED: { bg: "rgba(239, 68, 68, 0.1)", text: "#ef4444" },
-      EXPIRED: { bg: "rgba(107, 114, 128, 0.1)", text: "#6b7280" },
-    };
-
-    const statusColor =
-      statusColors[currentSubscription.status] || statusColors.EXPIRED;
-    const statusText =
-      currentSubscription.status === "ACTIVE"
-        ? t("subscription.subscriptionActive")
-        : currentSubscription.status === "CANCELLED"
-          ? t("subscription.subscriptionCancelled")
-          : t("subscription.subscriptionExpired");
+    if (!isPremium) return null;
 
     return (
-      <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
-        <Text style={[styles.statusText, { color: statusColor.text }]}>
-          {statusText}
+      <View
+        style={[
+          styles.statusBadge,
+          { backgroundColor: "rgba(34, 197, 94, 0.1)" },
+        ]}
+      >
+        <Text style={[styles.statusText, { color: "#22c55e" }]}>
+          {t("subscription.subscriptionActive")}
         </Text>
       </View>
     );
   };
 
-  const isCheckoutLoading = checkoutMutation.isPending || subscribing;
+  const isCheckoutLoading =
+    purchaseMutation.isPending || restoreMutation.isPending;
 
-  if (isLoading) {
+  if (packagesLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -239,8 +209,8 @@ export default function SubscriptionScreen({
           />
         }
       >
-        {/* Current Subscription Status */}
-        {currentSubscription && (
+        {/* Current Premium Status */}
+        {isPremium && (
           <View style={styles.currentPlanCard}>
             <View style={styles.currentPlanHeader}>
               <Text style={styles.currentPlanTitle}>
@@ -249,13 +219,13 @@ export default function SubscriptionScreen({
               {getStatusBadge()}
             </View>
             <Text style={styles.currentPlanName}>
-              {currentSubscription.plan?.name || t("subscription.freeTrial")}
+              {t("subscription.premium")}
             </Text>
-            {currentSubscription.endDate && (
+            {customerInfo?.entitlements.active["premium"]?.expirationDate && (
               <Text style={styles.currentPlanExpiry}>
                 {t("subscription.expiresOn", {
                   date: new Date(
-                    currentSubscription.endDate,
+                    customerInfo.entitlements.active["premium"].expirationDate,
                   ).toLocaleDateString(),
                 })}
               </Text>
@@ -307,45 +277,105 @@ export default function SubscriptionScreen({
           </View>
         </View>
 
-        {/* Plans */}
-        <Text style={styles.sectionTitle}>{t("subscription.choosePlan")}</Text>
+        {/* Plans from RevenueCat */}
+        {!isPremium && (
+          <>
+            <Text style={styles.sectionTitle}>
+              {t("subscription.choosePlan")}
+            </Text>
 
-        {/* All Available Plans with Translation */}
-        {plans.map((plan: SubscriptionPlan) => (
-          <TranslatedPlanCard
-            key={plan.id}
-            plan={plan}
-            isSelected={selectedPlanId === plan.id}
-            onPress={() => handleSelectPlan(plan.id)}
-          />
-        ))}
+            {packages.map((pkg: PurchasesPackage) => (
+              <TouchableOpacity
+                key={pkg.identifier}
+                style={[
+                  styles.planCard,
+                  selectedPackage?.identifier === pkg.identifier &&
+                    styles.planCardSelected,
+                ]}
+                onPress={() => handleSelectPackage(pkg)}
+              >
+                <View style={styles.planHeader}>
+                  <Text style={styles.planName}>
+                    {pkg.product.title || pkg.identifier}
+                  </Text>
+                  <Ionicons
+                    name={
+                      selectedPackage?.identifier === pkg.identifier
+                        ? "checkmark-circle"
+                        : "ellipse-outline"
+                    }
+                    size={24}
+                    color={
+                      selectedPackage?.identifier === pkg.identifier
+                        ? colors.primary
+                        : colors.textTertiary
+                    }
+                  />
+                </View>
+                <View style={styles.planPricing}>
+                  <Text style={styles.planPrice}>
+                    {pkg.product.priceString}
+                  </Text>
+                  <Text style={styles.planPeriod}>
+                    /
+                    {pkg.packageType === "ANNUAL"
+                      ? t("subscription.year")
+                      : t("subscription.month")}
+                  </Text>
+                </View>
+                {pkg.product.description && (
+                  <Text style={styles.planDescription}>
+                    {pkg.product.description}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ))}
 
-        {/* Subscribe Button */}
-        <TouchableOpacity
-          style={[
-            styles.subscribeButton,
-            !selectedPlanId && styles.subscribeButtonDisabled,
-          ]}
-          onPress={handleSubscribe}
-          disabled={!selectedPlanId || isCheckoutLoading}
-        >
-          <LinearGradient
-            colors={
-              selectedPlanId ? ["#667eea", "#764ba2"] : ["#9ca3af", "#9ca3af"]
-            }
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.subscribeGradient}
-          >
-            {isCheckoutLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.subscribeButtonText}>
-                {t("subscription.subscribe")}
-              </Text>
-            )}
-          </LinearGradient>
-        </TouchableOpacity>
+            {/* Subscribe Button */}
+            <TouchableOpacity
+              style={[
+                styles.subscribeButton,
+                !selectedPackage && styles.subscribeButtonDisabled,
+              ]}
+              onPress={handleSubscribe}
+              disabled={!selectedPackage || isCheckoutLoading}
+            >
+              <LinearGradient
+                colors={
+                  selectedPackage
+                    ? ["#667eea", "#764ba2"]
+                    : ["#9ca3af", "#9ca3af"]
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.subscribeGradient}
+              >
+                {isCheckoutLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.subscribeButtonText}>
+                    {t("subscription.subscribe")}
+                  </Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Restore Purchases Button (iOS requirement) */}
+            <TouchableOpacity
+              style={styles.restoreButton}
+              onPress={handleRestorePurchases}
+              disabled={restoreMutation.isPending}
+            >
+              {restoreMutation.isPending ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <Text style={styles.restoreButtonText}>
+                  {t("subscription.restorePurchases")}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </>
+        )}
 
         {/* Subscription History */}
         {isAuthenticated && subscriptionHistory.length > 0 && (
@@ -709,6 +739,16 @@ const createStyles = (colors: any) =>
       fontSize: 14,
       fontWeight: "600" as const,
       color: colors.primary,
+    } as TextStyle,
+    restoreButton: {
+      marginTop: 16,
+      alignItems: "center",
+      padding: 12,
+    } as ViewStyle,
+    restoreButtonText: {
+      fontSize: 14,
+      color: colors.primary,
+      fontWeight: "500" as const,
     } as TextStyle,
     notNowButton: {
       marginTop: 16,

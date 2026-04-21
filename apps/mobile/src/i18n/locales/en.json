@@ -233,7 +233,13 @@
     "paymentHistory": "Payment History",
     "paymentSucceeded": "Succeeded",
     "paymentPending": "Pending",
-    "paymentFailed": "Failed"
+    "paymentFailed": "Failed",
+    "premium": "Premium",
+    "month": "month",
+    "year": "year",
+    "restoreSuccess": "Purchases restored",
+    "noSubscription": "No active subscription",
+    "noPurchasesToRestore": "No previous purchases found to restore"
   },
   "notifications": {
     "title": "Notifications",

@@ -262,7 +262,13 @@
     "paymentHistory": "سجل المدفوعات",
     "paymentSucceeded": "ناجح",
     "paymentPending": "قيد الانتظار",
-    "paymentFailed": "فشل"
+    "paymentFailed": "فشل",
+    "premium": "بريميوم",
+    "month": "شهر",
+    "year": "سنة",
+    "restoreSuccess": "تم استعادة المشتريات",
+    "noSubscription": "لا يوجد اشتراك نشط",
+    "noPurchasesToRestore": "لم يتم العثور على مشتريات سابقة لاستعادتها"
   },
   "widget": {
     "title": "ويدجت Focus",

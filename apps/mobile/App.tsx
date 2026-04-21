@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Platform } from "react-native";
 import { Provider, useSelector } from "react-redux";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { store, RootState } from "./src/store";
 import { queryClient } from "./src/api/queryClient";
@@ -11,6 +11,11 @@ import { loadStoredTheme } from "./src/store/slices/themeSlice";
 import { loadStoredFont } from "./src/store/slices/fontSlice";
 import { useTrackActivity } from "./src/api/hooks/useUserActivity";
 import { setupNotificationChannel } from "./src/services/notificationService";
+import {
+  initializePurchases,
+  loginUser,
+  logoutUser,
+} from "./src/services/purchases";
 import "./src/i18n"; // Initialiser i18n
 
 // Register Android widget task handler
@@ -31,7 +36,9 @@ if (Platform.OS === "android") {
 
 function AppContent() {
   const token = useSelector((state: RootState) => state.auth.token);
+  const user = useSelector((state: RootState) => state.auth.user);
   const trackActivity = useTrackActivity();
+  const prevUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Load stored authentication, theme and font on app start
@@ -41,7 +48,35 @@ function AppContent() {
 
     // Setup notification channel for Android
     setupNotificationChannel();
+
+    // Initialize RevenueCat SDK (without user ID initially)
+    initializePurchases();
   }, []);
+
+  useEffect(() => {
+    // Sync RevenueCat user when authentication changes
+    const syncRevenueCatUser = async () => {
+      const currentUserId = user?.id || null;
+
+      // Only sync if user ID changed
+      if (currentUserId !== prevUserIdRef.current) {
+        try {
+          if (currentUserId) {
+            // User logged in - link to RevenueCat
+            await loginUser(currentUserId);
+          } else if (prevUserIdRef.current) {
+            // User logged out - switch to anonymous
+            await logoutUser();
+          }
+        } catch (error) {
+          console.error("[App] RevenueCat user sync failed:", error);
+        }
+        prevUserIdRef.current = currentUserId;
+      }
+    };
+
+    syncRevenueCatUser();
+  }, [user?.id]);
 
   useEffect(() => {
     // Track daily activity when user is authenticated

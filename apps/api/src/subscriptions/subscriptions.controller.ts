@@ -355,4 +355,44 @@ export class SubscriptionsController {
       return { received: false, error: err.message };
     }
   }
+
+  // ============ REVENUECAT WEBHOOK ============
+
+  @Post('webhook/revenuecat')
+  async handleRevenueCatWebhook(
+    @Headers('authorization') authorization: string,
+    @Body() body: any,
+  ) {
+    const webhookSecret = process.env.REVENUECAT_WEBHOOK_SECRET;
+
+    // Verify webhook authorization
+    if (webhookSecret && authorization !== `Bearer ${webhookSecret}`) {
+      console.error('RevenueCat webhook authorization failed');
+      return { received: false, error: 'Unauthorized' };
+    }
+
+    try {
+      await this.subscriptionsService.handleRevenueCatWebhook(body);
+      return { received: true };
+    } catch (err: any) {
+      console.error('RevenueCat webhook error:', err.message);
+      return { received: false, error: err.message };
+    }
+  }
+
+  // ============ REVENUECAT SYNC (called from mobile app) ============
+
+  @UseGuards(JwtAuthGuard)
+  @Post('sync-revenuecat')
+  async syncRevenueCat(
+    @Request() req: AuthenticatedRequest,
+    @Body('revenueCatUserId') revenueCatUserId: string,
+    @Body('entitlements') entitlements: string[],
+  ) {
+    return this.subscriptionsService.syncRevenueCatEntitlements(
+      req.user.userId,
+      revenueCatUserId,
+      entitlements,
+    );
+  }
 }
