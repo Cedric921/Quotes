@@ -87,7 +87,6 @@ export default ({ config }) => {
     },
     plugins: [
       "expo-localization",
-      "react-native-purchases",
       [
         "react-native-android-widget",
         {

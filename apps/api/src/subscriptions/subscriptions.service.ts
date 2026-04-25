@@ -23,6 +23,22 @@ import {
   UpdateConfigDto,
 } from './dto';
 
+// Entitlement identifier configured in RevenueCat dashboard
+const ENTITLEMENT_ID = 'Focus Pro';
+
+interface RevenueCatEventBody {
+  type?: string;
+  app_user_id?: string;
+  entitlement_ids?: string[];
+  expiration_at_ms?: number;
+  id?: string;
+  price?: number;
+}
+
+interface RevenueCatWebhookPayload {
+  event?: RevenueCatEventBody;
+}
+
 @Injectable()
 export class SubscriptionsService {
   private stripe: Stripe;
@@ -572,12 +588,15 @@ export class SubscriptionsService {
 
   // ============ REVENUECAT INTEGRATION ============
 
-  async handleRevenueCatWebhook(event: any): Promise<void> {
-    console.log('📱 RevenueCat webhook received:', event.event?.type);
+  async handleRevenueCatWebhook(
+    payload: RevenueCatWebhookPayload,
+  ): Promise<void> {
+    const event = payload.event ?? {};
+    console.log('📱 RevenueCat webhook received:', event.type);
 
-    const eventType = event.event?.type;
-    const appUserId = event.event?.app_user_id;
-    const entitlements = event.event?.entitlement_ids || [];
+    const eventType = event.type;
+    const appUserId = event.app_user_id;
+    const entitlements = event.entitlement_ids ?? [];
 
     if (!appUserId) {
       console.log('⚠️ No app_user_id in RevenueCat event');
@@ -606,7 +625,7 @@ export class SubscriptionsService {
   async activateRevenueCatSubscription(
     userId: string,
     entitlements: string[],
-    event: any,
+    event: RevenueCatEventBody,
   ): Promise<void> {
     // Find the user
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -615,8 +634,22 @@ export class SubscriptionsService {
       return;
     }
 
-    // Mark user as premium
-    user.isPremium = true;
+    // Only activate when the configured entitlement is granted
+    if (entitlements.length > 0 && !entitlements.includes(ENTITLEMENT_ID)) {
+      console.log(
+        `ℹ️ Event ignored: entitlement "${ENTITLEMENT_ID}" not in [${entitlements.join(', ')}]`,
+      );
+      return;
+    }
+
+    // Compute expiration date
+    const expirationDate = event.expiration_at_ms
+      ? new Date(event.expiration_at_ms)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
+
+    // Mark user as subscribed (premium = isSubscribed + subscriptionEndDate > now)
+    user.isSubscribed = true;
+    user.subscriptionEndDate = expirationDate;
     await this.userRepository.save(user);
 
     // Get or create a default premium plan for RevenueCat subscriptions
@@ -635,19 +668,14 @@ export class SubscriptionsService {
       await this.planRepository.save(plan);
     }
 
-    // Create subscription record
-    const expirationDate = event.event?.expiration_at_ms
-      ? new Date(event.event.expiration_at_ms)
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
-
     const subscription = this.subscriptionRepository.create({
       user,
       plan,
       status: SubscriptionStatus.ACTIVE,
       startDate: new Date(),
       endDate: expirationDate,
-      stripePaymentIntentId: `rc_${event.event?.id || Date.now()}`,
-      amountPaid: event.event?.price || 0,
+      stripePaymentIntentId: `rc_${event.id ?? Date.now()}`,
+      amountPaid: event.price ?? 0,
     });
 
     await this.subscriptionRepository.save(subscription);
@@ -658,7 +686,7 @@ export class SubscriptionsService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) return;
 
-    user.isPremium = false;
+    user.isSubscribed = false;
     await this.userRepository.save(user);
 
     // Mark active subscriptions as cancelled
@@ -684,12 +712,20 @@ export class SubscriptionsService {
       throw new NotFoundException('User not found');
     }
 
-    const hasPremium = entitlements.includes('premium');
+    const hasPremium = entitlements.includes(ENTITLEMENT_ID);
 
-    if (user.isPremium !== hasPremium) {
-      user.isPremium = hasPremium;
+    if (user.isSubscribed !== hasPremium) {
+      user.isSubscribed = hasPremium;
+      if (hasPremium && !user.subscriptionEndDate) {
+        // Default to 30 days if no end date is set yet
+        user.subscriptionEndDate = new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
+        );
+      }
       await this.userRepository.save(user);
-      console.log(`✅ User ${userId} premium status synced: ${hasPremium}`);
+      console.log(
+        `✅ User ${userId} (rc: ${revenueCatUserId}) premium synced: ${hasPremium}`,
+      );
     }
 
     return { synced: true, isPremium: hasPremium };
