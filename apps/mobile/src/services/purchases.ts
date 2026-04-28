@@ -16,43 +16,52 @@ const REVENUECAT_API_KEY_ANDROID =
 // Entitlement identifier (configured in RevenueCat dashboard)
 export const ENTITLEMENT_ID = "Focus Pro";
 
-/**
- * Initialize RevenueCat SDK
- * Should be called once at app startup
- */
-export const initializePurchases = async (userId?: string): Promise<void> => {
-  const apiKey =
-    Platform.OS === "ios" ? REVENUECAT_API_KEY_IOS : REVENUECAT_API_KEY_ANDROID;
+let isConfigured = false;
 
+const getApiKey = (): string =>
+  Platform.OS === "ios" ? REVENUECAT_API_KEY_IOS : REVENUECAT_API_KEY_ANDROID;
+
+const ensureConfigured = (userId?: string): boolean => {
+  if (isConfigured) return true;
+  const apiKey = getApiKey();
   if (!apiKey) {
     console.warn(
       "[Purchases] RevenueCat API key not configured for",
       Platform.OS,
     );
-    return;
+    return false;
   }
-
   try {
-    // Enable verbose logs in development
     Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.VERBOSE : LOG_LEVEL.ERROR);
-
-    // Configure with user ID if available
     if (userId) {
       Purchases.configure({ apiKey, appUserID: userId });
     } else {
       Purchases.configure({ apiKey });
     }
-
-    console.log("[Purchases] RevenueCat initialized successfully");
+    isConfigured = true;
+    console.log("[Purchases] RevenueCat configured for", Platform.OS);
+    return true;
   } catch (error) {
-    console.error("[Purchases] Failed to initialize:", error);
+    console.error("[Purchases] Failed to configure:", error);
+    return false;
   }
+};
+
+/**
+ * Initialize RevenueCat SDK
+ * Should be called once at app startup
+ */
+export const initializePurchases = async (userId?: string): Promise<void> => {
+  ensureConfigured(userId);
 };
 
 /**
  * Login user to RevenueCat (link purchases to user account)
  */
 export const loginUser = async (userId: string): Promise<CustomerInfo> => {
+  if (!ensureConfigured(userId)) {
+    throw new Error("[Purchases] SDK not configured (missing API key)");
+  }
   try {
     const { customerInfo } = await Purchases.logIn(userId);
     console.log("[Purchases] User logged in:", userId);
@@ -67,6 +76,9 @@ export const loginUser = async (userId: string): Promise<CustomerInfo> => {
  * Logout user from RevenueCat (anonymous mode)
  */
 export const logoutUser = async (): Promise<CustomerInfo> => {
+  if (!ensureConfigured()) {
+    throw new Error("[Purchases] SDK not configured (missing API key)");
+  }
   try {
     const customerInfo = await Purchases.logOut();
     console.log("[Purchases] User logged out");
@@ -81,6 +93,7 @@ export const logoutUser = async (): Promise<CustomerInfo> => {
  * Get current offerings (products available for purchase)
  */
 export const getOfferings = async (): Promise<PurchasesOffering | null> => {
+  if (!ensureConfigured()) return null;
   try {
     const offerings = await Purchases.getOfferings();
     return offerings.current;
@@ -104,6 +117,9 @@ export const getPackages = async (): Promise<PurchasesPackage[]> => {
 export const purchasePackage = async (
   pkg: PurchasesPackage,
 ): Promise<CustomerInfo> => {
+  if (!ensureConfigured()) {
+    throw new Error("[Purchases] SDK not configured (missing API key)");
+  }
   try {
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     console.log("[Purchases] Purchase successful");
@@ -122,6 +138,9 @@ export const purchasePackage = async (
  * Restore previous purchases
  */
 export const restorePurchases = async (): Promise<CustomerInfo> => {
+  if (!ensureConfigured()) {
+    throw new Error("[Purchases] SDK not configured (missing API key)");
+  }
   try {
     const customerInfo = await Purchases.restorePurchases();
     console.log("[Purchases] Purchases restored");
@@ -136,6 +155,9 @@ export const restorePurchases = async (): Promise<CustomerInfo> => {
  * Get current customer info (entitlements)
  */
 export const getCustomerInfo = async (): Promise<CustomerInfo> => {
+  if (!ensureConfigured()) {
+    throw new Error("[Purchases] SDK not configured (missing API key)");
+  }
   return await Purchases.getCustomerInfo();
 };
 
