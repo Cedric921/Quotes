@@ -63,11 +63,11 @@ export default function SubscriptionBottomSheet({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setStep("welcome");
     onClose();
-    // Navigate based on authentication status
+    // Only navigate to Profile if already authenticated; otherwise just
+    // dismiss the sheet so the user can keep using the app without being
+    // forced into account creation.
     if (isAuthenticated) {
       navigate("Profile");
-    } else {
-      navigate("Signup");
     }
   };
 

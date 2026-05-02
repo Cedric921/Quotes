@@ -438,11 +438,13 @@ export default function SubscriptionScreen({
           style={styles.notNowButton}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            // Navigate based on authentication status and source
+            // Authenticated users go to Profile; everyone else returns to
+            // the previous screen (typically Home) without being forced
+            // into account creation.
             if (fromProfile || isAuthenticated) {
               navigation.navigate("Profile");
             } else {
-              navigation.navigate("Signup");
+              navigation.goBack();
             }
           }}
         >
@@ -451,6 +453,29 @@ export default function SubscriptionScreen({
 
         {/* Terms Notice */}
         <Text style={styles.termsNotice}>{t("subscription.termsNotice")}</Text>
+        <View style={styles.legalLinksRow}>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("Terms");
+            }}
+          >
+            <Text style={styles.legalLinkText}>
+              {t("settings.termsOfService")}
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.legalLinkSeparator}>•</Text>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("Privacy");
+            }}
+          >
+            <Text style={styles.legalLinkText}>
+              {t("settings.privacyPolicy")}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -765,7 +790,24 @@ const createStyles = (colors: any) =>
       color: colors.textTertiary,
       textAlign: "center",
       marginTop: 16,
-      marginBottom: 32,
+      marginBottom: 8,
       paddingHorizontal: 20,
+    } as TextStyle,
+    legalLinksRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 32,
+      columnGap: 8,
+    } as ViewStyle,
+    legalLinkText: {
+      fontSize: 13,
+      color: colors.primary,
+      textDecorationLine: "underline",
+      fontWeight: "500" as const,
+    } as TextStyle,
+    legalLinkSeparator: {
+      fontSize: 13,
+      color: colors.textTertiary,
     } as TextStyle,
   });
