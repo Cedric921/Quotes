@@ -306,12 +306,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               <Ionicons name="language-outline" size={24} color="#0A84FF" />
               <Text style={styles.menuItemText}>{t("settings.language")}</Text>
             </View>
-            <View style={styles.menuItemRight}>
-              <Text style={styles.menuItemValue}>
-                {currentLanguage.nativeName}
-              </Text>
-              <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
-            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
           {/* Auto-translate toggle - only show if language is not French (content is in French) */}
@@ -350,10 +345,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 {t("settings.mode") || "Mode"}
               </Text>
             </View>
-            <View style={styles.menuItemRight}>
-              <Text style={styles.menuItemValue}>{getThemeLabel()}</Text>
-              <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
-            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
           </TouchableOpacity>
 
           <TouchableOpacity
