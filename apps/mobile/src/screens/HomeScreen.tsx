@@ -160,10 +160,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, [isSubscribed, isAdmin]);
 
   // Handle plan selection from bottom sheet
-  const handleSelectPlan = (plan: SubscriptionPlan) => {
-    setSelectedPlan(plan);
+  // Navigate directly to RevenueCat-powered SubscriptionScreen so users
+  // can purchase without being forced to create an account first.
+  const handleSelectPlan = (_plan: SubscriptionPlan) => {
     setShowOnboarding(false);
-    setShowProfileModal(true);
+    navigation.navigate("Subscription", { fromProfile: false });
   };
 
   // Handle onboarding close

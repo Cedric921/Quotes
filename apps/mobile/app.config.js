@@ -21,7 +21,7 @@ export default ({ config }) => {
   const easOwner = process.env.EAS_OWNER || "focus-application";
   const appSlug = process.env.APP_SLUG || "focus-quotes-app";
   const appName = process.env.APP_NAME || "Focus";
-  const appVersion = process.env.APP_VERSION || "1.0.0";
+  const appVersion = process.env.APP_VERSION || "1.0.2";
 
   // ===========================================
   // Platform-specific Configuration
@@ -71,6 +71,11 @@ export default ({ config }) => {
       bundleIdentifier: iosBundleId,
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
+        UIBackgroundModes: ["remote-notification"],
+        NSPhotoLibraryUsageDescription:
+          "Focus a besoin d'accéder à votre photothèque pour vous permettre de sélectionner une image existante comme photo de profil. Par exemple, vous pouvez choisir une photo de vous-même pour personnaliser votre compte.",
+        NSCameraUsageDescription:
+          "Focus utilise votre caméra pour vous permettre de prendre une photo de profil personnalisée qui sera affichée sur votre compte.",
       },
     },
     android: {
