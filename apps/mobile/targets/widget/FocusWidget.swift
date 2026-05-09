@@ -10,8 +10,8 @@ struct QuoteData: Codable {
 
 // MARK: - Timeline Provider
 struct Provider: TimelineProvider {
-    let appGroupId = "group.com.focus.quotes.widget"
-    
+    let appGroupId = "group.com.mindset.focus.widget"
+
     func placeholder(in context: Context) -> QuoteEntry {
         QuoteEntry(date: Date(), quote: QuoteData(
             content: "La seule façon de faire du bon travail est d'aimer ce que vous faites.",
@@ -21,39 +21,81 @@ struct Provider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> ()) {
-        let entry = getEntryFromStorage()
+        let entry = pickEntry(for: Date())
         completion(entry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> ()) {
-        let entry = getEntryFromStorage()
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date())!
-        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
-        completion(timeline)
-    }
-    
-    private func getEntryFromStorage() -> QuoteEntry {
-        let defaults = UserDefaults(suiteName: appGroupId)
+        let now = Date()
+        let calendar = Calendar.current
 
-        // Try reading as Data first (binary JSON)
-        if let data = defaults?.data(forKey: "currentQuote"),
-           let quote = try? JSONDecoder().decode(QuoteData.self, from: data) {
-            return QuoteEntry(date: Date(), quote: quote)
+        // Build one entry for today and one for the next 6 days so the widget
+        // shows a different quote each day even if the app is not opened.
+        var entries: [QuoteEntry] = []
+        for offset in 0..<7 {
+            if let day = calendar.date(byAdding: .day, value: offset, to: calendar.startOfDay(for: now)) {
+                entries.append(pickEntry(for: day))
+            }
         }
 
-        // Fallback: Try reading as String (from React Native)
+        // Refresh at next midnight to roll the quote forward
+        let nextMidnight = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now.addingTimeInterval(86400)
+        let timeline = Timeline(entries: entries, policy: .after(nextMidnight))
+        completion(timeline)
+    }
+
+    /// Pick a quote for a given date. Uses an array of quotes if available
+    /// (key "quotesArray") otherwise falls back to a single "currentQuote".
+    private func pickEntry(for date: Date) -> QuoteEntry {
+        let defaults = UserDefaults(suiteName: appGroupId)
+
+        // 1) Preferred: array of quotes
+        if let quotes = readQuotesArray(from: defaults), !quotes.isEmpty {
+            let dayIndex = dayOfEra(for: date)
+            let index = abs(dayIndex) % quotes.count
+            return QuoteEntry(date: date, quote: quotes[index])
+        }
+
+        // 2) Fallback: single quote stored as Data (binary JSON)
+        if let data = defaults?.data(forKey: "currentQuote"),
+           let quote = try? JSONDecoder().decode(QuoteData.self, from: data) {
+            return QuoteEntry(date: date, quote: quote)
+        }
+
+        // 3) Fallback: single quote stored as String
         if let jsonString = defaults?.string(forKey: "currentQuote"),
            let data = jsonString.data(using: .utf8),
            let quote = try? JSONDecoder().decode(QuoteData.self, from: data) {
-            return QuoteEntry(date: Date(), quote: quote)
+            return QuoteEntry(date: date, quote: quote)
         }
 
-        // Default fallback
-        return QuoteEntry(date: Date(), quote: QuoteData(
+        // 4) Default placeholder
+        return QuoteEntry(date: date, quote: QuoteData(
             content: "Ouvrez l'app Focus pour découvrir une citation inspirante.",
             author: "Focus",
             topicName: nil
         ))
+    }
+
+    private func readQuotesArray(from defaults: UserDefaults?) -> [QuoteData]? {
+        if let data = defaults?.data(forKey: "quotesArray"),
+           let quotes = try? JSONDecoder().decode([QuoteData].self, from: data) {
+            return quotes
+        }
+        if let jsonString = defaults?.string(forKey: "quotesArray"),
+           let data = jsonString.data(using: .utf8),
+           let quotes = try? JSONDecoder().decode([QuoteData].self, from: data) {
+            return quotes
+        }
+        return nil
+    }
+
+    private func dayOfEra(for date: Date) -> Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .dayOfYear], from: date)
+        let year = components.year ?? 0
+        let day = components.dayOfYear ?? 0
+        return year * 366 + day
     }
 }
 

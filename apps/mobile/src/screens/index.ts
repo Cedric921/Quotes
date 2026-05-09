@@ -16,3 +16,5 @@ export { default as EditProfileScreen } from "./EditProfileScreen";
 export { default as PaymentHistoryScreen } from "./PaymentHistoryScreen";
 export { default as ContactScreen } from "./ContactScreen";
 export { default as AboutScreen } from "./AboutScreen";
+export { default as ForgotPasswordScreen } from "./ForgotPasswordScreen";
+export { default as ResetPasswordScreen } from "./ResetPasswordScreen";

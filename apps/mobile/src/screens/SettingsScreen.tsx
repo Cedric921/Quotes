@@ -455,7 +455,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             style={styles.deleteAccountButton}
             onPress={handleDeleteAccount}
           >
-            <Ionicons name="trash-outline" size={24} color="#ff4444" />
+            <Ionicons name="trash-outline" size={24} color={colors.text} />
             <Text style={styles.deleteAccountText}>
               {t("settings.deleteAccount")}
             </Text>
@@ -850,14 +850,14 @@ const createStyles = (colors: any) =>
       columnGap: 12,
       padding: 16,
       borderRadius: 12,
-      backgroundColor: "rgba(255, 68, 68, 0.05)",
+      backgroundColor: colors.surface,
       borderWidth: 1,
-      borderColor: "rgba(255, 68, 68, 0.2)",
+      borderColor: colors.text,
     } as ViewStyle,
     deleteAccountText: {
       fontSize: 14,
       fontWeight: "500" as const,
-      color: "#ff4444",
+      color: colors.text,
     } as TextStyle,
     bottomSpacing: {
       height: 40,

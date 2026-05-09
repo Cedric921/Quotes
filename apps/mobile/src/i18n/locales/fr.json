@@ -46,7 +46,22 @@
     "signupError": "Erreur d'inscription",
     "signupSuccess": "Inscription réussie",
     "welcomeMessage": "Bienvenue !",
-    "errorOccurred": "Une erreur est survenue"
+    "errorOccurred": "Une erreur est survenue",
+    "forgotPasswordTitle": "Mot de passe oublié",
+    "forgotPasswordSubtitle": "Entrez votre email pour recevoir un code de réinitialisation",
+    "sendResetCode": "Envoyer le code",
+    "resetCodeSent": "Code envoyé",
+    "resetCodeSentMessage": "Si un compte est associé à cet email, un code vous a été envoyé.",
+    "resetPasswordTitle": "Réinitialiser le mot de passe",
+    "resetPasswordSubtitle": "Entrez le code reçu par email et votre nouveau mot de passe",
+    "verificationCode": "Code de vérification",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "resetPasswordSubmit": "Réinitialiser",
+    "resetPasswordSuccess": "Mot de passe réinitialisé",
+    "resetPasswordSuccessMessage": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+    "invalidResetCode": "Code invalide ou expiré",
+    "backToLogin": "Retour à la connexion"
   },
   "home": {
     "title": "Accueil",

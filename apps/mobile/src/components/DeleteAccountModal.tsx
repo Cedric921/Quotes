@@ -78,7 +78,12 @@ export default function DeleteAccountModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={handleClose}
+    >
       <View style={styles.overlay}>
         <View style={styles.content}>
           <View style={styles.stepIndicator}>
@@ -89,31 +94,59 @@ export default function DeleteAccountModal({
           {step === 1 ? (
             <>
               <View style={styles.iconContainer}>
-                <Ionicons name="warning" size={48} color="#ff4444" />
+                <Ionicons name="warning" size={48} color={colors.text} />
               </View>
-              <Text style={styles.title}>{t("settings.deleteAccountTitle")}</Text>
-              <Text style={styles.subtitle}>{t("settings.deleteAccountSubtitle")}</Text>
+              <Text style={styles.title}>
+                {t("settings.deleteAccountTitle")}
+              </Text>
+              <Text style={styles.subtitle}>
+                {t("settings.deleteAccountSubtitle")}
+              </Text>
               <View style={styles.warningList}>
-                <WarningItem styles={styles} text={t("settings.deleteWarning1")} />
-                <WarningItem styles={styles} text={t("settings.deleteWarning2")} />
-                <WarningItem styles={styles} text={t("settings.deleteWarning3")} />
+                <WarningItem
+                  styles={styles}
+                  text={t("settings.deleteWarning1")}
+                  iconColor={colors.text}
+                />
+                <WarningItem
+                  styles={styles}
+                  text={t("settings.deleteWarning2")}
+                  iconColor={colors.text}
+                />
+                <WarningItem
+                  styles={styles}
+                  text={t("settings.deleteWarning3")}
+                  iconColor={colors.text}
+                />
               </View>
               <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
-                  <Text style={styles.cancelButtonText}>{t("common.cancel")}</Text>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={handleClose}
+                >
+                  <Text style={styles.cancelButtonText}>
+                    {t("common.cancel")}
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.continueButton} onPress={handleNextStep}>
-                  <Text style={styles.continueButtonText}>{t("settings.continue")}</Text>
+                <TouchableOpacity
+                  style={styles.continueButton}
+                  onPress={handleNextStep}
+                >
+                  <Text style={styles.continueButtonText}>
+                    {t("settings.continue")}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </>
           ) : (
             <>
               <View style={styles.iconContainer}>
-                <Ionicons name="lock-closed" size={48} color="#ff4444" />
+                <Ionicons name="lock-closed" size={48} color={colors.text} />
               </View>
               <Text style={styles.title}>{t("settings.confirmIdentity")}</Text>
-              <Text style={styles.subtitle}>{t("settings.enterPasswordToDelete")}</Text>
+              <Text style={styles.subtitle}>
+                {t("settings.enterPasswordToDelete")}
+              </Text>
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.passwordInput}
@@ -121,25 +154,39 @@ export default function DeleteAccountModal({
                   placeholderTextColor={colors.textTertiary}
                   secureTextEntry
                   value={password}
-                  onChangeText={(text) => { setPassword(text); setError(""); }}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setError("");
+                  }}
                   editable={!isDeleting}
                   autoCapitalize="none"
                 />
               </View>
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
               <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.cancelButton} onPress={handleClose} disabled={isDeleting}>
-                  <Text style={styles.cancelButtonText}>{t("common.cancel")}</Text>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={handleClose}
+                  disabled={isDeleting}
+                >
+                  <Text style={styles.cancelButtonText}>
+                    {t("common.cancel")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.deleteButton, isDeleting && styles.deleteButtonDisabled]}
+                  style={[
+                    styles.deleteButton,
+                    isDeleting && styles.deleteButtonDisabled,
+                  ]}
                   onPress={handleConfirmDelete}
                   disabled={isDeleting}
                 >
                   {isDeleting ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" color={colors.background} />
                   ) : (
-                    <Text style={styles.deleteButtonText}>{t("settings.deleteMyAccount")}</Text>
+                    <Text style={styles.deleteButtonText}>
+                      {t("settings.deleteMyAccount")}
+                    </Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -151,10 +198,18 @@ export default function DeleteAccountModal({
   );
 }
 
-function WarningItem({ styles, text }: { styles: any; text: string }) {
+function WarningItem({
+  styles,
+  text,
+  iconColor,
+}: {
+  styles: any;
+  text: string;
+  iconColor: string;
+}) {
   return (
     <View style={styles.warningItem}>
-      <Ionicons name="close-circle" size={20} color="#ff4444" />
+      <Ionicons name="close-circle" size={20} color={iconColor} />
       <Text style={styles.warningText}>{text}</Text>
     </View>
   );
@@ -191,7 +246,7 @@ const createStyles = (colors: any) =>
       backgroundColor: colors.border,
     } as ViewStyle,
     stepDotActive: {
-      backgroundColor: "#ff4444",
+      backgroundColor: colors.text,
     } as ViewStyle,
     stepLine: {
       width: 40,
@@ -254,13 +309,13 @@ const createStyles = (colors: any) =>
       flex: 1,
       paddingVertical: 14,
       borderRadius: 12,
-      backgroundColor: "#ff4444",
+      backgroundColor: colors.text,
       alignItems: "center",
     } as ViewStyle,
     continueButtonText: {
       fontSize: 16,
       fontWeight: "600" as const,
-      color: "#fff",
+      color: colors.background,
     } as TextStyle,
     inputContainer: {
       marginBottom: 16,
@@ -276,7 +331,7 @@ const createStyles = (colors: any) =>
       color: colors.text,
     } as TextStyle,
     errorText: {
-      color: "#ff4444",
+      color: colors.text,
       fontSize: 14,
       textAlign: "center",
       marginBottom: 16,
@@ -285,7 +340,7 @@ const createStyles = (colors: any) =>
       flex: 1,
       paddingVertical: 14,
       borderRadius: 12,
-      backgroundColor: "#ff4444",
+      backgroundColor: colors.text,
       alignItems: "center",
       justifyContent: "center",
     } as ViewStyle,
@@ -295,6 +350,6 @@ const createStyles = (colors: any) =>
     deleteButtonText: {
       fontSize: 16,
       fontWeight: "600" as const,
-      color: "#fff",
+      color: colors.background,
     } as TextStyle,
   });

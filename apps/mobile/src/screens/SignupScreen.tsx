@@ -290,8 +290,8 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   } as ViewStyle,
   logoImage: {
-    width: 100,
-    height: 100,
+    width: 160,
+    height: 160,
   } as ImageStyle,
   subtitle: {
     fontSize: 18,

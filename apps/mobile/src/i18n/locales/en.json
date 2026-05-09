@@ -46,7 +46,22 @@
     "signupError": "Sign up error",
     "signupSuccess": "Sign up successful",
     "welcomeMessage": "Welcome!",
-    "errorOccurred": "An error occurred"
+    "errorOccurred": "An error occurred",
+    "forgotPasswordTitle": "Forgot password",
+    "forgotPasswordSubtitle": "Enter your email to receive a reset code",
+    "sendResetCode": "Send code",
+    "resetCodeSent": "Code sent",
+    "resetCodeSentMessage": "If an account exists for this email, a code has been sent.",
+    "resetPasswordTitle": "Reset password",
+    "resetPasswordSubtitle": "Enter the code from the email and your new password",
+    "verificationCode": "Verification code",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "resetPasswordSubmit": "Reset password",
+    "resetPasswordSuccess": "Password reset",
+    "resetPasswordSuccessMessage": "You can now log in with your new password.",
+    "invalidResetCode": "Invalid or expired code",
+    "backToLogin": "Back to login"
   },
   "home": {
     "title": "Home",

@@ -10,7 +10,9 @@ interface QuoteData {
 
 // Constants
 const WIDGET_QUOTE_KEY = "@focus_widget_quote";
+const WIDGET_QUOTES_ARRAY_KEY = "@focus_widget_quotes_array";
 const IOS_APP_GROUP = "group.com.mindset.focus.widget";
+const MAX_WIDGET_QUOTES = 30;
 
 /**
  * Widget Service
@@ -55,6 +57,34 @@ class WidgetService {
       }
     } catch (error) {
       console.error("[WidgetService] Failed to update widget:", error);
+    }
+  }
+
+  /**
+   * Push a list of quotes to the widget. The widget rotates through them,
+   * showing a different one each day (refreshed at midnight).
+   */
+  async updateWidgetQuotes(quotes: QuoteData[]): Promise<void> {
+    try {
+      const limited = quotes.slice(0, MAX_WIDGET_QUOTES).map((q) => ({
+        content: q.content,
+        author: q.author,
+        topicName: q.topicName ?? null,
+      }));
+
+      await AsyncStorage.setItem(
+        WIDGET_QUOTES_ARRAY_KEY,
+        JSON.stringify(limited),
+      );
+
+      if (Platform.OS === "ios") {
+        const { ExtensionStorage } = await import("@bacons/apple-targets");
+        const storage = new ExtensionStorage(IOS_APP_GROUP);
+        storage.set("quotesArray", JSON.stringify(limited));
+        ExtensionStorage.reloadWidget("FocusWidget");
+      }
+    } catch (error) {
+      console.error("[WidgetService] Failed to update widget quotes:", error);
     }
   }
 
