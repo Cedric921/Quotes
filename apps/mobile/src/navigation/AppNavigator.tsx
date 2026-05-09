@@ -20,6 +20,8 @@ import {
   PaymentHistoryScreen,
   ContactScreen,
   AboutScreen,
+  ForgotPasswordScreen,
+  ResetPasswordScreen,
 } from "../screens";
 import { navigationRef } from "../services/navigationService";
 
@@ -45,6 +47,8 @@ export type RootStackParamList = {
   PaymentHistory: undefined;
   Contact: undefined;
   About: undefined;
+  ForgotPassword: undefined;
+  ResetPassword: { email?: string } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -83,6 +87,11 @@ export default function AppNavigator() {
           />
           <Stack.Screen name="Contact" component={ContactScreen} />
           <Stack.Screen name="About" component={AboutScreen} />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPasswordScreen}
+          />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

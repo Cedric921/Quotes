@@ -165,6 +165,14 @@ export default function QuoteCard({
     [quote.topic?.color],
   );
 
+  // Detect if the gradient is light (so we should use dark text)
+  const useDarkText = useMemo(() => {
+    const baseColor = quote.topic?.color;
+    if (!baseColor) return false;
+    // If color is light but not very light (very light gets replaced with dark gradient)
+    return isLightColor(baseColor) && !isVeryLightColor(baseColor);
+  }, [quote.topic?.color]);
+
   const handleSubscription = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("Subscription");
@@ -303,6 +311,7 @@ export default function QuoteCard({
                 style={[
                   styles.quoteText,
                   dynamicStyles.quoteText,
+                  useDarkText && styles.quoteTextDark,
                   effectiveFontFamily && {
                     fontFamily: effectiveFontFamily,
                   },
@@ -313,7 +322,11 @@ export default function QuoteCard({
               {isTranslating && (
                 <ActivityIndicator
                   size="small"
-                  color="rgba(255, 255, 255, 0.6)"
+                  color={
+                    useDarkText
+                      ? "rgba(0, 0, 0, 0.6)"
+                      : "rgba(255, 255, 255, 0.6)"
+                  }
                   style={styles.translatingIndicator}
                 />
               )}
@@ -324,6 +337,7 @@ export default function QuoteCard({
                 style={[
                   styles.author,
                   dynamicStyles.authorText,
+                  useDarkText && styles.authorDark,
                   effectiveFontFamily && {
                     fontFamily: effectiveFontFamily,
                   },
@@ -407,12 +421,20 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 5,
   } as TextStyle,
+  quoteTextDark: {
+    color: "#000000",
+    textShadowColor: "rgba(255, 255, 255, 0.5)",
+  } as TextStyle,
   author: {
     color: "#ffffff",
     opacity: 0.9,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
+  } as TextStyle,
+  authorDark: {
+    color: "#000000",
+    textShadowColor: "rgba(255, 255, 255, 0.5)",
   } as TextStyle,
   topicBadge: {
     position: "absolute",

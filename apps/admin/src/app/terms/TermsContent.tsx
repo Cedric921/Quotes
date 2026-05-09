@@ -7,6 +7,8 @@ import { getMessages, Locale } from "@/lib/i18n";
 function TermsContentInner() {
   const searchParams = useSearchParams();
   const langParam = searchParams.get("lang");
+  const platformParam = searchParams.get("platform");
+  const isIOS = platformParam === "ios";
   const lang: Locale =
     langParam === "en" || langParam === "fr" ? langParam : "fr";
   const t = getMessages(lang).terms;
@@ -102,16 +104,18 @@ function TermsContentInner() {
                   {t.sections.s6.appleLink}
                 </a>
               </li>
-              <li>
-                <a
-                  href="https://play.google.com/intl/fr/about/play-terms/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  {t.sections.s6.googleLink}
-                </a>
-              </li>
+              {!isIOS && (
+                <li>
+                  <a
+                    href="https://play.google.com/intl/fr/about/play-terms/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {t.sections.s6.googleLink}
+                  </a>
+                </li>
+              )}
             </ul>
           </Section>
 

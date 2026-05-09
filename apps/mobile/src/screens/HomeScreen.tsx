@@ -36,7 +36,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { registerThunk } from "../store/slices/authSlice";
-import { useThemeColors, usePermissions } from "../hooks";
+import { useThemeColors, usePermissions, useReviewPrompt } from "../hooks";
 import { useTranslation } from "react-i18next";
 import { widgetService } from "../services/widgetService";
 import { SubscriptionPlan } from "../store/slices/subscriptionSlice";
@@ -353,12 +353,17 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, [isSharing, t]);
 
   const lastWidgetUpdateRef = useRef<string | null>(null);
+  const { recordQuoteViewed } = useReviewPrompt();
 
-  const handleViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
-      setCurrentIndex(viewableItems[0].index || 0);
-    }
-  }, []);
+  const handleViewableItemsChanged = useCallback(
+    ({ viewableItems }: any) => {
+      if (viewableItems.length > 0) {
+        setCurrentIndex(viewableItems[0].index || 0);
+        recordQuoteViewed();
+      }
+    },
+    [recordQuoteViewed],
+  );
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 50,
@@ -376,6 +381,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       });
     }
   }, [currentIndex, filteredQuotes]);
+
+  // Push the full quotes pool to the widget so it can rotate one per day
+  const lastQuotesPushRef = useRef<string>("");
+  useEffect(() => {
+    if (!filteredQuotes.length) return;
+    const signature = filteredQuotes
+      .slice(0, 30)
+      .map((q) => q.id)
+      .join("|");
+    if (signature === lastQuotesPushRef.current) return;
+    lastQuotesPushRef.current = signature;
+    widgetService.updateWidgetQuotes(
+      filteredQuotes.slice(0, 30).map((q) => ({
+        content: q.text,
+        author: q.author,
+        topicName: q.topic?.name,
+      })),
+    );
+  }, [filteredQuotes]);
 
   const handleOpenThemeModal = useCallback(() => {
     setShowThemeModal(true);

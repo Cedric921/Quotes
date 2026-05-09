@@ -32,7 +32,7 @@ export default function TermsScreen() {
     const currentLang = getCurrentLanguage();
     // Map app language to terms page language (only fr and en supported for terms)
     const termsLang = currentLang === "fr" ? "fr" : "en";
-    return `${BASE_TERMS_URL}?lang=${termsLang}`;
+    return `${BASE_TERMS_URL}?lang=${termsLang}&platform=${Platform.OS}`;
   }, [i18n.language]);
 
   const handleGoBack = () => {

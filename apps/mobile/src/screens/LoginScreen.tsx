@@ -159,6 +159,18 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             </View>
 
             <TouchableOpacity
+              style={styles.forgotPasswordLink}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.navigate("ForgotPassword");
+              }}
+            >
+              <Text style={styles.forgotPasswordText}>
+                {t("auth.forgotPassword")}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={styles.loginButton}
               onPress={handleLogin}
               disabled={isLoading}
@@ -218,8 +230,8 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   } as ViewStyle,
   logoImage: {
-    width: 100,
-    height: 100,
+    width: 160,
+    height: 160,
   } as ImageStyle,
   subtitle: {
     fontSize: 18,
@@ -242,6 +254,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: "#fff",
+  } as TextStyle,
+  forgotPasswordLink: {
+    alignSelf: "flex-end",
+    paddingVertical: 4,
+    marginTop: -4,
+  } as ViewStyle,
+  forgotPasswordText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "500" as const,
   } as TextStyle,
   loginButton: {
     backgroundColor: "#fff",
