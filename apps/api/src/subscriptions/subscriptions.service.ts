@@ -284,8 +284,10 @@ export class SubscriptionsService {
     // Format subscriptions as payments
     return subscriptions.map((sub) => ({
       id: sub.id,
-      planName: sub.plan?.name || 'Unknown Plan',
-      amount: sub.amountPaid || 0,
+      subscription: {
+        plan: sub.plan ? { name: sub.plan.name } : null,
+      },
+      amount: Number(sub.amountPaid || 0),
       currency: 'EUR',
       status:
         sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
@@ -329,7 +331,7 @@ export class SubscriptionsService {
       subscription: {
         plan: sub.plan ? { name: sub.plan.name } : null,
       },
-      amount: sub.amountPaid || 0,
+      amount: Number(sub.amountPaid || 0),
       currency: 'EUR',
       status:
         sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,

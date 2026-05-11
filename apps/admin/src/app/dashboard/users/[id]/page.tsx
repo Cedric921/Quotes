@@ -88,7 +88,7 @@ export default function UserDetailPage() {
   // Calculate total spent
   const totalSpent = payments
     .filter((p) => p.status === "SUCCEEDED")
-    .reduce((sum, p) => sum + p.amount, 0);
+    .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
   // Initialize edit form when user data loads (only once)
   if (user && !hasInitializedForm) {
