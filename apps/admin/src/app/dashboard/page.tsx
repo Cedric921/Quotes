@@ -399,7 +399,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Stripe Partnership Card - Dynamic */}
+          {/* RevenueCat Partnership Card - Dynamic */}
           <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-500/5 to-purple-500/5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-bl-full" />
             <CardHeader>
@@ -410,7 +410,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">
-                      {t.dashboard.stripe.title}
+                      {t.dashboard.revenuecat?.title || "RevenueCat"}
                     </CardTitle>
                   </div>
                 </div>
@@ -447,45 +447,69 @@ export default function DashboardPage() {
                   {/* Connection Status */}
                   <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
                     <span className="text-sm font-medium">
-                      {t.dashboard.stripe.status}
+                      {t.dashboard.revenuecat?.status || "Statut"}
                     </span>
                     <Badge
                       className={
-                        healthStatus?.services.stripe.status === "connected"
+                        healthStatus?.services.revenuecat?.status ===
+                        "connected"
                           ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
-                          : healthStatus?.services.stripe.status ===
+                          : healthStatus?.services.revenuecat?.status ===
                               "not_configured"
                             ? "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20"
                             : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
                       }
                     >
-                      {healthStatus?.services.stripe.status === "connected"
-                        ? t.dashboard.stripe.connected
-                        : healthStatus?.services.stripe.status ===
+                      {healthStatus?.services.revenuecat?.status === "connected"
+                        ? t.dashboard.revenuecat?.connected || "Connecté"
+                        : healthStatus?.services.revenuecat?.status ===
                             "not_configured"
-                          ? t.dashboard.stripe.notConfigured || "Non configuré"
-                          : t.dashboard.stripe.disconnected || "Déconnecté"}
+                          ? t.dashboard.revenuecat?.notConfigured ||
+                            "Non configuré"
+                          : t.dashboard.revenuecat?.disconnected ||
+                            "Déconnecté"}
                     </Badge>
                   </div>
 
-                  {/* API Key Status */}
+                  {/* iOS API Key Status */}
                   <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
                     <span className="text-sm font-medium">
-                      {t.dashboard.stripe.apiKey}
+                      {t.dashboard.revenuecat?.iosApiKey || "Clé iOS"}
                     </span>
-                    {healthStatus?.services.stripe.apiKeyConfigured ? (
+                    {healthStatus?.services.revenuecat?.iosApiKeyConfigured ? (
                       <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-green-500" />
-                        {healthStatus.services.stripe.mode === "live"
-                          ? "sk_live_****"
-                          : "sk_test_****"}
+                        appl_****
                       </span>
                     ) : (
                       <Badge
                         variant="outline"
                         className="text-xs text-yellow-600"
                       >
-                        {t.dashboard.stripe.notConfigured || "Non configuré"}
+                        {t.dashboard.revenuecat?.notConfigured ||
+                          "Non configurée"}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Android API Key Status */}
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
+                    <span className="text-sm font-medium">
+                      {t.dashboard.revenuecat?.androidApiKey || "Clé Android"}
+                    </span>
+                    {healthStatus?.services.revenuecat
+                      ?.androidApiKeyConfigured ? (
+                      <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-green-500" />
+                        goog_****
+                      </span>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-yellow-600"
+                      >
+                        {t.dashboard.revenuecat?.notConfigured ||
+                          "Non configurée"}
                       </Badge>
                     )}
                   </div>
@@ -493,58 +517,30 @@ export default function DashboardPage() {
                   {/* Webhook Status */}
                   <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
                     <span className="text-sm font-medium">
-                      {t.dashboard.stripe.webhook}
+                      {t.dashboard.revenuecat?.webhook || "Webhook"}
                     </span>
                     <Badge
                       variant="secondary"
                       className={`text-xs ${
-                        healthStatus?.services.stripe.webhookConfigured
+                        healthStatus?.services.revenuecat?.webhookConfigured
                           ? "bg-green-500/10 text-green-700"
                           : "bg-yellow-500/10 text-yellow-700"
                       }`}
                     >
-                      {healthStatus?.services.stripe.webhookConfigured
-                        ? t.dashboard.stripe.webhookConfigured
-                        : t.dashboard.stripe.webhookNotConfigured ||
+                      {healthStatus?.services.revenuecat?.webhookConfigured
+                        ? t.dashboard.revenuecat?.webhookConfigured ||
+                          "Configuré"
+                        : t.dashboard.revenuecat?.webhookNotConfigured ||
                           "Non configuré"}
                     </Badge>
                   </div>
-
-                  {/* Mode */}
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-                    <span className="text-sm font-medium">
-                      {t.dashboard.stripe.mode}
-                    </span>
-                    <Badge
-                      className={`text-xs ${
-                        healthStatus?.services.stripe.mode === "live"
-                          ? "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20"
-                          : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
-                      }`}
-                    >
-                      {healthStatus?.services.stripe.mode === "live"
-                        ? t.dashboard.stripe.live || "Production"
-                        : t.dashboard.stripe.test}
-                    </Badge>
-                  </div>
-
-                  {/* Latency (if connected) */}
-                  {healthStatus?.services.stripe.latency && (
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-                      <span className="text-sm font-medium">
-                        {t.dashboard.stripe.latency || "Latence"}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {healthStatus.services.stripe.latency}ms
-                      </span>
-                    </div>
-                  )}
                 </div>
               )}
 
               <div className="pt-4 border-t">
                 <p className="text-xs text-muted-foreground text-center">
-                  {t.dashboard.stripe.securePayment}
+                  {t.dashboard.revenuecat?.secureSubscriptions ||
+                    "Gestion sécurisée des abonnements mobiles"}
                 </p>
               </div>
             </CardContent>
@@ -703,14 +699,14 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Stripe Status */}
+              {/* RevenueCat Status */}
               <div className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3 mb-3">
                   <div
                     className={`p-2 rounded-lg ${
-                      healthStatus?.services.stripe.status === "connected"
+                      healthStatus?.services.revenuecat?.status === "connected"
                         ? "bg-green-500/10"
-                        : healthStatus?.services.stripe.status ===
+                        : healthStatus?.services.revenuecat?.status ===
                             "not_configured"
                           ? "bg-yellow-500/10"
                           : "bg-red-500/10"
@@ -718,9 +714,10 @@ export default function DashboardPage() {
                   >
                     <CreditCard
                       className={`w-5 h-5 ${
-                        healthStatus?.services.stripe.status === "connected"
+                        healthStatus?.services.revenuecat?.status ===
+                        "connected"
                           ? "text-green-500"
-                          : healthStatus?.services.stripe.status ===
+                          : healthStatus?.services.revenuecat?.status ===
                               "not_configured"
                             ? "text-yellow-500"
                             : "text-red-500"
@@ -728,19 +725,18 @@ export default function DashboardPage() {
                     />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">Stripe</p>
+                    <p className="font-medium text-sm">RevenueCat</p>
                     <p className="text-xs text-muted-foreground">
-                      {healthStatus?.services.stripe.mode === "live"
-                        ? "Production"
-                        : "Test"}
+                      iOS & Android
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {healthStatus?.services.stripe.status === "connected" ? (
+                    {healthStatus?.services.revenuecat?.status ===
+                    "connected" ? (
                       <CheckCircle className="w-4 h-4 text-green-500" />
-                    ) : healthStatus?.services.stripe.status ===
+                    ) : healthStatus?.services.revenuecat?.status ===
                       "not_configured" ? (
                       <AlertCircle className="w-4 h-4 text-yellow-500" />
                     ) : (
@@ -748,26 +744,27 @@ export default function DashboardPage() {
                     )}
                     <span
                       className={`text-xs font-medium ${
-                        healthStatus?.services.stripe.status === "connected"
+                        healthStatus?.services.revenuecat?.status ===
+                        "connected"
                           ? "text-green-600"
-                          : healthStatus?.services.stripe.status ===
+                          : healthStatus?.services.revenuecat?.status ===
                               "not_configured"
                             ? "text-yellow-600"
                             : "text-red-600"
                       }`}
                     >
-                      {healthStatus?.services.stripe.status === "connected"
+                      {healthStatus?.services.revenuecat?.status === "connected"
                         ? t.dashboard.services?.connected || "Connecté"
-                        : healthStatus?.services.stripe.status ===
+                        : healthStatus?.services.revenuecat?.status ===
                             "not_configured"
                           ? t.dashboard.services?.notConfigured ||
                             "Non configuré"
                           : t.dashboard.services?.disconnected || "Déconnecté"}
                     </span>
                   </div>
-                  {healthStatus?.services.stripe.latency && (
+                  {healthStatus?.services.revenuecat?.latency && (
                     <span className="text-xs text-muted-foreground">
-                      {healthStatus.services.stripe.latency}ms
+                      {healthStatus.services.revenuecat.latency}ms
                     </span>
                   )}
                 </div>

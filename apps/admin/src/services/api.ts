@@ -185,9 +185,13 @@ export const usersApi = {
       return null;
     }
   },
-  getPayments: async (userId: string): Promise<UserPayment[]> => {
+  getPayments: async (
+    userId: string,
+    environment?: EnvironmentFilter,
+  ): Promise<UserPayment[]> => {
     const response = await apiClient.get<UserPayment[]>(
       `/subscriptions/users/${userId}/payments`,
+      { params: environment ? { environment } : undefined },
     );
     return response.data;
   },
@@ -353,9 +357,12 @@ export const subscriptionsApi = {
   deletePlan: async (id: string): Promise<void> => {
     await apiClient.delete(`/subscriptions/plans/${id}`);
   },
-  getAll: async (): Promise<{ subscriptions: Subscription[] }> => {
+  getAll: async (
+    environment?: EnvironmentFilter,
+  ): Promise<{ subscriptions: Subscription[] }> => {
     const response = await apiClient.get<{ subscriptions: Subscription[] }>(
       "/subscriptions/all",
+      { params: environment ? { environment } : undefined },
     );
     return response.data;
   },
@@ -365,10 +372,17 @@ export const paymentsApi = {
   getAll: async (
     page: number = 1,
     limit: number = 20,
+    environment?: EnvironmentFilter,
   ): Promise<PaginatedPayments> => {
     const response = await apiClient.get<PaginatedPayments>(
       "/subscriptions/payments",
-      { params: { page, limit } },
+      {
+        params: {
+          page,
+          limit,
+          ...(environment ? { environment } : {}),
+        },
+      },
     );
     return response.data;
   },
@@ -458,6 +472,13 @@ export interface StripeStatus extends ServiceStatus {
   apiKeyConfigured?: boolean;
 }
 
+export interface RevenueCatStatus extends ServiceStatus {
+  webhookConfigured?: boolean;
+  apiKeyConfigured?: boolean;
+  iosApiKeyConfigured?: boolean;
+  androidApiKeyConfigured?: boolean;
+}
+
 export interface DatabaseStatus extends ServiceStatus {
   type?: "postgres" | "sqlite";
   provider?: "supabase" | "direct" | "local";
@@ -469,9 +490,12 @@ export interface HealthCheckResponse {
   services: {
     database: DatabaseStatus;
     stripe: StripeStatus;
+    revenuecat?: RevenueCatStatus;
     cloudinary: ServiceStatus;
   };
 }
+
+export type EnvironmentFilter = "PRODUCTION" | "SANDBOX" | undefined;
 
 export const statsApi = {
   getDashboard: async (): Promise<DashboardStats> => {
@@ -486,9 +510,12 @@ export const statsApi = {
       quotes: quotesRes.data.length,
     };
   },
-  getSubscriptionStats: async (): Promise<SubscriptionStats> => {
+  getSubscriptionStats: async (
+    environment?: EnvironmentFilter,
+  ): Promise<SubscriptionStats> => {
     const response = await apiClient.get<SubscriptionStats>(
       "/subscriptions/stats",
+      { params: environment ? { environment } : undefined },
     );
     return response.data;
   },

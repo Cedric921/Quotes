@@ -109,6 +109,30 @@
       "notConfigured": "Not configured",
       "latency": "Latency"
     },
+    "revenuecat": {
+      "title": "RevenueCat Partnership",
+      "description": "iOS & Android subscriptions powered by RevenueCat",
+      "status": "Status",
+      "webhook": "Webhook",
+      "webhookConfigured": "Configured",
+      "webhookNotConfigured": "Not configured",
+      "iosApiKey": "iOS Key",
+      "androidApiKey": "Android Key",
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "secureSubscriptions": "Secure mobile subscriptions management",
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    },
+    "environment": {
+      "label": "Environment",
+      "production": "Production",
+      "productionHint": "Real customer transactions",
+      "sandbox": "Sandbox",
+      "sandboxHint": "TestFlight / App Store sandbox tests",
+      "all": "All",
+      "allHint": "Production and sandbox combined"
+    },
     "services": {
       "title": "Services Status",
       "description": "Check the connectivity of your services",

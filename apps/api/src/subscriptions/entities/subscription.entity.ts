@@ -9,6 +9,11 @@ export enum SubscriptionStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export enum SubscriptionEnvironment {
+  PRODUCTION = 'PRODUCTION',
+  SANDBOX = 'SANDBOX',
+}
+
 @Entity()
 export class Subscription extends BaseEntity {
   @Column()
@@ -44,4 +49,12 @@ export class Subscription extends BaseEntity {
   // Montant payé (en centimes)
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amountPaid: number;
+
+  // PRODUCTION = real customer (Stripe live, App Store production, Play Store live)
+  // SANDBOX = test data (Stripe test, App Store sandbox via TestFlight, Play Store test track)
+  @Column({
+    type: 'varchar',
+    default: SubscriptionEnvironment.PRODUCTION,
+  })
+  environment: SubscriptionEnvironment;
 }

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { usersApi, User } from "@/services/api";
+import { EnvironmentFilter, User, usersApi } from "@/services/api";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 
 // Query keys
 export const userKeys = {
@@ -12,7 +13,8 @@ export const userKeys = {
     [...userKeys.detail(id), "subscriptions"] as const,
   activeSubscription: (id: string) =>
     [...userKeys.detail(id), "activeSubscription"] as const,
-  payments: (id: string) => [...userKeys.detail(id), "payments"] as const,
+  payments: (id: string, environment?: EnvironmentFilter) =>
+    [...userKeys.detail(id), "payments", { environment }] as const,
 };
 
 // Get all users
@@ -50,11 +52,12 @@ export const useUserActiveSubscription = (userId: string) => {
   });
 };
 
-// Get user payments
+// Get user payments scoped to the selected environment
 export const useUserPayments = (userId: string) => {
+  const { queryValue } = useEnvironment();
   return useQuery({
-    queryKey: userKeys.payments(userId),
-    queryFn: () => usersApi.getPayments(userId),
+    queryKey: userKeys.payments(userId, queryValue),
+    queryFn: () => usersApi.getPayments(userId, queryValue),
     enabled: !!userId,
   });
 };
