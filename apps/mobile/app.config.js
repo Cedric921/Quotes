@@ -69,11 +69,6 @@ export default ({ config }) => {
     ios: {
       supportsTablet: true,
       bundleIdentifier: iosBundleId,
-      entitlements: {
-        "com.apple.security.application-groups": [
-          `group.${iosBundleId}.widget`,
-        ],
-      },
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
         UIBackgroundModes: ["remote-notification"],
