@@ -338,7 +338,7 @@ export class NotificationsService {
 
       await this.sendPushNotifications(
         tokens,
-        '📖 Citation du moment',
+        'Focus',
         quote.text.length > 100
           ? quote.text.substring(0, 97) + '...'
           : quote.text,
@@ -374,7 +374,7 @@ export class NotificationsService {
 
     await this.sendPushNotifications(
       tokens,
-      '🔔 Test de notification',
+      'Focus',
       quote
         ? quote.text.length > 100
           ? quote.text.substring(0, 97) + '...'
