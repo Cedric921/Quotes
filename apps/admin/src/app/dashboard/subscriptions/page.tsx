@@ -116,8 +116,8 @@ export default function SubscriptionsPage() {
   };
 
   const savePlan = async () => {
-    if (!planForm.name || planForm.price <= 0) {
-      toast.error(t.subscriptions?.requiredFields || "Nom et prix requis");
+    if (!planForm.name) {
+      toast.error(t.subscriptions?.requiredFields || "Nom requis");
       return;
     }
 
@@ -438,7 +438,7 @@ export default function SubscriptionsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Prix (€) *</Label>
+                <Label htmlFor="price">Prix (€)</Label>
                 <Input
                   id="price"
                   type="number"
