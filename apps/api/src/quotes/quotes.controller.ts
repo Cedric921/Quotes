@@ -54,6 +54,7 @@ export class QuotesController {
     @Query('topicId') topicId?: string,
     @Query('userId') userId?: string,
     @Query('includePremium') includePremium?: string,
+    @Query('seed') seed?: string,
   ) {
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
@@ -65,6 +66,7 @@ export class QuotesController {
       topicId,
       userId,
       includePremiumBool,
+      seed,
     );
   }
 

@@ -51,11 +51,23 @@ export class QuotesService {
     topicId?: string,
     userId?: string,
     includePremium: boolean = true,
+    seed?: string,
   ) {
     const queryBuilder = this.quotesRepository
       .createQueryBuilder('quote')
-      .leftJoinAndSelect('quote.topic', 'topic')
-      .orderBy('quote.createdAt', 'DESC');
+      .leftJoinAndSelect('quote.topic', 'topic');
+
+    // When a seed is provided, sort deterministically by md5(id || seed) so
+    // pagination remains consistent within a session while each new session
+    // (different seed) returns a fresh shuffle.
+    if (seed) {
+      queryBuilder
+        .addSelect(`md5(quote.id::text || :seed)`, 'shuffle_key')
+        .orderBy('shuffle_key', 'ASC')
+        .setParameter('seed', seed);
+    } else {
+      queryBuilder.orderBy('quote.createdAt', 'DESC');
+    }
 
     if (topicId) {
       queryBuilder.andWhere('topic.id = :topicId', { topicId });
