@@ -440,28 +440,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           </TouchableOpacity>
         </View>
 
-        {/* Logout Button */}
+        {/* Delete Account + Logout */}
         <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleDeleteAccount}
+          >
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="trash-outline" size={24} color="#ff4444" />
+              <Text style={[styles.menuItemText, { color: "#ff4444" }]}>
+                {t("settings.deleteAccount")}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#a0a0a0" />
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={24} color="#ff4444" />
             <Text style={styles.logoutText}>{t("auth.logout")}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Delete Account Section */}
-        <View style={styles.section}>
-          <TouchableOpacity
-            style={styles.deleteAccountButton}
-            onPress={handleDeleteAccount}
-          >
-            <Ionicons
-              name="trash-outline"
-              size={14}
-              color={colors.textTertiary}
-            />
-            <Text style={styles.deleteAccountText}>
-              {t("settings.deleteAccount")}
-            </Text>
           </TouchableOpacity>
         </View>
 
@@ -845,20 +841,6 @@ const createStyles = (colors: any) =>
       fontSize: 16,
       fontWeight: "600" as const,
       color: "#ff4444",
-    } as TextStyle,
-    deleteAccountButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      columnGap: 6,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      alignSelf: "center",
-    } as ViewStyle,
-    deleteAccountText: {
-      fontSize: 12,
-      fontWeight: "400" as const,
-      color: colors.textTertiary,
     } as TextStyle,
     bottomSpacing: {
       height: 40,
