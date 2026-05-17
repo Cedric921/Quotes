@@ -33,4 +33,7 @@ export class Theme extends BaseEntity {
 
   @Column({ default: false })
   isPremium: boolean;
+
+  @Column({ default: false })
+  isDefault: boolean;
 }

@@ -37,6 +37,12 @@ export class ThemesController {
     return this.themesService.findActive();
   }
 
+  // Public endpoint - Get the theme marked as default (used on first launch)
+  @Get('default')
+  findDefault() {
+    return this.themesService.findDefault();
+  }
+
   // Admin endpoints
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -123,5 +129,16 @@ export class ThemesController {
     }
     return this.themesService.reorder(themeIds);
   }
-}
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/set-default')
+  async setDefault(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.themesService.setDefault(id);
+  }
+}

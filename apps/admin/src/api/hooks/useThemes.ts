@@ -66,3 +66,15 @@ export const useToggleThemeActive = () => {
     },
   });
 };
+
+// Mark a theme as the default one (exclusive)
+export const useSetDefaultTheme = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => themesApi.setDefault(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: themeKeys.all });
+    },
+  });
+};

@@ -44,6 +44,7 @@ import {
   Loader2,
   Type,
   Crown,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -55,6 +56,7 @@ import {
   useDeleteTheme,
   useToggleThemeActive,
   useActiveFonts,
+  useSetDefaultTheme,
 } from "@/api/hooks";
 import { Theme } from "@/services/api";
 
@@ -66,6 +68,7 @@ export default function ThemesPage() {
   const updateThemeMutation = useUpdateTheme();
   const deleteThemeMutation = useDeleteTheme();
   const toggleActiveMutation = useToggleThemeActive();
+  const setDefaultMutation = useSetDefaultTheme();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
@@ -183,6 +186,18 @@ export default function ThemesPage() {
     }
   };
 
+  const handleSetDefault = async (theme: Theme) => {
+    if (theme.isDefault) return;
+    const toastId = toast.loading(t.themes.updating);
+    try {
+      await setDefaultMutation.mutateAsync(theme.id);
+      toast.success(t.themes.defaultThemeSet, { id: toastId });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t.themes.error;
+      toast.error(message, { id: toastId });
+    }
+  };
+
   const handleToggleActive = async (theme: Theme) => {
     const toastId = toast.loading(t.themes.updating);
     try {
@@ -269,6 +284,12 @@ export default function ThemesPage() {
                       Premium
                     </Badge>
                   )}
+                  {theme.isDefault && (
+                    <Badge className="text-[10px] px-1 py-0 bg-blue-500/20 text-blue-300 border-blue-500/30">
+                      <Star className="h-2.5 w-2.5 mr-0.5 fill-current" />
+                      {t.themes.default}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -285,6 +306,17 @@ export default function ThemesPage() {
                 )}
               </Button>
               <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={!theme.isActive || theme.isDefault}
+                  title={t.themes.setAsDefault}
+                  onClick={() => handleSetDefault(theme)}
+                >
+                  <Star
+                    className={`h-4 w-4 ${theme.isDefault ? "fill-blue-500 text-blue-500" : ""}`}
+                  />
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
