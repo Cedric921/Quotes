@@ -6,7 +6,12 @@ import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { PushToken } from './entities/push-token.entity';
 import { UserNotificationSettings } from '../users/entities/user-notification-settings.entity';
 import { Quote } from '../quotes/entities/quote.entity';
+import { User } from '../users/entities/user.entity';
 import { RegisterPushTokenDto } from './dto/register-push-token.dto';
+
+// Freemium cap: free users can receive at most 2 notifications per day.
+// Premium users use the value configured in their notification settings.
+const FREE_MAX_NOTIFICATIONS_PER_DAY = 2;
 
 @Injectable()
 export class NotificationsService {
@@ -20,8 +25,20 @@ export class NotificationsService {
     private notificationSettingsRepository: Repository<UserNotificationSettings>,
     @InjectRepository(Quote)
     private quoteRepository: Repository<Quote>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {
     this.expo = new Expo();
+  }
+
+  // Returns true when the user has an active premium subscription
+  private async isUserPremium(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'isSubscribed', 'subscriptionEndDate'],
+    });
+    if (!user || !user.isSubscribed || !user.subscriptionEndDate) return false;
+    return new Date(user.subscriptionEndDate) > new Date();
   }
 
   // Register a push token for a user
@@ -259,15 +276,23 @@ export class NotificationsService {
           tracker = { date: today, count: 0, times: [] };
         }
 
+        // Apply freemium cap: free users get at most 2 notifications per day
+        const isPremium = await this.isUserPremium(settings.userId);
+        const effectiveMaxPerDay = isPremium
+          ? settings.maxNotificationsPerDay
+          : Math.min(
+              settings.maxNotificationsPerDay,
+              FREE_MAX_NOTIFICATIONS_PER_DAY,
+            );
+
         // Check if max notifications reached for today
-        if (tracker.count >= settings.maxNotificationsPerDay) {
+        if (tracker.count >= effectiveMaxPerDay) {
           continue;
         }
 
         // Calculate probability of sending notification this minute
         // Based on remaining notifications and remaining time in the window
-        const remainingNotifications =
-          settings.maxNotificationsPerDay - tracker.count;
+        const remainingNotifications = effectiveMaxPerDay - tracker.count;
         let remainingMinutes: number;
 
         if (startMinutes > endMinutes) {
