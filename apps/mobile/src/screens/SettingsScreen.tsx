@@ -450,12 +450,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
         {/* Delete Account Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t("settings.dangerZone")}</Text>
           <TouchableOpacity
             style={styles.deleteAccountButton}
             onPress={handleDeleteAccount}
           >
-            <Ionicons name="trash-outline" size={24} color={colors.text} />
+            <Ionicons
+              name="trash-outline"
+              size={14}
+              color={colors.textTertiary}
+            />
             <Text style={styles.deleteAccountText}>
               {t("settings.deleteAccount")}
             </Text>
@@ -847,17 +850,15 @@ const createStyles = (colors: any) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      columnGap: 12,
-      padding: 16,
-      borderRadius: 12,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.text,
+      columnGap: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      alignSelf: "center",
     } as ViewStyle,
     deleteAccountText: {
-      fontSize: 14,
-      fontWeight: "500" as const,
-      color: colors.text,
+      fontSize: 12,
+      fontWeight: "400" as const,
+      color: colors.textTertiary,
     } as TextStyle,
     bottomSpacing: {
       height: 40,
