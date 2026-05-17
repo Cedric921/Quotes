@@ -699,18 +699,23 @@ export class SubscriptionsService {
     await this.userRepository.save(user);
 
     // Get or create a default premium plan for RevenueCat subscriptions
+    // Backward compatibility: also match the legacy name "RevenueCat Premium"
     let plan = await this.planRepository.findOne({
-      where: { name: 'RevenueCat Premium' },
+      where: [{ name: 'Premium' }, { name: 'RevenueCat Premium' }],
     });
 
     if (!plan) {
       plan = this.planRepository.create({
-        name: 'RevenueCat Premium',
+        name: 'Premium',
         description: 'Premium subscription via App Store / Google Play',
         price: 0, // Price managed by stores
         durationMonths: 1,
         isActive: true,
       });
+      await this.planRepository.save(plan);
+    } else if (plan.name === 'RevenueCat Premium') {
+      // Migrate legacy plan name in-place
+      plan.name = 'Premium';
       await this.planRepository.save(plan);
     }
 
