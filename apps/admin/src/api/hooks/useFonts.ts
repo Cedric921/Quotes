@@ -75,3 +75,15 @@ export const useToggleFontActive = () => {
     },
   });
 };
+
+// Mark a font as the default one (exclusive)
+export const useSetDefaultFont = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => fontsApi.setDefault(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: fontKeys.all });
+    },
+  });
+};

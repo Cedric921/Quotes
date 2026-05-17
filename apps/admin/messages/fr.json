@@ -362,7 +362,10 @@
     "noFont": "Par défaut (Système)",
     "fontPreview": "Aperçu",
     "isPremium": "Thème Premium",
-    "premiumHint": "Disponible uniquement pour les utilisateurs premium"
+    "premiumHint": "Disponible uniquement pour les utilisateurs premium",
+    "default": "Défaut",
+    "setAsDefault": "Définir par défaut",
+    "defaultThemeSet": "Thème par défaut mis à jour"
   },
   "fonts": {
     "title": "Gestion des Polices",
@@ -407,7 +410,10 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "sheetDescriptionEdit": "Modifiez les informations de la police",
-    "sheetDescriptionNew": "Ajoutez une nouvelle police pour les utilisateurs premium"
+    "sheetDescriptionNew": "Ajoutez une nouvelle police pour les utilisateurs premium",
+    "default": "Défaut",
+    "setAsDefault": "Définir par défaut",
+    "defaultFontSet": "Police par défaut mise à jour"
   },
   "terms": {
     "title": "CONDITIONS CONTRACTUELLES (CGV) – SERVICES PREMIUM",

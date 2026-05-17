@@ -34,6 +34,12 @@ export class FontsController {
     return this.fontsService.findActive();
   }
 
+  // Public endpoint - Get the font marked as default (used on first launch)
+  @Get('default')
+  findDefault() {
+    return this.fontsService.findDefault();
+  }
+
   // Admin endpoints
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -117,5 +123,16 @@ export class FontsController {
     }
     return this.fontsService.reorder(body.fontIds);
   }
-}
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/set-default')
+  async setDefault(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return this.fontsService.setDefault(id);
+  }
+}

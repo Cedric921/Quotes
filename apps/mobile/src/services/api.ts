@@ -199,6 +199,15 @@ export const themesApi = {
     const response = await apiClient.get<BackgroundTheme[]>("/themes/active");
     return response.data;
   },
+  /**
+   * Get the theme marked as default by the admin
+   */
+  getDefaultTheme: async (): Promise<BackgroundTheme | null> => {
+    const response = await apiClient.get<BackgroundTheme | null>(
+      "/themes/default",
+    );
+    return response.data;
+  },
 };
 
 // Font types
@@ -219,6 +228,13 @@ export const fontsApi = {
    */
   getActiveFonts: async (): Promise<FontItem[]> => {
     const response = await apiClient.get<FontItem[]>("/fonts/active");
+    return response.data;
+  },
+  /**
+   * Get the font marked as default by the admin
+   */
+  getDefaultFont: async (): Promise<FontItem | null> => {
+    const response = await apiClient.get<FontItem | null>("/fonts/default");
     return response.data;
   },
 };

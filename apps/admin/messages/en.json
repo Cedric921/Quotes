@@ -362,7 +362,10 @@
     "noFont": "Default (System)",
     "fontPreview": "Preview",
     "isPremium": "Premium Theme",
-    "premiumHint": "Only available to premium users"
+    "premiumHint": "Only available to premium users",
+    "default": "Default",
+    "setAsDefault": "Set as default",
+    "defaultThemeSet": "Default theme updated"
   },
   "fonts": {
     "title": "Fonts Management",
@@ -407,7 +410,10 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "sheetDescriptionEdit": "Modify the font details",
-    "sheetDescriptionNew": "Add a new font for premium users"
+    "sheetDescriptionNew": "Add a new font for premium users",
+    "default": "Default",
+    "setAsDefault": "Set as default",
+    "defaultFontSet": "Default font updated"
   },
   "terms": {
     "title": "CONTRACTUAL TERMS (T&C) – PREMIUM SERVICES",

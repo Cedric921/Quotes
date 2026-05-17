@@ -109,5 +109,31 @@ export class FontsService {
     );
     return fonts;
   }
-}
 
+  // Returns the font marked as default (mobile uses this on first launch).
+  // Falls back to the first active font when no default is set.
+  async findDefault(): Promise<Font | null> {
+    const def = await this.fontRepository.findOne({
+      where: { isDefault: true, isActive: true },
+    });
+    if (def) return def;
+    return this.fontRepository.findOne({
+      where: { isActive: true },
+      order: { order: 'ASC', createdAt: 'ASC' },
+    });
+  }
+
+  // Exclusive default: marks one font as default and clears the flag on all
+  // others. The font must be active to be set as default.
+  async setDefault(id: string): Promise<Font> {
+    const font = await this.findOne(id);
+    if (!font.isActive) {
+      throw new BadRequestException(
+        'Only active fonts can be set as the default.',
+      );
+    }
+    await this.fontRepository.update({ isDefault: true }, { isDefault: false });
+    font.isDefault = true;
+    return this.fontRepository.save(font);
+  }
+}

@@ -61,6 +61,7 @@ export interface Theme {
   order: number;
   isActive: boolean;
   isPremium?: boolean;
+  isDefault?: boolean;
   fontName?: string;
   fontFamily?: string;
 }
@@ -73,6 +74,7 @@ export interface Font {
   previewText?: string;
   isActive: boolean;
   isPremium: boolean;
+  isDefault?: boolean;
   order: number;
 }
 
@@ -281,6 +283,10 @@ export const themesApi = {
     const response = await apiClient.post<Theme>(`/themes/${id}/toggle-active`);
     return response.data;
   },
+  setDefault: async (id: string): Promise<Theme> => {
+    const response = await apiClient.post<Theme>(`/themes/${id}/set-default`);
+    return response.data;
+  },
 };
 
 export const fontsApi = {
@@ -305,6 +311,10 @@ export const fontsApi = {
   },
   toggleActive: async (id: string): Promise<Font> => {
     const response = await apiClient.post<Font>(`/fonts/${id}/toggle-active`);
+    return response.data;
+  },
+  setDefault: async (id: string): Promise<Font> => {
+    const response = await apiClient.post<Font>(`/fonts/${id}/set-default`);
     return response.data;
   },
 };

@@ -43,6 +43,7 @@ import {
   EyeOff,
   Loader2,
   Crown,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -51,6 +52,7 @@ import {
   useUpdateFont,
   useDeleteFont,
   useToggleFontActive,
+  useSetDefaultFont,
 } from "@/api/hooks";
 import { Font } from "@/services/api";
 
@@ -61,6 +63,7 @@ export default function FontsPage() {
   const updateFontMutation = useUpdateFont();
   const deleteFontMutation = useDeleteFont();
   const toggleActiveMutation = useToggleFontActive();
+  const setDefaultMutation = useSetDefaultFont();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingFont, setEditingFont] = useState<Font | null>(null);
@@ -154,6 +157,22 @@ export default function FontsPage() {
     }
   };
 
+  const handleSetDefault = async (font: Font) => {
+    if (font.isDefault) return;
+    const toastId = toast.loading(t.fonts?.updating || "Updating...");
+    try {
+      await setDefaultMutation.mutateAsync(font.id);
+      toast.success(
+        t.fonts?.defaultFontSet || `"${font.name}" set as default`,
+        { id: toastId },
+      );
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Error setting default font";
+      toast.error(message, { id: toastId });
+    }
+  };
+
   const handleToggleActive = async (font: Font) => {
     const toastId = toast.loading(t.fonts?.updating || "Updating...");
     try {
@@ -237,7 +256,17 @@ export default function FontsPage() {
                     key={font.id}
                     className={!font.isActive ? "opacity-60" : ""}
                   >
-                    <TableCell className="font-medium">{font.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {font.name}
+                        {font.isDefault && (
+                          <Badge className="bg-blue-500/10 text-blue-700 border-blue-500/20">
+                            <Star className="h-3 w-3 mr-1 fill-current" />
+                            {t.fonts?.default || "Default"}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <code className="text-xs bg-muted px-2 py-1 rounded">
                         {font.fontFamily}
@@ -277,6 +306,17 @@ export default function FontsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={!font.isActive || font.isDefault}
+                          title={t.fonts?.setAsDefault || "Set as default"}
+                          onClick={() => handleSetDefault(font)}
+                        >
+                          <Star
+                            className={`h-4 w-4 ${font.isDefault ? "fill-blue-500 text-blue-500" : ""}`}
+                          />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
