@@ -78,6 +78,11 @@ const getUserIdFromToken = async (): Promise<string | null> => {
   }
 };
 
+// Per-session shuffle seed: generated once per app cold-start, ensures the
+// quote order is randomized differently each time the app opens while staying
+// stable across paginated requests within the same session.
+const SESSION_SHUFFLE_SEED = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 export const quotesApi = {
   /**
    * Get paginated quotes
@@ -85,12 +90,14 @@ export const quotesApi = {
    * @param limit - Number of quotes per page (default: 10)
    * @param topicId - Optional topic filter
    * @param includePremium - Whether to include premium quotes (default: true)
+   * @param seed - Optional shuffle seed (defaults to per-session seed)
    */
   getQuotes: async (
     page: number = 1,
     limit: number = 10,
     topicId?: string,
     includePremium: boolean = true,
+    seed: string = SESSION_SHUFFLE_SEED,
   ): Promise<Quote[]> => {
     const userId = await getUserIdFromToken();
     const response = await apiClient.get<Quote[]>("/quotes", {
@@ -100,6 +107,7 @@ export const quotesApi = {
         ...(topicId && { topicId }),
         ...(userId && { userId }),
         includePremium,
+        seed,
       },
     });
     // Handle case where response.data might be wrapped in an object
@@ -191,6 +199,15 @@ export const themesApi = {
     const response = await apiClient.get<BackgroundTheme[]>("/themes/active");
     return response.data;
   },
+  /**
+   * Get the theme marked as default by the admin
+   */
+  getDefaultTheme: async (): Promise<BackgroundTheme | null> => {
+    const response = await apiClient.get<BackgroundTheme | null>(
+      "/themes/default",
+    );
+    return response.data;
+  },
 };
 
 // Font types
@@ -211,6 +228,13 @@ export const fontsApi = {
    */
   getActiveFonts: async (): Promise<FontItem[]> => {
     const response = await apiClient.get<FontItem[]>("/fonts/active");
+    return response.data;
+  },
+  /**
+   * Get the font marked as default by the admin
+   */
+  getDefaultFont: async (): Promise<FontItem | null> => {
+    const response = await apiClient.get<FontItem | null>("/fonts/default");
     return response.data;
   },
 };

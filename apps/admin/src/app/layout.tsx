@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LocaleProvider } from "@/contexts/LocaleContext";
+import { EnvironmentProvider } from "@/contexts/EnvironmentContext";
 import { Providers } from "@/components/providers";
 import { Toaster } from "sonner";
 
@@ -38,7 +39,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <LocaleProvider>{children}</LocaleProvider>
+            <LocaleProvider>
+              <EnvironmentProvider>{children}</EnvironmentProvider>
+            </LocaleProvider>
             <Toaster richColors position="top-right" />
           </ThemeProvider>
         </Providers>

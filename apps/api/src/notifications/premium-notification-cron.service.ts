@@ -14,23 +14,23 @@ export class PremiumNotificationCronService {
   // Messages de rappel pour les utilisateurs premium
   private readonly reminderMessages = [
     {
-      title: '✨ Focus Premium',
+      title: 'Focus',
       body: 'Découvrez votre citation inspirante du jour !',
     },
     {
-      title: '🌟 Moment de sagesse',
+      title: 'Focus',
       body: 'Prenez une pause et laissez-vous inspirer par nos citations premium.',
     },
     {
-      title: '💎 Contenu exclusif',
-      body: 'De nouvelles citations premium vous attendent dans Focus.',
+      title: 'Focus',
+      body: 'De nouvelles citations premium vous attendent.',
     },
     {
-      title: '🔮 Inspiration quotidienne',
-      body: "N'oubliez pas de consulter vos citations du jour !",
+      title: 'Focus',
+      body: "N'oubliez pas votre dose d'inspiration du jour !",
     },
     {
-      title: '⭐ Focus vous attend',
+      title: 'Focus',
       body: 'Votre dose quotidienne de motivation est prête.',
     },
   ];
@@ -179,7 +179,7 @@ export class PremiumNotificationCronService {
 
       await this.notificationsService.sendPushNotifications(
         tokens,
-        `💎 ${quote.author || 'Citation du jour'}`,
+        'Focus',
         truncatedText,
         {
           type: 'premium_quote',
@@ -242,7 +242,7 @@ export class PremiumNotificationCronService {
 
       await this.notificationsService.sendPushNotifications(
         tokens,
-        '🆕 Nouvelle citation premium !',
+        'Focus',
         truncatedText,
         {
           type: 'new_premium_quote',
@@ -299,7 +299,7 @@ export class PremiumNotificationCronService {
 
     await this.notificationsService.sendPushNotifications(
       tokens,
-      `💎 ${quote.author || 'Citation premium'}`,
+      'Focus',
       truncatedText,
       {
         type: 'manual_premium_quote',

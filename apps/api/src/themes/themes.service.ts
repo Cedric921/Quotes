@@ -7,7 +7,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual } from 'typeorm';
 import { Theme } from './entities/theme.entity';
 import { CreateThemeDto, UpdateThemeDto } from './dto';
-import { CloudinaryService, CloudinaryUploadResult } from './cloudinary.service';
+import {
+  CloudinaryService,
+  CloudinaryUploadResult,
+} from './cloudinary.service';
 
 const MAX_ACTIVE_THEMES = 10;
 
@@ -153,5 +156,34 @@ export class ThemesService {
     );
     return themes;
   }
-}
 
+  // Returns the theme marked as default (mobile uses this on first launch).
+  // Falls back to the first active theme when no default is set.
+  async findDefault(): Promise<Theme | null> {
+    const def = await this.themeRepository.findOne({
+      where: { isDefault: true, isActive: true },
+    });
+    if (def) return def;
+    return this.themeRepository.findOne({
+      where: { isActive: true },
+      order: { order: 'ASC', createdAt: 'ASC' },
+    });
+  }
+
+  // Exclusive default: marks one theme as default and clears the flag on all
+  // others. The theme must be active to be set as default.
+  async setDefault(id: string): Promise<Theme> {
+    const theme = await this.findOne(id);
+    if (!theme.isActive) {
+      throw new BadRequestException(
+        'Only active themes can be set as the default.',
+      );
+    }
+    await this.themeRepository.update(
+      { isDefault: true },
+      { isDefault: false },
+    );
+    theme.isDefault = true;
+    return this.themeRepository.save(theme);
+  }
+}

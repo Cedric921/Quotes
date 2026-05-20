@@ -15,12 +15,5 @@ module.exports = (config) => ({
     textPrimary: { light: "#1f2937", dark: "#f9fafb" },
     textSecondary: { light: "#6b7280", dark: "#9ca3af" },
   },
-  
-  // App Groups for sharing data between app and widget
-  entitlements: {
-    "com.apple.security.application-groups": [
-      `group.${config.ios?.bundleIdentifier || "com.mindset.focus"}.widget`
-    ],
-  },
 });
 

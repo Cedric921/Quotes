@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fontsApi } from "../../services/api";
 
 export interface SelectedFont {
   id: string;
@@ -34,6 +35,22 @@ export const loadStoredFont = () => async (dispatch: any) => {
     const storedFont = await AsyncStorage.getItem("@focus_selected_font");
     if (storedFont) {
       dispatch(setSelectedFont(JSON.parse(storedFont)));
+      return;
+    }
+    // No user selection: fall back to the admin-defined default font
+    try {
+      const defaultFont = await fontsApi.getDefaultFont();
+      if (defaultFont) {
+        dispatch(
+          setSelectedFont({
+            id: defaultFont.id,
+            name: defaultFont.name,
+            fontFamily: defaultFont.fontFamily,
+          }),
+        );
+      }
+    } catch (err) {
+      console.error("Error loading default font:", err);
     }
   } catch (error) {
     console.error("Error loading stored font:", error);
@@ -56,4 +73,3 @@ export const changeSelectedFont =
       console.error("Error saving selected font:", error);
     }
   };
-

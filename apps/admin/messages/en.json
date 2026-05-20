@@ -109,6 +109,30 @@
       "notConfigured": "Not configured",
       "latency": "Latency"
     },
+    "revenuecat": {
+      "title": "RevenueCat Partnership",
+      "description": "iOS & Android subscriptions powered by RevenueCat",
+      "status": "Status",
+      "webhook": "Webhook",
+      "webhookConfigured": "Configured",
+      "webhookNotConfigured": "Not configured",
+      "iosApiKey": "iOS Key",
+      "androidApiKey": "Android Key",
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "secureSubscriptions": "Secure mobile subscriptions management",
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    },
+    "environment": {
+      "label": "Environment",
+      "production": "Production",
+      "productionHint": "Real customer transactions",
+      "sandbox": "Sandbox",
+      "sandboxHint": "TestFlight / App Store sandbox tests",
+      "all": "All",
+      "allHint": "Production and sandbox combined"
+    },
     "services": {
       "title": "Services Status",
       "description": "Check the connectivity of your services",
@@ -338,7 +362,10 @@
     "noFont": "Default (System)",
     "fontPreview": "Preview",
     "isPremium": "Premium Theme",
-    "premiumHint": "Only available to premium users"
+    "premiumHint": "Only available to premium users",
+    "default": "Default",
+    "setAsDefault": "Set as default",
+    "defaultThemeSet": "Default theme updated"
   },
   "fonts": {
     "title": "Fonts Management",
@@ -383,7 +410,10 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "sheetDescriptionEdit": "Modify the font details",
-    "sheetDescriptionNew": "Add a new font for premium users"
+    "sheetDescriptionNew": "Add a new font for premium users",
+    "default": "Default",
+    "setAsDefault": "Set as default",
+    "defaultFontSet": "Default font updated"
   },
   "terms": {
     "title": "CONTRACTUAL TERMS (T&C) – PREMIUM SERVICES",

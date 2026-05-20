@@ -151,6 +151,18 @@ export class UsersService {
       updateData.activeDays = JSON.stringify(updateDto.activeDays);
     }
 
+    // Freemium cap: free users can request at most 2 notifications per day.
+    // Premium users keep whatever value they sent.
+    if (updateDto.maxNotificationsPerDay !== undefined) {
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+      });
+      const isPremium = user ? this.calculateIsPremium(user) : false;
+      if (!isPremium && updateDto.maxNotificationsPerDay > 2) {
+        updateData.maxNotificationsPerDay = 2;
+      }
+    }
+
     if (!settings) {
       const newSettings = this.notificationSettingsRepository.create({
         userId,

@@ -188,11 +188,14 @@ export class SubscriptionsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('stats')
-  async getStats(@Request() req: AuthenticatedRequest) {
+  async getStats(
+    @Request() req: AuthenticatedRequest,
+    @Query('environment') environment?: string,
+  ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Only admins can view subscription stats');
     }
-    return this.subscriptionsService.getStats();
+    return this.subscriptionsService.getStats(environment);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -201,13 +204,18 @@ export class SubscriptionsController {
     @Request() req: AuthenticatedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('environment') environment?: string,
   ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Only admins can view all subscriptions');
     }
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 20;
-    return this.subscriptionsService.getAllSubscriptions(pageNum, limitNum);
+    return this.subscriptionsService.getAllSubscriptions(
+      pageNum,
+      limitNum,
+      environment,
+    );
   }
 
   // Payments endpoint - returns subscriptions formatted as payments
@@ -217,13 +225,18 @@ export class SubscriptionsController {
     @Request() req: AuthenticatedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('environment') environment?: string,
   ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Only admins can view payments');
     }
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 20;
-    return this.subscriptionsService.getAllPayments(pageNum, limitNum);
+    return this.subscriptionsService.getAllPayments(
+      pageNum,
+      limitNum,
+      environment,
+    );
   }
 
   // Get user's subscription for admin
@@ -245,11 +258,12 @@ export class SubscriptionsController {
   async getUserPaymentsAdmin(
     @Request() req: AuthenticatedRequest,
     @Param('userId') userId: string,
+    @Query('environment') environment?: string,
   ) {
     if (!req.user.isAdmin) {
       throw new ForbiddenException('Only admins can view user payments');
     }
-    return this.subscriptionsService.getUserPayments(userId);
+    return this.subscriptionsService.getUserPayments(userId, environment);
   }
 
   @UseGuards(JwtAuthGuard)

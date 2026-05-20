@@ -92,10 +92,9 @@ struct Provider: TimelineProvider {
 
     private func dayOfEra(for date: Date) -> Int {
         let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .dayOfYear], from: date)
-        let year = components.year ?? 0
-        let day = components.dayOfYear ?? 0
-        return year * 366 + day
+        let year = calendar.component(.year, from: date)
+        let dayOfYear = calendar.ordinality(of: .day, in: .year, for: date) ?? 0
+        return year * 366 + dayOfYear
     }
 }
 

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Appearance } from "react-native";
+import { themesApi } from "../../services/api";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -71,6 +72,26 @@ export const loadStoredTheme = () => async (dispatch: any) => {
     const storedBgTheme = await AsyncStorage.getItem("@focus_background_theme");
     if (storedBgTheme) {
       dispatch(setBackgroundTheme(JSON.parse(storedBgTheme)));
+      return;
+    }
+    // No user selection: fall back to the admin-defined default theme
+    try {
+      const defaultTheme = await themesApi.getDefaultTheme();
+      if (defaultTheme) {
+        dispatch(
+          setBackgroundTheme({
+            id: defaultTheme.id,
+            name: defaultTheme.name,
+            imageUrl: defaultTheme.imageUrl,
+            thumbnailUrl: defaultTheme.thumbnailUrl,
+            fontName: defaultTheme.fontName,
+            fontFamily: defaultTheme.fontFamily,
+            isPremium: defaultTheme.isPremium,
+          }),
+        );
+      }
+    } catch (err) {
+      console.error("Error loading default theme:", err);
     }
   } catch (error) {
     console.error("Error loading stored theme:", error);

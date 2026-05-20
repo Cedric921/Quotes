@@ -1,11 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { statsApi, HealthCheckResponse } from "@/services/api";
+import {
+  EnvironmentFilter,
+  HealthCheckResponse,
+  statsApi,
+} from "@/services/api";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 
 // Query keys
 export const statsKeys = {
   all: ["stats"] as const,
   dashboard: () => [...statsKeys.all, "dashboard"] as const,
-  subscriptions: () => [...statsKeys.all, "subscriptions"] as const,
+  subscriptions: (environment?: EnvironmentFilter) =>
+    [...statsKeys.all, "subscriptions", { environment }] as const,
   health: () => [...statsKeys.all, "health"] as const,
 };
 
@@ -18,11 +24,13 @@ export const useDashboardStats = () => {
   });
 };
 
-// Get subscription stats (revenue, premium users, etc.)
+// Get subscription stats (revenue, premium users, etc.) scoped to the
+// currently selected environment (Production / Sandbox / All).
 export const useSubscriptionStats = () => {
+  const { queryValue } = useEnvironment();
   return useQuery({
-    queryKey: statsKeys.subscriptions(),
-    queryFn: statsApi.getSubscriptionStats,
+    queryKey: statsKeys.subscriptions(queryValue),
+    queryFn: () => statsApi.getSubscriptionStats(queryValue),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
@@ -46,6 +54,12 @@ export const useHealthStatus = () => {
           provider: "local",
         },
         stripe: {
+          status: "error",
+          message: "Unable to check",
+          apiKeyConfigured: false,
+          webhookConfigured: false,
+        },
+        revenuecat: {
           status: "error",
           message: "Unable to check",
           apiKeyConfigured: false,

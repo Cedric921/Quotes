@@ -23,5 +23,7 @@ export class Font extends BaseEntity {
 
   @Column({ default: true })
   isPremium: boolean;
-}
 
+  @Column({ default: false })
+  isDefault: boolean;
+}

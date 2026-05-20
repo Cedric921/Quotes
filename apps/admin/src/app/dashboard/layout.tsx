@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { EnvironmentToggle } from "@/components/environment-toggle";
 import { Logo } from "@/components/Logo";
 import {
   AlertDialog,
@@ -194,7 +195,11 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="min-h-full p-8">{children}</div>
+        {/* Top bar with environment toggle */}
+        <div className="sticky top-0 z-20 flex items-center justify-end gap-2 px-8 py-3 bg-background/80 backdrop-blur-sm border-b border-border/50">
+          <EnvironmentToggle />
+        </div>
+        <div className="min-h-full p-8 pt-6">{children}</div>
       </main>
 
       {/* Toast Notifications */}

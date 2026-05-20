@@ -59,7 +59,7 @@ export const scheduleDailyNotifications = async (
     for (const weekday of notification.days) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "📖 Time for your daily quote",
+          title: "Focus",
           body: "Discover inspiring wisdom to brighten your day",
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,

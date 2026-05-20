@@ -109,6 +109,30 @@
       "notConfigured": "Non configuré",
       "latency": "Latence"
     },
+    "revenuecat": {
+      "title": "Partenariat RevenueCat",
+      "description": "Abonnements iOS et Android via RevenueCat",
+      "status": "Statut",
+      "webhook": "Webhook",
+      "webhookConfigured": "Configuré",
+      "webhookNotConfigured": "Non configuré",
+      "iosApiKey": "Clé iOS",
+      "androidApiKey": "Clé Android",
+      "configured": "Configurée",
+      "notConfigured": "Non configurée",
+      "secureSubscriptions": "Gestion sécurisée des abonnements mobiles",
+      "connected": "Connecté",
+      "disconnected": "Déconnecté"
+    },
+    "environment": {
+      "label": "Environnement",
+      "production": "Production",
+      "productionHint": "Vraies transactions de clients",
+      "sandbox": "Sandbox",
+      "sandboxHint": "Tests TestFlight / App Store Sandbox",
+      "all": "Tous",
+      "allHint": "Production et sandbox confondus"
+    },
     "services": {
       "title": "État des Services",
       "description": "Vérifiez la connectivité de vos services",
@@ -338,7 +362,10 @@
     "noFont": "Par défaut (Système)",
     "fontPreview": "Aperçu",
     "isPremium": "Thème Premium",
-    "premiumHint": "Disponible uniquement pour les utilisateurs premium"
+    "premiumHint": "Disponible uniquement pour les utilisateurs premium",
+    "default": "Défaut",
+    "setAsDefault": "Définir par défaut",
+    "defaultThemeSet": "Thème par défaut mis à jour"
   },
   "fonts": {
     "title": "Gestion des Polices",
@@ -383,7 +410,10 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "sheetDescriptionEdit": "Modifiez les informations de la police",
-    "sheetDescriptionNew": "Ajoutez une nouvelle police pour les utilisateurs premium"
+    "sheetDescriptionNew": "Ajoutez une nouvelle police pour les utilisateurs premium",
+    "default": "Défaut",
+    "setAsDefault": "Définir par défaut",
+    "defaultFontSet": "Police par défaut mise à jour"
   },
   "terms": {
     "title": "CONDITIONS CONTRACTUELLES (CGV) – SERVICES PREMIUM",

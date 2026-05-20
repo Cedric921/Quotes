@@ -10,6 +10,7 @@ import { SubscriptionPlan } from './entities/subscription-plan.entity';
 import {
   Subscription,
   SubscriptionStatus,
+  SubscriptionEnvironment,
 } from './entities/subscription.entity';
 import {
   AppConfig,
@@ -33,6 +34,9 @@ interface RevenueCatEventBody {
   expiration_at_ms?: number;
   id?: string;
   price?: number;
+  // RevenueCat sends 'SANDBOX' for App Store sandbox / Play test track,
+  // 'PRODUCTION' for real customers
+  environment?: 'SANDBOX' | 'PRODUCTION';
 }
 
 interface RevenueCatWebhookPayload {
@@ -59,7 +63,20 @@ export class SubscriptionsService {
 
   // ============ STATISTICS ============
 
-  async getStats(): Promise<{
+  /**
+   * Normalize the ?environment query string into a value the where-clause can
+   * consume. Returns undefined when the caller asked for everything (or sent
+   * an unrecognized value) so callers can spread it into `where`.
+   */
+  private parseEnvironment(raw?: string): SubscriptionEnvironment | undefined {
+    if (!raw) return undefined;
+    const upper = raw.toUpperCase();
+    if (upper === 'PRODUCTION') return SubscriptionEnvironment.PRODUCTION;
+    if (upper === 'SANDBOX') return SubscriptionEnvironment.SANDBOX;
+    return undefined;
+  }
+
+  async getStats(environment?: string): Promise<{
     totalRevenue: number;
     monthlyRevenue: number;
     premiumUsers: number;
@@ -78,6 +95,11 @@ export class SubscriptionsService {
       status: string;
     }>;
   }> {
+    const envFilter = this.parseEnvironment(environment);
+
+    // Premium/free counts are user-level (no environment column on user), so
+    // they stay accurate across both modes. Only revenue + transaction lists
+    // are scoped by environment.
     const totalUsers = await this.userRepository.count();
     const premiumUsers = await this.userRepository.count({
       where: { isSubscribed: true },
@@ -86,9 +108,12 @@ export class SubscriptionsService {
     const premiumPercentage =
       totalUsers > 0 ? Math.round((premiumUsers / totalUsers) * 100) : 0;
 
-    // Get all subscriptions for revenue calculation
+    // Get all subscriptions for revenue calculation (scoped by environment)
     const allSubscriptions = await this.subscriptionRepository.find({
-      where: { status: SubscriptionStatus.ACTIVE },
+      where: {
+        status: SubscriptionStatus.ACTIVE,
+        ...(envFilter ? { environment: envFilter } : {}),
+      },
       relations: ['plan'],
     });
 
@@ -115,6 +140,7 @@ export class SubscriptionsService {
       where: {
         status: SubscriptionStatus.ACTIVE,
         createdAt: Between(startOfLastMonth, endOfLastMonth),
+        ...(envFilter ? { environment: envFilter } : {}),
       },
     });
     const lastMonthRevenue = lastMonthSubscriptions.reduce(
@@ -134,6 +160,7 @@ export class SubscriptionsService {
 
     // Recent transactions (formatted for dashboard)
     const recentSubscriptions = await this.subscriptionRepository.find({
+      where: envFilter ? { environment: envFilter } : {},
       relations: ['plan', 'user'],
       order: { createdAt: 'DESC' },
       take: 10,
@@ -241,9 +268,12 @@ export class SubscriptionsService {
   async getAllSubscriptions(
     page = 1,
     limit = 20,
+    environment?: string,
   ): Promise<{ subscriptions: Subscription[]; total: number }> {
+    const envFilter = this.parseEnvironment(environment);
     const [subscriptions, total] =
       await this.subscriptionRepository.findAndCount({
+        where: envFilter ? { environment: envFilter } : {},
         relations: ['plan', 'user'],
         order: { createdAt: 'DESC' },
         skip: (page - 1) * limit,
@@ -274,9 +304,13 @@ export class SubscriptionsService {
   }
 
   // Get user payments (subscriptions formatted as payments)
-  async getUserPayments(userId: string): Promise<any[]> {
+  async getUserPayments(userId: string, environment?: string): Promise<any[]> {
+    const envFilter = this.parseEnvironment(environment);
     const subscriptions = await this.subscriptionRepository.find({
-      where: { userId },
+      where: {
+        userId,
+        ...(envFilter ? { environment: envFilter } : {}),
+      },
       relations: ['plan'],
       order: { createdAt: 'DESC' },
     });
@@ -284,8 +318,10 @@ export class SubscriptionsService {
     // Format subscriptions as payments
     return subscriptions.map((sub) => ({
       id: sub.id,
-      planName: sub.plan?.name || 'Unknown Plan',
-      amount: sub.amountPaid || 0,
+      subscription: {
+        plan: sub.plan ? { name: sub.plan.name } : null,
+      },
+      amount: Number(sub.amountPaid || 0),
       currency: 'EUR',
       status:
         sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
@@ -311,9 +347,12 @@ export class SubscriptionsService {
   async getAllPayments(
     page = 1,
     limit = 20,
+    environment?: string,
   ): Promise<{ payments: any[]; total: number }> {
+    const envFilter = this.parseEnvironment(environment);
     const [subscriptions, total] =
       await this.subscriptionRepository.findAndCount({
+        where: envFilter ? { environment: envFilter } : {},
         relations: ['plan', 'user'],
         order: { createdAt: 'DESC' },
         skip: (page - 1) * limit,
@@ -329,7 +368,7 @@ export class SubscriptionsService {
       subscription: {
         plan: sub.plan ? { name: sub.plan.name } : null,
       },
-      amount: sub.amountPaid || 0,
+      amount: Number(sub.amountPaid || 0),
       currency: 'EUR',
       status:
         sub.status === SubscriptionStatus.ACTIVE ? 'SUCCEEDED' : sub.status,
@@ -463,6 +502,12 @@ export class SubscriptionsService {
     const endDate = new Date(now);
     endDate.setMonth(endDate.getMonth() + plan.durationMonths);
 
+    // Stripe live keys (sk_live_) produce PRODUCTION rows; sk_test_ → SANDBOX.
+    const stripeKey = process.env.STRIPE_SECRET_KEY || '';
+    const environment = stripeKey.startsWith('sk_live_')
+      ? SubscriptionEnvironment.PRODUCTION
+      : SubscriptionEnvironment.SANDBOX;
+
     const subscription = this.subscriptionRepository.create({
       userId,
       planId: plan.id,
@@ -471,6 +516,7 @@ export class SubscriptionsService {
       endDate,
       stripePaymentIntentId,
       amountPaid,
+      environment,
     });
 
     const savedSubscription =
@@ -653,20 +699,30 @@ export class SubscriptionsService {
     await this.userRepository.save(user);
 
     // Get or create a default premium plan for RevenueCat subscriptions
+    // Backward compatibility: also match the legacy name "RevenueCat Premium"
     let plan = await this.planRepository.findOne({
-      where: { name: 'RevenueCat Premium' },
+      where: [{ name: 'Premium' }, { name: 'RevenueCat Premium' }],
     });
 
     if (!plan) {
       plan = this.planRepository.create({
-        name: 'RevenueCat Premium',
+        name: 'Premium',
         description: 'Premium subscription via App Store / Google Play',
         price: 0, // Price managed by stores
         durationMonths: 1,
         isActive: true,
       });
       await this.planRepository.save(plan);
+    } else if (plan.name === 'RevenueCat Premium') {
+      // Migrate legacy plan name in-place
+      plan.name = 'Premium';
+      await this.planRepository.save(plan);
     }
+
+    const environment =
+      event.environment === 'SANDBOX'
+        ? SubscriptionEnvironment.SANDBOX
+        : SubscriptionEnvironment.PRODUCTION;
 
     const subscription = this.subscriptionRepository.create({
       user,
@@ -675,7 +731,10 @@ export class SubscriptionsService {
       startDate: new Date(),
       endDate: expirationDate,
       stripePaymentIntentId: `rc_${event.id ?? Date.now()}`,
+      // Sandbox events should not pollute real revenue: keep the price RC
+      // reports but flag the row so admin filters can hide it.
       amountPaid: event.price ?? 0,
+      environment,
     });
 
     await this.subscriptionRepository.save(subscription);

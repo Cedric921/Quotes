@@ -19,12 +19,22 @@ export interface StripeStatus extends ServiceStatus {
   apiKeyConfigured?: boolean;
 }
 
+export interface RevenueCatStatus extends ServiceStatus {
+  // RevenueCat has no live/sandbox split at the server level: a single
+  // project receives webhooks for both, tagged per-event with environment.
+  webhookConfigured?: boolean;
+  apiKeyConfigured?: boolean;
+  iosApiKeyConfigured?: boolean;
+  androidApiKeyConfigured?: boolean;
+}
+
 export interface HealthCheckResponse {
   status: 'healthy' | 'degraded' | 'unhealthy';
   timestamp: string;
   services: {
     database: DatabaseStatus;
     stripe: StripeStatus;
+    revenuecat: RevenueCatStatus;
     cloudinary: ServiceStatus;
   };
 }
@@ -49,9 +59,10 @@ export class HealthService {
   }
 
   async checkHealth(): Promise<HealthCheckResponse> {
-    const [database, stripe, cloudinaryStatus] = await Promise.all([
+    const [database, stripe, revenuecat, cloudinaryStatus] = await Promise.all([
       this.checkDatabase(),
       this.checkStripe(),
+      this.checkRevenueCat(),
       this.checkCloudinary(),
     ]);
 
@@ -62,11 +73,13 @@ export class HealthService {
       overallStatus = 'unhealthy';
     } else if (
       stripe.status === 'error' ||
+      revenuecat.status === 'error' ||
       cloudinaryStatus.status === 'error'
     ) {
       overallStatus = 'degraded';
     } else if (
       stripe.status === 'not_configured' ||
+      revenuecat.status === 'not_configured' ||
       cloudinaryStatus.status === 'not_configured'
     ) {
       overallStatus = 'degraded';
@@ -78,8 +91,45 @@ export class HealthService {
       services: {
         database,
         stripe,
+        revenuecat,
         cloudinary: cloudinaryStatus,
       },
+    };
+  }
+
+  private checkRevenueCat(): RevenueCatStatus {
+    // RevenueCat webhook auth uses a bearer secret stored server-side.
+    const webhookSecret = process.env.REVENUECAT_WEBHOOK_SECRET;
+    // Client public API keys are kept on the mobile side, but we let the API
+    // expose flags so the admin can confirm the project is wired up.
+    const iosKey = process.env.REVENUECAT_IOS_API_KEY;
+    const androidKey = process.env.REVENUECAT_ANDROID_API_KEY;
+
+    const webhookConfigured =
+      !!webhookSecret && !webhookSecret.includes('placeholder');
+    const iosApiKeyConfigured = !!iosKey && !iosKey.includes('placeholder');
+    const androidApiKeyConfigured =
+      !!androidKey && !androidKey.includes('placeholder');
+    const apiKeyConfigured = iosApiKeyConfigured || androidApiKeyConfigured;
+
+    if (!webhookConfigured && !apiKeyConfigured) {
+      return {
+        status: 'not_configured',
+        message: 'RevenueCat is not configured',
+        webhookConfigured,
+        apiKeyConfigured,
+        iosApiKeyConfigured,
+        androidApiKeyConfigured,
+      };
+    }
+
+    return {
+      status: 'connected',
+      message: 'RevenueCat webhook configured',
+      webhookConfigured,
+      apiKeyConfigured,
+      iosApiKeyConfigured,
+      androidApiKeyConfigured,
     };
   }
 
