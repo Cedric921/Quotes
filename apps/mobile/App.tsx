@@ -1,11 +1,12 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Platform } from "react-native";
+import { StyleSheet, View, Platform, AppState } from "react-native";
 import { Provider, useSelector } from "react-redux";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { store, RootState } from "./src/store";
 import { queryClient } from "./src/api/queryClient";
+import { quoteKeys } from "./src/api/hooks/useQuotes";
 import { loadStoredAuth } from "./src/store/slices/authSlice";
 import { loadStoredTheme } from "./src/store/slices/themeSlice";
 import { loadStoredFont } from "./src/store/slices/fontSlice";
@@ -16,6 +17,7 @@ import {
   loginUser,
   logoutUser,
 } from "./src/services/purchases";
+import { refreshShuffleSeed } from "./src/services/api";
 import "./src/i18n"; // Initialiser i18n
 
 // Register Android widget task handler
@@ -85,6 +87,24 @@ function AppContent() {
       trackActivity.mutate(today);
     }
   }, [token]);
+
+  // Reshuffle quotes each time the app returns to the foreground so the user
+  // does not land on the same quotes after closing and reopening the app.
+  const appStateRef = useRef(AppState.currentState);
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      const prev = appStateRef.current;
+      appStateRef.current = nextState;
+      if (
+        (prev === "background" || prev === "inactive") &&
+        nextState === "active"
+      ) {
+        refreshShuffleSeed();
+        queryClient.invalidateQueries({ queryKey: quoteKeys.all });
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   return (
     <View style={styles.container}>

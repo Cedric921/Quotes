@@ -78,10 +78,18 @@ const getUserIdFromToken = async (): Promise<string | null> => {
   }
 };
 
-// Per-session shuffle seed: generated once per app cold-start, ensures the
-// quote order is randomized differently each time the app opens while staying
-// stable across paginated requests within the same session.
-const SESSION_SHUFFLE_SEED = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+// Shuffle seed regenerated each time the app opens (cold start) and each
+// time it returns to the foreground after being backgrounded. Pagination
+// within a single foreground session stays stable while a new opening
+// gets a fresh random order.
+let currentShuffleSeed = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+export const getShuffleSeed = (): string => currentShuffleSeed;
+
+export const refreshShuffleSeed = (): string => {
+  currentShuffleSeed = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return currentShuffleSeed;
+};
 
 export const quotesApi = {
   /**
@@ -97,7 +105,7 @@ export const quotesApi = {
     limit: number = 10,
     topicId?: string,
     includePremium: boolean = true,
-    seed: string = SESSION_SHUFFLE_SEED,
+    seed: string = getShuffleSeed(),
   ): Promise<Quote[]> => {
     const userId = await getUserIdFromToken();
     const response = await apiClient.get<Quote[]>("/quotes", {

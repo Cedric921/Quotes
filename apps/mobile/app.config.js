@@ -21,7 +21,7 @@ export default ({ config }) => {
   const easOwner = process.env.EAS_OWNER || "focus-application";
   const appSlug = process.env.APP_SLUG || "focus-quotes-app";
   const appName = process.env.APP_NAME || "Focus";
-  const appVersion = process.env.APP_VERSION || "1.0.2";
+  const appVersion = process.env.APP_VERSION || "1.0.4";
 
   // ===========================================
   // Platform-specific Configuration

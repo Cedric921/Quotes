@@ -13,7 +13,9 @@ interface EnvironmentContextType {
 }
 
 const STORAGE_KEY = "focus_admin_environment";
-const DEFAULT_MODE: EnvironmentMode = "PRODUCTION";
+// Default to showing both environments so admins land on a complete picture;
+// they can still narrow down to PRODUCTION or SANDBOX via the toggle.
+const DEFAULT_MODE: EnvironmentMode = "all";
 
 const EnvironmentContext = createContext<EnvironmentContextType | undefined>(
   undefined,
@@ -43,7 +45,9 @@ export function EnvironmentProvider({
   };
 
   const queryValue =
-    environment === "all" ? undefined : (environment as "PRODUCTION" | "SANDBOX");
+    environment === "all"
+      ? undefined
+      : (environment as "PRODUCTION" | "SANDBOX");
 
   return (
     <EnvironmentContext.Provider
