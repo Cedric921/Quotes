@@ -376,6 +376,17 @@ export const subscriptionsApi = {
     );
     return response.data;
   },
+  assignSubscriptionToUser: async (
+    userId: string,
+    planId: string,
+    adminPassword: string,
+  ): Promise<Subscription> => {
+    const response = await apiClient.post<Subscription>(
+      `/subscriptions/users/${userId}/assign-subscription`,
+      { planId, adminPassword },
+    );
+    return response.data;
+  },
 };
 
 export const paymentsApi = {

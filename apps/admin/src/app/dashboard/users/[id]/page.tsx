@@ -61,6 +61,17 @@ import {
   useUpdateUser,
   useVerifyPassword,
 } from "@/api/hooks";
+import {
+  useSubscriptionPlans,
+  useAssignSubscription,
+} from "@/api/hooks/useSubscriptions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function UserDetailPage() {
   const params = useParams();
@@ -71,8 +82,10 @@ export default function UserDetailPage() {
   const { data: user, isLoading, error: userError } = useUser(userId);
   const { data: activeSubscription } = useUserActiveSubscription(userId);
   const { data: payments = [] } = useUserPayments(userId);
+  const { data: plans = [] } = useSubscriptionPlans();
   const updateUserMutation = useUpdateUser();
   const verifyPasswordMutation = useVerifyPassword();
+  const assignSubscriptionMutation = useAssignSubscription();
 
   // Edit user states
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
@@ -84,6 +97,12 @@ export default function UserDetailPage() {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  // Assign subscription states
+  const [isAssignSubSheetOpen, setIsAssignSubSheetOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [assignError, setAssignError] = useState("");
 
   // Calculate total spent
   const totalSpent = payments
@@ -148,6 +167,38 @@ export default function UserDetailPage() {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update user";
       setPasswordError(errorMessage);
+      toast.error(errorMessage, { id: toastId });
+    }
+  };
+
+  const handleAssignSubscription = async () => {
+    if (!selectedPlanId) {
+      setAssignError("Please select a plan");
+      return;
+    }
+    if (!adminPassword) {
+      setAssignError("Please enter your admin password");
+      return;
+    }
+
+    setAssignError("");
+    const toastId = toast.loading("Assigning subscription...");
+
+    try {
+      await assignSubscriptionMutation.mutateAsync({
+        userId,
+        planId: selectedPlanId,
+        adminPassword,
+      });
+
+      toast.success("Subscription assigned successfully!", { id: toastId });
+      setIsAssignSubSheetOpen(false);
+      setSelectedPlanId("");
+      setAdminPassword("");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to assign subscription";
+      setAssignError(errorMessage);
       toast.error(errorMessage, { id: toastId });
     }
   };
@@ -255,6 +306,32 @@ export default function UserDetailPage() {
         </CardContent>
       </Card>
 
+      {/* No Subscription - Show assign button */}
+      {!user.isSubscribed && (
+        <Card className="border-2 border-dashed hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-500/5 to-pink-500/5">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-purple-500/10 to-pink-500/10">
+                <CreditCard className="w-8 h-8 text-purple-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg">No Active Subscription</h3>
+                <p className="text-sm text-muted-foreground">
+                  This user doesn&apos;t have an active subscription. You can assign one manually.
+                </p>
+              </div>
+              <Button
+                onClick={() => setIsAssignSubSheetOpen(true)}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                Assign Subscription
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Financial Overview - Only show if user is subscribed */}
       {user.isSubscribed && (
         <>
@@ -293,8 +370,19 @@ export default function UserDetailPage() {
                   <CardDescription className="text-sm font-medium">
                     Souscription Actuelle
                   </CardDescription>
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
-                    <CreditCard className="w-5 h-5 text-white" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsAssignSubSheetOpen(true)}
+                      className="h-8"
+                    >
+                      <Edit className="w-3 h-3 mr-1" />
+                      Edit
+                    </Button>
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                      <CreditCard className="w-5 h-5 text-white" />
+                    </div>
                   </div>
                 </div>
               </CardHeader>
@@ -535,6 +623,117 @@ export default function UserDetailPage() {
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Save Changes
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Assign Subscription Sheet */}
+      <Sheet open={isAssignSubSheetOpen} onOpenChange={setIsAssignSubSheetOpen}>
+        <SheetContent className="border-l-2 border-primary/20 overflow-y-auto">
+          <SheetHeader className="border-b pb-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                <CreditCard className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <SheetTitle className="text-xl">Assign Subscription</SheetTitle>
+                <SheetDescription className="mt-1">
+                  Manually assign a subscription plan to {user?.name || user?.email}
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <div className="space-y-6">
+            {/* Select Plan */}
+            <div className="space-y-3">
+              <Label htmlFor="plan-select" className="text-sm font-medium">
+                Select Plan
+              </Label>
+              <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                <SelectTrigger id="plan-select" className="border-2">
+                  <SelectValue placeholder="Choose a subscription plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {plans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.name} - €{Number(plan.price).toFixed(2)} ({plan.durationMonths} month
+                      {plan.durationMonths !== 1 ? "s" : ""})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Admin Password */}
+            <div className="space-y-3">
+              <Label htmlFor="admin-password" className="text-sm font-medium">
+                Admin Password
+              </Label>
+              <Input
+                id="admin-password"
+                type="password"
+                value={adminPassword}
+                onChange={(e) => {
+                  setAdminPassword(e.target.value);
+                  setAssignError("");
+                }}
+                placeholder="Enter your admin password"
+                className="border-2 focus:border-primary"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAssignSubscription();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Error Message */}
+            {assignError && (
+              <div className="p-4 rounded-lg bg-destructive/10 border-2 border-destructive/20">
+                <p className="text-sm text-destructive">{assignError}</p>
+              </div>
+            )}
+
+            {/* Warning Message */}
+            <div className="p-4 rounded-lg bg-amber-500/10 border-2 border-amber-500/20">
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 text-amber-500 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                    Manual Assignment
+                  </p>
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    This will create a new subscription for the user. Any existing
+                    subscription will be replaced.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-6 mt-6 border-t">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAssignSubSheetOpen(false);
+                setSelectedPlanId("");
+                setAdminPassword("");
+                setAssignError("");
+              }}
+              className="flex-1 border-2"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAssignSubscription}
+              disabled={assignSubscriptionMutation.isPending}
+              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 border-2 border-transparent"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Assign Subscription
             </Button>
           </div>
         </SheetContent>

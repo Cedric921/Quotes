@@ -2,6 +2,9 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Between } from 'typeorm';
@@ -23,6 +26,7 @@ import {
   UpdateSubscriptionPlanDto,
   UpdateConfigDto,
 } from './dto';
+import { AuthService } from '../auth/auth.service';
 
 // Entitlement identifier configured in RevenueCat dashboard
 const ENTITLEMENT_ID = 'Focus Pro';
@@ -56,6 +60,8 @@ export class SubscriptionsService {
     private configRepository: Repository<AppConfig>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
   ) {
     const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
     this.stripe = new Stripe(stripeKey);
@@ -788,5 +794,64 @@ export class SubscriptionsService {
     }
 
     return { synced: true, isPremium: hasPremium };
+  }
+
+  /**
+   * Permet à un admin d'attribuer manuellement une souscription à un utilisateur
+   */
+  async assignSubscriptionToUser(
+    userId: string,
+    planId: string,
+    adminId: string,
+    adminPassword: string,
+  ): Promise<Subscription> {
+    // Verify admin password
+    const isValidPassword = await this.authService.verifyPassword(
+      adminId,
+      adminPassword,
+    );
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Invalid admin password');
+    }
+
+    // Find user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Find plan
+    const plan = await this.findPlanById(planId);
+
+    // Calculate end date
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+
+    // Create subscription
+    const subscription = this.subscriptionRepository.create({
+      userId,
+      planId: plan.id,
+      status: SubscriptionStatus.ACTIVE,
+      startDate: now,
+      endDate,
+      stripePaymentIntentId: `admin_${adminId}_${Date.now()}`,
+      amountPaid: 0, // Admin assigned = free
+      environment: SubscriptionEnvironment.PRODUCTION,
+    });
+
+    const savedSubscription =
+      await this.subscriptionRepository.save(subscription);
+
+    // Update user premium status
+    user.isSubscribed = true;
+    user.subscriptionEndDate = endDate;
+    await this.userRepository.save(user);
+
+    console.log(
+      `✅ Admin ${adminId} assigned subscription ${plan.name} to user ${userId}`,
+    );
+
+    return savedSubscription;
   }
 }

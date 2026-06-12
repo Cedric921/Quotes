@@ -90,3 +90,27 @@ export const usePayments = (page: number = 1, limit: number = 20) => {
     queryFn: () => paymentsApi.getAll(page, limit, queryValue),
   });
 };
+
+// Assign subscription to user manually (admin only)
+export const useAssignSubscription = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      planId,
+      adminPassword,
+    }: {
+      userId: string;
+      planId: string;
+      adminPassword: string;
+    }) => subscriptionsApi.assignSubscriptionToUser(userId, planId, adminPassword),
+    onSuccess: (_, { userId }) => {
+      queryClient.invalidateQueries({ queryKey: ["users", "detail", userId] });
+      queryClient.invalidateQueries({
+        queryKey: ["users", "detail", userId, "activeSubscription"],
+      });
+      queryClient.invalidateQueries({ queryKey: subscriptionKeys.subscriptions() });
+    },
+  });
+};

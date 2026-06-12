@@ -341,6 +341,25 @@ export class SubscriptionsController {
     return this.subscriptionsService.getUserSubscriptionHistory(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('users/:userId/assign-subscription')
+  async assignSubscriptionToUser(
+    @Request() req: AuthenticatedRequest,
+    @Param('userId') userId: string,
+    @Body('planId') planId: string,
+    @Body('adminPassword') adminPassword: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can assign subscriptions');
+    }
+    return this.subscriptionsService.assignSubscriptionToUser(
+      userId,
+      planId,
+      req.user.userId,
+      adminPassword,
+    );
+  }
+
   // ============ STRIPE WEBHOOK ============
 
   @Post('webhook')
