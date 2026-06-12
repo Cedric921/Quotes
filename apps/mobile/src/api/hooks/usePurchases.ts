@@ -18,6 +18,7 @@ import {
   logoutUser,
 } from "../../services/purchases";
 import apiClient from "../../services/api";
+import { userKeys } from "./useUser";
 
 // Query keys
 export const purchasesKeys = {
@@ -116,7 +117,11 @@ export const usePurchase = () => {
       return customerInfo;
     },
     onSuccess: () => {
+      // Invalidate purchases queries
       queryClient.invalidateQueries({ queryKey: purchasesKeys.all });
+
+      // Invalidate user queries to refresh subscription status
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
   });
 };
@@ -144,7 +149,11 @@ export const useRestorePurchases = () => {
       return customerInfo;
     },
     onSuccess: () => {
+      // Invalidate purchases queries
       queryClient.invalidateQueries({ queryKey: purchasesKeys.all });
+
+      // Invalidate user queries to refresh subscription status
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
   });
 };

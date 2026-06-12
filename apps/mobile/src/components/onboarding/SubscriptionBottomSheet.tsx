@@ -194,15 +194,6 @@ export default function SubscriptionBottomSheet({
                           {plan.description}
                         </Text>
                       )}
-                      <View style={styles.planPricing}>
-                        <Text style={styles.planPrice}>
-                          €{Number(plan.price).toFixed(2)}
-                        </Text>
-                        <Text style={styles.planPeriod}>
-                          / {plan.durationMonths}{" "}
-                          {plan.durationMonths === 1 ? "mois" : "mois"}
-                        </Text>
-                      </View>
                     </TouchableOpacity>
                   ))}
                 </View>

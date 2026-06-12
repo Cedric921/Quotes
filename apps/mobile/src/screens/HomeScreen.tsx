@@ -133,10 +133,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const checkoutMutation = useCreateCheckoutSession();
 
   // Check if onboarding should be shown
-  // Show on every app open if user is not subscribed (unless "don't show again" is checked)
+  // Show on every app open if user is authenticated but not subscribed (unless "don't show again" is checked)
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
+        // Don't show if user is not authenticated
+        if (!isAuthenticated) {
+          return;
+        }
+
         // Don't show if user is subscribed or admin
         if (isSubscribed || isAdmin) {
           return;
@@ -157,7 +162,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       }
     };
     checkOnboarding();
-  }, [isSubscribed, isAdmin]);
+  }, [isAuthenticated, isSubscribed, isAdmin]);
 
   // Handle plan selection from bottom sheet
   // Navigate directly to RevenueCat-powered SubscriptionScreen so users
