@@ -63,7 +63,7 @@
       "env": {
         "API_URL": "https://focus-app-1.onrender.com",
         "IOS_BUNDLE_ID": "com.mindset.focus",
-        "ANDROID_PACKAGE": "com.mindset.focus",
+        "ANDROID_PACKAGE": "com.focus.quotes",
         "APPLE_TEAM_ID": "XA9AGYDNGM"
       }
     }
