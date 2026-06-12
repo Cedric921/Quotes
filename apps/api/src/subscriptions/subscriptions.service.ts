@@ -27,6 +27,7 @@ import {
   UpdateConfigDto,
 } from './dto';
 import { AuthService } from '../auth/auth.service';
+import { PromoCodeService } from './promo-code.service';
 
 // Entitlement identifier configured in RevenueCat dashboard
 const ENTITLEMENT_ID = 'Focus Pro';
@@ -62,6 +63,8 @@ export class SubscriptionsService {
     private userRepository: Repository<User>,
     @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
+    @Inject(forwardRef(() => PromoCodeService))
+    private promoCodeService: PromoCodeService,
   ) {
     const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
     this.stripe = new Stripe(stripeKey);
@@ -794,6 +797,52 @@ export class SubscriptionsService {
     }
 
     return { synced: true, isPremium: hasPremium };
+  }
+
+  /**
+   * Apply a promo code to a user to grant them premium access
+   */
+  async applyPromoCode(userId: string, promoCode: any): Promise<void> {
+    // Find user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if user already used a promo code
+    if (user.usedPromoCode) {
+      throw new BadRequestException(
+        'You have already used a promo code. Only one promo code per account.',
+      );
+    }
+
+    // Check if user already has an active subscription
+    if (user.isSubscribed && user.subscriptionEndDate) {
+      const now = new Date();
+      if (new Date(user.subscriptionEndDate) > now) {
+        throw new BadRequestException(
+          'You already have an active subscription. Promo codes cannot be applied to existing subscriptions.',
+        );
+      }
+    }
+
+    // Calculate end date based on promo code duration
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + promoCode.durationDays);
+
+    // Update user premium status and mark promo code as used
+    user.isSubscribed = true;
+    user.subscriptionEndDate = endDate;
+    user.usedPromoCode = promoCode.code;
+    await this.userRepository.save(user);
+
+    // Increment promo code usage count
+    await this.promoCodeService.incrementUsageCount(promoCode.code);
+
+    console.log(
+      `✅ Promo code ${promoCode.code} applied to user ${userId} - ${promoCode.durationDays} days of premium access`,
+    );
   }
 
   /**

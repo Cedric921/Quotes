@@ -22,7 +22,12 @@ import { SubscriptionPlan } from "../../store/slices/subscriptionSlice";
 interface ProfileCompletionModalProps {
   isVisible: boolean;
   onClose: () => void;
-  onComplete: (data: { name: string; email: string; password: string }) => void;
+  onComplete: (data: {
+    name: string;
+    email: string;
+    password: string;
+    promoCode?: string;
+  }) => void;
   selectedPlan: SubscriptionPlan | null;
   isLoading?: boolean;
 }
@@ -42,6 +47,7 @@ export default function ProfileCompletionModal({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -83,6 +89,7 @@ export default function ProfileCompletionModal({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password,
+      promoCode: promoCode.trim() ? promoCode.trim().toUpperCase() : undefined,
     });
   };
 
@@ -220,6 +227,17 @@ export default function ProfileCompletionModal({
               {
                 secureTextEntry: true,
                 autoCapitalize: "none",
+              },
+            )}
+
+            {renderInput(
+              "Promo Code (Optional)",
+              promoCode,
+              (text) => setPromoCode(text.toUpperCase()),
+              "Enter promo code",
+              undefined,
+              {
+                autoCapitalize: "characters",
               },
             )}
           </View>

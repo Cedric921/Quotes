@@ -31,6 +31,7 @@ import {
 } from "../components/onboarding";
 import { useQuotes, useToggleLikeQuote } from "../api/hooks";
 import { useCreateCheckoutSession } from "../api/hooks/useSubscriptions";
+import { useApplyPromoCode } from "../api/hooks/usePromoCode";
 import { Quote } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -184,6 +185,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     name: string;
     email: string;
     password: string;
+    promoCode?: string;
   }) => {
     if (!selectedPlan) return;
 
@@ -200,6 +202,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       // 2. Mark onboarding as completed
       await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+
+      // Note: If a promo code is provided, we skip the payment flow
+      // The promo code will be applied after registration in SignupScreen
+      // This modal is only for the paid subscription flow via Stripe
 
       // 3. Create checkout session
       const checkoutResult = await checkoutMutation.mutateAsync(

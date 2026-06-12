@@ -18,9 +18,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
-import { useAppDispatch } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { registerThunk } from "../store/slices/authSlice";
 import { useTranslation } from "react-i18next";
+import { useApplyPromoCode } from "../api/hooks/usePromoCode";
 
 interface SignupScreenProps {
   readonly navigation: any;
@@ -29,10 +30,14 @@ interface SignupScreenProps {
 export default function SignupScreen({ navigation }: SignupScreenProps) {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const token = useAppSelector((state) => state.auth.token);
+  const applyPromoCodeMutation = useApplyPromoCode();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -77,13 +82,40 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
     try {
       await dispatch(registerThunk({ name, email, password })).unwrap();
 
-      Toast.show({
-        type: "success",
-        text1: t("auth.signupSuccess"),
-        text2: t("auth.welcomeMessage"),
-        position: "top",
-        visibilityTime: 2000,
-      });
+      // Apply promo code if provided
+      if (promoCode.trim() && token) {
+        try {
+          const result = await applyPromoCodeMutation.mutateAsync({
+            code: promoCode.trim().toUpperCase(),
+            token,
+          });
+
+          Toast.show({
+            type: "success",
+            text1: t("auth.signupSuccess"),
+            text2: result.message,
+            position: "top",
+            visibilityTime: 4000,
+          });
+        } catch (promoError: any) {
+          // Signup succeeded but promo code failed - show warning
+          Toast.show({
+            type: "info",
+            text1: t("auth.signupSuccess"),
+            text2: promoError.message || "Promo code could not be applied",
+            position: "top",
+            visibilityTime: 4000,
+          });
+        }
+      } else {
+        Toast.show({
+          type: "success",
+          text1: t("auth.signupSuccess"),
+          text2: t("auth.welcomeMessage"),
+          position: "top",
+          visibilityTime: 2000,
+        });
+      }
 
       // Navigate to Home after successful signup
       navigation.navigate("Home");
@@ -227,6 +259,24 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
                   color="rgba(255,255,255,0.7)"
                 />
               </TouchableOpacity>
+            </View>
+
+            {/* Promo Code (Optional) */}
+            <View style={styles.inputContainer}>
+              <Ionicons
+                name="gift-outline"
+                size={20}
+                color="rgba(255,255,255,0.7)"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Promo Code (Optional)"
+                placeholderTextColor="rgba(255,255,255,0.5)"
+                value={promoCode}
+                onChangeText={(text) => setPromoCode(text.toUpperCase())}
+                autoCapitalize="characters"
+                autoCorrect={false}
+              />
             </View>
 
             <TouchableOpacity

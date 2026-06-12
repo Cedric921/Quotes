@@ -434,8 +434,28 @@ export class SubscriptionsController {
     );
   }
 
-  // ============ PROMO CODES (ADMIN ONLY) ============
+  // ============ PROMO CODES ============
 
+  // Apply promo code (authenticated users)
+  @UseGuards(JwtAuthGuard)
+  @Post('apply-promo-code')
+  async applyPromoCode(
+    @Request() req: AuthenticatedRequest,
+    @Body('code') code: string,
+  ) {
+    const promoCode = await this.promoCodeService.validatePromoCode(code);
+
+    // Apply the promo code to the user
+    await this.subscriptionsService.applyPromoCode(req.user.userId, promoCode);
+
+    return {
+      success: true,
+      message: `Promo code applied! You now have ${promoCode.durationDays} days of premium access.`,
+      durationDays: promoCode.durationDays,
+    };
+  }
+
+  // ADMIN ONLY endpoints
   @UseGuards(JwtAuthGuard)
   @Post('promo-codes')
   async createPromoCode(
