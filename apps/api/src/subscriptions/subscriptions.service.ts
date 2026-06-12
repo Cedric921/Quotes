@@ -2,6 +2,9 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Between } from 'typeorm';
@@ -23,6 +26,8 @@ import {
   UpdateSubscriptionPlanDto,
   UpdateConfigDto,
 } from './dto';
+import { AuthService } from '../auth/auth.service';
+import { PromoCodeService } from './promo-code.service';
 
 // Entitlement identifier configured in RevenueCat dashboard
 const ENTITLEMENT_ID = 'Focus Pro';
@@ -56,6 +61,10 @@ export class SubscriptionsService {
     private configRepository: Repository<AppConfig>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
+    @Inject(forwardRef(() => PromoCodeService))
+    private promoCodeService: PromoCodeService,
   ) {
     const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
     this.stripe = new Stripe(stripeKey);
@@ -788,5 +797,110 @@ export class SubscriptionsService {
     }
 
     return { synced: true, isPremium: hasPremium };
+  }
+
+  /**
+   * Apply a promo code to a user to grant them premium access
+   */
+  async applyPromoCode(userId: string, promoCode: any): Promise<void> {
+    // Find user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if user already used a promo code
+    if (user.usedPromoCode) {
+      throw new BadRequestException(
+        'You have already used a promo code. Only one promo code per account.',
+      );
+    }
+
+    // Check if user already has an active subscription
+    if (user.isSubscribed && user.subscriptionEndDate) {
+      const now = new Date();
+      if (new Date(user.subscriptionEndDate) > now) {
+        throw new BadRequestException(
+          'You already have an active subscription. Promo codes cannot be applied to existing subscriptions.',
+        );
+      }
+    }
+
+    // Calculate end date based on promo code duration
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + promoCode.durationDays);
+
+    // Update user premium status and mark promo code as used
+    user.isSubscribed = true;
+    user.subscriptionEndDate = endDate;
+    user.usedPromoCode = promoCode.code;
+    await this.userRepository.save(user);
+
+    // Increment promo code usage count
+    await this.promoCodeService.incrementUsageCount(promoCode.code);
+
+    console.log(
+      `✅ Promo code ${promoCode.code} applied to user ${userId} - ${promoCode.durationDays} days of premium access`,
+    );
+  }
+
+  /**
+   * Permet à un admin d'attribuer manuellement une souscription à un utilisateur
+   */
+  async assignSubscriptionToUser(
+    userId: string,
+    planId: string,
+    adminId: string,
+    adminPassword: string,
+  ): Promise<Subscription> {
+    // Verify admin password
+    const isValidPassword = await this.authService.verifyPassword(
+      adminId,
+      adminPassword,
+    );
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Invalid admin password');
+    }
+
+    // Find user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Find plan
+    const plan = await this.findPlanById(planId);
+
+    // Calculate end date
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+
+    // Create subscription
+    const subscription = this.subscriptionRepository.create({
+      userId,
+      planId: plan.id,
+      status: SubscriptionStatus.ACTIVE,
+      startDate: now,
+      endDate,
+      stripePaymentIntentId: `admin_${adminId}_${Date.now()}`,
+      amountPaid: 0, // Admin assigned = free
+      environment: SubscriptionEnvironment.PRODUCTION,
+    });
+
+    const savedSubscription =
+      await this.subscriptionRepository.save(subscription);
+
+    // Update user premium status
+    user.isSubscribed = true;
+    user.subscriptionEndDate = endDate;
+    await this.userRepository.save(user);
+
+    console.log(
+      `✅ Admin ${adminId} assigned subscription ${plan.name} to user ${userId}`,
+    );
+
+    return savedSubscription;
   }
 }

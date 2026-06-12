@@ -376,6 +376,17 @@ export const subscriptionsApi = {
     );
     return response.data;
   },
+  assignSubscriptionToUser: async (
+    userId: string,
+    planId: string,
+    adminPassword: string,
+  ): Promise<Subscription> => {
+    const response = await apiClient.post<Subscription>(
+      `/subscriptions/users/${userId}/assign-subscription`,
+      { planId, adminPassword },
+    );
+    return response.data;
+  },
 };
 
 export const paymentsApi = {
@@ -395,6 +406,67 @@ export const paymentsApi = {
       },
     );
     return response.data;
+  },
+};
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  expirationDate: string;
+  durationDays: number;
+  usageCount: number;
+  isActive: boolean;
+  description?: string;
+  createdAt: string;
+}
+
+export interface PromoCodeUser {
+  id: string;
+  email: string;
+  name?: string;
+  createdAt: string;
+  isSubscribed: boolean;
+  subscriptionEndDate?: string;
+}
+
+export const promoCodesApi = {
+  getAll: async (): Promise<PromoCode[]> => {
+    const response = await apiClient.get<PromoCode[]>(
+      "/subscriptions/promo-codes",
+    );
+    return response.data;
+  },
+  getById: async (id: string): Promise<PromoCode> => {
+    const response = await apiClient.get<PromoCode>(
+      `/subscriptions/promo-codes/${id}`,
+    );
+    return response.data;
+  },
+  getUsersByCode: async (code: string): Promise<PromoCodeUser[]> => {
+    const response = await apiClient.get<PromoCodeUser[]>(
+      `/subscriptions/promo-codes/${code}/users`,
+    );
+    return response.data;
+  },
+  create: async (data: Partial<PromoCode>): Promise<PromoCode> => {
+    const response = await apiClient.post<PromoCode>(
+      "/subscriptions/promo-codes",
+      data,
+    );
+    return response.data;
+  },
+  update: async (
+    id: string,
+    data: Partial<PromoCode>,
+  ): Promise<PromoCode> => {
+    const response = await apiClient.put<PromoCode>(
+      `/subscriptions/promo-codes/${id}`,
+      data,
+    );
+    return response.data;
+  },
+  delete: async (id: string): Promise<void> => {
+    await apiClient.delete(`/subscriptions/promo-codes/${id}`);
   },
 };
 

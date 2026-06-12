@@ -18,11 +18,13 @@ import type { RawBodyRequest } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SubscriptionsService } from './subscriptions.service';
+import { PromoCodeService } from './promo-code.service';
 import {
   CreateSubscriptionPlanDto,
   UpdateSubscriptionPlanDto,
   UpdateConfigDto,
 } from './dto';
+import { CreatePromoCodeDto, UpdatePromoCodeDto } from './dto/promo-code.dto';
 import Stripe from 'stripe';
 
 interface AuthenticatedRequest extends ExpressRequest {
@@ -37,7 +39,10 @@ interface AuthenticatedRequest extends ExpressRequest {
 export class SubscriptionsController {
   private stripe: Stripe;
 
-  constructor(private readonly subscriptionsService: SubscriptionsService) {
+  constructor(
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly promoCodeService: PromoCodeService,
+  ) {
     const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
     this.stripe = new Stripe(stripeKey);
   }
@@ -341,6 +346,25 @@ export class SubscriptionsController {
     return this.subscriptionsService.getUserSubscriptionHistory(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('users/:userId/assign-subscription')
+  async assignSubscriptionToUser(
+    @Request() req: AuthenticatedRequest,
+    @Param('userId') userId: string,
+    @Body('planId') planId: string,
+    @Body('adminPassword') adminPassword: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can assign subscriptions');
+    }
+    return this.subscriptionsService.assignSubscriptionToUser(
+      userId,
+      planId,
+      req.user.userId,
+      adminPassword,
+    );
+  }
+
   // ============ STRIPE WEBHOOK ============
 
   @Post('webhook')
@@ -408,5 +432,98 @@ export class SubscriptionsController {
       revenueCatUserId,
       entitlements,
     );
+  }
+
+  // ============ PROMO CODES ============
+
+  // Apply promo code (authenticated users)
+  @UseGuards(JwtAuthGuard)
+  @Post('apply-promo-code')
+  async applyPromoCode(
+    @Request() req: AuthenticatedRequest,
+    @Body('code') code: string,
+  ) {
+    const promoCode = await this.promoCodeService.validatePromoCode(code);
+
+    // Apply the promo code to the user
+    await this.subscriptionsService.applyPromoCode(req.user.userId, promoCode);
+
+    return {
+      success: true,
+      message: `Promo code applied! You now have ${promoCode.durationDays} days of premium access.`,
+      durationDays: promoCode.durationDays,
+    };
+  }
+
+  // ADMIN ONLY endpoints
+  @UseGuards(JwtAuthGuard)
+  @Post('promo-codes')
+  async createPromoCode(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: CreatePromoCodeDto,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can create promo codes');
+    }
+    return this.promoCodeService.create(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('promo-codes')
+  async getAllPromoCodes(@Request() req: AuthenticatedRequest) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view promo codes');
+    }
+    return this.promoCodeService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('promo-codes/:id')
+  async getPromoCode(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view promo code details');
+    }
+    return this.promoCodeService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('promo-codes/:code/users')
+  async getPromoCodeUsers(
+    @Request() req: AuthenticatedRequest,
+    @Param('code') code: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can view promo code users');
+    }
+    return this.promoCodeService.getUsersByPromoCode(code);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('promo-codes/:id')
+  async updatePromoCode(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() dto: UpdatePromoCodeDto,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can update promo codes');
+    }
+    return this.promoCodeService.update(id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('promo-codes/:id')
+  async deletePromoCode(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Only admins can delete promo codes');
+    }
+    await this.promoCodeService.delete(id);
+    return { success: true };
   }
 }
