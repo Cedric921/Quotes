@@ -32,6 +32,9 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   passwordResetExpires?: Date;
 
+  @Column({ nullable: true, comment: 'Promo code used by this user for subscription' })
+  usedPromoCode?: string;
+
   @ManyToMany(() => Topic)
   @JoinTable()
   favoriteTopics: Topic[];
