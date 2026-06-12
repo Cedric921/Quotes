@@ -18,26 +18,26 @@ Focus_project/
 │   ├── 📂 admin/                         # Panel d'administration (Next.js 15)
 │   │   ├── 📂 src/
 │   │   │   ├── 📂 app/                   # App Router Next.js
-│   │   │   │   ├── 📂 [locale]/          # Routes i18n
-│   │   │   │   │   ├── 📂 dashboard/     # Dashboard
+│   │   │   │   ├── 📂 dashboard/         # Dashboard
 │   │   │   │   │   ├── 📂 topics/        # Gestion topics
 │   │   │   │   │   ├── 📂 quotes/        # Gestion quotes
-│   │   │   │   │   └── 📂 users/         # Gestion users
+│   │   │   │   │   ├── 📂 users/         # Gestion users et souscriptions
+│   │   │   │   │   ├── 📂 promo-codes/   # Gestion promo codes ⭐ NOUVEAU
+│   │   │   │   │   └── 📂 payments/      # Historique paiements
 │   │   │   │   └── 📄 layout.tsx
 │   │   │   ├── 📂 components/            # Composants React
 │   │   │   │   ├── 📂 ui/                # Composants UI (shadcn)
 │   │   │   │   ├── 📄 TopicForm.tsx
 │   │   │   │   ├── 📄 QuoteForm.tsx
 │   │   │   │   └── 📄 IconPicker.tsx
-│   │   │   ├── 📂 contexts/              # Contextes React
-│   │   │   │   └── 📄 AuthContext.tsx
+│   │   │   ├── 📂 api/                   # API et hooks ⭐ NOUVEAU
+│   │   │   │   ├── 📂 hooks/
+│   │   │   │   │   ├── 📄 useSubscriptions.ts
+│   │   │   │   │   └── 📄 usePromoCodes.ts
+│   │   │   │   └── 📂 services/
+│   │   │   │       └── 📄 api.ts         # Client API Axios
 │   │   │   ├── 📂 lib/                   # Utilitaires
-│   │   │   │   ├── 📄 api.ts             # Client API
 │   │   │   │   └── 📄 utils.ts
-│   │   │   └── 📂 i18n/                  # Internationalisation
-│   │   ├── 📂 messages/                  # Traductions
-│   │   │   ├── 📄 en.json
-│   │   │   └── 📄 fr.json
 │   │   └── 📄 package.json
 │   │
 │   ├── 📂 api/                           # API REST (NestJS)
@@ -64,6 +64,17 @@ Focus_project/
 │   │   │   │   │   └── 📄 user.entity.ts  # extends BaseEntity ⭐
 │   │   │   │   ├── 📄 users.controller.ts
 │   │   │   │   └── 📄 users.service.ts
+│   │   │   ├── 📂 subscriptions/         # Module abonnements ⭐ NOUVEAU
+│   │   │   │   ├── 📂 entities/
+│   │   │   │   │   ├── 📄 subscription.entity.ts
+│   │   │   │   │   ├── 📄 subscription-plan.entity.ts
+│   │   │   │   │   └── 📄 promo-code.entity.ts
+│   │   │   │   ├── 📂 dto/
+│   │   │   │   │   └── 📄 promo-code.dto.ts
+│   │   │   │   ├── 📄 subscriptions.controller.ts
+│   │   │   │   ├── 📄 subscriptions.service.ts
+│   │   │   │   ├── 📄 promo-code.service.ts
+│   │   │   │   └── 📄 subscription-cron.service.ts
 │   │   │   └── 📄 main.ts
 │   │   ├── 📄 MIGRATION_UUID.md          # Doc migration UUIDs
 │   │   ├── 📄 database.sqlite            # Base de données
@@ -72,27 +83,36 @@ Focus_project/
 │   │
 │   └── 📂 mobile/                        # App mobile (React Native + Expo)
 │       ├── 📂 src/
-│       │   ├── 📂 store/                 # Redux Store ⭐ NOUVEAU
+│       │   ├── 📂 store/                 # Redux Store ⭐
 │       │   │   ├── 📄 index.ts           # Configuration store
 │       │   │   ├── 📄 hooks.ts           # Hooks typés
 │       │   │   └── 📂 slices/
 │       │   │       ├── 📄 authSlice.ts   # State auth
-│       │   │       └── 📄 themeSlice.ts  # State theme
-│       │   ├── 📂 api/                   # React Query ⭐ NOUVEAU
+│       │   │       ├── 📄 themeSlice.ts  # State theme
+│       │   │       └── 📄 subscriptionSlice.ts
+│       │   ├── 📂 api/                   # React Query ⭐
 │       │   │   ├── 📄 queryClient.ts     # Config React Query
+│       │   │   ├── 📄 config.ts          # Configuration API
 │       │   │   └── 📂 hooks/
 │       │   │       ├── 📄 useQuotes.ts   # Hooks quotes
 │       │   │       ├── 📄 useTopics.ts   # Hooks topics
+│       │   │       ├── 📄 usePurchases.ts # Hooks RevenueCat ⭐ NOUVEAU
+│       │   │       ├── 📄 usePromoCode.ts # Hooks promo codes ⭐ NOUVEAU
 │       │   │       └── 📄 index.ts
 │       │   ├── 📂 screens/               # Écrans
 │       │   │   ├── 📄 HomeScreen.tsx
 │       │   │   ├── 📄 TopicsListScreen.tsx
+│       │   │   ├── 📄 SubscriptionScreen.tsx
 │       │   │   ├── 📄 TopicScreen.tsx
 │       │   │   ├── 📄 ProfileScreen.tsx
 │       │   │   ├── 📄 SettingsScreen.tsx
+│       │   │   ├── 📄 PaymentHistoryScreen.tsx
 │       │   │   ├── 📄 LoginScreen.tsx
 │       │   │   └── 📄 SignupScreen.tsx
 │       │   ├── 📂 components/            # Composants
+│       │   │   ├── 📂 onboarding/
+│       │   │   │   ├── 📄 SubscriptionBottomSheet.tsx
+│       │   │   │   └── 📄 ProfileCompletionModal.tsx
 │       │   │   ├── 📄 QuoteCard.tsx
 │       │   │   ├── 📄 LoadingScreen.tsx
 │       │   │   └── 📄 ErrorMessage.tsx
@@ -145,26 +165,35 @@ Focus_project/
 
 ## 🎯 Points Clés
 
-### ⭐ Nouveautés Récentes
+### ⭐ Nouveautés Récentes (v1.0.4)
 
-1. **BaseEntity Pattern** (API)
+1. **Système de Promo Codes**
+   - Backend : Entité PromoCode, validation, application
+   - Admin : Page de gestion complète avec statistiques
+   - Mobile : Champ optionnel lors de l'inscription
+
+2. **Attribution Manuelle de Souscription**
+   - Admin peut attribuer une souscription à un utilisateur
+   - Vérification par mot de passe pour sécurité
+   - Interface dans le détail utilisateur
+
+3. **Intégration RevenueCat**
+   - Gestion des abonnements iOS/Android
+   - Webhook pour synchronisation automatique
+   - Hook `usePurchases` pour achats in-app
+
+4. **BaseEntity Pattern** (API)
    - Tous les modèles héritent de `BaseEntity`
    - Champs communs : `id`, `createdAt`, `updatedAt`, `deletedAt`
 
-2. **Redux Toolkit + React Query** (Mobile)
+5. **Redux Toolkit + React Query** (Mobile)
    - State management moderne
    - Cache automatique
    - Hooks typés
 
-3. **Documentation Complète**
+6. **Documentation Complète**
    - README principal mis à jour
    - Guides de migration
-   - Documentation architecture
-
-### 🔄 À Migrer
-
-- [ ] Composants mobile vers Redux/React Query
-- [ ] Suppression des anciens contextes
-- [ ] Tests unitaires et e2e
+   - Documentation subscriptions
 
 

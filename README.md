@@ -37,7 +37,9 @@ Application full-stack de gestion et consultation de citations inspirantes avec 
 - ✅ **Thèmes visuels personnalisés** avec polices
 - ✅ Like/Unlike de citations
 - ✅ Filtrage par topics
-- ✅ **Système d'abonnement** (Stripe)
+- ✅ **Système d'abonnement** (RevenueCat + Stripe)
+- ✅ **Attribution manuelle de souscription** (Admin)
+- ✅ **Système de promo codes** (Admin + Mobile)
 - ✅ **Notifications push** personnalisées
 - ✅ **Widgets iOS/Android**
 - ✅ **Partage de citations** en image
@@ -72,7 +74,7 @@ abstract class BaseEntity {
 }
 ```
 
-**Entités** : `Topic`, `Quote`, `User`
+**Entités principales** : `Topic`, `Quote`, `User`, `Subscription`, `SubscriptionPlan`, `PromoCode`
 
 ### Architecture Mobile (Redux + React Query)
 
@@ -102,7 +104,8 @@ abstract class BaseEntity {
 - **Passport JWT**
 - **bcrypt**
 - **class-validator**
-- **Stripe** (paiements)
+- **Stripe** (paiements web)
+- **RevenueCat** (paiements mobile)
 - **DeepL / MyMemory** (traduction)
 - **Cloudinary** (images)
 
@@ -117,6 +120,7 @@ abstract class BaseEntity {
 - **i18next** (10 langues)
 - **Ionicons**
 - **Expo Notifications**
+- **RevenueCat SDK** (abonnements)
 - **react-native-android-widget** / **@bacons/apple-targets** (widgets)
 
 ### DevOps
@@ -222,12 +226,15 @@ Interface web pour gérer le contenu.
 
 **Fonctionnalités** :
 
-- Dashboard avec statistiques
+- Dashboard avec statistiques (utilisateurs, revenus, abonnements)
 - CRUD Topics (nom, titre, description, icône, couleur, premium)
 - CRUD Quotes (texte, auteur, topic)
 - Gestion utilisateurs et abonnements
+- **Attribution manuelle de souscription** (avec vérification mot de passe)
+- **Gestion des promo codes** (création, liste, détails, utilisateurs)
 - Gestion des thèmes visuels et polices
 - Gestion des plans d'abonnement
+- Historique des paiements (Stripe + RevenueCat)
 - Upload d'images (Cloudinary)
 - Authentification JWT
 - i18n (FR/EN)
@@ -248,7 +255,13 @@ Backend NestJS avec architecture modulaire.
 - `GET /topics` - Liste des topics
 - `GET /topics/:id` - Topic par ID
 - `POST /subscriptions/checkout` - Créer une session Stripe
+- `POST /subscriptions/webhook/revenuecat` - Webhook RevenueCat
+- `POST /subscriptions/sync-revenuecat` - Synchroniser entitlements
+- `POST /subscriptions/apply-promo-code` - Appliquer un promo code
+- `POST /subscriptions/users/:userId/assign-subscription` - Attribution manuelle (admin)
 - `GET /subscriptions/plans` - Liste des plans
+- `POST /subscriptions/promo-codes` - Créer un promo code (admin)
+- `GET /subscriptions/promo-codes` - Liste des promo codes (admin)
 - `POST /translations/translate` - Traduire du texte
 
 **URL** : `http://localhost:3001`
@@ -272,13 +285,16 @@ Application React Native avec Expo.
 - **Notifications push** configurables (heures, jours)
 - **Widgets** iOS et Android
 - **Partage** de citations en image
-- **Abonnement premium** via Stripe
+- **Abonnement premium** via RevenueCat (iOS/Android)
+- **Promo codes** pour accès premium gratuit
+- Synchronisation automatique des abonnements
 - i18n (FR, EN, ES, AR, DE, IT, ZH, NL, RU, TR)
 
 **Technologies** :
 
 - Redux Toolkit (state management)
 - React Query (server state)
+- RevenueCat SDK (abonnements)
 - React Navigation (navigation)
 - i18next (internationalisation)
 - Expo Notifications (push)
@@ -430,12 +446,13 @@ Durée de validité : **7 jours**
 
 ## 💳 Système d'Abonnement
 
-L'application intègre un système d'abonnement premium via **Stripe** :
+L'application intègre un système d'abonnement premium via **RevenueCat** (mobile) et **Stripe** (web) :
 
 ### Plans disponibles
 
 - Plans mensuels et annuels configurables depuis l'admin
 - Période d'essai gratuite (freemium)
+- **Promo codes** pour accès premium temporaire
 
 ### Fonctionnalités Premium
 
@@ -444,14 +461,40 @@ L'application intègre un système d'abonnement premium via **Stripe** :
 - Thèmes visuels exclusifs
 - Traduction automatique illimitée
 
-### Configuration Stripe
+### Attribution Manuelle (Admin)
+
+Les administrateurs peuvent :
+- Attribuer manuellement une souscription à un utilisateur
+- Nécessite confirmation par mot de passe admin
+- Visible dans l'interface admin sous chaque profil utilisateur
+
+### Système de Promo Codes
+
+**Admin :**
+- Créer des promo codes avec durée personnalisée (ex: 7, 30, 90 jours)
+- Voir la liste des utilisateurs ayant utilisé chaque code
+- Suivre le nombre d'utilisations
+
+**Utilisateur Mobile :**
+- Entrer un promo code lors de l'inscription
+- Application automatique du premium pour la durée définie
+- Un seul promo code par compte
+
+### Configuration
 
 Variables d'environnement requises :
 
 ```env
+# Stripe (paiements web)
 STRIPE_SECRET_KEY=sk_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+
+# RevenueCat (paiements mobile)
+REVENUECAT_API_KEY=...
+REVENUECAT_WEBHOOK_SECRET=...
 ```
+
+Voir [docs/SUBSCRIPTIONS_SETUP.md](./docs/SUBSCRIPTIONS_SETUP.md) pour plus de détails.
 
 ---
 
@@ -484,7 +527,8 @@ Ce projet est sous licence MIT.
 - [Expo](https://expo.dev/) - Plateforme React Native
 - [Radix UI](https://www.radix-ui.com/) - Composants accessibles
 - [Turborepo](https://turbo.build/) - Monorepo tool
-- [Stripe](https://stripe.com/) - Paiements
+- [Stripe](https://stripe.com/) - Paiements web
+- [RevenueCat](https://www.revenuecat.com/) - Paiements mobile
 - [DeepL](https://www.deepl.com/) - Traduction automatique
 - [Supabase](https://supabase.com/) - Base de données PostgreSQL
 - [Cloudinary](https://cloudinary.com/) - Gestion d'images
