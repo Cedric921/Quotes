@@ -1,8 +1,8 @@
-# 📱 Focus v1.0.4 - Production Builds Tracking
+# 📱 Focus v1.0.5 - Production Builds Tracking
 
-Date de lancement : **13 juin 2026, 13:43** (Relance après correction)
+Date de lancement : **13 juin 2026, 15:29** (Build iOS final avec version 1.0.5)
 
-## ⚠️ Note Importante
+## ⚠️ Note Importante - Historique des Problèmes
 Les premiers builds (Android versionCode 7, iOS buildNumber 28) ont échoué à cause d'une erreur d'import dans `usePromoCode.ts`.
 **Correction appliquée** : Import path corrigé de `../config` vers `../../services/api`
 **Nouveaux builds** lancés avec le code corrigé.
@@ -27,25 +27,25 @@ https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/3b1
 
 ---
 
-### ✅ iOS Production Build + Auto-Submit
+### ✅ iOS Production Build + Auto-Submit (FINAL - v1.0.5)
 
-**Version** : 1.0.4
-**Build Number** : **29** (incrémenté de 28 → 29)
+**Version** : **1.0.5** ✨ (incrémenté pour App Store)
+**Build Number** : **30** (incrémenté de 29 → 30)
 **Type** : Archive (IPA)
-**Build ID** : `f2b02a4a-c1f3-42cf-8fd2-b43b9c9cac0b`
-**Submission ID** : `d463ec61-c5b0-47dd-ab21-5135ae301537`
+**Build ID** : `b24286af-ab67-48ec-8c84-b85606ad5b57`
+**Submission ID** : `a855e139-ac44-4aaf-9ad0-5ee1a3fd3b9e`
 
 #### 🔗 Lien de Tracking iOS Build
 ```
-https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/f2b02a4a-c1f3-42cf-8fd2-b43b9c9cac0b
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/b24286af-ab67-48ec-8c84-b85606ad5b57
 ```
 
 #### 🔗 Lien de Tracking iOS Submission
 ```
-https://expo.dev/accounts/focus-application/projects/focus-quotes-app/submissions/d463ec61-c5b0-47dd-ab21-5135ae301537
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/submissions/a855e139-ac44-4aaf-9ad0-5ee1a3fd3b9e
 ```
 
-**Statut Build** : ⏳ En cours de build...
+**Statut Build** : ⏳ En cours de build (version 1.0.5)...
 **Statut Submission** : ⏳ En attente du build (auto-submit après build réussi)
 
 ---
@@ -65,7 +65,27 @@ https://expo.dev/accounts/focus-application/projects/focus-quotes-app/submission
 - **Statut** : ❌ Échec
 - **Raison** : Erreur d'import dans `usePromoCode.ts` - Unable to resolve module `../config`
 
-### Correction Appliquée
+### Problème iOS v1.0.4 - Version déjà approuvée
+- **Build ID** : `f2b02a4a-c1f3-42cf-8fd2-b43b9c9cac0b`
+- **Build Number** : 29
+- **Submission ID** : `d463ec61-c5b0-47dd-ab21-5135ae301537`
+- **Statut** : ❌ Échec de soumission
+- **Erreur** :
+```
+Validation failed: This bundle is invalid. The value for key CFBundleShortVersionString [1.0.4]
+in the Info.plist file must contain a higher version than that of the previously approved version [1.0.4].
+```
+- **Raison** : L'App Store a déjà une version 1.0.4 approuvée. Apple exige un numéro de version supérieur.
+
+### Correction Appliquée - Version bumped to 1.0.5
+- **Commit** : `fe71b8b`
+- **Message** : "chore: bump version to 1.0.5 for iOS submission"
+- **Changements** :
+  - Modifier `app.config.js` : `appVersion = "1.0.5"` au lieu de `"1.0.4"`
+  - Relancer le build iOS avec version 1.0.5
+  - Nouveau build : `b24286af-ab67-48ec-8c84-b85606ad5b57`
+
+### Correction Import Path (Build initial)
 - **Commit** : `3b6da4d`
 - **Message** : "fix: correct import path in usePromoCode hook"
 - **Changements** :
@@ -159,16 +179,17 @@ Une fois le build et la soumission terminés :
 
 ### Vérifier le statut des builds
 ```bash
-# Statut Android (Build corrigé)
+# Statut Android (versionCode 8)
 eas build:view 3b16ff8e-c0dc-40c5-97e8-73ed3e5fef44
 
-# Statut iOS (Build corrigé)
-eas build:view f2b02a4a-c1f3-42cf-8fd2-b43b9c9cac0b
+# Statut iOS FINAL (v1.0.5, buildNumber 30)
+eas build:view b24286af-ab67-48ec-8c84-b85606ad5b57
 ```
 
 ### Vérifier la soumission iOS
 ```bash
-eas submission:view d463ec61-c5b0-47dd-ab21-5135ae301537
+# Soumission iOS FINALE (v1.0.5)
+eas submission:view a855e139-ac44-4aaf-9ad0-5ee1a3fd3b9e
 ```
 
 ### Liste de tous les builds
