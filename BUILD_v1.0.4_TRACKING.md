@@ -1,19 +1,26 @@
 # 📱 Focus v1.0.4 - Production Builds Tracking
 
-Date de lancement : **13 juin 2026, 13:39**
+Date de lancement : **13 juin 2026, 13:43** (Relance après correction)
 
-## 🚀 Builds Lancés
+## ⚠️ Note Importante
+Les premiers builds (Android versionCode 7, iOS buildNumber 28) ont échoué à cause d'une erreur d'import dans `usePromoCode.ts`.
+**Correction appliquée** : Import path corrigé de `../config` vers `../../services/api`
+**Nouveaux builds** lancés avec le code corrigé.
+
+---
+
+## 🚀 Builds Actifs (Corrigés)
 
 ### ✅ Android Production Build
 
-**Version** : 1.0.4  
-**Version Code** : 7 (incrémenté de 6 → 7)  
-**Type** : App Bundle (AAB)  
-**Build ID** : `6e6bf8bc-636b-42b1-9b67-3e2f6ebf27c5`
+**Version** : 1.0.4
+**Version Code** : **8** (incrémenté de 7 → 8)
+**Type** : App Bundle (AAB)
+**Build ID** : `3b16ff8e-c0dc-40c5-97e8-73ed3e5fef44`
 
 #### 🔗 Lien de Tracking Android
 ```
-https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/6e6bf8bc-636b-42b1-9b67-3e2f6ebf27c5
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/3b16ff8e-c0dc-40c5-97e8-73ed3e5fef44
 ```
 
 **Statut** : ⏳ En cours de build...
@@ -22,24 +29,49 @@ https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/6e6
 
 ### ✅ iOS Production Build + Auto-Submit
 
-**Version** : 1.0.4  
-**Build Number** : 28 (incrémenté de 27 → 28)  
-**Type** : Archive (IPA)  
-**Build ID** : `f79409b2-ceba-4dba-919e-1e09fe9346e4`  
-**Submission ID** : `ffcf3478-0de0-42b1-b731-f1f5a471675e`
+**Version** : 1.0.4
+**Build Number** : **29** (incrémenté de 28 → 29)
+**Type** : Archive (IPA)
+**Build ID** : `f2b02a4a-c1f3-42cf-8fd2-b43b9c9cac0b`
+**Submission ID** : `d463ec61-c5b0-47dd-ab21-5135ae301537`
 
 #### 🔗 Lien de Tracking iOS Build
 ```
-https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/f79409b2-ceba-4dba-919e-1e09fe9346e4
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/f2b02a4a-c1f3-42cf-8fd2-b43b9c9cac0b
 ```
 
 #### 🔗 Lien de Tracking iOS Submission
 ```
-https://expo.dev/accounts/focus-application/projects/focus-quotes-app/submissions/ffcf3478-0de0-42b1-b731-f1f5a471675e
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/submissions/d463ec61-c5b0-47dd-ab21-5135ae301537
 ```
 
-**Statut Build** : ⏳ En cours de build...  
+**Statut Build** : ⏳ En cours de build...
 **Statut Submission** : ⏳ En attente du build (auto-submit après build réussi)
+
+---
+
+## ❌ Builds Échoués (Historique)
+
+### Android Build Initial
+- **Build ID** : `6e6bf8bc-636b-42b1-9b67-3e2f6ebf27c5`
+- **Version Code** : 7
+- **Statut** : ❌ Échec
+- **Raison** : Erreur d'import dans `usePromoCode.ts` - Unable to resolve module `../config`
+
+### iOS Build Initial
+- **Build ID** : `f79409b2-ceba-4dba-919e-1e09fe9346e4`
+- **Build Number** : 28
+- **Submission ID** : `ffcf3478-0de0-42b1-b731-f1f5a471675e`
+- **Statut** : ❌ Échec
+- **Raison** : Erreur d'import dans `usePromoCode.ts` - Unable to resolve module `../config`
+
+### Correction Appliquée
+- **Commit** : `3b6da4d`
+- **Message** : "fix: correct import path in usePromoCode hook"
+- **Changements** :
+  - Remplacer `import { API_CONFIG } from "../config"` par `import apiClient from "../../services/api"`
+  - Utiliser `apiClient.post()` au lieu de `fetch()`
+  - Simplifier la signature du hook
 
 ---
 
@@ -127,16 +159,16 @@ Une fois le build et la soumission terminés :
 
 ### Vérifier le statut des builds
 ```bash
-# Statut Android
-eas build:view 6e6bf8bc-636b-42b1-9b67-3e2f6ebf27c5
+# Statut Android (Build corrigé)
+eas build:view 3b16ff8e-c0dc-40c5-97e8-73ed3e5fef44
 
-# Statut iOS
-eas build:view f79409b2-ceba-4dba-919e-1e09fe9346e4
+# Statut iOS (Build corrigé)
+eas build:view f2b02a4a-c1f3-42cf-8fd2-b43b9c9cac0b
 ```
 
 ### Vérifier la soumission iOS
 ```bash
-eas submission:view ffcf3478-0de0-42b1-b731-f1f5a471675e
+eas submission:view d463ec61-c5b0-47dd-ab21-5135ae301537
 ```
 
 ### Liste de tous les builds
