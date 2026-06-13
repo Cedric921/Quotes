@@ -30,7 +30,6 @@ interface SignupScreenProps {
 export default function SignupScreen({ navigation }: SignupScreenProps) {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const token = useAppSelector((state) => state.auth.token);
   const applyPromoCodeMutation = useApplyPromoCode();
 
   const [name, setName] = useState("");
@@ -83,12 +82,11 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
       await dispatch(registerThunk({ name, email, password })).unwrap();
 
       // Apply promo code if provided
-      if (promoCode.trim() && token) {
+      if (promoCode.trim()) {
         try {
-          const result = await applyPromoCodeMutation.mutateAsync({
-            code: promoCode.trim().toUpperCase(),
-            token,
-          });
+          const result = await applyPromoCodeMutation.mutateAsync(
+            promoCode.trim().toUpperCase()
+          );
 
           Toast.show({
             type: "success",
