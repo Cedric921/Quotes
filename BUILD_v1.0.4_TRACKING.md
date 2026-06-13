@@ -1,0 +1,186 @@
+# 📱 Focus v1.0.4 - Production Builds Tracking
+
+Date de lancement : **13 juin 2026, 13:39**
+
+## 🚀 Builds Lancés
+
+### ✅ Android Production Build
+
+**Version** : 1.0.4  
+**Version Code** : 7 (incrémenté de 6 → 7)  
+**Type** : App Bundle (AAB)  
+**Build ID** : `6e6bf8bc-636b-42b1-9b67-3e2f6ebf27c5`
+
+#### 🔗 Lien de Tracking Android
+```
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/6e6bf8bc-636b-42b1-9b67-3e2f6ebf27c5
+```
+
+**Statut** : ⏳ En cours de build...
+
+---
+
+### ✅ iOS Production Build + Auto-Submit
+
+**Version** : 1.0.4  
+**Build Number** : 28 (incrémenté de 27 → 28)  
+**Type** : Archive (IPA)  
+**Build ID** : `f79409b2-ceba-4dba-919e-1e09fe9346e4`  
+**Submission ID** : `ffcf3478-0de0-42b1-b731-f1f5a471675e`
+
+#### 🔗 Lien de Tracking iOS Build
+```
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/f79409b2-ceba-4dba-919e-1e09fe9346e4
+```
+
+#### 🔗 Lien de Tracking iOS Submission
+```
+https://expo.dev/accounts/focus-application/projects/focus-quotes-app/submissions/ffcf3478-0de0-42b1-b731-f1f5a471675e
+```
+
+**Statut Build** : ⏳ En cours de build...  
+**Statut Submission** : ⏳ En attente du build (auto-submit après build réussi)
+
+---
+
+## 📦 Configuration des Builds
+
+### Informations Communes
+- **Bundle ID (iOS)** : `com.mindset.focus`
+- **Package (Android)** : `com.focus.quotes`
+- **Apple Team ID** : `XA9AGYDNGM`
+- **Apple ID** : `focusmindsetapp@gmail.com`
+- **ASC App ID** : `6761561417`
+
+### Targets iOS
+1. **Focus** (App principale)
+   - Bundle ID : `com.mindset.focus`
+   - Provisioning Profile : `RBZKK86SPW`
+
+2. **FocusWidget** (Widget iOS)
+   - Bundle ID : `com.mindset.focus.widget`
+   - Provisioning Profile : `JATG2B2Z3T`
+
+### Credentials
+- **Distribution Certificate** : `203B3552A7021CE3DE5717559374AAC`
+- **Expiration** : 3 avril 2027
+
+---
+
+## ✨ Nouveautés v1.0.4
+
+### 🎯 Fonctionnalités Implémentées
+
+#### 1. Attribution Manuelle de Souscription (Admin)
+- Admin peut attribuer une souscription à un utilisateur
+- Vérification par mot de passe admin
+- Interface dans le profil utilisateur
+
+#### 2. Système de Promo Codes
+**Backend:**
+- Entité PromoCode (code, expiration, durée, utilisation)
+- Validation et application automatique
+- Incrémentation du compteur d'utilisation
+
+**Admin:**
+- Page de gestion des promo codes
+- Création avec durée personnalisée
+- Liste des utilisateurs par code
+- Statistiques d'utilisation
+
+**Mobile:**
+- Champ optionnel lors de l'inscription
+- Application automatique après création de compte
+- Messages de succès/erreur
+
+#### 3. Intégration RevenueCat
+- Gestion des abonnements iOS/Android
+- Webhook pour synchronisation
+- Hook `usePurchases` pour achats in-app
+
+#### 4. Améliorations
+- Synchronisation automatique des abonnements
+- Invalidation des queries après achat
+- UI/UX améliorée pour les souscriptions
+
+---
+
+## 📊 Suivi Post-Build
+
+### Android
+Une fois le build terminé :
+1. ✅ Télécharger l'AAB depuis EAS
+2. ✅ Uploader sur Google Play Console
+3. ✅ Créer une release sur la track "Internal" ou "Production"
+4. ✅ Soumettre pour review
+
+### iOS
+Une fois le build et la soumission terminés :
+1. ✅ Le build sera automatiquement soumis à App Store Connect
+2. ✅ Vérifier la soumission dans App Store Connect
+3. ✅ Compléter les informations de release si nécessaire
+4. ✅ Soumettre pour review Apple
+
+---
+
+## 🔍 Commandes de Vérification
+
+### Vérifier le statut des builds
+```bash
+# Statut Android
+eas build:view 6e6bf8bc-636b-42b1-9b67-3e2f6ebf27c5
+
+# Statut iOS
+eas build:view f79409b2-ceba-4dba-919e-1e09fe9346e4
+```
+
+### Vérifier la soumission iOS
+```bash
+eas submission:view ffcf3478-0de0-42b1-b731-f1f5a471675e
+```
+
+### Liste de tous les builds
+```bash
+cd apps/mobile
+eas build:list
+```
+
+---
+
+## 📝 Notes Importantes
+
+- **Auto-increment** activé : Les versions sont automatiquement incrémentées à chaque build
+- **Auto-submit iOS** : La soumission iOS se fera automatiquement après le succès du build
+- **Credentials** : Gérés par EAS (Expo servers)
+- **API URL** : `https://focus-app-1.onrender.com`
+
+---
+
+## ✅ Checklist Post-Déploiement
+
+### Backend
+- [ ] Vérifier que l'API est à jour sur Render
+- [ ] Exécuter les migrations de base de données (PromoCode, User.usedPromoCode)
+- [ ] Vérifier les webhooks RevenueCat
+- [ ] Tester les endpoints promo codes
+
+### Mobile
+- [ ] Tester l'inscription avec promo code
+- [ ] Vérifier la synchronisation RevenueCat
+- [ ] Tester les achats in-app
+- [ ] Vérifier les notifications
+
+### Admin
+- [ ] Tester la création de promo codes
+- [ ] Vérifier l'attribution manuelle de souscription
+- [ ] Consulter l'historique des paiements
+- [ ] Tester la page de gestion des promo codes
+
+---
+
+## 🆘 Support
+
+En cas de problème avec les builds :
+- Consulter les logs sur les pages de tracking EAS
+- Vérifier les credentials dans Expo
+- Consulter la documentation : https://docs.expo.dev/build/introduction/
