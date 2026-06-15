@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { API_CONFIG } from "../config";
+import apiClient from "../../services/api";
 
 interface ApplyPromoCodeResponse {
   success: boolean;
@@ -9,26 +9,12 @@ interface ApplyPromoCodeResponse {
 
 export const useApplyPromoCode = () => {
   return useMutation({
-    mutationFn: async ({ code, token }: { code: string; token: string }) => {
-      const response = await fetch(
-        `${API_CONFIG.getBaseUrl()}/subscriptions/apply-promo-code`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ code }),
-        }
+    mutationFn: async (code: string) => {
+      const response = await apiClient.post<ApplyPromoCodeResponse>(
+        "/subscriptions/apply-promo-code",
+        { code }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to apply promo code");
-      }
-
-      return data as ApplyPromoCodeResponse;
+      return response.data;
     },
   });
 };

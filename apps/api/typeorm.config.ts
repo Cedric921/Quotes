@@ -5,6 +5,7 @@ import { resolve } from 'path';
 // Load environment variables
 config({ path: resolve(__dirname, '.env') });
 config({ path: resolve(__dirname, '.env.local') });
+config({ path: resolve(__dirname, '.env.migration') });
 
 export default new DataSource({
   type: 'postgres',
