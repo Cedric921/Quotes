@@ -19,6 +19,7 @@ import {
   Share2,
   Menu,
   X,
+  Ticket,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,11 @@ export default function DashboardLayout({
       href: "/dashboard/subscriptions",
       icon: Settings,
       label: t.nav.subscriptions || "Subscriptions",
+    },
+    {
+      href: "/dashboard/promo-codes",
+      icon: Ticket,
+      label: t.nav.promoCodes || "Promo Codes",
     },
     {
       href: "/dashboard/payments",
