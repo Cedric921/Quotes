@@ -8,12 +8,10 @@
 import { DataSource } from 'typeorm';
 
 // Source database (your old database with data)
-const SOURCE_DB_URL =
-  'postgresql://postgres.aubzbuiovfmcpfjadjeb:akfbAHJ3V7NZzpuS@aws-1-eu-west-3.pooler.supabase.com:5432/postgres';
+const SOURCE_DB_URL = process.env.SOURCE_DB_URL;
 
 // Destination database (new database)
-const DEST_DB_URL =
-  'postgresql://postgres.cbeeyutwgfmqffocoqha:Naimnour1006%21%21@aws-1-eu-west-1.pooler.supabase.com:5432/postgres';
+const DEST_DB_URL = process.env.DB_URL;
 
 async function migrateData() {
   console.log('🚀 Starting data migration...\n');
