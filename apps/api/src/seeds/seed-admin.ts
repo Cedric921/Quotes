@@ -11,8 +11,8 @@ import { Topic } from '../topics/entities/topic.entity';
 import { Quote } from '../quotes/entities/quote.entity';
 import { getDatabaseConfig } from '../config/database.config';
 
-const ADMIN_EMAIL = 'admin@focus.app';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function seedAdmin() {
   console.log('🔄 Creating database connection...');
@@ -62,12 +62,6 @@ async function seedAdmin() {
       console.log('✅ Admin user created successfully!');
     }
 
-    console.log('');
-    console.log('========================================');
-    console.log('🔐 Admin Credentials:');
-    console.log(`   Email:    ${ADMIN_EMAIL}`);
-    console.log(`   Password: ${ADMIN_PASSWORD}`);
-    console.log('========================================');
   } catch (error) {
     console.error('❌ Error seeding admin:', error);
     throw error;
