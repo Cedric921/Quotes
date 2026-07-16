@@ -214,7 +214,6 @@ export class HealthService {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    // Check if Cloudinary is configured
     if (!cloudName || !apiKey || !apiSecret) {
       return {
         status: 'not_configured',
@@ -224,7 +223,6 @@ export class HealthService {
 
     const startTime = Date.now();
     try {
-      // Test connection by pinging the API
       const result = await cloudinary.api.ping();
 
       if (result.status === 'ok') {
@@ -248,6 +246,31 @@ export class HealthService {
             ? error.message
             : 'Cloudinary connection failed',
         latency: Date.now() - startTime,
+      };
+    }
+  }
+
+  async getStats() {
+    try {
+      const [users, topics, quotes] = await Promise.all([
+        this.dataSource.query('SELECT COUNT(*) as count FROM "user"'),
+        this.dataSource.query('SELECT COUNT(*) as count FROM topic'),
+        this.dataSource.query('SELECT COUNT(*) as count FROM quote'),
+      ]);
+
+      return {
+        users: parseInt(users[0]?.count || '0'),
+        topics: parseInt(topics[0]?.count || '0'),
+        quotes: parseInt(quotes[0]?.count || '0'),
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        users: 0,
+        topics: 0,
+        quotes: 0,
+        error: 'Failed to fetch stats',
+        timestamp: new Date().toISOString(),
       };
     }
   }
