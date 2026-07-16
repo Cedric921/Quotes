@@ -316,6 +316,92 @@ Application React Native avec Expo.
 - **[apps/mobile/I18N_IMPLEMENTATION.md](./apps/mobile/I18N_IMPLEMENTATION.md)** - Implémentation i18n
 - **[apps/api/MIGRATION_UUID.md](./apps/api/MIGRATION_UUID.md)** - Migration vers UUIDs
 
+## 🔧 Troubleshooting
+
+### Erreur Admin Password (401 Unauthorized)
+
+Si vous rencontrez l'erreur `Invalid admin password` lors de l'attribution manuelle de souscription :
+
+**Cause** : Le mot de passe fourni ne correspond pas au hash bcrypt stocké en base de données.
+
+**Solutions** :
+
+1. **Tester la connexion au dashboard admin** :
+   - URL : `http://localhost:3000/login`
+   - Credentials : `admin@focus.com` / `admin123`
+   - Si la connexion échoue → Réinitialiser le mot de passe
+
+2. **Réinitialiser via le script seed** :
+   ```bash
+   cd apps/api
+   npm run db:seed:admin
+   ```
+   Nouvelles credentials : `admin@focus.com` / `admin123`
+
+3. **Réinitialiser via SQL** :
+   ```bash
+   # Générer un hash bcrypt
+   node -e "const bcrypt = require('bcrypt'); bcrypt.hash('VotreMotDePasse', 10, (err, hash) => console.log(hash));"
+
+   # Mettre à jour en base (Supabase SQL Editor)
+   UPDATE "user"
+   SET password = 'HASH_GÉNÉRÉ_CI-DESSUS'
+   WHERE email = 'admin@focus.com' AND "isAdmin" = true;
+   ```
+
+**Note** : L'attribution manuelle de souscription requiert le mot de passe admin pour sécuriser cette action sensible.
+
+### Keep-Alive Polling
+
+Pour éviter les cold starts de l'API (hébergement gratuit), le système implémente un polling automatique :
+
+- **Mobile** : Ping `/health` toutes les 60 secondes
+- **Admin** : Ping `/health/stats` toutes les 60 secondes + auto-refresh dashboard
+
+**Configuration** : Services configurés dans `apps/mobile/App.tsx` et `apps/admin/src/app/dashboard/page.tsx`
+
+### Synchronisation des Abonnements
+
+L'app mobile vérifie automatiquement l'expiration des abonnements :
+
+- **Intervalle** : Toutes les 5 minutes en arrière-plan
+- **Au premier plan** : Vérification immédiate au retour sur l'app
+- **Action** : Passe automatiquement à "free tier" si l'abonnement a expiré
+
+**Fichier** : `apps/mobile/src/services/subscriptionSyncService.ts`
+
+### Skeleton Loading Invisible
+
+Si les utilisateurs signalent un "écran blanc" au chargement :
+
+**Cause** : Les skeletons ont une opacité trop faible (8%) et sont quasi invisibles.
+
+**Solution** : Les skeletons ont été améliorés avec :
+- Opacité augmentée à 15% (+87% de visibilité)
+- Animation pulse plus prononcée (50-90% au lieu de 30-70%)
+- Ombres ajoutées pour la profondeur
+- Hauteurs et espacements augmentés
+
+**Fichier** : `apps/mobile/src/components/LoadingSkeleton.tsx`
+
+### Nettoyage des Commentaires
+
+**Standard à suivre** :
+
+✅ **Garder** :
+- Documentation d'API publique (JSDoc)
+- Explication de logique complexe
+- Notes de sécurité et TODOs importants
+- Références techniques (liens vers docs)
+
+❌ **Supprimer** :
+- Commentaires évidents (`// Get user`)
+- Commentaires redondants (nom de fonction = commentaire)
+- Code commenté (dead code)
+- Séparateurs inutiles (`// ========`)
+
+**Méthode** : Nettoyer progressivement lors de la modification de fichiers existants. Ne pas automatiser pour éviter les bugs.
+
 ---
 
 ## 🔧 Scripts Disponibles
