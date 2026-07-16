@@ -1,48 +1,48 @@
 # 🎯 Focus - Quotes Application
 
-Application full-stack de gestion et consultation de citations inspirantes avec panel d'administration, API REST et application mobile.
+Full-stack application for managing and browsing inspirational quotes with admin panel, REST API and mobile application.
 
-## 📋 Table des Matières
+## 📋 Table of Contents
 
-- [Vue d'Ensemble](#-vue-densemble)
+- [Overview](#-overview)
 - [Architecture](#-architecture)
 - [Technologies](#-technologies)
 - [Installation](#-installation)
-- [Démarrage Rapide](#-démarrage-rapide)
+- [Quick Start](#-quick-start)
 - [Applications](#-applications)
 - [Documentation](#-documentation)
-- [Scripts Disponibles](#-scripts-disponibles)
+- [Available Scripts](#-available-scripts)
 
 ---
 
-## 🌟 Vue d'Ensemble
+## 🌟 Overview
 
-**Focus** est une plateforme complète de citations inspirantes comprenant :
+**Focus** is a complete platform for inspirational quotes including:
 
-- 🖥️ **Panel Admin** - Interface web pour gérer les citations, topics et utilisateurs
-- 🔌 **API REST** - Backend NestJS avec authentification JWT et base de données PostgreSQL (Supabase)
-- 📱 **App Mobile** - Application React Native/Expo avec infinite scroll et i18n (10 langues)
+- 🖥️ **Admin Panel** - Web interface to manage quotes, topics and users
+- 🔌 **REST API** - NestJS backend with JWT authentication and PostgreSQL database (Supabase)
+- 📱 **Mobile App** - React Native/Expo application with infinite scroll and i18n (10 languages)
 
-### Fonctionnalités Principales
+### Main Features
 
-- ✅ CRUD complet pour citations et topics
-- ✅ Authentification JWT avec rôles (admin/user)
-- ✅ Internationalisation (FR, EN, ES, AR, DE, IT, ZH, NL, RU, TR avec support RTL)
-- ✅ **Traduction automatique** des citations et topics (DeepL / MyMemory)
-- ✅ Système d'icônes cross-platform (Lucide + Ionicons)
-- ✅ Gestion d'état avec Redux Toolkit + React Query
-- ✅ Architecture modulaire avec BaseEntity (UUIDs)
-- ✅ Infinite scroll et pagination
-- ✅ Thème clair/sombre/système
-- ✅ **Thèmes visuels personnalisés** avec polices
-- ✅ Like/Unlike de citations
-- ✅ Filtrage par topics
-- ✅ **Système d'abonnement** (RevenueCat + Stripe)
-- ✅ **Attribution manuelle de souscription** (Admin)
-- ✅ **Système de promo codes** (Admin + Mobile)
-- ✅ **Notifications push** personnalisées
-- ✅ **Widgets iOS/Android**
-- ✅ **Partage de citations** en image
+- ✅ Complete CRUD for quotes and topics
+- ✅ JWT authentication with roles (admin/user)
+- ✅ Internationalization (FR, EN, ES, AR, DE, IT, ZH, NL, RU, TR with RTL support)
+- ✅ **Automatic translation** of quotes and topics (DeepL / MyMemory)
+- ✅ Cross-platform icon system (Lucide + Ionicons)
+- ✅ State management with Redux Toolkit + React Query
+- ✅ Modular architecture with BaseEntity (UUIDs)
+- ✅ Infinite scroll and pagination
+- ✅ Light/dark/system theme
+- ✅ **Custom visual themes** with fonts
+- ✅ Like/Unlike quotes
+- ✅ Filtering by topics
+- ✅ **Subscription system** (RevenueCat + Stripe)
+- ✅ **Manual subscription assignment** (Admin)
+- ✅ **Promo codes system** (Admin + Mobile)
+- ✅ **Custom push notifications**
+- ✅ **iOS/Android widgets**
+- ✅ **Quote sharing** as image
 
 ---
 
@@ -51,36 +51,36 @@ Application full-stack de gestion et consultation de citations inspirantes avec 
 ```
 Focus_project/
 ├── apps/
-│   ├── admin/          # Panel d'administration (Next.js 15)
-│   ├── api/            # API REST (NestJS)
-│   └── mobile/         # Application mobile (React Native + Expo)
+│   ├── admin/          # Admin panel (Next.js 15)
+│   ├── api/            # REST API (NestJS)
+│   └── mobile/         # Mobile app (React Native + Expo)
 ├── packages/
-│   ├── eslint-config/  # Configuration ESLint partagée
-│   ├── typescript-config/ # Configuration TypeScript partagée
-│   └── ui/             # Composants UI partagés
+│   ├── eslint-config/  # Shared ESLint configuration
+│   ├── typescript-config/ # Shared TypeScript configuration
+│   └── ui/             # Shared UI components
 └── docs/               # Documentation
 ```
 
-### Architecture API (BaseEntity Pattern)
+### API Architecture (BaseEntity Pattern)
 
-Toutes les entités héritent de `BaseEntity` :
+All entities inherit from `BaseEntity`:
 
 ```typescript
 abstract class BaseEntity {
   id: string; // UUID
-  createdAt: Date; // Auto-généré
-  updatedAt: Date; // Auto-mis à jour
+  createdAt: Date; // Auto-generated
+  updatedAt: Date; // Auto-updated
   deletedAt: Date; // Soft delete
 }
 ```
 
-**Entités principales** : `Topic`, `Quote`, `User`, `Subscription`, `SubscriptionPlan`, `PromoCode`
+**Main entities**: `Topic`, `Quote`, `User`, `Subscription`, `SubscriptionPlan`, `PromoCode`
 
-### Architecture Mobile (Redux + React Query)
+### Mobile Architecture (Redux + React Query)
 
-- **Redux Toolkit** : State global (auth, theme)
-- **React Query** : Server state avec cache automatique
-- **i18next** : Internationalisation (FR, EN, ES, AR)
+- **Redux Toolkit**: Global state (auth, theme)
+- **React Query**: Server state with automatic cache
+- **i18next**: Internationalization (FR, EN, ES, AR)
 
 ---
 
@@ -135,86 +135,86 @@ abstract class BaseEntity {
 
 ## 📦 Installation
 
-### Prérequis
+### Prerequisites
 
 - **Node.js** >= 18.x
 - **npm** >= 9.x
 - **Git**
 
-### Installation Globale
+### Global Installation
 
 ```bash
-# Cloner le repository
+# Clone the repository
 git clone <repository-url>
 cd Focus_project
 
-# Installer toutes les dépendances
+# Install all dependencies
 npm install
 ```
 
 ---
 
-## 🚀 Démarrage Rapide
+## 🚀 Quick Start
 
-### 1. Démarrer l'API
+### 1. Start the API
 
 ```bash
-# Depuis la racine
+# From root
 npm run dev:api
 
-# Ou depuis apps/api
+# Or from apps/api
 cd apps/api
 npm run start:dev
 ```
 
-L'API sera disponible sur `http://localhost:3001`
+API will be available at `http://localhost:3001`
 
-### 2. Initialiser la Base de Données
+### 2. Initialize the Database
 
 ```bash
 cd apps/api
 
-# Réinitialiser la DB (optionnel)
+# Reset DB (optional)
 ./reset-database.sh
 
-# Seed les topics
+# Seed topics
 node seed-topics.js
 ```
 
-### 3. Démarrer le Panel Admin
+### 3. Start the Admin Panel
 
 ```bash
-# Depuis la racine
+# From root
 npm run dev:admin
 
-# Ou depuis apps/admin
+# Or from apps/admin
 cd apps/admin
 npm run dev
 ```
 
-Le panel sera disponible sur `http://localhost:3000`
+Panel will be available at `http://localhost:3000`
 
-**Compte admin par défaut** :
+**Default admin account**:
 
 - Email: `admin@focus.com`
 - Password: `admin123`
 
-### 4. Démarrer l'App Mobile
+### 4. Start the Mobile App
 
 ```bash
-# Depuis la racine
+# From root
 npm run dev:mobile
 
-# Ou depuis apps/mobile
+# Or from apps/mobile
 cd apps/mobile
 npm start
 ```
 
-Scannez le QR code avec **Expo Go** ou appuyez sur :
+Scan the QR code with **Expo Go** or press:
 
-- `i` pour iOS Simulator
-- `a` pour Android Emulator
-- `w` pour Web
+- `i` for iOS Simulator
+- `a` for Android Emulator
+- `w` for Web
 
 ---
 
@@ -222,160 +222,246 @@ Scannez le QR code avec **Expo Go** ou appuyez sur :
 
 ### 🖥️ Admin Panel (`apps/admin`)
 
-Interface web pour gérer le contenu.
+Web interface to manage content.
 
-**Fonctionnalités** :
+**Features**:
 
-- Dashboard avec statistiques (utilisateurs, revenus, abonnements)
-- CRUD Topics (nom, titre, description, icône, couleur, premium)
-- CRUD Quotes (texte, auteur, topic)
-- Gestion utilisateurs et abonnements
-- **Attribution manuelle de souscription** (avec vérification mot de passe)
-- **Gestion des promo codes** (création, liste, détails, utilisateurs)
-- Gestion des thèmes visuels et polices
-- Gestion des plans d'abonnement
-- Historique des paiements (Stripe + RevenueCat)
-- Upload d'images (Cloudinary)
-- Authentification JWT
+- Dashboard with statistics (users, revenue, subscriptions)
+- CRUD Topics (name, title, description, icon, color, premium)
+- CRUD Quotes (text, author, topic)
+- User and subscription management
+- **Manual subscription assignment** (with password verification)
+- **Promo codes management** (creation, list, details, users)
+- Visual themes and fonts management
+- Subscription plans management
+- Payment history (Stripe + RevenueCat)
+- Image upload (Cloudinary)
+- JWT authentication
 - i18n (FR/EN)
 
-**URL** : `http://localhost:3000`
+**URL**: `http://localhost:3000`
 
 ### 🔌 API (`apps/api`)
 
-Backend NestJS avec architecture modulaire.
+NestJS backend with modular architecture.
 
-**Endpoints principaux** :
+**Main endpoints**:
 
-- `POST /auth/login` - Authentification
-- `POST /auth/register` - Inscription
-- `GET /quotes` - Liste des citations (pagination)
-- `GET /quotes/:id` - Citation par ID
-- `POST /quotes/:id/like` - Liker une citation
-- `GET /topics` - Liste des topics
-- `GET /topics/:id` - Topic par ID
-- `POST /subscriptions/checkout` - Créer une session Stripe
-- `POST /subscriptions/webhook/revenuecat` - Webhook RevenueCat
-- `POST /subscriptions/sync-revenuecat` - Synchroniser entitlements
-- `POST /subscriptions/apply-promo-code` - Appliquer un promo code
-- `POST /subscriptions/users/:userId/assign-subscription` - Attribution manuelle (admin)
-- `GET /subscriptions/plans` - Liste des plans
-- `POST /subscriptions/promo-codes` - Créer un promo code (admin)
-- `GET /subscriptions/promo-codes` - Liste des promo codes (admin)
-- `POST /translations/translate` - Traduire du texte
+- `POST /auth/login` - Authentication
+- `POST /auth/register` - Registration
+- `GET /quotes` - List quotes (pagination)
+- `GET /quotes/:id` - Quote by ID
+- `POST /quotes/:id/like` - Like a quote
+- `GET /topics` - List topics
+- `GET /topics/:id` - Topic by ID
+- `POST /subscriptions/checkout` - Create Stripe session
+- `POST /subscriptions/webhook/revenuecat` - RevenueCat webhook
+- `POST /subscriptions/sync-revenuecat` - Sync entitlements
+- `POST /subscriptions/apply-promo-code` - Apply promo code
+- `POST /subscriptions/users/:userId/assign-subscription` - Manual assignment (admin)
+- `GET /subscriptions/plans` - List plans
+- `POST /subscriptions/promo-codes` - Create promo code (admin)
+- `GET /subscriptions/promo-codes` - List promo codes (admin)
+- `POST /translations/translate` - Translate text
 
-**URL** : `http://localhost:3001`
-**Documentation** : Voir `apps/api/README.md`
+**URL**: `http://localhost:3001`
+**Documentation**: See `apps/api/README.md`
 
 ### 📱 Mobile App (`apps/mobile`)
 
-Application React Native avec Expo.
+React Native application with Expo.
 
-**Fonctionnalités** :
+**Features**:
 
-- Infinite scroll de citations
+- Infinite scroll quotes
 - Pull-to-refresh
-- Like/Unlike et favoris
-- Filtrage par topics
-- Authentification
-- Profil utilisateur avec statistiques
-- Settings (langue, thème, mode)
-- **Traduction automatique** des citations et topics
-- **Thèmes visuels** personnalisés avec polices
-- **Notifications push** configurables (heures, jours)
-- **Widgets** iOS et Android
-- **Partage** de citations en image
-- **Abonnement premium** via RevenueCat (iOS/Android)
-- **Promo codes** pour accès premium gratuit
-- Synchronisation automatique des abonnements
+- Like/Unlike and favorites
+- Filter by topics
+- Authentication
+- User profile with statistics
+- Settings (language, theme, mode)
+- **Automatic translation** of quotes and topics
+- **Custom visual themes** with fonts
+- **Push notifications** configurable (hours, days)
+- **Widgets** iOS and Android
+- **Share** quotes as image
+- **Premium subscription** via RevenueCat (iOS/Android)
+- **Promo codes** for free premium access
+- Automatic subscription synchronization
 - i18n (FR, EN, ES, AR, DE, IT, ZH, NL, RU, TR)
 
-**Technologies** :
+**Technologies**:
 
 - Redux Toolkit (state management)
 - React Query (server state)
-- RevenueCat SDK (abonnements)
+- RevenueCat SDK (subscriptions)
 - React Navigation (navigation)
-- i18next (internationalisation)
+- i18next (internationalization)
 - Expo Notifications (push)
-- Expo Sharing (partage)
+- Expo Sharing (sharing)
 
 ---
 
 ## 📚 Documentation
 
-### Documentation Principale
+### Main Documentation
 
-- **[ARCHITECTURE_IMPROVEMENTS.md](./ARCHITECTURE_IMPROVEMENTS.md)** - Améliorations architecturales (BaseEntity, Redux, React Query)
-- **[ICONS_SYSTEM.md](./ICONS_SYSTEM.md)** - Système d'icônes cross-platform
-- **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Guide de tests
+- **[ARCHITECTURE_IMPROVEMENTS.md](./ARCHITECTURE_IMPROVEMENTS.md)** - Architecture improvements (BaseEntity, Redux, React Query)
+- **[ICONS_SYSTEM.md](./ICONS_SYSTEM.md)** - Cross-platform icon system
+- **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Testing guide
 
-### Documentation par App
+### App-specific Documentation
 
 - **[apps/mobile/MIGRATION_GUIDE.md](./apps/mobile/MIGRATION_GUIDE.md)** - Migration Context → Redux + React Query
-- **[apps/mobile/I18N_IMPLEMENTATION.md](./apps/mobile/I18N_IMPLEMENTATION.md)** - Implémentation i18n
-- **[apps/api/MIGRATION_UUID.md](./apps/api/MIGRATION_UUID.md)** - Migration vers UUIDs
+- **[apps/mobile/I18N_IMPLEMENTATION.md](./apps/mobile/I18N_IMPLEMENTATION.md)** - i18n implementation
+- **[apps/api/MIGRATION_UUID.md](./apps/api/MIGRATION_UUID.md)** - Migration to UUIDs
+
+## 🔧 Troubleshooting
+
+### Admin Password Error (401 Unauthorized)
+
+If you encounter `Invalid admin password` error during manual subscription assignment:
+
+**Cause**: The provided password doesn't match the bcrypt hash stored in database.
+
+**Solutions**:
+
+1. **Test admin dashboard login**:
+   - URL: `http://localhost:3000/login`
+   - Credentials: `admin@focus.com` / `admin123`
+   - If login fails → Reset password
+
+2. **Reset via seed script**:
+   ```bash
+   cd apps/api
+   npm run db:seed:admin
+   ```
+   New credentials: `admin@focus.com` / `admin123`
+
+3. **Reset via SQL**:
+   ```bash
+   # Generate bcrypt hash
+   node -e "const bcrypt = require('bcrypt'); bcrypt.hash('YourPassword', 10, (err, hash) => console.log(hash));"
+
+   # Update in database (Supabase SQL Editor)
+   UPDATE "user"
+   SET password = 'GENERATED_HASH_ABOVE'
+   WHERE email = 'admin@focus.com' AND "isAdmin" = true;
+   ```
+
+**Note**: Manual subscription assignment requires admin password to secure this sensitive action.
+
+### Keep-Alive Polling
+
+To avoid API cold starts (free hosting), the system implements automatic polling:
+
+- **Mobile**: Ping `/health` every 60 seconds
+- **Admin**: Ping `/health/stats` every 60 seconds + auto-refresh dashboard
+
+**Configuration**: Services configured in `apps/mobile/App.tsx` and `apps/admin/src/app/dashboard/page.tsx`
+
+### Subscription Synchronization
+
+Mobile app automatically checks subscription expiration:
+
+- **Interval**: Every 5 minutes in background
+- **On foreground**: Immediate check when app returns
+- **Action**: Automatically switches to "free tier" if subscription expired
+
+**File**: `apps/mobile/src/services/subscriptionSyncService.ts`
+
+### Invisible Skeleton Loading
+
+If users report a "white screen" during loading:
+
+**Cause**: Skeletons have too low opacity (8%) and are barely visible.
+
+**Solution**: Skeletons have been improved with:
+- Opacity increased to 15% (+87% visibility)
+- More pronounced pulse animation (50-90% instead of 30-70%)
+- Shadows added for depth
+- Increased heights and spacing
+
+**File**: `apps/mobile/src/components/LoadingSkeleton.tsx`
+
+### Comment Cleanup
+
+**Standard to follow**:
+
+✅ **Keep**:
+- Public API documentation (JSDoc)
+- Complex logic explanation
+- Security notes and important TODOs
+- Technical references (links to docs)
+
+❌ **Remove**:
+- Obvious comments (`// Get user`)
+- Redundant comments (function name = comment)
+- Commented code (dead code)
+- Useless separators (`// ========`)
+
+**Method**: Clean progressively when modifying existing files. Don't automate to avoid bugs.
 
 ---
 
-## 🔧 Scripts Disponibles
+## 🔧 Available Scripts
 
-### Scripts Globaux (depuis la racine)
+### Global Scripts (from root)
 
 ```bash
-# Développement
-npm run dev              # Démarrer toutes les apps
-npm run dev:admin        # Démarrer uniquement l'admin
-npm run dev:api          # Démarrer uniquement l'API
-npm run dev:mobile       # Démarrer uniquement le mobile
+# Development
+npm run dev              # Start all apps
+npm run dev:admin        # Start admin only
+npm run dev:api          # Start API only
+npm run dev:mobile       # Start mobile only
 
 # Build
-npm run build            # Build toutes les apps
-npm run build:admin      # Build l'admin
-npm run build:api        # Build l'API
+npm run build            # Build all apps
+npm run build:admin      # Build admin
+npm run build:api        # Build API
 
 # Linting
-npm run lint             # Lint toutes les apps
+npm run lint             # Lint all apps
 ```
 
-### Scripts API (`apps/api`)
+### API Scripts (`apps/api`)
 
 ```bash
-npm run start:dev        # Mode développement (watch)
-npm run start:prod       # Mode production
-npm run build            # Compiler TypeScript
-npm test                 # Tests unitaires
-npm run test:e2e         # Tests e2e
+npm run start:dev        # Development mode (watch)
+npm run start:prod       # Production mode
+npm run build            # Compile TypeScript
+npm test                 # Unit tests
+npm run test:e2e         # E2E tests
 ```
 
-### Scripts Admin (`apps/admin`)
+### Admin Scripts (`apps/admin`)
 
 ```bash
-npm run dev              # Mode développement
-npm run build            # Build production
-npm run start            # Démarrer en production
-npm run lint             # Linter le code
+npm run dev              # Development mode
+npm run build            # Production build
+npm run start            # Start in production
+npm run lint             # Lint code
 ```
 
-### Scripts Mobile (`apps/mobile`)
+### Mobile Scripts (`apps/mobile`)
 
 ```bash
-npm start                # Démarrer Expo
-npm run android          # Ouvrir sur Android
-npm run ios              # Ouvrir sur iOS
-npm run web              # Ouvrir sur Web
+npm start                # Start Expo
+npm run android          # Open on Android
+npm run ios              # Open on iOS
+npm run web              # Open on Web
 ```
 
 ---
 
-## 🌍 Internationalisation
+## 🌍 Internationalization
 
-### Langues Supportées
+### Supported Languages
 
-- 🇫🇷 **Français** (fr) - Langue source
+- 🇫🇷 **Français** (fr) - Source language
 - 🇬🇧 **English** (en)
 - 🇪🇸 **Español** (es)
-- 🇸🇦 **العربية** (ar) - avec support RTL
+- 🇸🇦 **العربية** (ar) - with RTL support
 - 🇩🇪 **Deutsch** (de)
 - 🇮🇹 **Italiano** (it)
 - 🇨🇳 **中文** (zh)
@@ -383,152 +469,152 @@ npm run web              # Ouvrir sur Web
 - 🇷🇺 **Русский** (ru)
 - 🇹🇷 **Türkçe** (tr)
 
-### Traduction Automatique
+### Automatic Translation
 
-L'application dispose d'une fonctionnalité de **traduction automatique** des citations et topics :
+The app has an **automatic translation** feature for quotes and topics:
 
-- Activable dans **Settings → Traduction automatique**
-- Utilise **DeepL API** (principal) et **MyMemory** (fallback)
-- Cache local pour éviter les appels API répétés
-- Traduit automatiquement depuis le français vers la langue sélectionnée
+- Enable in **Settings → Automatic translation**
+- Uses **DeepL API** (primary) and **MyMemory** (fallback)
+- Local cache to avoid repeated API calls
+- Automatically translates from French to selected language
 
-### Changer la Langue
+### Change Language
 
-**Mobile** : Settings → Language → Sélectionner la langue
-**Admin** : Sélecteur de langue dans le header
-
----
-
-## 🎨 Thèmes et Personnalisation
-
-### Mode d'affichage
-
-L'application mobile supporte 3 modes :
-
-- ☀️ **Light** - Thème clair
-- 🌙 **Dark** - Thème sombre
-- 🔄 **System** - Suit le thème du système
-
-### Thèmes Visuels
-
-L'application propose des **thèmes visuels personnalisés** :
-
-- Fonds d'écran avec images
-- Polices personnalisées par thème
-- Gérables depuis le panel admin
+**Mobile**: Settings → Language → Select language
+**Admin**: Language selector in header
 
 ---
 
-## 🔐 Authentification
+## 🎨 Themes and Customization
 
-### Comptes par Défaut
+### Display Mode
 
-**Admin** :
+Mobile app supports 3 modes:
+
+- ☀️ **Light** - Light theme
+- 🌙 **Dark** - Dark theme
+- 🔄 **System** - Follow system theme
+
+### Visual Themes
+
+The app offers **custom visual themes**:
+
+- Wallpapers with images
+- Custom fonts per theme
+- Manageable from admin panel
+
+---
+
+## 🔐 Authentication
+
+### Default Accounts
+
+**Admin**:
 
 - Email: `admin@focus.com`
 - Password: `admin123`
 
-**User** :
+**User**:
 
 - Email: `user@focus.com`
 - Password: `user123`
 
 ### JWT
 
-Les tokens JWT sont stockés dans :
+JWT tokens are stored in:
 
-- **Admin** : `localStorage`
-- **Mobile** : `AsyncStorage`
+- **Admin**: `localStorage`
+- **Mobile**: `AsyncStorage`
 
-Durée de validité : **7 jours**
+Validity duration: **7 days**
 
 ---
 
-## 💳 Système d'Abonnement
+## 💳 Subscription System
 
-L'application intègre un système d'abonnement premium via **RevenueCat** (mobile) et **Stripe** (web) :
+The app integrates a premium subscription system via **RevenueCat** (mobile) and **Stripe** (web):
 
-### Plans disponibles
+### Available Plans
 
-- Plans mensuels et annuels configurables depuis l'admin
-- Période d'essai gratuite (freemium)
-- **Promo codes** pour accès premium temporaire
+- Monthly and annual plans configurable from admin
+- Free trial period (freemium)
+- **Promo codes** for temporary premium access
 
-### Fonctionnalités Premium
+### Premium Features
 
-- Accès aux topics premium
-- Notifications push personnalisées
-- Thèmes visuels exclusifs
-- Traduction automatique illimitée
+- Access to premium topics
+- Custom push notifications
+- Exclusive visual themes
+- Unlimited automatic translation
 
-### Attribution Manuelle (Admin)
+### Manual Assignment (Admin)
 
-Les administrateurs peuvent :
-- Attribuer manuellement une souscription à un utilisateur
-- Nécessite confirmation par mot de passe admin
-- Visible dans l'interface admin sous chaque profil utilisateur
+Administrators can:
+- Manually assign a subscription to a user
+- Requires admin password confirmation
+- Visible in admin interface under each user profile
 
-### Système de Promo Codes
+### Promo Codes System
 
-**Admin :**
-- Créer des promo codes avec durée personnalisée (ex: 7, 30, 90 jours)
-- Voir la liste des utilisateurs ayant utilisé chaque code
-- Suivre le nombre d'utilisations
+**Admin:**
+- Create promo codes with custom duration (e.g., 7, 30, 90 days)
+- View list of users who used each code
+- Track usage count
 
-**Utilisateur Mobile :**
-- Entrer un promo code lors de l'inscription
-- Application automatique du premium pour la durée définie
-- Un seul promo code par compte
+**Mobile User:**
+- Enter promo code during registration
+- Automatic premium application for defined duration
+- One promo code per account
 
 ### Configuration
 
-Variables d'environnement requises :
+Required environment variables:
 
 ```env
-# Stripe (paiements web)
+# Stripe (web payments)
 STRIPE_SECRET_KEY=sk_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
-# RevenueCat (paiements mobile)
+# RevenueCat (mobile payments)
 REVENUECAT_API_KEY=...
 REVENUECAT_WEBHOOK_SECRET=...
 ```
 
-Voir [docs/SUBSCRIPTIONS_SETUP.md](./docs/SUBSCRIPTIONS_SETUP.md) pour plus de détails.
+See [docs/SUBSCRIPTIONS_SETUP.md](./docs/SUBSCRIPTIONS_SETUP.md) for more details.
 
 ---
 
 ## 🤝 Contribution
 
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+1. Fork the project
+2. Create a branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-Ce projet est sous licence MIT.
+This project is licensed under MIT.
 
 ---
 
-## 👥 Auteurs
+## 👥 Authors
 
-- **Cédric Karungu** - Développeur Principal
+- **Cédric Karungu** - Lead Developer
 
 ---
 
-## 🙏 Remerciements
+## 🙏 Acknowledgments
 
-- [NestJS](https://nestjs.com/) - Framework backend
-- [Next.js](https://nextjs.org/) - Framework React
-- [Expo](https://expo.dev/) - Plateforme React Native
-- [Radix UI](https://www.radix-ui.com/) - Composants accessibles
+- [NestJS](https://nestjs.com/) - Backend framework
+- [Next.js](https://nextjs.org/) - React framework
+- [Expo](https://expo.dev/) - React Native platform
+- [Radix UI](https://www.radix-ui.com/) - Accessible components
 - [Turborepo](https://turbo.build/) - Monorepo tool
-- [Stripe](https://stripe.com/) - Paiements web
-- [RevenueCat](https://www.revenuecat.com/) - Paiements mobile
-- [DeepL](https://www.deepl.com/) - Traduction automatique
-- [Supabase](https://supabase.com/) - Base de données PostgreSQL
-- [Cloudinary](https://cloudinary.com/) - Gestion d'images
+- [Stripe](https://stripe.com/) - Web payments
+- [RevenueCat](https://www.revenuecat.com/) - Mobile payments
+- [DeepL](https://www.deepl.com/) - Automatic translation
+- [Supabase](https://supabase.com/) - PostgreSQL database
+- [Cloudinary](https://cloudinary.com/) - Image management

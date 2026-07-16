@@ -18,6 +18,14 @@ import {
   logoutUser,
 } from "./src/services/purchases";
 import { refreshShuffleSeed } from "./src/services/api";
+import {
+  startSubscriptionSync,
+  stopSubscriptionSync,
+} from "./src/services/subscriptionSyncService";
+import {
+  startKeepAlive,
+  stopKeepAlive,
+} from "./src/services/keepAliveService";
 import "./src/i18n"; // Initialiser i18n
 
 // Register Android widget task handler
@@ -53,6 +61,18 @@ function AppContent() {
 
     // Initialize RevenueCat SDK (without user ID initially)
     initializePurchases();
+
+    // Start subscription status sync (checks every 5 minutes)
+    startSubscriptionSync();
+
+    // Start keep-alive ping (keeps API awake, pings every minute)
+    startKeepAlive();
+
+    // Cleanup on unmount
+    return () => {
+      stopSubscriptionSync();
+      stopKeepAlive();
+    };
   }, []);
 
   useEffect(() => {
@@ -90,6 +110,7 @@ function AppContent() {
 
   // Reshuffle quotes each time the app returns to the foreground so the user
   // does not land on the same quotes after closing and reopening the app.
+  // Also check subscription status when app becomes active again.
   const appStateRef = useRef(AppState.currentState);
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
@@ -101,6 +122,11 @@ function AppContent() {
       ) {
         refreshShuffleSeed();
         queryClient.invalidateQueries({ queryKey: quoteKeys.all });
+
+        // Check subscription status when app returns to foreground
+        import("./src/services/subscriptionSyncService").then(({ checkSubscriptionStatus }) => {
+          checkSubscriptionStatus();
+        });
       }
     });
     return () => subscription.remove();

@@ -174,17 +174,31 @@ export const logoutThunk = () => async (dispatch: any) => {
 
 export const loadStoredAuth = () => async (dispatch: any) => {
   try {
+    console.log("[Auth] Loading stored auth from AsyncStorage...");
     const token = await AsyncStorage.getItem("@focus_auth_token");
     const userStr = await AsyncStorage.getItem("@focus_user_data");
 
+    console.log("[Auth] Token exists:", !!token);
+    console.log("[Auth] User data exists:", !!userStr);
+
     if (token && userStr) {
-      const user = JSON.parse(userStr);
-      dispatch(setCredentials({ user, token }));
+      try {
+        const user = JSON.parse(userStr);
+        console.log("[Auth] Successfully parsed user data for:", user.email);
+        dispatch(setCredentials({ user, token }));
+      } catch (parseError) {
+        console.error("[Auth] Failed to parse user data, clearing storage:", parseError);
+        // Clear corrupted data
+        await AsyncStorage.removeItem("@focus_auth_token");
+        await AsyncStorage.removeItem("@focus_user_data");
+        dispatch(setLoading(false));
+      }
     } else {
+      console.log("[Auth] No stored credentials found");
       dispatch(setLoading(false));
     }
   } catch (error) {
-    console.error("Error loading stored auth:", error);
+    console.error("[Auth] Error loading stored auth:", error);
     dispatch(setLoading(false));
   }
 };
