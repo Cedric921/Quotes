@@ -22,6 +22,10 @@ import {
   startSubscriptionSync,
   stopSubscriptionSync,
 } from "./src/services/subscriptionSyncService";
+import {
+  startKeepAlive,
+  stopKeepAlive,
+} from "./src/services/keepAliveService";
 import "./src/i18n"; // Initialiser i18n
 
 // Register Android widget task handler
@@ -61,9 +65,13 @@ function AppContent() {
     // Start subscription status sync (checks every 5 minutes)
     startSubscriptionSync();
 
+    // Start keep-alive ping (keeps API awake, pings every minute)
+    startKeepAlive();
+
     // Cleanup on unmount
     return () => {
       stopSubscriptionSync();
+      stopKeepAlive();
     };
   }, []);
 
