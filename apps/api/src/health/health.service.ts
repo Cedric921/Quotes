@@ -20,8 +20,6 @@ export interface StripeStatus extends ServiceStatus {
 }
 
 export interface RevenueCatStatus extends ServiceStatus {
-  // RevenueCat has no live/sandbox split at the server level: a single
-  // project receives webhooks for both, tagged per-event with environment.
   webhookConfigured?: boolean;
   apiKeyConfigured?: boolean;
   iosApiKeyConfigured?: boolean;
@@ -44,13 +42,11 @@ export class HealthService {
   private stripe: Stripe | null = null;
 
   constructor(private dataSource: DataSource) {
-    // Initialize Stripe if key is configured
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (stripeKey && !stripeKey.includes('placeholder')) {
       this.stripe = new Stripe(stripeKey);
     }
 
-    // Initialize Cloudinary
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
@@ -66,7 +62,6 @@ export class HealthService {
       this.checkCloudinary(),
     ]);
 
-    // Determine overall status
     let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 
     if (database.status === 'error' || database.status === 'disconnected') {
@@ -98,10 +93,7 @@ export class HealthService {
   }
 
   private checkRevenueCat(): RevenueCatStatus {
-    // RevenueCat webhook auth uses a bearer secret stored server-side.
     const webhookSecret = process.env.REVENUECAT_WEBHOOK_SECRET;
-    // Client public API keys are kept on the mobile side, but we let the API
-    // expose flags so the admin can confirm the project is wired up.
     const iosKey = process.env.REVENUECAT_IOS_API_KEY;
     const androidKey = process.env.REVENUECAT_ANDROID_API_KEY;
 
@@ -159,7 +151,6 @@ export class HealthService {
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    // Check if Stripe is configured
     if (!stripeKey || stripeKey.includes('placeholder')) {
       return {
         status: 'not_configured',
@@ -170,14 +161,12 @@ export class HealthService {
       };
     }
 
-    // Determine mode from key
     const mode: 'test' | 'live' = stripeKey.startsWith('sk_live_')
       ? 'live'
       : 'test';
 
     const startTime = Date.now();
     try {
-      // Test the connection by fetching balance (simple API call)
       await this.stripe!.balance.retrieve();
 
       return {
