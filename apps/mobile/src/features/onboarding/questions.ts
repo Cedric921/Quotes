@@ -1,0 +1,206 @@
+import type { Question, Step } from "./types";
+
+const q = (
+  id: string,
+  kind: Question["kind"],
+  options: (string | [string, Question["options"][number]["icon"]])[],
+  extra: Partial<Question> = {},
+): Question => ({
+  id,
+  kind,
+  titleKey: `onboarding.q.${id}.title`,
+  options: options.map((o) =>
+    typeof o === "string"
+      ? { id: o, labelKey: `onboarding.q.${id}.opt.${o}` }
+      : { id: o[0], labelKey: `onboarding.q.${id}.opt.${o[0]}`, icon: o[1] },
+  ),
+  ...extra,
+});
+
+/**
+ * The questionnaire. Order lives in `flow` below — this is just the content,
+ * so a question can be reordered or A/B'd without touching a screen.
+ */
+export const questions: Question[] = [
+  q("source", "single", [
+    "tiktok",
+    "instagram",
+    "friend",
+    "appstore",
+    "search",
+    "other",
+  ]),
+  q("age", "single", ["u18", "18_24", "25_34", "35_44", "45_54", "55p"], {
+    skippable: true,
+  }),
+  q("faith", "single", ["yes", "somewhat", "no", "prefer_not"], {
+    skippable: true,
+  }),
+  q("beliefs", "single", [
+    "christian",
+    "muslim",
+    "jewish",
+    "hindu",
+    "buddhist",
+    "spiritual",
+    "none",
+    "other",
+  ], { skippable: true }),
+  q("zodiac", "single", [
+    "aries", "taurus", "gemini", "cancer", "leo", "virgo",
+    "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
+  ], { skippable: true }),
+  q("motivationSources", "multi", [
+    "learning",
+    "people",
+    "progress",
+    "challenge",
+    "recognition",
+    "other",
+  ], { skippable: true }),
+  q("consistency", "multi", [
+    "routine",
+    "reminders",
+    "accountability",
+    "small_steps",
+    "other",
+  ], { skippable: true }),
+  q("whenUnmotivated", "multi", [
+    "rest",
+    "music",
+    "talk",
+    "push_through",
+    "avoid",
+  ], { skippable: true }),
+  q("dailyHabit", "multi", [
+    "morning",
+    "commute",
+    "break",
+    "evening",
+    "before_sleep",
+  ], { skippable: true }),
+
+  // Second block — after the theme is chosen and the first quote is shown.
+  q("quoteStyle", "multi", [
+    "tough_love",
+    "admired_people",
+    "short",
+    "thought_provoking",
+    "spiritual",
+  ], { skippable: true }),
+  q("whenItLands", "multi", [
+    "write",
+    "save",
+    "share",
+    "send",
+    "download",
+    "wallpaper",
+  ], { skippable: true }),
+  q("mentalHealth", "multi", [
+    "meditation",
+    "support",
+    "exercise",
+    "therapy",
+    "journal",
+    "nature",
+  ], { skippable: true }),
+  q("thoughtsShapeReality", "single", ["seen_it", "open", "not_really"], {
+    skippable: true,
+  }),
+  q("positiveThinking", "single", [
+    "believe",
+    "heard",
+    "tell_me_more",
+    "sceptical",
+  ], { skippable: true }),
+  q("mood", "single", [
+    ["excellent", "happy-outline"],
+    ["good", "happy-outline"],
+    ["neutral", "remove-outline"],
+    ["bad", "sad-outline"],
+    ["terrible", "sad-outline"],
+    ["other", "ellipsis-horizontal"],
+  ], { usesName: true }),
+  q("moodCause", "multi", [
+    ["work", "briefcase-outline"],
+    ["health", "pulse-outline"],
+    ["relationship", "heart-outline"],
+    ["family", "home-outline"],
+    ["friends", "people-outline"],
+    ["other", "ellipsis-horizontal"],
+  ]),
+  q("avoiding", "multi", [
+    "heal_past",
+    "set_goals",
+    "transform_relationships",
+    "career",
+    "finances",
+    "other",
+  ], { skippable: true }),
+  q("improve", "multi", [
+    ["positive_thinking", "happy-outline"],
+    ["faith", "sparkles-outline"],
+    ["stress", "rainy-outline"],
+    ["self_esteem", "ribbon-outline"],
+    ["relationships", "people-circle-outline"],
+    ["goals", "flag-outline"],
+  ]),
+  q("achieve", "multi", [
+    "positive_mindset",
+    "confidence",
+    "reach_goals",
+    "energy",
+    "happiness",
+    "presence",
+  ], { skippable: true }),
+];
+
+export const questionById = (id: string): Question => {
+  const found = questions.find((x) => x.id === id);
+  if (!found) throw new Error(`Unknown onboarding question: ${id}`);
+  return found;
+};
+
+/**
+ * The funnel, in order. ~30 steps; the `question` ones all render through
+ * `QuestionScreen`.
+ */
+export const flow: Step[] = [
+  { kind: "intro", copyKey: "onboarding.intro.hero" },
+  { kind: "question", questionId: "source" },
+  { kind: "intro", copyKey: "onboarding.intro.personalise" },
+  { kind: "question", questionId: "age" },
+  { kind: "name" },
+  { kind: "question", questionId: "faith" },
+  { kind: "question", questionId: "beliefs" },
+  { kind: "question", questionId: "zodiac" },
+  { kind: "question", questionId: "motivationSources" },
+  { kind: "question", questionId: "consistency" },
+  { kind: "question", questionId: "whenUnmotivated" },
+  { kind: "intro", copyKey: "onboarding.intro.goals" },
+  { kind: "question", questionId: "dailyHabit" },
+  { kind: "streak" },
+  { kind: "reminders" },
+  { kind: "appIcon" },
+  { kind: "bundle" },
+  { kind: "theme" },
+  { kind: "personalQuote" },
+  { kind: "intro", copyKey: "onboarding.intro.quiz2" },
+  { kind: "question", questionId: "quoteStyle" },
+  { kind: "question", questionId: "whenItLands" },
+  { kind: "question", questionId: "mentalHealth" },
+  { kind: "question", questionId: "thoughtsShapeReality" },
+  { kind: "question", questionId: "positiveThinking" },
+  { kind: "question", questionId: "mood" },
+  { kind: "question", questionId: "moodCause" },
+  { kind: "question", questionId: "avoiding" },
+  { kind: "question", questionId: "improve" },
+  { kind: "question", questionId: "achieve" },
+  { kind: "goals" },
+  { kind: "topics" },
+  { kind: "plan" },
+  { kind: "manifesto", copyKey: "onboarding.manifesto.firstThing" },
+  { kind: "manifesto", copyKey: "onboarding.manifesto.threeDays" },
+  { kind: "widget" },
+  { kind: "welcome" },
+];
