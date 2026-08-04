@@ -36,3 +36,18 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Design reference — third-party screen captures used to build the v2 UI.
+# Working material, ~27 MB, never pushed. The values extracted from them live
+# in docs/DESIGN_SYSTEM_V2.md instead.
+docs/design-reference/
+!docs/design-reference/README.md
+
+# Signing material — must never leave the machine
+apps/mobile/credentials/
+apps/mobile/credentials.json
+*.jks
+*.keystore
+*.mobileprovision
+*.p8
+*.p12
