@@ -1,11 +1,15 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { APP_CONFIG } from "../constants/config";
+import { palette } from "../theme/tokens";
 
-// Configure how notifications should be handled when the app is in foreground
+// Configure how notifications should be handled when the app is in foreground.
+// SDK 54 split the old `shouldShowAlert` into banner and notification-centre
+// list; leaving them out means a reminder arrives and shows nothing.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -64,11 +68,13 @@ export const scheduleDailyNotifications = async (
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
         },
+        // The trigger kind became explicit in SDK 54: without `type` the
+        // call is rejected and nothing is ever scheduled.
         trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
           hour: hours,
           minute: minutes,
           weekday: weekday === 0 ? 1 : weekday + 1, // Convert 0=Sunday to 1=Sunday for expo-notifications
-          repeats: true,
         },
       });
     }
@@ -120,7 +126,8 @@ export const setupNotificationChannel = async (): Promise<void> => {
       name: "Default",
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
+      // The LED/notification tint follows the app accent.
+      lightColor: palette.violet,
     });
   }
 };

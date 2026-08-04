@@ -4,6 +4,7 @@ import {
   TextWidget,
   ImageWidget,
 } from "react-native-android-widget";
+import { widgetSurface as w } from "../theme/tokens";
 
 interface QuoteWidgetProps {
   content: string;
@@ -34,8 +35,11 @@ export function FocusQuoteWidget({
         justifyContent: "space-between",
         padding: isSmall ? 12 : 16,
         borderRadius: 16,
+        // v1 painted the widget indigo→purple, a gradient that appears
+        // nowhere else in the product. This is the app's own accent.
         backgroundGradient: {
-          colors: ["#6366f1", "#a855f7"],
+          from: w.gradientFrom,
+          to: w.gradientTo,
           orientation: "TOP_BOTTOM",
         },
       }}
@@ -54,13 +58,13 @@ export function FocusQuoteWidget({
           text="❝"
           style={{
             fontSize: isSmall ? 20 : isLarge ? 32 : 24,
-            color: "rgba(255, 255, 255, 0.8)",
+            color: w.textDim,
           }}
         />
         {topicName && !isSmall && (
           <FlexWidget
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: w.chip,
               paddingHorizontal: 8,
               paddingVertical: 4,
               borderRadius: 8,
@@ -70,7 +74,7 @@ export function FocusQuoteWidget({
               text={topicName}
               style={{
                 fontSize: 10,
-                color: "rgba(255, 255, 255, 0.9)",
+                color: w.textStrong,
                 fontWeight: "600",
               }}
             />
@@ -90,9 +94,8 @@ export function FocusQuoteWidget({
           text={content}
           style={{
             fontSize: isSmall ? 12 : isLarge ? 18 : 14,
-            color: "#ffffff",
+            color: w.text,
             fontWeight: "500",
-            lineHeight: isSmall ? 16 : isLarge ? 24 : 20,
           }}
           maxLines={isSmall ? 3 : isLarge ? 6 : 4}
           truncate="END"
@@ -112,7 +115,7 @@ export function FocusQuoteWidget({
           text={`— ${author}`}
           style={{
             fontSize: isSmall ? 10 : isLarge ? 14 : 12,
-            color: "rgba(255, 255, 255, 0.9)",
+            color: w.textStrong,
             fontWeight: "600",
           }}
         />
@@ -121,7 +124,7 @@ export function FocusQuoteWidget({
             text="Focus"
             style={{
               fontSize: 10,
-              color: "rgba(255, 255, 255, 0.6)",
+              color: w.textFaint,
             }}
           />
         )}
@@ -144,3 +147,12 @@ export function FocusQuoteWidgetSmall(props: Omit<QuoteWidgetProps, "size">) {
   return <FocusQuoteWidget {...props} size="small" />;
 }
 
+/**
+ * The widget as `requestWidgetUpdate` wants it: a function of the quote.
+ *
+ * It lives here rather than in `widgetService` because that file is `.ts` —
+ * and because the service has no business knowing which variant renders.
+ */
+export const renderFocusQuoteWidget = (quote: QuoteWidgetProps) => (
+  <FocusQuoteWidget {...quote} />
+);

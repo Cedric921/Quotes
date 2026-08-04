@@ -5,6 +5,9 @@ import {
   type NotificationConfig,
 } from "./notificationService";
 
+/** Sunday through Saturday, in the numbering `notificationService` expects. */
+const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
+
 export interface ReminderSchedule {
   /** How many reminders to spread across the window. */
   count: number;
@@ -51,13 +54,15 @@ export const requestAndSchedule = async (
 
   await setupNotificationChannel();
 
+  // A reminder the user asked for daily runs every day of the week; the
+  // scheduler takes one entry per time, each carrying its own days.
   const times = buildTimes(schedule);
-  const config: NotificationConfig = {
-    times,
-    enabled: true,
-  } as NotificationConfig;
+  const configs: NotificationConfig[] = times.map(({ hour, minute }) => ({
+    time: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
+    days: EVERY_DAY,
+  }));
 
-  await scheduleDailyNotifications(config);
+  await scheduleDailyNotifications(configs);
   return { granted: true, scheduled: times.length };
 };
 

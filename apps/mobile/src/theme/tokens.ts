@@ -79,6 +79,30 @@ export const imageSurface = {
   blurIntensity: 24,
 } as const;
 
+/**
+ * Android home-screen widget.
+ *
+ * It renders through `react-native-android-widget`, outside React's tree —
+ * no provider, no hooks — so it reads these values directly. They live here
+ * rather than in the widget file so the widget can never drift from the app's
+ * accent the way v1's indigo did.
+ *
+ * The spaces after the commas are load-bearing: the library types its colours
+ * as `` `rgba(${number}, ${number}, ${number}, ${number})` ``, so the compact
+ * form the rest of this file uses does not compile there.
+ */
+export const widgetSurface = {
+  gradientFrom: palette.violet,
+  gradientTo: palette.blush,
+
+  text: palette.white,
+  textStrong: "rgba(255, 255, 255, 0.9)",
+  textDim: "rgba(255, 255, 255, 0.8)",
+  textFaint: "rgba(255, 255, 255, 0.6)",
+  /** Topic pill behind the quote's category. */
+  chip: "rgba(255, 255, 255, 0.2)",
+} as const;
+
 /** The accent gradient. Four sanctioned uses — see spec §2.3. */
 export const gradient = {
   from: palette.violet,
@@ -146,6 +170,7 @@ export const typography = {
 export const hitSize = 44;
 
 export type Palette = typeof palette;
+export type WidgetSurface = typeof widgetSurface;
 export type BaseSurface = typeof baseSurface;
 export type ImageSurface = typeof imageSurface;
 export type TypographyVariant = keyof typeof typography;
