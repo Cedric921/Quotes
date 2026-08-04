@@ -23,6 +23,7 @@ const useStyles = makeStyles((t) => ({
     overflow: "hidden",
   },
   solid: { backgroundColor: t.base.ctaBg },
+  danger: { backgroundColor: t.base.danger },
   disabled: { backgroundColor: t.base.ctaDisabledBg },
   gradientFill: {
     ...fill,
@@ -43,8 +44,12 @@ const useStyles = makeStyles((t) => ({
 export interface ButtonProps {
   label: string;
   onPress?: () => void;
-  /** `primary` is the white pill. `gradient` is reserved for conversion moments. */
-  variant?: "primary" | "gradient";
+  /**
+   * `primary` is the white pill. `gradient` is reserved for conversion
+   * moments. `danger` is the one destructive action in the app — deleting
+   * the account — and nothing else.
+   */
+  variant?: "primary" | "gradient" | "danger";
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -86,7 +91,13 @@ export function Button({
       disabled={inert}
       style={({ pressed }) => [
         s.base,
-        variant === "primary" || inert ? (inert ? s.disabled : s.solid) : null,
+        inert
+          ? s.disabled
+          : variant === "primary"
+            ? s.solid
+            : variant === "danger"
+              ? s.danger
+              : null,
         pressed && !inert ? s.pressed : null,
         style,
       ]}
@@ -102,7 +113,13 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={t.base.ctaFg} />
       ) : (
-        <Text variant="label" tone="onCta" weight="700">
+        <Text
+          variant="label"
+          // A coral fill needs white type; the white and gradient fills both
+          // take the dark ink.
+          tone={variant === "danger" && !inert ? "primary" : "onCta"}
+          weight="700"
+        >
           {label}
         </Text>
       )}

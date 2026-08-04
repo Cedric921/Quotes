@@ -1,16 +1,37 @@
-import React from "react";
-import { TextInput, View, type TextInputProps } from "react-native";
+import React, { useState } from "react";
+import {
+  Pressable,
+  TextInput,
+  View,
+  type TextInputProps,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { makeStyles, useTheme } from "../theme";
 import { Text } from "./Text";
 
 const useStyles = makeStyles((t) => ({
-  field: {
+  // The pill is the container, not the input: it has to hold the eye toggle
+  // and still read as one field.
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
     minHeight: 60,
     paddingHorizontal: t.space.lg,
     borderRadius: t.radius.pill,
     backgroundColor: t.base.bgElevated,
+  },
+  field: {
+    flex: 1,
+    paddingVertical: t.space.sm,
     color: t.base.textPrimary,
     fontSize: t.typography.body.size,
+  },
+  reveal: {
+    marginLeft: t.space.xs,
+    height: t.hitSize,
+    width: t.hitSize,
+    alignItems: "center",
+    justifyContent: "center",
   },
   area: {
     minHeight: 180,
@@ -32,19 +53,51 @@ const useStyles = makeStyles((t) => ({
 
 export interface InputProps extends Omit<TextInputProps, "style"> {
   label?: string;
+  /**
+   * Password field: masks the value and adds the reveal toggle inside the
+   * pill. Use this rather than `secureTextEntry`, so every password field in
+   * the app gets the same affordance.
+   */
+  secure?: boolean;
+  /** Reveal-toggle accessibility label, e.g. "Afficher le mot de passe". */
+  revealLabel?: string;
 }
 
-/** Single-line pill field. Used for the name step and the settings sub-pages. */
-export function Input({ label, ...rest }: InputProps) {
+/**
+ * Single-line pill field. Used for the name step, the settings sub-pages and
+ * every auth form.
+ */
+export function Input({ label, secure, revealLabel, ...rest }: InputProps) {
   const s = useStyles();
   const t = useTheme();
+  const [revealed, setRevealed] = useState(false);
+
   return (
-    <TextInput
-      accessibilityLabel={label ?? rest.placeholder}
-      placeholderTextColor={t.base.textTertiary}
-      style={s.field}
-      {...rest}
-    />
+    <View style={s.pill}>
+      <TextInput
+        accessibilityLabel={label ?? rest.placeholder}
+        placeholderTextColor={t.base.textTertiary}
+        secureTextEntry={secure && !revealed}
+        style={s.field}
+        {...rest}
+      />
+      {secure ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={revealLabel ?? label ?? rest.placeholder}
+          accessibilityState={{ selected: revealed }}
+          hitSlop={8}
+          onPress={() => setRevealed((prev) => !prev)}
+          style={s.reveal}
+        >
+          <Ionicons
+            name={revealed ? "eye-off-outline" : "eye-outline"}
+            size={20}
+            color={t.base.textTertiary}
+          />
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
