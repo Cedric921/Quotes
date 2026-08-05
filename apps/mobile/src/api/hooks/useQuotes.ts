@@ -160,24 +160,3 @@ export const useToggleLikeQuote = () => {
     },
   });
 };
-
-// Legacy hooks for backward compatibility
-export const useLikeQuote = () => {
-  const toggleLike = useToggleLikeQuote();
-  return {
-    mutate: (quoteId: string) => toggleLike.mutate({ quoteId, isLiked: false }),
-    mutateAsync: (quoteId: string) =>
-      toggleLike.mutateAsync({ quoteId, isLiked: false }),
-    ...toggleLike,
-  };
-};
-
-export const useUnlikeQuote = () => {
-  const toggleLike = useToggleLikeQuote();
-  return {
-    mutate: (quoteId: string) => toggleLike.mutate({ quoteId, isLiked: true }),
-    mutateAsync: (quoteId: string) =>
-      toggleLike.mutateAsync({ quoteId, isLiked: true }),
-    ...toggleLike,
-  };
-};
