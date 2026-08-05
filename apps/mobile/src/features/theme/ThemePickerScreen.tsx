@@ -40,7 +40,9 @@ export function ThemePickerScreen({
         imageUri: theme.thumbnailUrl ?? theme.imageUrl,
         // "Aa" previews the font the theme carries, not just the photo.
         sample: "Aa",
-        animated: theme.isAnimated,
+        // `animated` stays unset: the admin panel doesn't publish the flag
+        // yet, and guessing it would badge every theme. TileGrid already
+        // draws the badge the day the API serves it.
       })),
     [themes],
   );

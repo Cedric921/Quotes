@@ -60,9 +60,9 @@ export function OnboardingFlow() {
     case "theme":
       return <ThemePickerScreen onDone={goNext} />;
     case "appIcon":
-      return <AppIconScreen />;
+      return <AppIconScreen onDone={goNext} />;
     case "reminders":
-      return <RemindersSetupScreen />;
+      return <RemindersSetupScreen onDone={goNext} />;
     case "streak":
       return <StreakIntroScreen />;
     case "plan":

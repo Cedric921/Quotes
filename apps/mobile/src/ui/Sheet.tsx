@@ -6,6 +6,7 @@ import {
   type NativeSyntheticEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { SurfaceProvider, makeStyles, useTheme } from "../theme";
 import { IconCircle } from "./IconCircle";
 import { Text } from "./Text";
@@ -68,6 +69,7 @@ export function Sheet({
 }: SheetProps) {
   const s = useStyles();
   const t = useTheme();
+  const { t: translate } = useTranslation();
   const insets = useSafeAreaInsets();
   const [collapsed, setCollapsed] = useState(!!collapsedOnly);
 
@@ -85,9 +87,17 @@ export function Sheet({
       <View style={[s.root, { paddingTop: insets.top + t.space.xs }]}>
         <View style={s.bar}>
           {onBack ? (
-            <IconCircle icon="chevron-back" label="Retour" onPress={onBack} />
+            <IconCircle
+              icon="chevron-back"
+              label={translate("common.back")}
+              onPress={onBack}
+            />
           ) : onClose ? (
-            <IconCircle icon="close" label="Fermer" onPress={onClose} />
+            <IconCircle
+              icon="close"
+              label={translate("common.close")}
+              onPress={onClose}
+            />
           ) : (
             <View style={s.spacer} />
           )}

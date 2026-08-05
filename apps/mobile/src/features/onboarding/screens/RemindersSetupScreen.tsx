@@ -4,8 +4,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useTranslation } from "react-i18next";
 import { Button, Card, Screen, Stepper, Text, TimeRow } from "../../../ui";
 import { makeStyles } from "../../../theme";
-import { useAppDispatch } from "../../../store/hooks";
-import { next } from "../store/onboardingSlice";
 import { remindersService } from "../../../services/remindersService";
 
 const useStyles = makeStyles((t) => ({
@@ -40,10 +38,18 @@ const at = (h: number) => {
  * screen entry: asking before the user has seen what they'd be agreeing to is
  * how apps lose the permission for good.
  */
-export function RemindersSetupScreen() {
+export interface RemindersSetupScreenProps {
+  /** Called once the schedule is saved — advances the funnel, or closes. */
+  onDone: () => void;
+  ctaLabelKey?: string;
+}
+
+export function RemindersSetupScreen({
+  onDone,
+  ctaLabelKey = "onboarding.reminders.cta",
+}: RemindersSetupScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
 
   const [count, setCount] = useState(10);
   const [start, setStart] = useState(at(9));
@@ -61,7 +67,7 @@ export function RemindersSetupScreen() {
       });
     } finally {
       setSaving(false);
-      dispatch(next());
+      onDone();
     }
   };
 
@@ -69,7 +75,7 @@ export function RemindersSetupScreen() {
     <Screen
       footer={
         <Button
-          label={t("onboarding.reminders.cta")}
+          label={t(ctaLabelKey)}
           loading={saving}
           onPress={() => void save()}
         />

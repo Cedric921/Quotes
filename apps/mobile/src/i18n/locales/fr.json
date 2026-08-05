@@ -23,7 +23,8 @@
     "done": "Terminé",
     "copy": "Copier",
     "now": "Maintenant",
-    "andMore": ", et {{count}} de plus"
+    "andMore": ", et {{count}} de plus",
+    "back": "Retour"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -68,7 +69,11 @@
     "resetPasswordSuccessMessage": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
     "invalidResetCode": "Code invalide ou expiré",
     "tooManyResetRequests": "Trop de demandes. Réessayez dans quelques minutes.",
-    "backToLogin": "Retour à la connexion"
+    "backToLogin": "Retour à la connexion",
+    "showPassword": "Afficher le mot de passe",
+    "signupSubtitle": "Votre compte garde vos citations aimées et votre abonnement, sur tous vos appareils.",
+    "sessionExpired": "Session expirée",
+    "sessionExpiredMessage": "Reconnectez-vous depuis Paramètres › Compte."
   },
   "home": {
     "title": "Accueil",
@@ -171,6 +176,45 @@
       "facebook": "Facebook",
       "pinterest": "Pinterest",
       "x": "X (anciennement Twitter)"
+    },
+    "intro": {
+      "sound": "Un léger retour sonore quand vous aimez ou partagez une citation.",
+      "contentPreferences": "Choisissez les sujets que vous voulez voir plus souvent dans votre fil.",
+      "mutedContent": "Les sujets mis en sourdine n'apparaîtront plus du tout."
+    },
+    "options": {
+      "gender": {
+        "woman": "Femme",
+        "man": "Homme",
+        "non_binary": "Non-binaire",
+        "other": "Autre",
+        "prefer_not": "Je préfère ne pas répondre"
+      },
+      "relationship": {
+        "single": "Célibataire",
+        "dating": "En fréquentation",
+        "relationship": "En couple",
+        "married": "Marié·e",
+        "complicated": "C'est compliqué",
+        "prefer_not": "Je préfère ne pas répondre"
+      },
+      "sound": {
+        "on": "Activé",
+        "off": "Désactivé"
+      },
+      "language": {
+        "system": "Langue du système",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "nl": "Nederlands",
+        "ru": "Русский",
+        "tr": "Türkçe",
+        "ar": "العربية",
+        "zh": "中文"
+      }
     }
   },
   "profile": {
@@ -318,7 +362,9 @@
     "year": "an",
     "restoreSuccess": "Achats restaurés",
     "noSubscription": "Aucun abonnement actif",
-    "noPurchasesToRestore": "Aucun achat précédent à restaurer"
+    "noPurchasesToRestore": "Aucun achat précédent à restaurer",
+    "manageInStore": "Gérer sur le store",
+    "noPayments": "Aucun paiement pour le moment"
   },
   "notifications": {
     "title": "Notifications",
@@ -783,5 +829,23 @@
     "addToCollection": "Ajouter à collection",
     "copyText": "Copier le texte",
     "hideWatermark": "Cacher le filigrane"
+  },
+  "widgets": {
+    "openHome": "Ouvrir l'écran d'accueil",
+    "home": {
+      "title": "Widgets écran d'accueil",
+      "intro": "Une citation sur votre écran d'accueil, renouvelée au fil de la journée.",
+      "step1": "Appuyez longuement sur un espace vide de l'écran d'accueil",
+      "step2": "Appuyez sur Modifier, puis sur Ajouter un widget",
+      "step3": "Cherchez Motivation et choisissez une taille"
+    },
+    "lock": {
+      "title": "Widgets écran de verrouillage",
+      "intro": "Une citation visible sans même déverrouiller votre téléphone.",
+      "step1": "Appuyez longuement sur l'écran de verrouillage",
+      "step2": "Appuyez sur Personnaliser, puis sur l'écran de verrouillage",
+      "step3": "Appuyez sur la zone sous l'heure",
+      "step4": "Choisissez Motivation dans la liste"
+    }
   }
 }

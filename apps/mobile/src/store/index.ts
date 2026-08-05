@@ -7,6 +7,7 @@ import translationReducer from "./slices/translationSlice";
 import onboardingReducer from "../features/onboarding/store/onboardingSlice";
 import streakReducer from "../features/streak/streakSlice";
 import likeQuotaReducer from "../features/quotes/likeQuotaSlice";
+import settingsReducer from "../features/settings/settingsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ export const store = configureStore({
     onboarding: onboardingReducer,
     streak: streakReducer,
     likeQuota: likeQuotaReducer,
+    settings: settingsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

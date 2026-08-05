@@ -1,15 +1,19 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Platform, AppState } from "react-native";
+import { Platform, AppState } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider, useSelector } from "react-redux";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import AppNavigator from "./src/navigation/AppNavigator";
+import { RootNavigator } from "./src/navigation/RootNavigator";
+import { ThemeProvider } from "./src/theme";
 import { store, RootState } from "./src/store";
 import { queryClient } from "./src/api/queryClient";
 import { quoteKeys } from "./src/api/hooks/useQuotes";
 import { loadStoredAuth } from "./src/store/slices/authSlice";
 import { loadStoredTheme } from "./src/store/slices/themeSlice";
 import { loadStoredFont } from "./src/store/slices/fontSlice";
+import { loadSettings } from "./src/features/settings/settingsSlice";
 import { useTrackActivity } from "./src/api/hooks/useUserActivity";
 import { setupNotificationChannel } from "./src/services/notificationService";
 import {
@@ -22,11 +26,8 @@ import {
   startSubscriptionSync,
   stopSubscriptionSync,
 } from "./src/services/subscriptionSyncService";
-import {
-  startKeepAlive,
-  stopKeepAlive,
-} from "./src/services/keepAliveService";
-import "./src/i18n"; // Initialiser i18n
+import { startKeepAlive, stopKeepAlive } from "./src/services/keepAliveService";
+import "./src/i18n";
 
 // Register Android widget task handler
 if (Platform.OS === "android") {
@@ -51,24 +52,19 @@ function AppContent() {
   const prevUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Load stored authentication, theme and font on app start
+    // Load stored authentication, theme, font and user settings on app start.
+    // The v2 slices (onboarding, streak, like quota) hydrate inside
+    // RootNavigator, which is what gates the first render on them.
     store.dispatch(loadStoredAuth());
     store.dispatch(loadStoredTheme());
     store.dispatch(loadStoredFont());
+    store.dispatch(loadSettings());
 
-    // Setup notification channel for Android
     setupNotificationChannel();
-
-    // Initialize RevenueCat SDK (without user ID initially)
     initializePurchases();
-
-    // Start subscription status sync (checks every 5 minutes)
     startSubscriptionSync();
-
-    // Start keep-alive ping (keeps API awake, pings every minute)
     startKeepAlive();
 
-    // Cleanup on unmount
     return () => {
       stopSubscriptionSync();
       stopKeepAlive();
@@ -80,14 +76,11 @@ function AppContent() {
     const syncRevenueCatUser = async () => {
       const currentUserId = user?.id || null;
 
-      // Only sync if user ID changed
       if (currentUserId !== prevUserIdRef.current) {
         try {
           if (currentUserId) {
-            // User logged in - link to RevenueCat
             await loginUser(currentUserId);
           } else if (prevUserIdRef.current) {
-            // User logged out - switch to anonymous
             await logoutUser();
           }
         } catch (error) {
@@ -103,7 +96,7 @@ function AppContent() {
   useEffect(() => {
     // Track daily activity when user is authenticated
     if (token) {
-      const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      const today = new Date().toISOString().split("T")[0];
       trackActivity.mutate(today);
     }
   }, [token]);
@@ -123,36 +116,46 @@ function AppContent() {
         refreshShuffleSeed();
         queryClient.invalidateQueries({ queryKey: quoteKeys.all });
 
-        // Check subscription status when app returns to foreground
-        import("./src/services/subscriptionSyncService").then(({ checkSubscriptionStatus }) => {
-          checkSubscriptionStatus();
-        });
+        import("./src/services/subscriptionSyncService").then(
+          ({ checkSubscriptionStatus }) => {
+            checkSubscriptionStatus();
+          },
+        );
       }
     });
     return () => subscription.remove();
   }, []);
 
   return (
-    <View style={styles.container}>
-      <AppNavigator />
+    <>
+      <RootNavigator />
       <StatusBar style="light" />
-    </View>
+    </>
   );
 }
 
+/**
+ * Provider order matters:
+ *
+ *   GestureHandlerRootView  — must be the outermost native view, or the feed's
+ *                             vertical pager and the sheets lose their gestures
+ *   SafeAreaProvider        — `Screen` and `Sheet` read insets from it
+ *   Provider (redux)        — ThemeProvider reads the selected font from the store
+ *   QueryClientProvider
+ *   ThemeProvider           — must sit inside redux, outside every screen
+ */
 export default function App() {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <AppContent />
-      </QueryClientProvider>
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <AppContent />
+            </ThemeProvider>
+          </QueryClientProvider>
+        </Provider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-});

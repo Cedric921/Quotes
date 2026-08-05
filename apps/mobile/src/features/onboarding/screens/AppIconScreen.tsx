@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Screen, Text, TileGrid, type Tile } from "../../../ui";
 import { makeStyles } from "../../../theme";
 import { useAppDispatch } from "../../../store/hooks";
-import { next, setAppIcon } from "../store/onboardingSlice";
+import { setAppIcon } from "../store/onboardingSlice";
 import { appIcons, setAlternateIcon } from "../../../services/appIconService";
 
 const useStyles = makeStyles((t) => ({
@@ -19,15 +19,27 @@ const toTiles = (): Tile[] =>
     sample: icon.previewUri ? undefined : "”",
   }));
 
+export interface AppIconScreenProps {
+  /** Called by the CTA. The funnel advances; settings closes the screen. */
+  onDone: () => void;
+  ctaLabelKey?: string;
+}
+
 /**
- * Alternate app icons. The system shows its own confirmation alert after the
+ * Alternate app icons. Reached from the onboarding funnel and from the
+ * profile grid, so it owns no navigation of its own. The system shows its own confirmation alert after the
  * swap, which is why there is no success state of our own here.
  */
-export function AppIconScreen() {
+export function AppIconScreen({
+  onDone,
+  ctaLabelKey = "common.continue",
+}: AppIconScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const [selected, setSelected] = useState<string>(appIcons[0]?.id ?? "default");
+  const [selected, setSelected] = useState<string>(
+    appIcons[0]?.id ?? "default",
+  );
 
   const choose = async (id: string) => {
     setSelected(id);
@@ -40,11 +52,7 @@ export function AppIconScreen() {
   };
 
   return (
-    <Screen
-      footer={
-        <Button label={t("common.continue")} onPress={() => dispatch(next())} />
-      }
-    >
+    <Screen footer={<Button label={t(ctaLabelKey)} onPress={onDone} />}>
       <Text variant="display" align="center" style={s.title}>
         {t("onboarding.appIcon.title")}
       </Text>

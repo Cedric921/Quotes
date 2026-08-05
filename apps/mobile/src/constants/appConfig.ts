@@ -12,6 +12,8 @@ export const APP_VERSION: string =
   (Constants.expoConfig?.version as string | undefined) ?? "2.0.0";
 
 export const SUPPORT_URL = "https://focus-app.com/help";
+export const SHARE_APP_URL = "https://focus-app.com";
+export const MORE_APPS_URL = "https://focus-app.com/apps";
 export const BUNDLE_URL = "https://focus-app.com/bundle";
 export const LEGAL_TERMS_URL = "https://focus-app.com/terms";
 export const LEGAL_PRIVACY_URL = "https://focus-app.com/privacy";

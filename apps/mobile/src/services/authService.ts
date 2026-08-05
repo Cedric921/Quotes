@@ -3,6 +3,7 @@ import Toast from "react-native-toast-message";
 import { store } from "../store";
 import { logout } from "../store/slices/authSlice";
 import { resetAndNavigate } from "./navigationService";
+import i18n from "../i18n";
 import { queryClient } from "../api/queryClient";
 import { clearAuthTokenCache } from "./authTokenCache";
 
@@ -33,15 +34,17 @@ export const handleTokenExpired = async () => {
     // Show toast message
     Toast.show({
       type: "error",
-      text1: "Session expirée",
-      text2: "Veuillez vous reconnecter",
+      text1: i18n.t("auth.sessionExpired"),
+      text2: i18n.t("auth.sessionExpiredMessage"),
       position: "top",
       visibilityTime: 4000,
     });
 
-    // Navigate to login screen
+    // v2 has no login gate: the feed reads fine without an account, so an
+    // expired token drops the user back on it rather than on a sign-in wall.
+    // Signing in again is a settings row away.
     setTimeout(() => {
-      resetAndNavigate("Login");
+      resetAndNavigate("Feed");
       isLoggingOut = false;
     }, 500);
   } catch (error) {

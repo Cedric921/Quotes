@@ -6,6 +6,23 @@ import { makeStyles } from "../../theme";
 import { Sheet, SettingsRow, SettingsSection, Text, Toggle } from "../../ui";
 import { useAppSelector } from "../../store/hooks";
 import { APP_VERSION, SOCIAL_URLS, SUPPORT_URL, LEGAL_PRIVACY_URL, LEGAL_TERMS_URL } from "../../constants/appConfig";
+import type { Ionicons } from "@expo/vector-icons";
+
+/**
+ * Each network keeps its own mark — a generic feed icon five times over reads
+ * as one row repeated. X has no Ionicons glyph under its new name, so it
+ * still comes through as the bird.
+ */
+const SOCIAL_ICONS: Record<
+  keyof typeof SOCIAL_URLS,
+  keyof typeof Ionicons.glyphMap
+> = {
+  instagram: "logo-instagram",
+  tiktok: "logo-tiktok",
+  facebook: "logo-facebook",
+  pinterest: "logo-pinterest",
+  x: "logo-twitter",
+};
 
 const useStyles = makeStyles((t) => ({
   version: {
@@ -95,7 +112,7 @@ export function SettingsScreen({
         {(Object.keys(SOCIAL_URLS) as (keyof typeof SOCIAL_URLS)[]).map((key) => (
           <SettingsRow
             key={key}
-            icon="logo-rss"
+            icon={SOCIAL_ICONS[key]}
             label={t(`settings.social.${key}`)}
             onPress={() => void Linking.openURL(SOCIAL_URLS[key])}
           />

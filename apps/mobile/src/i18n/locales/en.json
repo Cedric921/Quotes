@@ -23,7 +23,8 @@
     "done": "Done",
     "copy": "Copy",
     "now": "Now",
-    "andMore": ", and {{count}} more"
+    "andMore": ", and {{count}} more",
+    "back": "Back"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -68,7 +69,11 @@
     "resetPasswordSuccessMessage": "You can now log in with your new password.",
     "invalidResetCode": "Invalid or expired code",
     "tooManyResetRequests": "Too many requests. Please try again in a few minutes.",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "showPassword": "Show password",
+    "signupSubtitle": "Your account keeps your liked quotes and your subscription across every device.",
+    "sessionExpired": "Session expired",
+    "sessionExpiredMessage": "Sign in again from Settings › Account."
   },
   "home": {
     "title": "Home",
@@ -171,6 +176,45 @@
       "facebook": "Facebook",
       "pinterest": "Pinterest",
       "x": "X (formerly Twitter)"
+    },
+    "intro": {
+      "sound": "A light sound when you like or share a quote.",
+      "contentPreferences": "Pick the topics you want to see more of in your feed.",
+      "mutedContent": "Muted topics won't appear at all."
+    },
+    "options": {
+      "gender": {
+        "woman": "Woman",
+        "man": "Man",
+        "non_binary": "Non-binary",
+        "other": "Other",
+        "prefer_not": "Prefer not to say"
+      },
+      "relationship": {
+        "single": "Single",
+        "dating": "Dating",
+        "relationship": "In a relationship",
+        "married": "Married",
+        "complicated": "It's complicated",
+        "prefer_not": "Prefer not to say"
+      },
+      "sound": {
+        "on": "On",
+        "off": "Off"
+      },
+      "language": {
+        "system": "System language",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "nl": "Nederlands",
+        "ru": "Русский",
+        "tr": "Türkçe",
+        "ar": "العربية",
+        "zh": "中文"
+      }
     }
   },
   "profile": {
@@ -318,7 +362,9 @@
     "year": "year",
     "restoreSuccess": "Purchases restored",
     "noSubscription": "No active subscription",
-    "noPurchasesToRestore": "No previous purchases found to restore"
+    "noPurchasesToRestore": "No previous purchases found to restore",
+    "manageInStore": "Manage in the store",
+    "noPayments": "No payments yet"
   },
   "notifications": {
     "title": "Notifications",
@@ -783,5 +829,23 @@
     "addToCollection": "Add to collection",
     "copyText": "Copy text",
     "hideWatermark": "Hide watermark"
+  },
+  "widgets": {
+    "openHome": "Open the home screen",
+    "home": {
+      "title": "Home screen widgets",
+      "intro": "A quote on your home screen, refreshed through the day.",
+      "step1": "Press and hold an empty space on your home screen",
+      "step2": "Tap Edit, then Add widget",
+      "step3": "Search for Motivation and pick a size"
+    },
+    "lock": {
+      "title": "Lock screen widgets",
+      "intro": "A quote you can see without unlocking your phone.",
+      "step1": "Press and hold the lock screen",
+      "step2": "Tap Customise, then the lock screen",
+      "step3": "Tap the area under the clock",
+      "step4": "Choose Motivation from the list"
+    }
   }
 }
