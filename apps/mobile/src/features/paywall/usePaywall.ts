@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import type { PurchasesPackage } from "react-native-purchases";
 import {
   useOfferings,
   usePurchase,
@@ -13,6 +14,8 @@ export interface PaywallOffering {
   /** What the user is charged today — "0,00 €" during the trial. */
   introPrice: string;
   identifier?: string;
+  /** The store package itself — what `purchase()` hands to RevenueCat. */
+  pkg: PurchasesPackage;
 }
 
 const MONTHS = 12;
@@ -49,12 +52,13 @@ export function usePaywall() {
       monthlyEquivalent,
       introPrice: annual.product.introPrice?.priceString ?? "0,00 €",
       identifier: annual.identifier,
+      pkg: annual,
     };
   }, [offerings]);
 
   const purchase = useCallback(async () => {
-    if (!offering?.identifier) return;
-    await purchaseMutation.mutateAsync(offering.identifier);
+    if (!offering) return;
+    await purchaseMutation.mutateAsync(offering.pkg);
   }, [offering, purchaseMutation]);
 
   const restore = useCallback(async () => {
