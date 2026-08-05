@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../theme";
-import { Sheet, Text } from "../../ui";
+import { Sheet, SettingsRow, SettingsSection, Text } from "../../ui";
 import { useAppSelector } from "../../store/hooks";
 import { useStreak } from "../streak/useStreak";
 import { UnlockBanner } from "./components/UnlockBanner";
@@ -17,11 +17,14 @@ const useStyles = makeStyles((t) => ({
 export interface ProfileSheetProps {
   onClose: () => void;
   onOpenSettings: () => void;
+  onOpenLikedQuotes: () => void;
   onOpenPaywall: () => void;
   onOpenStreakSettings: () => void;
   onShareStreak: () => void;
   /** Feature tiles route into their own modal screens. */
   onOpen: (route: string) => void;
+  /** The bundle tile opens a web page, not a screen. */
+  onOpenBundle: () => void;
 }
 
 /**
@@ -34,35 +37,79 @@ export interface ProfileSheetProps {
 export function ProfileSheet({
   onClose,
   onOpenSettings,
+  onOpenLikedQuotes,
   onOpenPaywall,
   onOpenStreakSettings,
   onShareStreak,
   onOpen,
+  onOpenBundle,
 }: ProfileSheetProps) {
   const s = useStyles();
   const { t } = useTranslation();
-  const isSubscribed = useAppSelector((st) => st.auth.user?.isSubscribed ?? false);
+  const isSubscribed = useAppSelector(
+    (st) => st.auth.user?.isSubscribed ?? false,
+  );
   const streak = useStreak();
+  const likedCount = useAppSelector(
+    (st) => st.auth.user?.likedQuotesCount ?? 0,
+  );
 
   const tiles = useMemo<FeatureTile[]>(
     () => [
-      { id: "topics", title: t("profile.tile.topics"), onPress: () => onOpen("Topics") },
-      { id: "wallpapers", title: t("profile.tile.wallpapers"), onPress: () => onOpen("Wallpapers") },
-      { id: "reminders", title: t("profile.tile.reminders"), onPress: () => onOpen("Reminders") },
-      { id: "homeWidgets", title: t("profile.tile.homeWidgets"), onPress: () => onOpen("HomeWidgets") },
-      { id: "lockWidgets", title: t("profile.tile.lockWidgets"), onPress: () => onOpen("LockWidgets") },
-      { id: "appIcon", title: t("profile.tile.appIcon"), onPress: () => onOpen("AppIcon") },
-      { id: "alarm", title: t("profile.tile.alarm"), onPress: () => onOpen("Alarm") },
-      { id: "watch", title: t("profile.tile.watch"), onPress: () => onOpen("Watch") },
+      {
+        id: "topics",
+        title: t("profile.tile.topics"),
+        onPress: () => onOpen("ContentPreferences"),
+      },
+      {
+        id: "wallpapers",
+        title: t("profile.tile.wallpapers"),
+        onPress: () => onOpen("ThemePicker"),
+      },
+      {
+        id: "reminders",
+        title: t("profile.tile.reminders"),
+        onPress: () => onOpen("Reminders"),
+      },
+      {
+        id: "homeWidgets",
+        title: t("profile.tile.homeWidgets"),
+        onPress: () => onOpen("HomeWidgets"),
+      },
+      {
+        id: "lockWidgets",
+        title: t("profile.tile.lockWidgets"),
+        onPress: () => onOpen("LockWidgets"),
+      },
+      {
+        id: "appIcon",
+        title: t("profile.tile.appIcon"),
+        onPress: () => onOpen("AppIcon"),
+      },
+      // No alarm feature and no watch app exist yet. The slots stay in the
+      // design; the tiles stay out of the build until there's something behind
+      // them. Flip `enabled` when the native side lands.
+      {
+        id: "alarm",
+        title: t("profile.tile.alarm"),
+        enabled: false,
+        onPress: () => undefined,
+      },
+      {
+        id: "watch",
+        title: t("profile.tile.watch"),
+        enabled: false,
+        onPress: () => undefined,
+      },
       {
         id: "bundle",
         title: t("profile.tile.bundle"),
         subtitle: t("profile.tile.bundleSubtitle"),
         wide: true,
-        onPress: () => onOpen("Bundle"),
+        onPress: onOpenBundle,
       },
     ],
-    [t, onOpen],
+    [t, onOpen, onOpenBundle],
   );
 
   return (
@@ -85,6 +132,21 @@ export function ProfileSheet({
           onShare={onShareStreak}
           onOptions={onOpenStreakSettings}
         />
+      </View>
+
+      {/*
+       * The kept quotes sit above the customisation grid, and outside it: the
+       * grid is "change how the app looks", this is the user's own content.
+       */}
+      <View style={s.block}>
+        <SettingsSection>
+          <SettingsRow
+            icon="heart-outline"
+            label={t("favorites.title")}
+            value={likedCount > 0 ? String(likedCount) : undefined}
+            onPress={onOpenLikedQuotes}
+          />
+        </SettingsSection>
       </View>
 
       <Text variant="title" style={s.sectionTitle}>

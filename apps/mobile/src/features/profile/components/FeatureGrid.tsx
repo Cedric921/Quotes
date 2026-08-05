@@ -38,6 +38,12 @@ export interface FeatureTile {
   illustration?: number;
   onPress: () => void;
   wide?: boolean;
+  /**
+   * Set false for a tile whose feature doesn't exist yet. The grid drops it
+   * rather than rendering something that opens nothing — the design keeps the
+   * slot, the build doesn't ship the dead end.
+   */
+  enabled?: boolean;
 }
 
 /**
@@ -51,52 +57,54 @@ export function FeatureGrid({ tiles }: { tiles: FeatureTile[] }) {
 
   return (
     <View style={s.grid}>
-      {tiles.map((tile) => (
-        <Pressable
-          key={tile.id}
-          accessibilityRole="button"
-          accessibilityLabel={tile.title}
-          onPress={tile.onPress}
-          style={({ pressed }) => [
-            s.tile,
-            tile.wide ? s.wide : null,
-            pressed ? s.pressed : null,
-          ]}
-        >
-          {tile.wide ? (
-            <>
-              <View style={s.wideCopy}>
-                <Text variant="title">{tile.title}</Text>
-                {tile.subtitle ? (
-                  <Text variant="body" tone="dim">
-                    {tile.subtitle}
-                  </Text>
+      {tiles
+        .filter((tile) => tile.enabled !== false)
+        .map((tile) => (
+          <Pressable
+            key={tile.id}
+            accessibilityRole="button"
+            accessibilityLabel={tile.title}
+            onPress={tile.onPress}
+            style={({ pressed }) => [
+              s.tile,
+              tile.wide ? s.wide : null,
+              pressed ? s.pressed : null,
+            ]}
+          >
+            {tile.wide ? (
+              <>
+                <View style={s.wideCopy}>
+                  <Text variant="title">{tile.title}</Text>
+                  {tile.subtitle ? (
+                    <Text variant="body" tone="dim">
+                      {tile.subtitle}
+                    </Text>
+                  ) : null}
+                </View>
+                {tile.illustration ? (
+                  <Image
+                    source={tile.illustration}
+                    style={s.wideArt}
+                    resizeMode="contain"
+                  />
                 ) : null}
-              </View>
-              {tile.illustration ? (
-                <Image
-                  source={tile.illustration}
-                  style={s.wideArt}
-                  resizeMode="contain"
-                />
-              ) : null}
-            </>
-          ) : (
-            <>
-              <Text variant="body" style={s.title}>
-                {tile.title}
-              </Text>
-              {tile.illustration ? (
-                <Image
-                  source={tile.illustration}
-                  style={s.art}
-                  resizeMode="contain"
-                />
-              ) : null}
-            </>
-          )}
-        </Pressable>
-      ))}
+              </>
+            ) : (
+              <>
+                <Text variant="body" style={s.title}>
+                  {tile.title}
+                </Text>
+                {tile.illustration ? (
+                  <Image
+                    source={tile.illustration}
+                    style={s.art}
+                    resizeMode="contain"
+                  />
+                ) : null}
+              </>
+            )}
+          </Pressable>
+        ))}
     </View>
   );
 }

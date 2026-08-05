@@ -115,9 +115,10 @@ export function QuoteFeedScreen({
   const handleLike = useCallback(() => {
     if (!current) return;
 
+    // `isLiked` is the state *before* the tap — the mutation flips it.
     // Un-liking never costs quota, and never pushes the paywall.
     if (current.isLiked) {
-      toggleLike.mutate(current.id);
+      toggleLike.mutate({ quoteId: current.id, isLiked: true });
       return;
     }
     if (quotaReached) {
@@ -125,7 +126,7 @@ export function QuoteFeedScreen({
       return;
     }
 
-    toggleLike.mutate(current.id);
+    toggleLike.mutate({ quoteId: current.id, isLiked: false });
     dispatch(increment());
     void dispatch(persistLikeQuota());
     setBurst(true);
