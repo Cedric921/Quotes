@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Linking, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,6 +14,11 @@ import {
 import { makeStyles } from "../../theme";
 import { TrialTimeline, type TrialStep } from "./components/TrialTimeline";
 import { usePaywall } from "./usePaywall";
+import {
+  cancelTrialReminder,
+  requestNotificationPermissions,
+  scheduleTrialReminder,
+} from "../../services/notificationService";
 import { LEGAL_PRIVACY_URL, LEGAL_TERMS_URL } from "../../constants/appConfig";
 
 const TRIAL_DAYS = 3;
@@ -63,6 +68,41 @@ export function PaywallScreen({ presentation, onDismiss }: PaywallScreenProps) {
   const { t, i18n } = useTranslation();
   const { offering, purchase, restore, isPurchasing } = usePaywall();
   const [remindMe, setRemindMe] = useState(false);
+
+  /**
+   * The switch schedules the notification the timeline promises, on the same
+   * day it shows — it was local state and nothing else, so the third step of
+   * the trial timeline described something that never happened.
+   *
+   * A refused permission puts the switch back: a reminder that cannot fire
+   * should not look armed.
+   */
+  const onRemindMe = useCallback(
+    async (value: boolean) => {
+      setRemindMe(value);
+
+      if (!value) {
+        await cancelTrialReminder();
+        return;
+      }
+
+      const { granted } = await requestNotificationPermissions();
+      if (!granted) {
+        setRemindMe(false);
+        return;
+      }
+
+      const scheduled = await scheduleTrialReminder(
+        addDays(TRIAL_DAYS - 1),
+        {
+          title: t("paywall.reminderTitle"),
+          body: t("paywall.reminderBody"),
+        },
+      );
+      if (!scheduled) setRemindMe(false);
+    },
+    [t],
+  );
 
   const dateFmt = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { day: "numeric", month: "short" }),
@@ -153,7 +193,7 @@ export function PaywallScreen({ presentation, onDismiss }: PaywallScreenProps) {
         <Text variant="body">{t("paywall.remindMe")}</Text>
         <Toggle
           value={remindMe}
-          onChange={setRemindMe}
+          onChange={(value) => void onRemindMe(value)}
           label={t("paywall.remindMe")}
         />
       </Card>

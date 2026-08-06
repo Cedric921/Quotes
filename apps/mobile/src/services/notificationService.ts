@@ -50,11 +50,26 @@ export interface NotificationConfig {
  * Schedule notifications with specific times and days
  * @param notifications - Array of notification configurations with time and days
  */
+/** Tags the daily reminders so they can be replaced without a blanket cancel. */
+const DAILY_KIND = "daily";
+
+/** The one-off "your trial ends soon" notification, scheduled from the paywall. */
+export const TRIAL_REMINDER_ID = "focus-trial-reminder";
+
 export const scheduleDailyNotifications = async (
   notifications: NotificationConfig[],
 ): Promise<void> => {
-  // Cancel all existing notifications first
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  // Replace only the daily reminders. `cancelAllScheduledNotificationsAsync`
+  // used to run here, which also dropped the trial reminder the moment the
+  // user changed their reminder times.
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    scheduled
+      .filter((item) => item.content.data?.kind === DAILY_KIND)
+      .map((item) =>
+        Notifications.cancelScheduledNotificationAsync(item.identifier),
+      ),
+  );
 
   for (const notification of notifications) {
     const [hours, minutes] = notification.time.split(":").map(Number);
@@ -67,6 +82,7 @@ export const scheduleDailyNotifications = async (
           body: "Discover inspiring wisdom to brighten your day",
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
+          data: { kind: DAILY_KIND },
         },
         // The trigger kind became explicit in SDK 54: without `type` the
         // call is rejected and nothing is ever scheduled.
@@ -79,6 +95,37 @@ export const scheduleDailyNotifications = async (
       });
     }
   }
+};
+
+/**
+ * Schedule the single "your trial ends soon" notification.
+ *
+ * Fixed identifier, so toggling the switch twice replaces it rather than
+ * stacking two. Returns false when the date has already passed — a trial
+ * shorter than the reminder window has nothing to remind about.
+ */
+export const scheduleTrialReminder = async (
+  date: Date,
+  content: { title: string; body: string },
+): Promise<boolean> => {
+  await cancelTrialReminder();
+  if (date.getTime() <= Date.now()) return false;
+
+  await Notifications.scheduleNotificationAsync({
+    identifier: TRIAL_REMINDER_ID,
+    content: {
+      title: content.title,
+      body: content.body,
+      sound: true,
+      data: { kind: "trial" },
+    },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date },
+  });
+  return true;
+};
+
+export const cancelTrialReminder = async (): Promise<void> => {
+  await Notifications.cancelScheduledNotificationAsync(TRIAL_REMINDER_ID);
 };
 
 /**
