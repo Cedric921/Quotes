@@ -3,8 +3,9 @@ import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../theme";
 import { Button, Input, LinkButton, Sheet, Text } from "../../ui";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { useAppDispatch } from "../../store/hooks";
 import { registerThunk } from "../../store/slices/authSlice";
+import { useDisplayName } from "../settings/useDisplayName";
 import {
   isEmail,
   notifyError,
@@ -33,8 +34,7 @@ export function SignUpScreen({ onBack, onSignIn }: SignUpScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const firstName = useAppSelector((st) => st.onboarding.firstName);
-  const [name, setName] = useState(firstName);
+  const [name, setName] = useState(useDisplayName());
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");

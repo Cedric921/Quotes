@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../theme";
 import { Sheet, SettingsRow, SettingsSection, Text, Toggle } from "../../ui";
 import { useAppSelector } from "../../store/hooks";
+import { useDisplayName } from "./useDisplayName";
 import { APP_VERSION, SOCIAL_URLS, SUPPORT_URL, LEGAL_PRIVACY_URL, LEGAL_TERMS_URL } from "../../constants/appConfig";
 import type { Ionicons } from "@expo/vector-icons";
 
@@ -60,6 +61,7 @@ export function SettingsScreen({
   const { t } = useTranslation();
   const user = useAppSelector((st) => st.auth.user);
   const isAuthenticated = useAppSelector((st) => st.auth.isAuthenticated);
+  const name = useDisplayName();
 
   return (
     <Sheet title={t("settings.title")} onBack={onBack} collapsedOnly>
@@ -72,7 +74,7 @@ export function SettingsScreen({
       </SettingsSection>
 
       <SettingsSection title={t("settings.section.aboutYou")}>
-        <SettingsRow icon="person-outline" label={t("settings.name")} value={user?.name} onPress={() => onOpen("Name")} />
+        <SettingsRow icon="person-outline" label={t("settings.name")} value={name || undefined} onPress={() => onOpen("Name")} />
         <SettingsRow icon="male-female-outline" label={t("settings.gender")} onPress={() => onOpen("Gender")} />
         <SettingsRow icon="people-outline" label={t("settings.age")} onPress={() => onOpen("Age")} />
         <SettingsRow icon="heart-outline" label={t("settings.relationship")} onPress={() => onOpen("Relationship")} />

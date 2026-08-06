@@ -11,6 +11,12 @@ const KEY = "@focus_settings_v2";
  * completion. Single-value fields hold an id; multi-value fields hold ids.
  */
 export interface SettingsState {
+  /**
+   * The name the user gave the funnel. It lives here, not only on the API
+   * user, because v2 has no sign-in gate: most people reading quotes have no
+   * account, and the name still has to survive and still has to be editable.
+   */
+  name?: string;
   gender?: string;
   age?: string;
   relationship?: string;
@@ -34,7 +40,7 @@ const initialState: SettingsState = {
   hydrated: false,
 };
 
-type Single = "gender" | "age" | "relationship" | "beliefs" | "language";
+type Single = "name" | "gender" | "age" | "relationship" | "beliefs" | "language";
 type Multi = "contentPreferences" | "mutedTopics";
 
 const settingsSlice = createSlice({
@@ -71,12 +77,14 @@ const settingsSlice = createSlice({
     seedFromOnboarding: (
       state,
       action: PayloadAction<{
+        name?: string;
         age?: string;
         beliefs?: string;
         topicIds?: string[];
       }>,
     ) => {
-      const { age, beliefs, topicIds } = action.payload;
+      const { name, age, beliefs, topicIds } = action.payload;
+      if (name && !state.name) state.name = name;
       if (age && !state.age) state.age = age;
       if (beliefs && !state.beliefs) state.beliefs = beliefs;
       if (topicIds?.length && state.contentPreferences.length === 0) {

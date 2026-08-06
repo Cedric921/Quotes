@@ -138,14 +138,15 @@ export const completeOnboarding =
     /**
      * Hand the answers to settings.
      *
-     * The funnel asks for the age, the beliefs and the topics, and settings
-     * shows the same three fields — until now it showed them empty, so the
-     * first thing the app did after the questionnaire was forget it. The
-     * topics matter twice over: the feed filters on them.
+     * The funnel asks for the name, the age, the beliefs and the topics, and
+     * settings shows the same four fields — until now it showed them empty,
+     * so the first thing the app did after the questionnaire was forget it.
+     * The topics matter twice over: the feed filters on them.
      */
-    const { topicIds } = getState().onboarding;
+    const { firstName, topicIds } = getState().onboarding;
     dispatch(
       seedFromOnboarding({
+        name: firstName.trim() || undefined,
         age: answers.age?.[0],
         beliefs: answers.beliefs?.[0],
         topicIds,
