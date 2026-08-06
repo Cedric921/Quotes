@@ -1,5 +1,9 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  persistSettings,
+  seedFromOnboarding,
+} from "../../settings/settingsSlice";
 import type { Answers } from "../types";
 
 const KEY_DONE = "@focus_onboarding_v2_done";
@@ -100,7 +104,8 @@ export const {
 
 export default onboardingSlice.reducer;
 
-type Dispatch = (action: unknown) => void;
+type Dispatch = (action: any) => any;
+type GetState = () => { onboarding: OnboardingState };
 
 export const loadOnboarding = () => async (dispatch: Dispatch) => {
   try {
@@ -120,7 +125,7 @@ export const loadOnboarding = () => async (dispatch: Dispatch) => {
 };
 
 export const completeOnboarding =
-  (answers: Answers) => async (dispatch: Dispatch) => {
+  (answers: Answers) => async (dispatch: Dispatch, getState: GetState) => {
     try {
       await Promise.all([
         AsyncStorage.setItem(KEY_DONE, "1"),
@@ -129,5 +134,24 @@ export const completeOnboarding =
     } catch {
       // Persisting the funnel is best-effort; never block the user on it.
     }
+
+    /**
+     * Hand the answers to settings.
+     *
+     * The funnel asks for the age, the beliefs and the topics, and settings
+     * shows the same three fields — until now it showed them empty, so the
+     * first thing the app did after the questionnaire was forget it. The
+     * topics matter twice over: the feed filters on them.
+     */
+    const { topicIds } = getState().onboarding;
+    dispatch(
+      seedFromOnboarding({
+        age: answers.age?.[0],
+        beliefs: answers.beliefs?.[0],
+        topicIds,
+      }),
+    );
+    dispatch(persistSettings());
+
     dispatch(finish());
   };

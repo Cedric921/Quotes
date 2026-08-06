@@ -8,24 +8,28 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "../../theme";
-import { Coachmark, IconCircle } from "../../ui";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { useQuotes, useToggleLikeQuote } from "../../api/hooks/useQuotes";
+import { Button, Coachmark, IconCircle, Text } from "../../ui";
+import { useAppSelector } from "../../store/hooks";
+import { useQuotes } from "../../api/hooks/useQuotes";
 import { QuoteSlide } from "./components/QuoteSlide";
 import { QuoteActions } from "./components/QuoteActions";
 import { LikeQuotaBar } from "./components/LikeQuotaBar";
 import { LikeBurst } from "./components/LikeBurst";
 import { FloatingNav } from "./components/FloatingNav";
 import { StreakToast } from "./components/StreakToast";
-import {
-  FREE_LIKE_QUOTA,
-  increment,
-  persistLikeQuota,
-} from "./likeQuotaSlice";
+import { FREE_LIKE_QUOTA } from "./likeQuotaSlice";
+import { useQuoteLike } from "./useQuoteLike";
 import { useStreak } from "../streak/useStreak";
 import type { Quote } from "../../types";
 
 const COACHMARK_KEY = "@focus_coachmark_like_v2";
+
+/**
+ * Keep pulling pages while the filter leaves fewer than this many quotes to
+ * read. Without it, following one narrow topic empties a feed that has plenty
+ * of matching quotes two pages down.
+ */
+const MIN_VISIBLE = 5;
 
 const useStyles = makeStyles((t) => ({
   root: { flex: 1, backgroundColor: t.palette.ink900 },
@@ -43,6 +47,14 @@ const useStyles = makeStyles((t) => ({
     left: 0,
     right: 0,
   },
+  empty: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: t.space.sm,
+    paddingHorizontal: t.space.xxl,
+  },
+  emptyCta: { marginTop: t.space.lg, alignSelf: "stretch" },
 }));
 
 export interface QuoteFeedScreenProps {
@@ -69,22 +81,40 @@ export function QuoteFeedScreen({
   const s = useStyles();
   const t = useTheme();
   const { t: translate } = useTranslation();
-  const dispatch = useAppDispatch();
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
   const backgroundTheme = useAppSelector((st) => st.theme.backgroundTheme);
   const isSubscribed = useAppSelector((st) => st.auth.user?.isSubscribed ?? false);
   const likesUsed = useAppSelector((st) => st.likeQuota.used);
+  const followedTopics = useAppSelector((st) => st.settings.contentPreferences);
+  const mutedTopics = useAppSelector((st) => st.settings.mutedTopics);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useQuotes(10, true);
-  const toggleLike = useToggleLikeQuote();
+  const like = useQuoteLike();
   const streak = useStreak();
 
-  const quotes = useMemo<Quote[]>(
-    () => data?.pages.flat() ?? [],
-    [data],
-  );
+  const loaded = useMemo<Quote[]>(() => data?.pages.flat() ?? [], [data]);
+
+  /**
+   * Both topic settings are applied here, on the client, because the API has
+   * no notion of either yet (spec §8). Muting wins over following: a topic in
+   * both lists is one the user asked twice not to see.
+   *
+   * A quote with no topic rides along only when nothing is followed — once
+   * the user has named the subjects they want, an unclassified quote is not
+   * one of them.
+   */
+  const quotes = useMemo<Quote[]>(() => {
+    if (followedTopics.length === 0 && mutedTopics.length === 0) return loaded;
+
+    return loaded.filter((quote) => {
+      const topicId = quote.topic?.id;
+      if (!topicId) return followedTopics.length === 0;
+      if (mutedTopics.includes(topicId)) return false;
+      return followedTopics.length === 0 || followedTopics.includes(topicId);
+    });
+  }, [loaded, followedTopics, mutedTopics]);
 
   const [index, setIndex] = useState(0);
   const [burst, setBurst] = useState(false);
@@ -110,31 +140,54 @@ export function QuoteFeedScreen({
     },
   ).current;
 
-  const quotaReached = !isSubscribed && likesUsed >= FREE_LIKE_QUOTA;
-
   const handleLike = useCallback(() => {
     if (!current) return;
 
-    // `isLiked` is the state *before* the tap — the mutation flips it.
-    // Un-liking never costs quota, and never pushes the paywall.
-    if (current.isLiked) {
-      toggleLike.mutate({ quoteId: current.id, isLiked: true });
-      return;
-    }
-    if (quotaReached) {
-      onOpenPaywall();
-      return;
-    }
-
-    toggleLike.mutate({ quoteId: current.id, isLiked: false });
-    dispatch(increment());
-    void dispatch(persistLikeQuota());
-    setBurst(true);
-  }, [current, quotaReached, toggleLike, dispatch, onOpenPaywall]);
+    const outcome = like.toggle(current);
+    if (outcome === "blocked") onOpenPaywall();
+    if (outcome === "liked") setBurst(true);
+  }, [current, like, onOpenPaywall]);
 
   const onEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // The filter runs after paging, so a page can arrive and add nothing to the
+  // feed. `onEndReached` never fires in that case — there is nothing to reach
+  // the end of — so the fetching is driven off the visible count instead.
+  useEffect(() => {
+    if (quotes.length < MIN_VISIBLE && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [quotes.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Everything filtered out, and no page left to rescue it: say so, and offer
+  // the way back rather than a blank screen the user has to diagnose.
+  if (quotes.length === 0 && !hasNextPage && !isFetchingNextPage) {
+    return (
+      <View style={s.root}>
+        <View style={s.empty}>
+          <Text variant="title" align="center">
+            {translate("feed.empty.title")}
+          </Text>
+          <Text variant="body" tone="dim" align="center">
+            {translate("feed.empty.body")}
+          </Text>
+          <Button
+            label={translate("settings.contentPreferences")}
+            onPress={onOpenTopics}
+            style={s.emptyCta}
+          />
+        </View>
+
+        <FloatingNav
+          onTopics={onOpenTopics}
+          onTheme={onOpenTheme}
+          onProfile={onOpenProfile}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={s.root}>

@@ -62,14 +62,41 @@ const settingsSlice = createSlice({
     setAnalytics: (state, action: PayloadAction<boolean>) => {
       state.analytics = action.payload;
     },
+    /**
+     * Carry the funnel's answers over, once.
+     *
+     * Only empty fields are filled: the funnel runs before settings exist, but
+     * a re-run must never quietly undo a correction the user made afterwards.
+     */
+    seedFromOnboarding: (
+      state,
+      action: PayloadAction<{
+        age?: string;
+        beliefs?: string;
+        topicIds?: string[];
+      }>,
+    ) => {
+      const { age, beliefs, topicIds } = action.payload;
+      if (age && !state.age) state.age = age;
+      if (beliefs && !state.beliefs) state.beliefs = beliefs;
+      if (topicIds?.length && state.contentPreferences.length === 0) {
+        state.contentPreferences = topicIds;
+      }
+    },
     hydrate: (state, action: PayloadAction<Partial<SettingsState>>) => {
       Object.assign(state, action.payload, { hydrated: true });
     },
   },
 });
 
-export const { setChoice, toggleChoice, setSound, setAnalytics, hydrate } =
-  settingsSlice.actions;
+export const {
+  setChoice,
+  toggleChoice,
+  setSound,
+  setAnalytics,
+  seedFromOnboarding,
+  hydrate,
+} = settingsSlice.actions;
 export default settingsSlice.reducer;
 
 type Dispatch = (action: unknown) => void;

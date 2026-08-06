@@ -24,7 +24,8 @@
     "copy": "Copier",
     "now": "Maintenant",
     "andMore": ", et {{count}} de plus",
-    "back": "Retour"
+    "back": "Retour",
+    "share": "Partager"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -773,7 +774,11 @@
     "name": "Motivation"
   },
   "feed": {
-    "coachmark": "Commencez : mettez {{count}} citations dans vos favoris pour personnaliser votre fil"
+    "coachmark": "Commencez : mettez {{count}} citations dans vos favoris pour personnaliser votre fil",
+    "empty": {
+      "title": "Rien à lire avec ces réglages",
+      "body": "Vos sujets suivis et votre contenu en sourdine ne laissent passer aucune citation. Élargissez-les pour retrouver votre fil."
+    }
   },
   "theme": {
     "picker": {
@@ -821,7 +826,9 @@
         "title": "{{date}} - Devenir membre",
         "subtitle": "Votre essai prendra fin sauf si vous l'annulez"
       }
-    }
+    },
+    "reminderTitle": "Votre essai se termine demain",
+    "reminderBody": "Annulez avant demain si Focus Premium n'est pas pour vous."
   },
   "share": {
     "editTheme": "Modifier thème",

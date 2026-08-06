@@ -1,8 +1,12 @@
 import React from "react";
 import { Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
+import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "../../../theme";
+import {
+  ImpactFeedbackStyle,
+  useFeedback,
+} from "../../settings/useFeedback";
 
 const useStyles = makeStyles((t) => ({
   row: {
@@ -48,14 +52,16 @@ export function QuoteActions({
 }: QuoteActionsProps) {
   const s = useStyles();
   const t = useTheme();
+  const { t: translate } = useTranslation();
+  const feedback = useFeedback();
 
   return (
     <View style={s.row}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Partager"
+        accessibilityLabel={translate("common.share")}
         onPress={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          feedback(ImpactFeedbackStyle.Light);
           onShare();
         }}
         style={({ pressed }) => [s.button, pressed ? s.pressed : null]}
@@ -65,10 +71,10 @@ export function QuoteActions({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="J'aime"
+        accessibilityLabel={translate(liked ? "common.liked" : "common.like")}
         accessibilityState={{ selected: liked }}
         onPress={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          feedback(ImpactFeedbackStyle.Medium);
           onLike();
         }}
         onLayout={(e) =>

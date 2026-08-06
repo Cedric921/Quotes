@@ -24,7 +24,8 @@
     "copy": "Copy",
     "now": "Now",
     "andMore": ", and {{count}} more",
-    "back": "Back"
+    "back": "Back",
+    "share": "Share"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -773,7 +774,11 @@
     "name": "Motivation"
   },
   "feed": {
-    "coachmark": "Get started: favourite {{count}} quotes to personalise your feed"
+    "coachmark": "Get started: favourite {{count}} quotes to personalise your feed",
+    "empty": {
+      "title": "Nothing to read with these settings",
+      "body": "The topics you follow and the ones you muted leave no quote through. Widen them to get your feed back."
+    }
   },
   "theme": {
     "picker": {
@@ -821,7 +826,9 @@
         "title": "{{date}} - Become a member",
         "subtitle": "Your trial ends unless you cancel"
       }
-    }
+    },
+    "reminderTitle": "Your trial ends tomorrow",
+    "reminderBody": "Cancel before tomorrow if Focus Premium isn't for you."
   },
   "share": {
     "editTheme": "Edit theme",
