@@ -374,7 +374,6 @@ export function RootNavigator() {
           setSharing(null);
           navigationRef.current?.navigate("ThemePicker");
         }}
-        onAddToCollection={() => setSharing(null)}
         onRequestPremium={() => {
           setSharing(null);
           navigationRef.current?.navigate("Paywall");

@@ -1,7 +1,6 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Modal,
-  Pressable,
   ScrollView,
   View,
   useWindowDimensions,
@@ -14,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "../../theme";
 import { IconCircle, Text } from "../../ui";
 import { ShareCard } from "./ShareCard";
+import { useQuoteLike } from "../quotes/useQuoteLike";
 import type { Quote } from "../../types";
 
 const useStyles = makeStyles((t) => ({
@@ -39,7 +39,8 @@ export interface ShareSheetProps {
   isPremium: boolean;
   onClose: () => void;
   onEditTheme: () => void;
-  onAddToCollection: () => void;
+  /** Called when a locked action is tapped — hiding the watermark, or a like
+   *  past the free quota. */
   onRequestPremium: () => void;
 }
 
@@ -65,7 +66,6 @@ export function ShareSheet({
   isPremium,
   onClose,
   onEditTheme,
-  onAddToCollection,
   onRequestPremium,
 }: ShareSheetProps) {
   const s = useStyles();
@@ -75,6 +75,15 @@ export function ShareSheet({
   const cardRef = useRef<View>(null);
   const [watermark, setWatermark] = useState(true);
   const [busy, setBusy] = useState(false);
+  const like = useQuoteLike();
+  // The quote arrives as a snapshot from the feed, so its `isLiked` does not
+  // move when the collection action fires. This tracks the tap locally, only
+  // so the icon answers.
+  const [collected, setCollected] = useState<boolean | null>(null);
+
+  // The sheet stays mounted between quotes, so the local "kept" state has to
+  // be dropped when a different quote arrives.
+  useEffect(() => setCollected(null), [quote?.id]);
 
   const previewWidth = Math.min(width - t2.gutter * 4, 300);
 
@@ -97,6 +106,8 @@ export function ShareSheet({
 
   if (!quote) return null;
 
+  const inCollection = collected ?? !!quote.isLiked;
+
   const actions: Action[] = [
     {
       id: "theme",
@@ -112,9 +123,19 @@ export function ShareSheet({
     },
     {
       id: "collection",
-      icon: "bookmark-outline",
+      // "Collection" and "liked" are the same list — there is only one place
+      // a kept quote goes, and it is the one the profile links to.
+      icon: inCollection ? "bookmark" : "bookmark-outline",
       labelKey: "share.addToCollection",
-      run: onAddToCollection,
+      locked: like.quotaReached && !inCollection,
+      run: () => {
+        const outcome = like.toggle({ ...quote, isLiked: inCollection });
+        if (outcome === "blocked") {
+          onRequestPremium();
+          return;
+        }
+        setCollected(outcome === "liked");
+      },
     },
     {
       id: "copy",
@@ -155,13 +176,8 @@ export function ShareSheet({
           contentContainerStyle={s.actions}
         >
           {actions.map((action) => (
-            <Pressable
+            <View
               key={action.id}
-              accessibilityRole="button"
-              accessibilityLabel={t(action.labelKey)}
-              accessibilityState={{ disabled: busy }}
-              disabled={busy}
-              onPress={() => void action.run()}
               style={[
                 s.action,
                 action.locked ? s.actionDisabled : null,
@@ -172,12 +188,12 @@ export function ShareSheet({
                 icon={action.icon}
                 label={t(action.labelKey)}
                 size={64}
-                onPress={() => void action.run()}
+                onPress={busy ? undefined : () => void action.run()}
               />
               <Text variant="caption" tone="dim" style={s.actionLabel}>
                 {t(action.labelKey)}
               </Text>
-            </Pressable>
+            </View>
           ))}
         </ScrollView>
       </View>
