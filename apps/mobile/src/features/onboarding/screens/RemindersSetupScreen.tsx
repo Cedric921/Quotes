@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Card, Screen, Stepper, Text, TimeRow } from "../../../ui";
 import { makeStyles } from "../../../theme";
 import { remindersService } from "../../../services/remindersService";
+import { useSyncReminders } from "../../../api/hooks/useRemindersSync";
 
 const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
@@ -50,6 +51,7 @@ export function RemindersSetupScreen({
 }: RemindersSetupScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
+  const syncReminders = useSyncReminders();
 
   const [count, setCount] = useState(10);
   const [start, setStart] = useState(at(9));
@@ -60,11 +62,21 @@ export function RemindersSetupScreen({
   const save = async () => {
     setSaving(true);
     try {
-      await remindersService.requestAndSchedule({
+      const { granted } = await remindersService.requestAndSchedule({
         count,
         startHour: start.getHours(),
         endHour: end.getHours(),
       });
+
+      // The device is scheduled; tell the server too, so its own sends land in
+      // the same window. No-op without an account, and never fatal.
+      if (granted) {
+        await syncReminders({
+          startTime: fmt(start),
+          endTime: fmt(end),
+          count,
+        });
+      }
     } finally {
       setSaving(false);
       onDone();
