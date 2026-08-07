@@ -422,7 +422,15 @@
     "testNotificationSent": "Test notification sent",
     "checkYourDevice": "Check your device for the notification",
     "upgradeForMore": "Upgrade for more notifications",
-    "freeUserLimit": "Free users can have 3 notifications per day"
+    "freeUserLimit": "Free users can have 3 notifications per day",
+    "daily": {
+      "title": "Focus",
+      "body": "Your quote of the moment is waiting."
+    },
+    "test": {
+      "title": "🔔 Test notification",
+      "body": "Your notifications are working perfectly."
+    }
   },
   "widget": {
     "title": "Focus Widget",

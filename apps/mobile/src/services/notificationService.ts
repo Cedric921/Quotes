@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { APP_CONFIG } from "../constants/config";
+import i18n from "../i18n";
 import { palette } from "../theme/tokens";
 
 // Configure how notifications should be handled when the app is in foreground.
@@ -77,9 +78,12 @@ export const scheduleDailyNotifications = async (
     // Schedule a notification for each selected day
     for (const weekday of notification.days) {
       await Notifications.scheduleNotificationAsync({
+        // Read at schedule time, so a reminder speaks the language the app
+        // was in when the user set it — it used to be English for all ten
+        // locales.
         content: {
-          title: "Focus",
-          body: "Discover inspiring wisdom to brighten your day",
+          title: i18n.t("notifications.daily.title"),
+          body: i18n.t("notifications.daily.body"),
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
           data: { kind: DAILY_KIND },
@@ -156,8 +160,8 @@ export const areNotificationsEnabled = async (): Promise<boolean> => {
 export const sendTestNotification = async (): Promise<void> => {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: "🔔 Test Notification",
-      body: "Your notifications are working perfectly!",
+      title: i18n.t("notifications.test.title"),
+      body: i18n.t("notifications.test.body"),
       sound: true,
     },
     trigger: null, // Send immediately
