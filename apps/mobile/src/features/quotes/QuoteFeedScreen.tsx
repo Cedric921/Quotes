@@ -19,6 +19,7 @@ import { FloatingNav } from "./components/FloatingNav";
 import { StreakToast } from "./components/StreakToast";
 import { FREE_LIKE_QUOTA } from "./likeQuotaSlice";
 import { useQuoteLike } from "./useQuoteLike";
+import { useWidgetSync } from "./useWidgetSync";
 import { useStreak } from "../streak/useStreak";
 import type { Quote } from "../../types";
 
@@ -126,6 +127,10 @@ export function QuoteFeedScreen({
   } | null>(null);
 
   const current = quotes[index];
+
+  // The widgets are advertised in the profile grid and set up during the
+  // funnel; without this they can only ever show their fallback text.
+  useWidgetSync(quotes, current);
 
   // One visit per app open drives the streak; the toast fires off the slice.
   useEffect(() => {
