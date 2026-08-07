@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { ChoiceScreen } from "./ChoiceScreen";
 import {
@@ -17,6 +16,7 @@ import {
   soundOptions,
 } from "../options";
 import { useTopics } from "../../../api/hooks/useTopics";
+import { SYSTEM_LANGUAGE, changeLanguage } from "../../../i18n";
 import type { Topic } from "../../../types";
 
 interface FieldProps {
@@ -99,16 +99,17 @@ export function BeliefsScreen({ onBack }: FieldProps) {
  */
 export function LanguageScreen({ onBack }: FieldProps) {
   const dispatch = useAppDispatch();
-  const { i18n } = useTranslation();
-  const value = useAppSelector((s) => s.settings.language) ?? "system";
+  const value = useAppSelector((s) => s.settings.language) ?? SYSTEM_LANGUAGE;
 
   const select = useCallback(
     (id: string) => {
       dispatch(setChoice({ field: "language", value: id }));
       void dispatch(persistSettings());
-      void i18n.changeLanguage(id === "system" ? undefined : id);
+      // Through the i18n module, not the instance: it is what writes the
+      // preference down and what turns "system" into an actual language.
+      void changeLanguage(id);
     },
-    [dispatch, i18n],
+    [dispatch],
   );
 
   return (

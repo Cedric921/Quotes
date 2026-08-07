@@ -35,6 +35,31 @@ const supportedLanguageCodes = supportedLanguages.map((l) => l.code);
 // Langue par défaut: Français
 const DEFAULT_LANGUAGE = "fr";
 
+/** Valeur stockée quand l'utilisateur veut suivre la langue de l'appareil. */
+export const SYSTEM_LANGUAGE = "system";
+
+/**
+ * La langue de l'appareil, si l'app la parle.
+ *
+ * `expo-localization` était importé et jamais appelé : une installation
+ * anglophone démarrait en français et n'avait aucun moyen de le deviner avant
+ * d'aller dans les réglages.
+ */
+const deviceLanguage = (): string => {
+  const code = Localization.getLocales()[0]?.languageCode;
+  return code && supportedLanguageCodes.includes(code)
+    ? code
+    : DEFAULT_LANGUAGE;
+};
+
+/** Résout une préférence — un code, `system`, ou rien — en langue à appliquer. */
+const resolveLanguage = (preference?: string | null): string => {
+  if (!preference || preference === SYSTEM_LANGUAGE) return deviceLanguage();
+  return supportedLanguageCodes.includes(preference)
+    ? preference
+    : deviceLanguage();
+};
+
 // Initialiser i18n de manière synchrone d'abord
 i18n.use(initReactI18next).init({
   resources: {
@@ -56,29 +81,37 @@ i18n.use(initReactI18next).init({
   },
 });
 
-// Charger la langue sauvegardée de manière asynchrone
+// Charger la préférence sauvegardée de manière asynchrone
 const loadSavedLanguage = async () => {
   try {
-    const savedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (savedLanguage) {
-      await i18n.changeLanguage(savedLanguage);
-    }
+    const saved = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+    await i18n.changeLanguage(resolveLanguage(saved));
   } catch (error) {
     console.error("Error loading saved language:", error);
+    await i18n.changeLanguage(deviceLanguage());
   }
 };
 
 // Charger la langue sauvegardée au démarrage
 loadSavedLanguage();
 
-// Fonction pour changer la langue
-export const changeLanguage = async (language: string) => {
+/**
+ * Changer la langue et s'en souvenir.
+ *
+ * C'est la préférence qui est stockée, pas la langue résolue : `system` doit
+ * rester `system`, sinon un utilisateur qui suit son appareil se retrouve figé
+ * sur la langue qu'il avait le jour où il a ouvert l'écran.
+ *
+ * L'écran de réglages appelait `i18n.changeLanguage` directement, donc le choix
+ * s'appliquait à l'écran et disparaissait au redémarrage.
+ */
+export const changeLanguage = async (preference: string) => {
   try {
-    await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
-    await i18n.changeLanguage(language);
+    await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, preference);
   } catch (error) {
     console.error("Error changing language:", error);
   }
+  await i18n.changeLanguage(resolveLanguage(preference));
 };
 
 // Fonction pour obtenir la langue actuelle

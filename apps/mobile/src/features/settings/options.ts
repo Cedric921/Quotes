@@ -1,4 +1,5 @@
 import { questionById } from "../onboarding/questions";
+import { SYSTEM_LANGUAGE } from "../../i18n";
 
 export interface ChoiceOption {
   id: string;
@@ -46,7 +47,7 @@ export const beliefsOptions = fromQuestion("beliefs");
  * device is the right default for nine users out of ten.
  */
 export const languageOptions: ChoiceOption[] = [
-  { id: "system", labelKey: "settings.options.language.system" },
+  { id: SYSTEM_LANGUAGE, labelKey: "settings.options.language.system" },
   ...["en", "fr", "es", "de", "it", "nl", "ru", "tr", "ar", "zh"].map(
     (id) => ({ id, labelKey: `settings.options.language.${id}` }),
   ),
