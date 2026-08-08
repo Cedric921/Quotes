@@ -44,12 +44,15 @@ export function UnlockBanner({
             </Text>
           </View>
           {illustration ? (
+            // Decorative: the banner's own label already says what it does,
+            // and an empty `accessibilityLabel` still takes VoiceOver focus
+            // to announce nothing.
             <Image
               source={illustration}
               style={s.art}
               resizeMode="contain"
-              accessibilityRole="image"
-              accessibilityLabel=""
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
             />
           ) : null}
         </View>
