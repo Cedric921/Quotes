@@ -166,9 +166,20 @@ export function QuoteFeedScreen({
     }
   }, [quotes.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Everything filtered out, and no page left to rescue it: say so, and offer
-  // the way back rather than a blank screen the user has to diagnose.
-  if (quotes.length === 0 && !hasNextPage && !isFetchingNextPage) {
+  // Everything the API gave us was filtered out, and no page is left to
+  // rescue it: say so, and offer the way back rather than a blank screen the
+  // user has to diagnose.
+  //
+  // `loaded.length > 0` is what separates "your settings hid everything" from
+  // "the first page has not arrived yet" — both leave `quotes` empty, and only
+  // one of them is the user's doing.
+  const filteredEverythingOut =
+    loaded.length > 0 &&
+    quotes.length === 0 &&
+    !hasNextPage &&
+    !isFetchingNextPage;
+
+  if (filteredEverythingOut) {
     return (
       <View style={s.root}>
         <View style={s.empty}>
