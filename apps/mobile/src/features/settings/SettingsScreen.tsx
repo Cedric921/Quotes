@@ -6,24 +6,17 @@ import { makeStyles } from "../../theme";
 import { Sheet, SettingsRow, SettingsSection, Text, Toggle } from "../../ui";
 import { useAppSelector } from "../../store/hooks";
 import { useDisplayName } from "./useDisplayName";
+import { useSocialNetworks } from "../../api/hooks/useSocial";
+import { socialIcon } from "../../utils/iconMapper";
 import { APP_VERSION, SOCIAL_URLS, SUPPORT_URL, LEGAL_PRIVACY_URL, LEGAL_TERMS_URL } from "../../constants/appConfig";
-import type { Ionicons } from "@expo/vector-icons";
-
 /**
- * Each network keeps its own mark — a generic feed icon five times over reads
- * as one row repeated. X has no Ionicons glyph under its new name, so it
- * still comes through as the bird.
+ * The five the app ships with, used until the API answers — and if it never
+ * does. Each keeps its own mark: a generic feed icon five times over reads as
+ * one row repeated.
  */
-const SOCIAL_ICONS: Record<
-  keyof typeof SOCIAL_URLS,
-  keyof typeof Ionicons.glyphMap
-> = {
-  instagram: "logo-instagram",
-  tiktok: "logo-tiktok",
-  facebook: "logo-facebook",
-  pinterest: "logo-pinterest",
-  x: "logo-twitter",
-};
+const FALLBACK_SOCIALS = (
+  Object.keys(SOCIAL_URLS) as (keyof typeof SOCIAL_URLS)[]
+).map((key) => ({ id: key, name: key, url: SOCIAL_URLS[key] }));
 
 const useStyles = makeStyles((t) => ({
   version: {
@@ -62,6 +55,9 @@ export function SettingsScreen({
   const user = useAppSelector((st) => st.auth.user);
   const isAuthenticated = useAppSelector((st) => st.auth.isAuthenticated);
   const name = useDisplayName();
+  // The admin panel manages these; the constants are the offline answer.
+  const { data: socials } = useSocialNetworks();
+  const socialRows = socials?.length ? socials : FALLBACK_SOCIALS;
 
   return (
     <Sheet title={t("settings.title")} onBack={onBack} collapsedOnly>
@@ -111,12 +107,19 @@ export function SettingsScreen({
       </SettingsSection>
 
       <SettingsSection title={t("settings.section.follow")}>
-        {(Object.keys(SOCIAL_URLS) as (keyof typeof SOCIAL_URLS)[]).map((key) => (
+        {socialRows.map((social) => (
           <SettingsRow
-            key={key}
-            icon={SOCIAL_ICONS[key]}
-            label={t(`settings.social.${key}`)}
-            onPress={() => void Linking.openURL(SOCIAL_URLS[key])}
+            key={social.id}
+            icon={socialIcon(
+              "icon" in social ? (social.icon as string) : undefined,
+              social.name,
+            )}
+            // A network served by the API brings its own name; the shipped
+            // five have a translated one.
+            label={t(`settings.social.${social.name}`, {
+              defaultValue: social.name,
+            })}
+            onPress={() => void Linking.openURL(social.url)}
           />
         ))}
       </SettingsSection>
