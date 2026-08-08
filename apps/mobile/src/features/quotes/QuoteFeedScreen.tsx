@@ -20,6 +20,7 @@ import { StreakToast } from "./components/StreakToast";
 import { FREE_LIKE_QUOTA } from "./likeQuotaSlice";
 import { useQuoteLike } from "./useQuoteLike";
 import { useWidgetSync } from "./useWidgetSync";
+import { useReviewPrompt } from "./useReviewPrompt";
 import { useStreak } from "../streak/useStreak";
 import type { Quote } from "../../types";
 
@@ -94,6 +95,7 @@ export function QuoteFeedScreen({
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useQuotes(10, true);
   const like = useQuoteLike();
   const streak = useStreak();
+  const recordQuoteViewed = useReviewPrompt();
 
   const loaded = useMemo<Quote[]>(() => data?.pages.flat() ?? [], [data]);
 
@@ -138,10 +140,19 @@ export function QuoteFeedScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Held in a ref because FlatList keeps the first callback it is given:
+  // passing a new function on re-render makes it throw.
+  const recordQuoteViewedRef = useRef(recordQuoteViewed);
+  recordQuoteViewedRef.current = recordQuoteViewed;
+
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const first = viewableItems[0];
-      if (typeof first?.index === "number") setIndex(first.index);
+      if (typeof first?.index !== "number") return;
+      setIndex(first.index);
+      // Reading quotes is what earns the review prompt, and the only place
+      // that knows one was read is here.
+      void recordQuoteViewedRef.current();
     },
   ).current;
 

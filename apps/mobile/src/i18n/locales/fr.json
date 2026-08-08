@@ -367,7 +367,15 @@
     "noSubscription": "Aucun abonnement actif",
     "noPurchasesToRestore": "Aucun achat précédent à restaurer",
     "manageInStore": "Gérer sur le store",
-    "noPayments": "Aucun paiement pour le moment"
+    "noPayments": "Aucun paiement pour le moment",
+    "promo": {
+      "title": "Code promo",
+      "placeholder": "Saisissez votre code",
+      "apply": "Appliquer",
+      "optional": "Code promo (facultatif)",
+      "applied": "Code appliqué",
+      "failed": "Ce code n'a pas pu être appliqué"
+    }
   },
   "notifications": {
     "title": "Notifications",

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Linking, Platform, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../../theme";
@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   GradientBorderCard,
+  Input,
   Sheet,
   SettingsRow,
   SettingsSection,
@@ -13,6 +14,7 @@ import {
 } from "../../../ui";
 import { useAppSelector } from "../../../store/hooks";
 import { useUserPayments, type Payment } from "../../../api/hooks/useUser";
+import { useApplyPromoCode } from "../../../api/hooks/usePromoCode";
 import { usePaywall } from "../usePaywall";
 import { notifyError, notifySuccess } from "../../auth/feedback";
 
@@ -38,6 +40,7 @@ const useStyles = makeStyles((t) => ({
   },
   paymentCopy: { flex: 1, gap: t.space.xxs },
   empty: { marginTop: t.space.xs },
+  promo: { gap: t.space.sm, marginBottom: t.space.xl },
 }));
 
 export interface ManageSubscriptionScreenProps {
@@ -62,6 +65,9 @@ export function ManageSubscriptionScreen({
   const isSubscribed = user?.isSubscribed ?? false;
   const { restore, isRestoring } = usePaywall();
   const { data: payments = [], isLoading } = useUserPayments();
+  const isAuthenticated = useAppSelector((st) => st.auth.isAuthenticated);
+  const applyPromoCode = useApplyPromoCode();
+  const [promo, setPromo] = useState("");
 
   const dateFmt = useMemo(
     () =>
@@ -85,6 +91,22 @@ export function ManageSubscriptionScreen({
   const renewal = user?.subscriptionEndDate
     ? dateFmt.format(new Date(user.subscriptionEndDate))
     : undefined;
+
+  const onApplyPromo = () => {
+    const code = promo.trim().toUpperCase();
+    if (!code) return;
+
+    applyPromoCode.mutate(code, {
+      onSuccess: (result) => {
+        setPromo("");
+        // The API explains what the code gave ("30 days of premium"); that
+        // sentence is worth more than our generic line, and `t()` passes a
+        // non-key through unchanged.
+        notifySuccess("subscription.promo.applied", result.message);
+      },
+      onError: () => notifyError("subscription.promo.failed"),
+    });
+  };
 
   const onRestore = async () => {
     try {
@@ -148,6 +170,34 @@ export function ManageSubscriptionScreen({
           onPress={() => void Linking.openURL(STORE_SUBSCRIPTIONS_URL)}
         />
       </SettingsSection>
+
+      {/*
+        * A code redeems against the account, so it is only offered to someone
+        * who has one — the hook posts to `/subscriptions/apply-promo-code`
+        * with the bearer token.
+        */}
+      {isAuthenticated ? (
+        <SettingsSection title={t("subscription.promo.title")}>
+          <View style={s.promo}>
+            <Input
+              value={promo}
+              onChangeText={setPromo}
+              placeholder={t("subscription.promo.placeholder")}
+              label={t("subscription.promo.title")}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={onApplyPromo}
+            />
+            <Button
+              label={t("subscription.promo.apply")}
+              disabled={promo.trim().length === 0}
+              loading={applyPromoCode.isPending}
+              onPress={onApplyPromo}
+            />
+          </View>
+        </SettingsSection>
+      ) : null}
 
       <SettingsSection title={t("subscription.paymentHistory")}>
         {payments.length > 0 ? (

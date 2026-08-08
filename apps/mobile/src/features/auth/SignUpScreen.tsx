@@ -5,6 +5,7 @@ import { makeStyles } from "../../theme";
 import { Button, Input, LinkButton, Sheet, Text } from "../../ui";
 import { useAppDispatch } from "../../store/hooks";
 import { registerThunk } from "../../store/slices/authSlice";
+import { useApplyPromoCode } from "../../api/hooks/usePromoCode";
 import { useDisplayName } from "../settings/useDisplayName";
 import {
   isEmail,
@@ -34,10 +35,12 @@ export function SignUpScreen({ onBack, onSignIn }: SignUpScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const applyPromoCode = useApplyPromoCode();
   const [name, setName] = useState(useDisplayName());
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
+  const [promo, setPromo] = useState("");
   const [pending, setPending] = useState(false);
 
   const complete =
@@ -67,6 +70,20 @@ export function SignUpScreen({ onBack, onSignIn }: SignUpScreenProps) {
           password,
         }),
       ).unwrap();
+
+      // The code is applied after the account exists, and its failure is not
+      // the sign-up's failure: a wrong code must not cost the user the
+      // account they just created.
+      const code = promo.trim().toUpperCase();
+      if (code) {
+        try {
+          const result = await applyPromoCode.mutateAsync(code);
+          notifySuccess("subscription.promo.applied", result.message);
+        } catch {
+          notifyError("subscription.promo.failed");
+        }
+      }
+
       notifySuccess("auth.signupSuccess", "auth.welcomeMessage");
       onBack();
     } catch (error) {
@@ -126,6 +143,15 @@ export function SignUpScreen({ onBack, onSignIn }: SignUpScreenProps) {
           autoCapitalize="none"
           autoComplete="new-password"
           textContentType="newPassword"
+          returnKeyType="next"
+        />
+        <Input
+          value={promo}
+          onChangeText={setPromo}
+          placeholder={t("subscription.promo.optional")}
+          label={t("subscription.promo.optional")}
+          autoCapitalize="characters"
+          autoCorrect={false}
           returnKeyType="done"
           onSubmitEditing={() => void submit()}
         />

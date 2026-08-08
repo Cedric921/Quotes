@@ -367,7 +367,15 @@
     "noSubscription": "No active subscription",
     "noPurchasesToRestore": "No previous purchases found to restore",
     "manageInStore": "Manage in the store",
-    "noPayments": "No payments yet"
+    "noPayments": "No payments yet",
+    "promo": {
+      "title": "Promo code",
+      "placeholder": "Enter your code",
+      "apply": "Apply",
+      "optional": "Promo code (optional)",
+      "applied": "Code applied",
+      "failed": "That code could not be applied"
+    }
   },
   "notifications": {
     "title": "Notifications",
