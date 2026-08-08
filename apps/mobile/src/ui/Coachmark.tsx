@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Pressable, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "../theme";
 import { Text } from "./Text";
 
@@ -57,6 +58,7 @@ export function Coachmark({
 }: CoachmarkProps) {
   const s = useStyles();
   const t = useTheme();
+  const { t: translate } = useTranslation();
 
   if (!visible) return null;
 
@@ -68,7 +70,7 @@ export function Coachmark({
       <Pressable
         style={s.backdrop}
         accessibilityRole="button"
-        accessibilityLabel="Fermer l'astuce"
+        accessibilityLabel={translate("common.close")}
         onPress={onDismiss}
       >
         <View

@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SurfaceProvider, makeStyles, useTheme } from "../../theme";
 import { Text } from "../../ui";
 import type { Quote } from "../../types";
+import { WATERMARK } from "../../constants/appConfig";
 
 /** 9:16, so the export drops straight into a story without letterboxing. */
 export const SHARE_ASPECT = 9 / 16;
@@ -78,7 +79,7 @@ export const ShareCard = forwardRef<View, ShareCardProps>(function ShareCard(
             {showWatermark ? (
               <View style={s.watermark}>
                 <Ionicons name="chatbox" size={14} color={t.image.text} />
-                <Text variant="caption">motivation.app</Text>
+                <Text variant="caption">{WATERMARK}</Text>
               </View>
             ) : null}
           </View>

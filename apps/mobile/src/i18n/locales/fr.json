@@ -25,7 +25,9 @@
     "now": "Maintenant",
     "andMore": ", et {{count}} de plus",
     "back": "Retour",
-    "share": "Partager"
+    "share": "Partager",
+    "decrease": "Diminuer",
+    "increase": "Augmenter"
   },
   "permissions": {
     "notificationsTitle": "Notifications",

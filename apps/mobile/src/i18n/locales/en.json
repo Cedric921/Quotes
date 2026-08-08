@@ -25,7 +25,9 @@
     "now": "Now",
     "andMore": ", and {{count}} more",
     "back": "Back",
-    "share": "Share"
+    "share": "Share",
+    "decrease": "Decrease",
+    "increase": "Increase"
   },
   "permissions": {
     "notificationsTitle": "Notifications",

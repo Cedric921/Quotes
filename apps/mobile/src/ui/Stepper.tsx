@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "../theme";
 import { Text } from "./Text";
 
@@ -53,6 +54,7 @@ export function Stepper({
 }: StepperProps) {
   const s = useStyles();
   const t = useTheme();
+  const { t: translate } = useTranslation();
 
   const step = (delta: number) => {
     const next = Math.min(max, Math.max(min, value + delta));
@@ -69,7 +71,7 @@ export function Stepper({
       <View style={s.controls}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Moins"
+          accessibilityLabel={translate("common.decrease")}
           onPress={() => step(-1)}
           disabled={value <= min}
           style={[s.button, value <= min ? s.buttonDisabled : null]}
@@ -83,7 +85,7 @@ export function Stepper({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Plus"
+          accessibilityLabel={translate("common.increase")}
           onPress={() => step(1)}
           disabled={value >= max}
           style={[s.button, value >= max ? s.buttonDisabled : null]}

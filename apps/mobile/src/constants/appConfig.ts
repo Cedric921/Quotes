@@ -13,6 +13,12 @@ export const APP_VERSION: string =
 
 export const SUPPORT_URL = "https://focus-app.com/help";
 export const SHARE_APP_URL = "https://focus-app.com";
+
+/**
+ * Stamped on every shared image (premium can hide it). Written without the
+ * scheme because it is read, not tapped.
+ */
+export const WATERMARK = "focus-app.com";
 export const MORE_APPS_URL = "https://focus-app.com/apps";
 export const BUNDLE_URL = "https://focus-app.com/bundle";
 export const LEGAL_TERMS_URL = "https://focus-app.com/terms";
