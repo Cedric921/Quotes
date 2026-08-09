@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   requestNotificationPermissions,
   scheduleDailyNotifications,
@@ -7,6 +8,8 @@ import {
 
 /** Sunday through Saturday, in the numbering `notificationService` expects. */
 const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
+
+const KEY = "@focus_reminders_v2";
 
 export interface ReminderSchedule {
   /** How many reminders to spread across the window. */
@@ -63,7 +66,36 @@ export const requestAndSchedule = async (
   }));
 
   await scheduleDailyNotifications(configs);
+  await saveSchedule(schedule);
   return { granted: true, scheduled: times.length };
 };
 
-export const remindersService = { buildTimes, requestAndSchedule };
+/**
+ * The schedule currently on the device.
+ *
+ * Reopening "Rappels" from the profile used to show the defaults — ten a day
+ * between 9 and 22 — whatever the user had set, and saving from there
+ * silently reset them to it.
+ */
+export const loadSchedule = async (): Promise<ReminderSchedule | null> => {
+  try {
+    const raw = await AsyncStorage.getItem(KEY);
+    return raw ? (JSON.parse(raw) as ReminderSchedule) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveSchedule = async (schedule: ReminderSchedule): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(KEY, JSON.stringify(schedule));
+  } catch {
+    // The notifications are scheduled either way; this only pre-fills a form.
+  }
+};
+
+export const remindersService = {
+  buildTimes,
+  requestAndSchedule,
+  loadSchedule,
+};

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Platform, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useTranslation } from "react-i18next";
@@ -56,6 +56,17 @@ export function RemindersSetupScreen({
   const [count, setCount] = useState(10);
   const [start, setStart] = useState(at(9));
   const [end, setEnd] = useState(at(22));
+
+  // Reopened from the profile, the screen shows what is actually scheduled
+  // rather than the funnel's defaults.
+  useEffect(() => {
+    void remindersService.loadSchedule().then((saved) => {
+      if (!saved) return;
+      setCount(saved.count);
+      setStart(at(saved.startHour));
+      setEnd(at(saved.endHour));
+    });
+  }, []);
   const [editing, setEditing] = useState<"start" | "end" | null>(null);
   const [saving, setSaving] = useState(false);
 
