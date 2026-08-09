@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../theme";
 import { Card, IconCircle, Sheet, Text } from "../../ui";
 import { useLikedQuotes } from "../../api/hooks/useUser";
-import { useToggleLikeQuote } from "../../api/hooks/useQuotes";
+import { useQuoteLike } from "./useQuoteLike";
 import type { Quote } from "../../types";
 
 const useStyles = makeStyles((t) => ({
@@ -35,7 +35,7 @@ export function LikedQuotesScreen({ onBack, onShare }: LikedQuotesScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
   const { data: quotes = [], isLoading } = useLikedQuotes();
-  const toggleLike = useToggleLikeQuote();
+  const like = useQuoteLike();
 
   const confirmRemove = (quote: Quote) => {
     Alert.alert(t("favorites.removeTitle"), t("favorites.removeMessage"), [
@@ -43,10 +43,10 @@ export function LikedQuotesScreen({ onBack, onShare }: LikedQuotesScreenProps) {
       {
         text: t("common.delete"),
         style: "destructive",
-        // `isLiked: true` is the state before the tap: the mutation unlikes,
-        // and its own invalidation drops the row from this list.
-        onPress: () =>
-          toggleLike.mutate({ quoteId: quote.id, isLiked: true }),
+        // Through the shared hook, not the mutation: this is where people
+        // actually remove favourites, and it is where the free quota has to
+        // give the slot back. The mutation's own invalidation drops the row.
+        onPress: () => like.toggle({ ...quote, isLiked: true }),
       },
     ]);
   };
