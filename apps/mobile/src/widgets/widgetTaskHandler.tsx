@@ -2,9 +2,7 @@ import React from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { WidgetTaskHandlerProps } from "react-native-android-widget";
 import { FocusQuoteWidget, FocusQuoteWidgetLarge } from "./FocusQuoteWidget";
-
-/** The key `widgetService` writes to. One store, both readers. */
-const WIDGET_QUOTE_KEY = "@focus_widget_quote";
+import { WIDGET_QUOTE_KEY } from "../constants/appConfig";
 
 // Default quote when no data is available
 const DEFAULT_QUOTE = {

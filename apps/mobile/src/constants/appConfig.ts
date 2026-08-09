@@ -32,6 +32,17 @@ export const SOCIAL_URLS = {
   x: "https://x.com/focus_app",
 } as const;
 
+/**
+ * Where the app leaves the quote for the widgets to find.
+ *
+ * Both sides of the bridge need the exact same string — the app writes it and
+ * the headless widget task handler reads it — and a silent drift here shows up
+ * as a widget stuck on its fallback line, which is how it spent its first
+ * release.
+ */
+export const WIDGET_QUOTE_KEY = "@focus_widget_quote";
+export const WIDGET_QUOTES_ARRAY_KEY = "@focus_widget_quotes_array";
+
 /** Free tier ceiling, mirrored in `likeQuotaSlice`. */
 export const FREE_LIKE_QUOTA = 5;
 

@@ -1,5 +1,9 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  WIDGET_QUOTE_KEY,
+  WIDGET_QUOTES_ARRAY_KEY,
+} from "../constants/appConfig";
 
 // Types
 interface QuoteData {
@@ -9,8 +13,6 @@ interface QuoteData {
 }
 
 // Constants
-const WIDGET_QUOTE_KEY = "@focus_widget_quote";
-const WIDGET_QUOTES_ARRAY_KEY = "@focus_widget_quotes_array";
 const IOS_APP_GROUP = "group.com.mindset.focus.widget";
 const MAX_WIDGET_QUOTES = 30;
 
