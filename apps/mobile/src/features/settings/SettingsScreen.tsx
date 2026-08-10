@@ -153,7 +153,14 @@ export function SettingsScreen({
           <Text variant="caption" tone="dim">
             {t("settings.version", { version: APP_VERSION })}
           </Text>
-          <Text variant="caption" tone="dim" numberOfLines={1}>
+          {/* Truncated in the middle, like the design: support asks for the
+              end of the id as often as the start. */}
+          <Text
+            variant="caption"
+            tone="dim"
+            numberOfLines={1}
+            ellipsizeMode="middle"
+          >
             {t("settings.userId", { id: user?.id ?? "—" })}
           </Text>
         </View>
