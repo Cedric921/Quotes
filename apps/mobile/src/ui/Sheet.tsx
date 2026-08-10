@@ -122,6 +122,12 @@ export function Sheet({
         <ScrollView
           onScroll={onScroll}
           scrollEventThrottle={32}
+          // Sub-pages carry forms — the name, the six auth fields, a promo
+          // code — and the sheet is what scrolls them. Without these, the
+          // field the keyboard covers stays covered, and a tap on the CTA
+          // only dismisses the keyboard.
+          automaticallyAdjustKeyboardInsets
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={[
             s.content,
             { paddingBottom: insets.bottom + t.space.xxxl },

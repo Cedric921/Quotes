@@ -77,6 +77,14 @@ function AppContent() {
       const currentUserId = user?.id || null;
 
       if (currentUserId !== prevUserIdRef.current) {
+        // Everything cached was fetched as somebody else — as a guest before
+        // signing in, or as this user before signing out. The feed's `isLiked`
+        // flags are the visible half of that: without this, a fresh sign-in
+        // shows five minutes of hearts belonging to nobody.
+        if (prevUserIdRef.current !== null || currentUserId !== null) {
+          queryClient.invalidateQueries();
+        }
+
         try {
           if (currentUserId) {
             await loginUser(currentUserId);
