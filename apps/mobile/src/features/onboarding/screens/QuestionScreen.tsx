@@ -82,6 +82,7 @@ export function QuestionScreen({ questionId }: QuestionScreenProps) {
             key={option.id}
             label={t(option.labelKey)}
             icon={option.icon}
+            glyph={option.glyph}
             kind={question.kind === "single" ? "radio" : "check"}
             selected={selected.includes(option.id)}
             onPress={() => onSelect(option.id)}

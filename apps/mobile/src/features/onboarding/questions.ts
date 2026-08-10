@@ -18,6 +18,38 @@ const q = (
 });
 
 /**
+ * The twelve signs, with the symbols the design puts beside them. They are
+ * Unicode, not icons: no icon font ships the zodiac, and a list of twelve
+ * identical bullets is not the screen that was drawn.
+ */
+const ZODIAC: [string, string][] = [
+  ["aries", "\u2648"],
+  ["taurus", "\u2649"],
+  ["gemini", "\u264A"],
+  ["cancer", "\u264B"],
+  ["leo", "\u264C"],
+  ["virgo", "\u264D"],
+  ["libra", "\u264E"],
+  ["scorpio", "\u264F"],
+  ["sagittarius", "\u2650"],
+  ["capricorn", "\u2651"],
+  ["aquarius", "\u2652"],
+  ["pisces", "\u2653"],
+];
+
+const zodiac = (): Question => ({
+  id: "zodiac",
+  kind: "single",
+  titleKey: "onboarding.q.zodiac.title",
+  skippable: true,
+  options: ZODIAC.map(([id, glyph]) => ({
+    id,
+    labelKey: `onboarding.q.zodiac.opt.${id}`,
+    glyph,
+  })),
+});
+
+/**
  * The questionnaire. Order lives in `flow` below — this is just the content,
  * so a question can be reordered or A/B'd without touching a screen.
  */
@@ -25,6 +57,7 @@ export const questions: Question[] = [
   q("source", "single", [
     "tiktok",
     "instagram",
+    "facebook",
     "friend",
     "appstore",
     "search",
@@ -46,10 +79,7 @@ export const questions: Question[] = [
     "none",
     "other",
   ], { skippable: true }),
-  q("zodiac", "single", [
-    "aries", "taurus", "gemini", "cancer", "leo", "virgo",
-    "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
-  ], { skippable: true }),
+  zodiac(),
   q("motivationSources", "multi", [
     "learning",
     "people",
@@ -166,7 +196,11 @@ export const questionById = (id: string): Question => {
  * `QuestionScreen`.
  */
 export const flow: Step[] = [
-  { kind: "intro", copyKey: "onboarding.intro.hero" },
+  {
+    kind: "intro",
+    copyKey: "onboarding.intro.hero",
+    subtitleKey: "onboarding.intro.heroSubtitle",
+  },
   { kind: "question", questionId: "source" },
   { kind: "intro", copyKey: "onboarding.intro.personalise" },
   { kind: "question", questionId: "age" },

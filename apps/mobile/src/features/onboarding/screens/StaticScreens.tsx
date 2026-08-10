@@ -14,11 +14,14 @@ const useStyles = makeStyles((t) => ({
   },
   illustration: { width: "100%", height: 260 },
   introTitle: { marginBottom: t.space.xxl },
+  heroTitle: { marginTop: t.space.xxl, marginBottom: t.space.md },
   manifesto: { flex: 1, justifyContent: "center" },
 }));
 
 export interface CopyScreenProps {
   copyKey: string;
+  /** Present only on the opening screen, which also flips the layout. */
+  subtitleKey?: string;
   illustration?: number;
 }
 
@@ -26,31 +29,65 @@ export interface CopyScreenProps {
  * Illustration on top, promise underneath. Used at the three moments the
  * funnel needs to re-state why the next block of questions is worth answering.
  */
-export function IntroScreen({ copyKey, illustration }: CopyScreenProps) {
+export function IntroScreen({
+  copyKey,
+  subtitleKey,
+  illustration,
+}: CopyScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
+  const art = (
+    <View style={s.illustrationWrap}>
+      {illustration ? (
+        <Image
+          source={illustration}
+          style={s.illustration}
+          resizeMode="contain"
+          accessibilityRole="image"
+          accessibilityLabel={t(copyKey)}
+        />
+      ) : null}
+    </View>
+  );
+
+  const copy = (
+    <View>
+      <Text
+        variant="display"
+        align="center"
+        style={subtitleKey ? s.heroTitle : s.introTitle}
+      >
+        {t(copyKey)}
+      </Text>
+      {subtitleKey ? (
+        <Text variant="body" tone="dim" align="center">
+          {t(subtitleKey)}
+        </Text>
+      ) : null}
+    </View>
+  );
+
+  // The opening screen leads with its promise and illustrates it underneath;
+  // the three later ones show the picture first and land the line at the end.
   return (
     <Screen
       footer={
         <Button label={t("common.continue")} onPress={() => dispatch(next())} />
       }
     >
-      <View style={s.illustrationWrap}>
-        {illustration ? (
-          <Image
-            source={illustration}
-            style={s.illustration}
-            resizeMode="contain"
-            accessibilityRole="image"
-            accessibilityLabel={t(copyKey)}
-          />
-        ) : null}
-      </View>
-      <Text variant="display" align="center" style={s.introTitle}>
-        {t(copyKey)}
-      </Text>
+      {subtitleKey ? (
+        <>
+          {copy}
+          {art}
+        </>
+      ) : (
+        <>
+          {art}
+          {copy}
+        </>
+      )}
     </Screen>
   );
 }

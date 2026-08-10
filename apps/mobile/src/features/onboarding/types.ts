@@ -27,6 +27,11 @@ export interface QuestionOption {
   id: string;
   labelKey: string;
   icon?: IconName;
+  /**
+   * A character drawn where the icon would go, for symbols no icon font
+   * carries — the twelve astrological signs, and nothing else so far.
+   */
+  glyph?: string;
 }
 
 /** Steps that don't fit the question mould get their own screen. */
@@ -53,6 +58,11 @@ export interface Step {
   questionId?: string;
   /** Set for `intro` and `manifesto`. */
   copyKey?: string;
+  /**
+   * Second line under the title. Only the opening screen has one, and having
+   * one is what flips the layout: copy on top, illustration underneath.
+   */
+  subtitleKey?: string;
   illustration?: string;
 }
 

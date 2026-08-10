@@ -25,6 +25,8 @@ const useStyles = makeStyles((t) => ({
     borderColor: t.base.borderStrong,
   },
   label: { flex: 1 },
+  // Sized to the icon it stands in for, so a list mixing the two still lines up.
+  glyph: { width: 24, textAlign: "center" },
   marker: {
     width: 28,
     height: 28,
@@ -47,6 +49,8 @@ export interface OptionRowProps {
   /** `check` for multi-select, `radio` for single-select. */
   kind?: "check" | "radio";
   icon?: keyof typeof Ionicons.glyphMap;
+  /** Drawn in the icon's place for symbols no icon font has. */
+  glyph?: string;
   testID?: string;
 }
 
@@ -64,6 +68,7 @@ export function OptionRow({
   onPress,
   kind = "check",
   icon,
+  glyph,
   testID,
 }: OptionRowProps) {
   const s = useStyles();
@@ -89,6 +94,14 @@ export function OptionRow({
           size={24}
           color={selected ? t.base.textPrimary : t.base.textSecondary}
         />
+      ) : glyph ? (
+        <Text
+          variant="title"
+          tone={selected ? "primary" : "dim"}
+          style={s.glyph}
+        >
+          {glyph}
+        </Text>
       ) : null}
 
       <Text

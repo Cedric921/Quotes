@@ -111,7 +111,7 @@
     "termsOfService": "Terms of Service",
     "contactUs": "Contact Us",
     "aboutUs": "Follow Us",
-    "version": "Motivation app - version {{version}}",
+    "version": "Focus app - version {{version}}",
     "logout": "Logout",
     "logoutConfirmation": "Are you sure you want to logout?",
     "selectTheme": "Select theme",
@@ -165,7 +165,7 @@
     "mutedContent": "Muted content",
     "sound": "Sound",
     "signIn": "Sign in",
-    "shareApp": "Share Motivation",
+    "shareApp": "Share Focus",
     "moreApps": "More apps",
     "review": "Leave us a review",
     "help": "Help",
@@ -496,7 +496,8 @@
       "hero": "Stay motivated throughout the day",
       "personalise": "Personalise the app to improve your experience",
       "goals": "Personalise the app around your goals",
-      "quiz2": "Answer a few questions to get personalised quotes"
+      "quiz2": "Answer a few questions to get personalised quotes",
+      "heroSubtitle": "The inspiration to think positively, stay consistent and focus on your own growth"
     },
     "manifesto": {
       "firstThing": "The first thing you see when you look at your phone can change your whole day",
@@ -551,15 +552,16 @@
       "later": "Remind me later"
     },
     "welcome": {
-      "title": "Welcome to Motivation",
+      "title": "Welcome to Focus",
       "swipe": "Swipe up"
     },
     "q": {
       "source": {
-        "title": "How did you hear about Motivation?",
+        "title": "How did you hear about Focus?",
         "opt": {
           "tiktok": "TikTok",
           "instagram": "Instagram",
+          "facebook": "Facebook",
           "friend": "A friend",
           "appstore": "App Store",
           "search": "Web search",
@@ -751,7 +753,7 @@
         }
       },
       "achieve": {
-        "title": "What do you want to achieve with Motivation?",
+        "title": "What do you want to achieve with Focus?",
         "opt": {
           "positive_mindset": "Build a positive mindset",
           "confidence": "Improve my confidence",
@@ -789,7 +791,7 @@
     "version": "Version"
   },
   "app": {
-    "name": "Motivation"
+    "name": "Focus"
   },
   "feed": {
     "coachmark": "Get started: favourite {{count}} quotes to personalise your feed",
@@ -862,7 +864,7 @@
       "intro": "A quote on your home screen, refreshed through the day.",
       "step1": "Press and hold an empty space on your home screen",
       "step2": "Tap Edit, then Add widget",
-      "step3": "Search for Motivation and pick a size"
+      "step3": "Search for Focus and pick a size"
     },
     "lock": {
       "title": "Lock screen widgets",
@@ -870,7 +872,7 @@
       "step1": "Press and hold the lock screen",
       "step2": "Tap Customise, then the lock screen",
       "step3": "Tap the area under the clock",
-      "step4": "Choose Motivation from the list"
+      "step4": "Choose Focus from the list"
     }
   }
 }

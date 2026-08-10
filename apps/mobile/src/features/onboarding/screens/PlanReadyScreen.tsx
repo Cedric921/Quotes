@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,21 @@ import { Button, GradientBorderCard, Screen, Text } from "../../../ui";
 import { makeStyles, useTheme } from "../../../theme";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { next } from "../store/onboardingSlice";
+import { useTopics } from "../../../api/hooks/useTopics";
+import {
+  remindersService,
+  type ReminderSchedule,
+} from "../../../services/remindersService";
+import type { Topic } from "../../../types";
+
+/** What the reminders step starts on, and what the card shows if it was skipped. */
+const DEFAULT_SCHEDULE: ReminderSchedule = {
+  count: 10,
+  startHour: 9,
+  endHour: 22,
+};
+
+const hh = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 
 const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
@@ -36,6 +51,23 @@ export function PlanReadyScreen() {
 
   const answers = useAppSelector((st) => st.onboarding.answers);
   const topicIds = useAppSelector((st) => st.onboarding.topicIds);
+  const { data: topics = [] } = useTopics();
+
+  // The reminders step runs before this one, so what it scheduled is what the
+  // card should quote back. It was hardcoded to the reference screenshot's
+  // "11 per day, 9 AM to 10 PM" — numbers the user had never chosen.
+  const [schedule, setSchedule] = useState<ReminderSchedule>(DEFAULT_SCHEDULE);
+  useEffect(() => {
+    void remindersService
+      .loadSchedule()
+      .then((saved) => saved && setSchedule(saved));
+  }, []);
+
+  // Topics are ids in state and names on screen: the card used to print the
+  // raw ids, which on this API are UUIDs.
+  const topicNames = topicIds.map(
+    (id) => (topics as Topic[]).find((topic) => topic.id === id)?.name ?? id,
+  );
 
   const achieve = (answers.achieve ?? []).map((id) =>
     t(`onboarding.q.achieve.opt.${id}`),
@@ -57,15 +89,15 @@ export function PlanReadyScreen() {
     {
       icon: "grid-outline",
       labelKey: "onboarding.plan.interests",
-      value: summarise(topicIds),
+      value: summarise(topicNames),
     },
     {
       icon: "notifications-outline",
       labelKey: "onboarding.plan.reminders",
       value: t("onboarding.plan.remindersValue", {
-        count: 11,
-        from: "9 AM",
-        to: "10 PM",
+        count: schedule.count,
+        from: hh(schedule.startHour),
+        to: hh(schedule.endHour),
       }),
     },
   ];

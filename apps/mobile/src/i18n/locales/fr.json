@@ -111,7 +111,7 @@
     "termsOfService": "Conditions d'utilisation",
     "contactUs": "Contactez-nous",
     "aboutUs": "Suivez-nous",
-    "version": "Motivation app - version {{version}}",
+    "version": "Focus app - version {{version}}",
     "logout": "Déconnexion",
     "logoutConfirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
     "selectTheme": "Sélectionner un thème",
@@ -165,7 +165,7 @@
     "mutedContent": "Contenu en sourdine",
     "sound": "Son",
     "signIn": "Se connecter",
-    "shareApp": "Partager Motivation",
+    "shareApp": "Partager Focus",
     "moreApps": "Plus d'applications",
     "review": "Laissez-nous un avis",
     "help": "Aide",
@@ -496,7 +496,8 @@
       "hero": "Motivez-vous tout au long de la journée",
       "personalise": "Personnalisez l'application pour améliorer votre expérience",
       "goals": "Personnalisez l'application en fonction de vos objectifs",
-      "quiz2": "Répondez à quelques questions pour obtenir des citations personnalisées"
+      "quiz2": "Répondez à quelques questions pour obtenir des citations personnalisées",
+      "heroSubtitle": "L'inspiration pour penser positivement, rester cohérent et se concentrer sur son évolution"
     },
     "manifesto": {
       "firstThing": "La première chose que vous voyez lorsque vous regardez votre téléphone peut transformer toute votre journée",
@@ -551,15 +552,16 @@
       "later": "Me rappeler plus tard"
     },
     "welcome": {
-      "title": "Bienvenue à Motivation",
+      "title": "Bienvenue dans Focus",
       "swipe": "Balayez vers le haut"
     },
     "q": {
       "source": {
-        "title": "Comment avez-vous entendu parler de Motivation ?",
+        "title": "Comment avez-vous entendu parler de Focus ?",
         "opt": {
           "tiktok": "TikTok",
           "instagram": "Instagram",
+          "facebook": "Facebook",
           "friend": "Un ami",
           "appstore": "App Store",
           "search": "Recherche web",
@@ -751,7 +753,7 @@
         }
       },
       "achieve": {
-        "title": "Que voulez-vous atteindre avec Motivation ?",
+        "title": "Que voulez-vous atteindre avec Focus ?",
         "opt": {
           "positive_mindset": "Développer un état d'esprit positif",
           "confidence": "Améliorer ma confiance en moi",
@@ -789,7 +791,7 @@
     "version": "Version"
   },
   "app": {
-    "name": "Motivation"
+    "name": "Focus"
   },
   "feed": {
     "coachmark": "Commencez : mettez {{count}} citations dans vos favoris pour personnaliser votre fil",
@@ -862,7 +864,7 @@
       "intro": "Une citation sur votre écran d'accueil, renouvelée au fil de la journée.",
       "step1": "Appuyez longuement sur un espace vide de l'écran d'accueil",
       "step2": "Appuyez sur Modifier, puis sur Ajouter un widget",
-      "step3": "Cherchez Motivation et choisissez une taille"
+      "step3": "Cherchez Focus et choisissez une taille"
     },
     "lock": {
       "title": "Widgets écran de verrouillage",
@@ -870,7 +872,7 @@
       "step1": "Appuyez longuement sur l'écran de verrouillage",
       "step2": "Appuyez sur Personnaliser, puis sur l'écran de verrouillage",
       "step3": "Appuyez sur la zone sous l'heure",
-      "step4": "Choisissez Motivation dans la liste"
+      "step4": "Choisissez Focus dans la liste"
     }
   }
 }
