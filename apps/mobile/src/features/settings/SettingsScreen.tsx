@@ -3,7 +3,14 @@ import { Linking, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../theme";
-import { Sheet, SettingsRow, SettingsSection, Text, Toggle } from "../../ui";
+import {
+  IconCircle,
+  Sheet,
+  SettingsRow,
+  SettingsSection,
+  Text,
+  Toggle,
+} from "../../ui";
 import { useAppSelector } from "../../store/hooks";
 import { useDisplayName } from "./useDisplayName";
 import { useSocialNetworks } from "../../api/hooks/useSocial";
@@ -164,8 +171,14 @@ export function SettingsScreen({
             {t("settings.userId", { id: user?.id ?? "—" })}
           </Text>
         </View>
-        <SettingsRow
+        {/*
+          * A round icon button, not a `SettingsRow`: a row is built to fill a
+          * list, so inside this card it expanded and squeezed the two lines of
+          * text down to nothing — the card showed "Copy" and no version.
+          */}
+        <IconCircle
           icon="copy-outline"
+          size={44}
           label={t("common.copy")}
           onPress={() =>
             void Clipboard.setStringAsync(
