@@ -17,3 +17,4 @@ export {
   type SettingsSectionProps,
 } from "./SettingsList";
 export { Coachmark, type CoachmarkProps } from "./Coachmark";
+export { TileArt, type TileArtProps } from "./TileArt";

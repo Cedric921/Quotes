@@ -58,31 +58,37 @@ export function ProfileSheet({
     () => [
       {
         id: "topics",
+        icon: "albums-outline",
         title: t("profile.tile.topics"),
         onPress: () => onOpen("ContentPreferences"),
       },
       {
         id: "wallpapers",
+        icon: "image-outline",
         title: t("profile.tile.wallpapers"),
         onPress: () => onOpen("ThemePicker"),
       },
       {
         id: "reminders",
+        icon: "notifications-outline",
         title: t("profile.tile.reminders"),
         onPress: () => onOpen("Reminders"),
       },
       {
         id: "homeWidgets",
+        icon: "grid-outline",
         title: t("profile.tile.homeWidgets"),
         onPress: () => onOpen("HomeWidgets"),
       },
       {
         id: "lockWidgets",
+        icon: "lock-closed-outline",
         title: t("profile.tile.lockWidgets"),
         onPress: () => onOpen("LockWidgets"),
       },
       {
         id: "appIcon",
+        icon: "apps-outline",
         title: t("profile.tile.appIcon"),
         onPress: () => onOpen("AppIcon"),
       },
@@ -91,18 +97,21 @@ export function ProfileSheet({
       // them. Flip `enabled` when the native side lands.
       {
         id: "alarm",
+        icon: "alarm-outline",
         title: t("profile.tile.alarm"),
         enabled: false,
         onPress: () => undefined,
       },
       {
         id: "watch",
+        icon: "watch-outline",
         title: t("profile.tile.watch"),
         enabled: false,
         onPress: () => undefined,
       },
       {
         id: "bundle",
+        icon: "cube-outline",
         title: t("profile.tile.bundle"),
         subtitle: t("profile.tile.bundleSubtitle"),
         wide: true,

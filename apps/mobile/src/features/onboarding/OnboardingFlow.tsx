@@ -49,7 +49,11 @@ export function OnboardingFlow() {
       return <QuestionScreen questionId={step.questionId!} />;
     case "intro":
       return (
-        <IntroScreen copyKey={step.copyKey!} subtitleKey={step.subtitleKey} />
+        <IntroScreen
+          copyKey={step.copyKey!}
+          subtitleKey={step.subtitleKey}
+          icon={step.icon}
+        />
       );
     case "manifesto":
       return <ManifestoScreen copyKey={step.copyKey!} />;

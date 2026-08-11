@@ -1,7 +1,8 @@
 import React from "react";
 import { Image, Pressable, View } from "react-native";
+import type { Ionicons } from "@expo/vector-icons";
 import { makeStyles } from "../../../theme";
-import { Text } from "../../../ui";
+import { Text, TileArt } from "../../../ui";
 
 const useStyles = makeStyles((t) => ({
   grid: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm },
@@ -36,6 +37,8 @@ export interface FeatureTile {
   /** Second line, used only by the full-width tile at the bottom. */
   subtitle?: string;
   illustration?: number;
+  /** Drawn when no illustration asset exists — which is every tile today. */
+  icon?: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   wide?: boolean;
   /**
@@ -87,6 +90,10 @@ export function FeatureGrid({ tiles }: { tiles: FeatureTile[] }) {
                     style={s.wideArt}
                     resizeMode="contain"
                   />
+                ) : tile.icon ? (
+                  <View style={s.wideArt}>
+                    <TileArt icon={tile.icon} size={96} />
+                  </View>
                 ) : null}
               </>
             ) : (
@@ -100,6 +107,10 @@ export function FeatureGrid({ tiles }: { tiles: FeatureTile[] }) {
                     style={s.art}
                     resizeMode="contain"
                   />
+                ) : tile.icon ? (
+                  <View style={s.art}>
+                    <TileArt icon={tile.icon} />
+                  </View>
                 ) : null}
               </>
             )}

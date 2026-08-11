@@ -1,7 +1,8 @@
 import React from "react";
 import { Image, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Button, Screen, Text } from "../../../ui";
+import { Button, Screen, Text, TileArt } from "../../../ui";
+import type { IconName } from "../types";
 import { makeStyles } from "../../../theme";
 import { useAppDispatch } from "../../../store/hooks";
 import { next } from "../store/onboardingSlice";
@@ -23,6 +24,8 @@ export interface CopyScreenProps {
   /** Present only on the opening screen, which also flips the layout. */
   subtitleKey?: string;
   illustration?: number;
+  /** Drawn when there is no illustration — which is every screen today. */
+  icon?: IconName;
 }
 
 /**
@@ -33,6 +36,7 @@ export function IntroScreen({
   copyKey,
   subtitleKey,
   illustration,
+  icon,
 }: CopyScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
@@ -48,6 +52,8 @@ export function IntroScreen({
           accessibilityRole="image"
           accessibilityLabel={t(copyKey)}
         />
+      ) : icon ? (
+        <TileArt icon={icon} size={220} />
       ) : null}
     </View>
   );

@@ -64,6 +64,8 @@ export interface Step {
    */
   subtitleKey?: string;
   illustration?: string;
+  /** Stands in for the illustration nobody has drawn yet. */
+  icon?: IconName;
 }
 
 export type Answers = Record<string, string[]>;
