@@ -5,7 +5,11 @@ import { Button, Screen, Text, TileGrid, type Tile } from "../../../ui";
 import { makeStyles } from "../../../theme";
 import { useAppDispatch } from "../../../store/hooks";
 import { setAppIcon } from "../store/onboardingSlice";
-import { appIcons, setAlternateIcon } from "../../../services/appIconService";
+import {
+  APP_MARK,
+  appIcons,
+  setAlternateIcon,
+} from "../../../services/appIconService";
 
 const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
@@ -16,7 +20,10 @@ const toTiles = (): Tile[] =>
   appIcons.map((icon) => ({
     id: icon.id,
     imageUri: icon.previewUri,
-    sample: icon.previewUri ? undefined : "”",
+    backdrop: icon.previewUri ? undefined : icon.backdrop,
+    logo: icon.previewUri
+      ? undefined
+      : { source: APP_MARK, tint: icon.markTint },
   }));
 
 export interface AppIconScreenProps {

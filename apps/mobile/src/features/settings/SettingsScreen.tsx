@@ -43,6 +43,8 @@ const useStyles = makeStyles((t) => ({
 export interface SettingsScreenProps {
   onBack: () => void;
   onOpen: (route: string) => void;
+  /** Opens a URL inside the app, titled by an i18n key. */
+  onOpenPage: (url: string, titleKey: string) => void;
   analyticsEnabled: boolean;
   onAnalyticsChange: (value: boolean) => void;
 }
@@ -54,6 +56,7 @@ export interface SettingsScreenProps {
 export function SettingsScreen({
   onBack,
   onOpen,
+  onOpenPage,
   analyticsEnabled,
   onAnalyticsChange,
 }: SettingsScreenProps) {
@@ -135,12 +138,12 @@ export function SettingsScreen({
         <SettingsRow
           icon="shield-checkmark-outline"
           label={t("settings.privacy")}
-          onPress={() => void Linking.openURL(LEGAL_PRIVACY_URL)}
+          onPress={() => onOpenPage(LEGAL_PRIVACY_URL, "settings.privacy")}
         />
         <SettingsRow
           icon="document-text-outline"
           label={t("settings.terms")}
-          onPress={() => void Linking.openURL(LEGAL_TERMS_URL)}
+          onPress={() => onOpenPage(LEGAL_TERMS_URL, "settings.terms")}
         />
         <SettingsRow
           label={t("settings.analytics")}

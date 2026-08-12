@@ -27,7 +27,9 @@
     "back": "Retour",
     "share": "Partager",
     "decrease": "Diminuer",
-    "increase": "Augmenter"
+    "increase": "Augmenter",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat"
   },
   "permissions": {
     "notificationsTitle": "Notifications",

@@ -21,6 +21,7 @@ import { QuoteFeedScreen } from "../features/quotes/QuoteFeedScreen";
 import { LikedQuotesScreen } from "../features/quotes/LikedQuotesScreen";
 import { ProfileSheet } from "../features/profile/ProfileSheet";
 import { WidgetsHelpScreen } from "../features/profile/screens/WidgetsHelpScreen";
+import { WebPageScreen } from "../features/settings/screens/WebPageScreen";
 import { SettingsScreen } from "../features/settings/SettingsScreen";
 import { StreakSettingsScreen } from "../features/settings/screens/StreakSettingsScreen";
 import { NameEditScreen } from "../features/settings/screens/NameEditScreen";
@@ -82,6 +83,8 @@ export type RootStackParamList = {
   Account: undefined;
   DeleteAccount: undefined;
   LikedQuotes: undefined;
+  /** A URL read inside the app: the terms, the privacy policy. */
+  WebPage: { url: string; titleKey: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -120,6 +123,8 @@ export function RootNavigator() {
   }, [dispatch]);
 
   const back = () => navigationRef.current?.goBack();
+  const openPage = (url: string, titleKey: string) =>
+    navigationRef.current?.navigate("WebPage", { url, titleKey });
 
   /**
    * Three settings rows are actions, not destinations. Routing them through
@@ -210,6 +215,7 @@ export function RootNavigator() {
                     <SettingsScreen
                       onBack={back}
                       onOpen={open}
+                      onOpenPage={openPage}
                       analyticsEnabled={analytics}
                       onAnalyticsChange={(value) => {
                         dispatch(setAnalytics(value));
@@ -267,6 +273,7 @@ export function RootNavigator() {
                     <RemindersSetupScreen
                       ctaLabelKey="common.save"
                       onDone={back}
+                      onBack={back}
                     />
                   )}
                 </Stack.Screen>
@@ -284,7 +291,20 @@ export function RootNavigator() {
 
                 <Stack.Screen name="Paywall">
                   {() => (
-                    <PaywallScreen presentation="sheet" onDismiss={back} />
+                    <PaywallScreen
+                      presentation="sheet"
+                      onDismiss={back}
+                      onOpenPage={openPage}
+                    />
+                  )}
+                </Stack.Screen>
+                <Stack.Screen name="WebPage">
+                  {({ route }: ScreenProps<"WebPage">) => (
+                    <WebPageScreen
+                      url={route.params.url}
+                      titleKey={route.params.titleKey}
+                      onBack={back}
+                    />
                   )}
                 </Stack.Screen>
                 <Stack.Screen name="ManageSubscription">

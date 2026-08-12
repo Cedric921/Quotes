@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Platform, View } from "react-native";
+import { Image, Platform, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useTranslation } from "react-i18next";
-import { Button, Card, Screen, Stepper, Text, TimeRow } from "../../../ui";
+import {
+  Button,
+  Card,
+  IconCircle,
+  Screen,
+  Stepper,
+  Text,
+  TimeRow,
+} from "../../../ui";
 import { makeStyles } from "../../../theme";
 import { remindersService } from "../../../services/remindersService";
 import { useSyncReminders } from "../../../api/hooks/useRemindersSync";
@@ -19,9 +27,15 @@ const useStyles = makeStyles((t) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  // The preview is a notification, and a notification shows the app's own
+  // icon — this one showed a quotation mark, the reference app's mark.
+  previewLogo: { width: 30, height: 30, tintColor: t.base.textPrimary },
   previewBody: { flex: 1 },
   rows: { gap: t.space.sm, marginTop: t.space.xl },
+  top: { paddingHorizontal: t.gutter, minHeight: 56, justifyContent: "center" },
 }));
+
+const LOGO = require("../../../../assets/images/source-icon-transparent.png");
 
 const fmt = (d: Date) =>
   `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
@@ -43,11 +57,17 @@ export interface RemindersSetupScreenProps {
   /** Called once the schedule is saved — advances the funnel, or closes. */
   onDone: () => void;
   ctaLabelKey?: string;
+  /**
+   * Shows a back chevron. Absent in the funnel, which only moves forward;
+   * set from the profile, where the screen is a page you can leave unsaved.
+   */
+  onBack?: () => void;
 }
 
 export function RemindersSetupScreen({
   onDone,
   ctaLabelKey = "onboarding.reminders.cta",
+  onBack,
 }: RemindersSetupScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
@@ -96,6 +116,17 @@ export function RemindersSetupScreen({
 
   return (
     <Screen
+      header={
+        onBack ? (
+          <View style={s.top}>
+            <IconCircle
+              icon="chevron-back"
+              label={t("common.back")}
+              onPress={onBack}
+            />
+          </View>
+        ) : undefined
+      }
       footer={
         <Button
           label={t(ctaLabelKey)}
@@ -114,7 +145,7 @@ export function RemindersSetupScreen({
       <Card variant="overlay">
         <View style={s.preview}>
           <View style={s.previewIcon}>
-            <Text variant="title">”</Text>
+            <Image source={LOGO} style={s.previewLogo} resizeMode="contain" />
           </View>
           <View style={s.previewBody}>
             <Text variant="label">{t("app.name")}</Text>

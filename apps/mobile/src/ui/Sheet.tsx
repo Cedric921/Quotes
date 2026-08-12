@@ -30,15 +30,22 @@ const useStyles = makeStyles((t) => ({
     paddingBottom: t.space.sm,
     minHeight: 56,
   },
-  barTitle: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    textAlign: "center",
-  },
+  /**
+   * A flex child between the two round buttons, never absolute. Positioned
+   * absolutely it spanned the whole bar and sat on top of the back button, so
+   * every tap on the chevron landed on a line of text and went nowhere —
+   * "back" was dead on every collapsed sheet in the app.
+   */
+  barTitle: { flex: 1, textAlign: "center", marginHorizontal: t.space.xs },
   spacer: { width: 52 },
   content: { paddingHorizontal: t.gutter, paddingBottom: t.space.xxxl },
+  body: { flex: 1 },
   largeTitle: { marginTop: t.space.sm, marginBottom: t.space.lg },
+  /**
+   * Pinned under the scroll, inset from the edges. A bar that touched the
+   * screen edges would read as part of the device, not of the sheet.
+   */
+  footer: { paddingHorizontal: t.gutter, paddingTop: t.space.sm },
 }));
 
 export interface SheetProps {
@@ -50,6 +57,13 @@ export interface SheetProps {
   children: ReactNode;
   /** Sub-pages use a back chevron and keep the title in the bar only. */
   collapsedOnly?: boolean;
+  /** Pinned below the content, above the home indicator — a search field, a CTA. */
+  footer?: ReactNode;
+  /**
+   * Off for children that scroll on their own, such as a web view. Inside a
+   * ScrollView they would need a fixed height and fight it for the gesture.
+   */
+  scrollable?: boolean;
 }
 
 /**
@@ -66,6 +80,8 @@ export function Sheet({
   action,
   children,
   collapsedOnly,
+  footer,
+  scrollable = true,
 }: SheetProps) {
   const s = useStyles();
   const t = useTheme();
@@ -81,6 +97,9 @@ export function Sheet({
     },
     [collapsedOnly],
   );
+
+  // Space the scroll content leaves for the footer, when there is one.
+  const bottomInset = insets.bottom + (footer ? t.space.md : t.space.xxxl);
 
   return (
     <SurfaceProvider surface="base">
@@ -106,7 +125,9 @@ export function Sheet({
             <Text variant="title" style={s.barTitle} numberOfLines={1}>
               {title}
             </Text>
-          ) : null}
+          ) : (
+            <View style={s.body} />
+          )}
 
           {action ? (
             <IconCircle
@@ -119,27 +140,39 @@ export function Sheet({
           )}
         </View>
 
-        <ScrollView
-          onScroll={onScroll}
-          scrollEventThrottle={32}
-          // Sub-pages carry forms — the name, the six auth fields, a promo
-          // code — and the sheet is what scrolls them. Without these, the
-          // field the keyboard covers stays covered, and a tap on the CTA
-          // only dismisses the keyboard.
-          automaticallyAdjustKeyboardInsets
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={[
-            s.content,
-            { paddingBottom: insets.bottom + t.space.xxxl },
-          ]}
-        >
-          {collapsedOnly ? null : (
-            <Text variant="display" style={s.largeTitle}>
-              {title}
-            </Text>
-          )}
-          {children}
-        </ScrollView>
+        {scrollable ? (
+          <ScrollView
+            onScroll={onScroll}
+            scrollEventThrottle={32}
+            // Sub-pages carry forms — the name, the six auth fields, a promo
+            // code — and the sheet is what scrolls them. Without these, the
+            // field the keyboard covers stays covered, and a tap on the CTA
+            // only dismisses the keyboard.
+            automaticallyAdjustKeyboardInsets
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={[s.content, { paddingBottom: bottomInset }]}
+          >
+            {collapsedOnly ? null : (
+              <Text variant="display" style={s.largeTitle}>
+                {title}
+              </Text>
+            )}
+            {children}
+          </ScrollView>
+        ) : (
+          <View style={s.body}>{children}</View>
+        )}
+
+        {footer ? (
+          <View
+            style={[
+              s.footer,
+              { paddingBottom: Math.max(insets.bottom, t.space.md) + t.space.xs },
+            ]}
+          >
+            {footer}
+          </View>
+        ) : null}
       </View>
     </SurfaceProvider>
   );

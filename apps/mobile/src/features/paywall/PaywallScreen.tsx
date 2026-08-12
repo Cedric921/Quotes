@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Linking, View } from "react-native";
+import { View } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -54,6 +55,12 @@ export interface PaywallScreenProps {
   /** `fullscreen` ends the funnel; `sheet` is the crown button on the feed. */
   presentation: "fullscreen" | "sheet";
   onDismiss: () => void;
+  /**
+   * Opens the terms or the privacy policy inside the app. The funnel renders
+   * this screen with no navigator around it and leaves this out, in which
+   * case the in-app browser sheet stands in — still not a tab switch.
+   */
+  onOpenPage?: (url: string, titleKey: string) => void;
 }
 
 /**
@@ -63,11 +70,18 @@ export interface PaywallScreenProps {
  * and whether dismissing means "skip" or "go back". Duplicating it as two
  * screens is how v1 ended up with an 814-line subscription file.
  */
-export function PaywallScreen({ presentation, onDismiss }: PaywallScreenProps) {
+export function PaywallScreen({
+  presentation,
+  onDismiss,
+  onOpenPage,
+}: PaywallScreenProps) {
   const s = useStyles();
   const { t, i18n } = useTranslation();
   const { offering, purchase, restore, isPurchasing } = usePaywall();
   const [remindMe, setRemindMe] = useState(false);
+
+  const openPage = (url: string, titleKey: string) =>
+    onOpenPage ? onOpenPage(url, titleKey) : void WebBrowser.openBrowserAsync(url);
 
   /**
    * The switch schedules the notification the timeline promises, on the same
@@ -168,11 +182,11 @@ export function PaywallScreen({ presentation, onDismiss }: PaywallScreenProps) {
             <LinkButton label={t("paywall.restore")} onPress={() => void restore()} />
             <LinkButton
               label={t("paywall.terms")}
-              onPress={() => void Linking.openURL(LEGAL_TERMS_URL)}
+              onPress={() => openPage(LEGAL_TERMS_URL, "settings.terms")}
             />
             <LinkButton
               label={t("paywall.privacy")}
-              onPress={() => void Linking.openURL(LEGAL_PRIVACY_URL)}
+              onPress={() => openPage(LEGAL_PRIVACY_URL, "settings.privacy")}
             />
           </View>
         </>

@@ -179,6 +179,7 @@ export function ContentPreferencesScreen({ onBack }: FieldProps) {
       titleKey="settings.contentPreferences"
       introKey="settings.intro.contentPreferences"
       kind="multi"
+      searchable
       options={options}
       selected={selected}
       onSelect={toggle}
@@ -194,6 +195,7 @@ export function MutedContentScreen({ onBack }: FieldProps) {
       titleKey="settings.mutedContent"
       introKey="settings.intro.mutedContent"
       kind="multi"
+      searchable
       options={options}
       selected={selected}
       onSelect={toggle}

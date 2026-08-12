@@ -1,5 +1,12 @@
 import React from "react";
-import { Image, Pressable, View, useWindowDimensions } from "react-native";
+import {
+  Image,
+  Pressable,
+  View,
+  useWindowDimensions,
+  type ImageSourcePropType,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { makeStyles, useTheme } from "../theme";
 import { Text } from "./Text";
@@ -17,6 +24,8 @@ const useStyles = makeStyles((t) => ({
     backgroundColor: t.base.bgElevated,
   },
   image: { width: "100%", height: "100%" },
+  fill: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
+  logo: { width: "58%", height: "58%" },
   centre: {
     position: "absolute",
     top: 0,
@@ -51,6 +60,13 @@ const useStyles = makeStyles((t) => ({
 export interface Tile {
   id: string;
   imageUri?: string;
+  /**
+   * A flat colour or a two-stop gradient behind the tile, for tiles drawn from
+   * tokens rather than loaded from a file — the app icon variants.
+   */
+  backdrop?: string | readonly [string, string];
+  /** A mark centred on the backdrop, tinted to sit on it. */
+  logo?: { source: ImageSourcePropType; tint: string };
   /** Sample glyph drawn over the tile — "Aa" for themes, "”" for app icons. */
   sample?: string;
   /** Marks a theme whose background is animated. */
@@ -106,8 +122,29 @@ export function TileGrid({
               selected && shape === "icon" ? s.ring : null,
             ]}
           >
+            {typeof tile.backdrop === "string" ? (
+              <View style={[s.fill, { backgroundColor: tile.backdrop }]} />
+            ) : tile.backdrop ? (
+              <LinearGradient
+                colors={tile.backdrop}
+                start={t.gradient.diagonal.start}
+                end={t.gradient.diagonal.end}
+                style={s.fill}
+              />
+            ) : null}
+
             {tile.imageUri ? (
               <Image source={{ uri: tile.imageUri }} style={s.image} />
+            ) : null}
+
+            {tile.logo ? (
+              <View style={s.centre}>
+                <Image
+                  source={tile.logo.source}
+                  style={[s.logo, { tintColor: tile.logo.tint }]}
+                  resizeMode="contain"
+                />
+              </View>
             ) : null}
 
             {tile.sample ? (

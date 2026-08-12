@@ -27,7 +27,9 @@
     "back": "Back",
     "share": "Share",
     "decrease": "Decrease",
-    "increase": "Increase"
+    "increase": "Increase",
+    "search": "Search",
+    "noResults": "No results"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
