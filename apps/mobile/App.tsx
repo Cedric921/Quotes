@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { Platform, AppState } from "react-native";
+import { Platform, AppState, LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider, useSelector } from "react-redux";
@@ -28,6 +28,17 @@ import {
 } from "./src/services/subscriptionSyncService";
 import { startKeepAlive, stopKeepAlive } from "./src/services/keepAliveService";
 import "./src/i18n";
+
+// A simulator has no StoreKit configuration, so RevenueCat cannot load its
+// offerings and says so on every launch — as a red toast over the first screen
+// of any demo or screen recording. The paywall already handles the missing
+// offering (it shows "—"), so the toast adds nothing. Dev-only: LogBox does
+// not exist in release builds.
+LogBox.ignoreLogs([
+  /\[RevenueCat\]/,
+  /\[Purchases\] Failed to get offerings/,
+  /Require cycle: src\/services\/api\.ts/,
+]);
 
 // Register Android widget task handler
 if (Platform.OS === "android") {
