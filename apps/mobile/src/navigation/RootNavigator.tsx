@@ -182,7 +182,14 @@ export function RootNavigator() {
             <>
               <Stack.Screen name="Feed">{renderFeed}</Stack.Screen>
 
-              <Stack.Group screenOptions={{ presentation: "modal" }}>
+              {/*
+                * No drag-to-dismiss: a pull at the top of a settings list is a
+                * bounce, not a way out. Every screen here has its own close or
+                * back button, which is what the design shows.
+                */}
+              <Stack.Group
+                screenOptions={{ presentation: "modal", gestureEnabled: false }}
+              >
                 <Stack.Screen name="Profile">
                   {({ navigation }: ScreenProps<"Profile">) => (
                     <ProfileSheet

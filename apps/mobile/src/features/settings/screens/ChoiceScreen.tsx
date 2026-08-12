@@ -74,6 +74,8 @@ export function ChoiceScreen({
       footer={
         searchable ? (
           <Input
+            variant="glass"
+            icon="search-outline"
             value={query}
             onChangeText={setQuery}
             placeholder={t("common.search")}

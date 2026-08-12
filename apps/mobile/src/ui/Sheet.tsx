@@ -1,10 +1,13 @@
 import React, { useCallback, useState, type ReactNode } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { SurfaceProvider, makeStyles, useTheme } from "../theme";
@@ -42,11 +45,26 @@ const useStyles = makeStyles((t) => ({
   body: { flex: 1 },
   largeTitle: { marginTop: t.space.sm, marginBottom: t.space.lg },
   /**
-   * Pinned under the scroll, inset from the edges. A bar that touched the
-   * screen edges would read as part of the device, not of the sheet.
+   * Floats over the bottom of the scroll, inset from the edges, on a blurred
+   * pane: the rows slide under it and stay legible through it. A bar that
+   * touched the screen edges would read as part of the device, not of the
+   * sheet.
    */
-  footer: { paddingHorizontal: t.gutter, paddingTop: t.space.sm },
+  footer: {
+    position: "absolute",
+    left: t.gutter,
+    right: t.gutter,
+    borderRadius: t.radius.pill,
+    overflow: "hidden",
+    borderWidth: t.border.hairline,
+    borderColor: t.image.chromeBorder,
+    backgroundColor: t.image.chrome,
+  },
+  footerBlur: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
 }));
+
+/** Room the scroll leaves under its last row so the footer never covers it. */
+const FOOTER_CLEARANCE = 60 + 24;
 
 export interface SheetProps {
   title: string;
@@ -99,11 +117,22 @@ export function Sheet({
   );
 
   // Space the scroll content leaves for the footer, when there is one.
-  const bottomInset = insets.bottom + (footer ? t.space.md : t.space.xxxl);
+  const footerBottom = Math.max(insets.bottom, t.space.md) + t.space.xs;
+  const bottomInset = footer
+    ? footerBottom + FOOTER_CLEARANCE
+    : insets.bottom + t.space.xxxl;
 
   return (
     <SurfaceProvider surface="base">
-      <View style={[s.root, { paddingTop: insets.top + t.space.xs }]}>
+      <KeyboardAvoidingView
+        style={[s.root, { paddingTop: insets.top + t.space.xs }]}
+        // `automaticallyAdjustKeyboardInsets` on the ScrollView was the wrong
+        // tool once a field lived outside it: it left a phantom bottom inset
+        // behind after any scroll, and the rows went off the top of the view
+        // — the list looked empty. Padding the whole sheet moves the footer
+        // and the content together.
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <View style={s.bar}>
           {onBack ? (
             <IconCircle
@@ -144,11 +173,8 @@ export function Sheet({
           <ScrollView
             onScroll={onScroll}
             scrollEventThrottle={32}
-            // Sub-pages carry forms — the name, the six auth fields, a promo
-            // code — and the sheet is what scrolls them. Without these, the
-            // field the keyboard covers stays covered, and a tap on the CTA
-            // only dismisses the keyboard.
-            automaticallyAdjustKeyboardInsets
+            // Sub-pages carry forms; a tap on the CTA must submit, not just
+            // dismiss the keyboard.
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={[s.content, { paddingBottom: bottomInset }]}
           >
@@ -164,16 +190,16 @@ export function Sheet({
         )}
 
         {footer ? (
-          <View
-            style={[
-              s.footer,
-              { paddingBottom: Math.max(insets.bottom, t.space.md) + t.space.xs },
-            ]}
-          >
+          <View style={[s.footer, { bottom: footerBottom }]}>
+            <BlurView
+              intensity={t.image.blurIntensity}
+              tint="dark"
+              style={s.footerBlur}
+            />
             {footer}
           </View>
         ) : null}
-      </View>
+      </KeyboardAvoidingView>
     </SurfaceProvider>
   );
 }

@@ -20,12 +20,15 @@ const useStyles = makeStyles((t) => ({
     borderRadius: t.radius.pill,
     backgroundColor: t.base.bgElevated,
   },
+  // On a blurred pane the pill is the pane: no fill of its own.
+  pillGlass: { backgroundColor: "transparent" },
   field: {
     flex: 1,
     paddingVertical: t.space.sm,
     color: t.base.textPrimary,
     fontSize: t.typography.body.size,
   },
+  leading: { marginRight: t.space.sm },
   reveal: {
     marginLeft: t.space.xs,
     height: t.hitSize,
@@ -61,19 +64,38 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
   secure?: boolean;
   /** Reveal-toggle accessibility label, e.g. "Afficher le mot de passe". */
   revealLabel?: string;
+  /** `glass` sits on a blurred surface — the sheet footer — and draws no fill. */
+  variant?: "solid" | "glass";
+  /** Leading icon, e.g. the magnifier on a search field. */
+  icon?: keyof typeof Ionicons.glyphMap;
 }
 
 /**
  * Single-line pill field. Used for the name step, the settings sub-pages and
  * every auth form.
  */
-export function Input({ label, secure, revealLabel, ...rest }: InputProps) {
+export function Input({
+  label,
+  secure,
+  revealLabel,
+  variant = "solid",
+  icon,
+  ...rest
+}: InputProps) {
   const s = useStyles();
   const t = useTheme();
   const [revealed, setRevealed] = useState(false);
 
   return (
-    <View style={s.pill}>
+    <View style={[s.pill, variant === "glass" ? s.pillGlass : null]}>
+      {icon ? (
+        <Ionicons
+          name={icon}
+          size={20}
+          color={t.base.textTertiary}
+          style={s.leading}
+        />
+      ) : null}
       <TextInput
         accessibilityLabel={label ?? rest.placeholder}
         placeholderTextColor={t.base.textTertiary}
