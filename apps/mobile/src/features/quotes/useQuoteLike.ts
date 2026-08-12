@@ -35,21 +35,36 @@ export function useQuoteLike() {
     (quote: Quote): LikeOutcome => {
       // `isLiked` is the state *before* the tap — the mutation flips it.
       if (quote.isLiked) {
-        toggleLike.mutate({ quoteId: quote.id, isLiked: true });
         // The slot comes back. Without this a free account that liked five
         // quotes and removed them all sat at 5/5 with nothing in it, unable
         // to like anything again — `decrement` was written for this and
         // never called.
-        dispatch(decrement());
-        void dispatch(persistLikeQuota());
+        toggleLike.mutate(
+          { quoteId: quote.id, isLiked: true },
+          {
+            onSuccess: () => {
+              dispatch(decrement());
+              void dispatch(persistLikeQuota());
+            },
+          },
+        );
         return "unliked";
       }
 
       if (quotaReached) return "blocked";
 
-      toggleLike.mutate({ quoteId: quote.id, isLiked: false });
-      dispatch(increment());
-      void dispatch(persistLikeQuota());
+      // Spent on success, not on the tap: a like the server refuses is
+      // rolled back by the mutation, and a slot spent on it would be gone
+      // for nothing.
+      toggleLike.mutate(
+        { quoteId: quote.id, isLiked: false },
+        {
+          onSuccess: () => {
+            dispatch(increment());
+            void dispatch(persistLikeQuota());
+          },
+        },
+      );
       return "liked";
     },
     [quotaReached, toggleLike, dispatch],

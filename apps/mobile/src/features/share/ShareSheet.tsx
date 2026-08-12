@@ -9,6 +9,7 @@ import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "../../theme";
 import { IconCircle, Text } from "../../ui";
@@ -72,6 +73,10 @@ export function ShareSheet({
   const t2 = useTheme();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
+  // A full-screen `Modal` starts at the very top of the screen, under the
+  // status bar. Without this the close button sat at y≈40, where the OS
+  // owns the touches: the X was visible and could not be tapped.
+  const insets = useSafeAreaInsets();
   const cardRef = useRef<View>(null);
   const [watermark, setWatermark] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -155,7 +160,7 @@ export function ShareSheet({
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={s.root}>
+      <View style={[s.root, { paddingTop: insets.top }]}>
         <View style={s.close}>
           <IconCircle icon="close" label={t("common.close")} onPress={onClose} />
         </View>

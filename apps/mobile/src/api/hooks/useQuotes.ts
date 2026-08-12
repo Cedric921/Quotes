@@ -77,6 +77,7 @@ export const useToggleLikeQuote = () => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  const token = useAppSelector((state) => state.auth.token);
 
   return useMutation({
     mutationFn: async ({
@@ -86,6 +87,13 @@ export const useToggleLikeQuote = () => {
       quoteId: string;
       isLiked: boolean;
     }) => {
+      // Most readers have no account (spec §4: signing in is optional). For
+      // them the optimistic update in `onMutate` *is* the like — it lives in
+      // the query cache and the local quota — and there is no server to tell.
+      // Calling the API anyway returned 401, rolled the heart back, and used
+      // to reset the whole app.
+      if (!token) return;
+
       if (isLiked) {
         return quotesApi.unlikeQuote(quoteId);
       } else {

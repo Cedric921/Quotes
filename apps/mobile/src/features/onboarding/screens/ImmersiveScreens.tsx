@@ -11,6 +11,9 @@ import { next } from "../store/onboardingSlice";
 const useStyles = makeStyles(() => ({
   centre: { flex: 1, alignItems: "center", justifyContent: "center" },
   swipe: { alignItems: "center", paddingBottom: 24 },
+  // The gesture's target: it must be a real native view that fills the
+  // screen, or the pan has nothing to attach to.
+  surface: { flex: 1 },
 }));
 
 /**
@@ -68,25 +71,31 @@ export function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
       if (event.translationY < -SWIPE_DISTANCE) onEnter();
     });
 
+  // The detector sits *inside* `Screen`, on a view React Native is told not
+  // to flatten. Wrapped around `Screen` — a composite — it warned that its
+  // child "may get view-flattened" and the swipe never fired: the welcome
+  // screen could only be left by tapping the hint.
   return (
-    <GestureDetector gesture={swipeUp}>
-      <Screen variant="image" imageUri={theme?.imageUrl}>
-        <View style={s.centre}>
-          <Text variant="quote" align="center">
-            {t("onboarding.welcome.title")}
-          </Text>
-        </View>
+    <Screen variant="image" imageUri={theme?.imageUrl}>
+      <GestureDetector gesture={swipeUp}>
+        <View style={s.surface} collapsable={false}>
+          <View style={s.centre}>
+            <Text variant="quote" align="center">
+              {t("onboarding.welcome.title")}
+            </Text>
+          </View>
 
-        <View
-          style={s.swipe}
-          accessibilityRole="button"
-          accessibilityLabel={t("onboarding.welcome.swipe")}
-          onTouchEnd={onEnter}
-        >
-          <Ionicons name="chevron-up" size={28} color={t2.image.text} />
-          <Text variant="body">{t("onboarding.welcome.swipe")}</Text>
+          <View
+            style={s.swipe}
+            accessibilityRole="button"
+            accessibilityLabel={t("onboarding.welcome.swipe")}
+            onTouchEnd={onEnter}
+          >
+            <Ionicons name="chevron-up" size={28} color={t2.image.text} />
+            <Text variant="body">{t("onboarding.welcome.swipe")}</Text>
+          </View>
         </View>
-      </Screen>
-    </GestureDetector>
+      </GestureDetector>
+    </Screen>
   );
 }

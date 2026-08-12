@@ -53,9 +53,14 @@ apiClient.interceptors.response.use(
         `[API Error] ${error.response.status} - ${error.response.statusText}`,
       );
 
-      // Handle 401 Unauthorized - Token expired
+      // A 401 only means the session expired when there was a session.
+      // Without a token it is an ordinary "not allowed" — a guest tapping a
+      // heart — and treating it as an expiry cleared the query cache and
+      // reset the stack under them: the feed jumped back to its first quote
+      // with its background gone, and a toast told them to sign in again.
       if (error.response.status === 401) {
-        await handleTokenExpired();
+        const hadSession = !!error.config?.headers?.Authorization;
+        if (hadSession) await handleTokenExpired();
       }
     } else if (error.request) {
       // Request was made but no response received
