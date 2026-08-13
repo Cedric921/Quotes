@@ -276,11 +276,12 @@ export function RootNavigator() {
                   )}
                 </Stack.Screen>
                 <Stack.Screen name="Reminders">
-                  {() => (
+                  {({ navigation }: ScreenProps<"Reminders">) => (
                     <RemindersSetupScreen
                       ctaLabelKey="common.save"
                       onDone={back}
                       onBack={back}
+                      onOpenPaywall={() => navigation.navigate("Paywall")}
                     />
                   )}
                 </Stack.Screen>

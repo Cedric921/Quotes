@@ -11,7 +11,12 @@ import { RegisterPushTokenDto } from './dto/register-push-token.dto';
 
 // Freemium cap: free users can receive at most 2 notifications per day.
 // Premium users use the value configured in their notification settings.
-const FREE_MAX_NOTIFICATIONS_PER_DAY = 2;
+/**
+ * The free tier's ceiling on server-sent reminders per day. The client shows
+ * the same number (`FREE_REMINDERS_PER_DAY` in the mobile app), so a user is
+ * told the rule before they hit it rather than losing sends silently.
+ */
+export const FREE_MAX_NOTIFICATIONS_PER_DAY = 10;
 
 @Injectable()
 export class NotificationsService {
@@ -301,7 +306,8 @@ export class NotificationsService {
           tracker = { date: today, count: 0, times: [] };
         }
 
-        // Apply freemium cap: free users get at most 2 notifications per day
+        // Apply the freemium cap: free accounts stop at the tier's ceiling,
+        // whatever window they asked for.
         const isPremium = premiumUserIds.has(settings.userId);
         const effectiveMaxPerDay = isPremium
           ? settings.maxNotificationsPerDay

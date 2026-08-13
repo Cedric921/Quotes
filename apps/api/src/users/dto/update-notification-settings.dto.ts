@@ -31,7 +31,7 @@ export class UpdateNotificationSettingsDto {
   @IsOptional()
   @IsInt()
   @Min(1, { message: 'Minimum 1 notification per day' })
-  @Max(10, { message: 'Maximum 10 notifications per day' })
+  @Max(20, { message: 'Maximum 20 notifications per day' })
   maxNotificationsPerDay?: number;
 
   @IsOptional()

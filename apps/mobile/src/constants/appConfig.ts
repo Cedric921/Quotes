@@ -46,5 +46,15 @@ export const WIDGET_QUOTES_ARRAY_KEY = "@focus_widget_quotes_array";
 /** Free tier ceiling, mirrored in `likeQuotaSlice`. */
 export const FREE_LIKE_QUOTA = 5;
 
+/**
+ * Free tier's reminders per day. Mirrors `FREE_MAX_NOTIFICATIONS_PER_DAY` on
+ * the API: the stepper stops here for a free account, and says why, instead
+ * of letting them schedule twenty and receiving ten.
+ */
+export const FREE_REMINDERS_PER_DAY = 10;
+
+/** What the stepper allows a premium account. Matches the API's DTO ceiling. */
+export const MAX_REMINDERS_PER_DAY = 20;
+
 /** Length of the introductory trial, in days. */
 export const TRIAL_DAYS = 3;

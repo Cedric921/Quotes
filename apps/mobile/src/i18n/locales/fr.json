@@ -434,7 +434,7 @@
     "testNotificationSent": "Notification test envoyée",
     "checkYourDevice": "Vérifiez votre appareil pour la notification",
     "upgradeForMore": "Passez à Premium pour plus de notifications",
-    "freeUserLimit": "Les utilisateurs gratuits peuvent avoir 3 notifications par jour",
+    "freeUserLimit": "Les comptes gratuits reçoivent jusqu'à 10 rappels par jour",
     "daily": {
       "title": "Focus",
       "body": "Votre citation du moment vous attend."
@@ -521,7 +521,8 @@
       "howMany": "Combien",
       "startAt": "Commencer à",
       "endAt": "Finir à",
-      "cta": "Autoriser et enregistrer"
+      "cta": "Autoriser et enregistrer",
+      "freeLimit": "Jusqu'à {{count}} rappels par jour avec le compte gratuit"
     },
     "streak": {
       "title": "Restez motivé grâce à une routine quotidienne cohérente",

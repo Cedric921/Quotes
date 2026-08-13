@@ -3,9 +3,10 @@ import { useAppSelector } from "../../store/hooks";
 import { getExpoPushToken } from "../../services/notificationService";
 import { useRegisterPushToken } from "./usePushToken";
 import { useUpdateNotificationSettings } from "./useNotificationSettings";
-
-/** The API caps a day's notifications lower than the stepper lets you ask for. */
-const SERVER_MAX_PER_DAY = 10;
+import {
+  FREE_REMINDERS_PER_DAY,
+  MAX_REMINDERS_PER_DAY,
+} from "../../constants/appConfig";
 
 const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
 
@@ -32,6 +33,9 @@ export interface ReminderWindow {
  */
 export function useSyncReminders() {
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
+  const isSubscribed = useAppSelector(
+    (s) => s.auth.user?.isSubscribed ?? false,
+  );
   const registerPushToken = useRegisterPushToken();
   const updateSettings = useUpdateNotificationSettings();
 
@@ -51,7 +55,12 @@ export function useSyncReminders() {
           enabled: true,
           startTime,
           endTime,
-          maxNotificationsPerDay: Math.min(count, SERVER_MAX_PER_DAY),
+          // The server applies the same ceiling itself; sending the capped
+          // value keeps what the account sees and what it gets identical.
+          maxNotificationsPerDay: Math.min(
+            count,
+            isSubscribed ? MAX_REMINDERS_PER_DAY : FREE_REMINDERS_PER_DAY,
+          ),
           activeDays: EVERY_DAY,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         });
@@ -59,6 +68,6 @@ export function useSyncReminders() {
         console.warn("[Reminders] settings not synced:", error);
       }
     },
-    [isAuthenticated, registerPushToken, updateSettings],
+    [isAuthenticated, isSubscribed, registerPushToken, updateSettings],
   );
 }

@@ -434,7 +434,7 @@
     "testNotificationSent": "Test notification sent",
     "checkYourDevice": "Check your device for the notification",
     "upgradeForMore": "Upgrade for more notifications",
-    "freeUserLimit": "Free users can have 3 notifications per day",
+    "freeUserLimit": "Free accounts get up to 10 reminders a day",
     "daily": {
       "title": "Focus",
       "body": "Your quote of the moment is waiting."
@@ -521,7 +521,8 @@
       "howMany": "How many",
       "startAt": "Start at",
       "endAt": "End at",
-      "cta": "Allow and save"
+      "cta": "Allow and save",
+      "freeLimit": "Up to {{count}} reminders a day on the free plan"
     },
     "streak": {
       "title": "Stay motivated with a consistent daily routine",

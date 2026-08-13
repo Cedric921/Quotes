@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   IconCircle,
+  LinkButton,
   Screen,
   Stepper,
   Text,
@@ -14,6 +15,11 @@ import {
 import { makeStyles } from "../../../theme";
 import { remindersService } from "../../../services/remindersService";
 import { useSyncReminders } from "../../../api/hooks/useRemindersSync";
+import { useAppSelector } from "../../../store/hooks";
+import {
+  FREE_REMINDERS_PER_DAY,
+  MAX_REMINDERS_PER_DAY,
+} from "../../../constants/appConfig";
 
 const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
@@ -33,6 +39,7 @@ const useStyles = makeStyles((t) => ({
   previewBody: { flex: 1 },
   rows: { gap: t.space.sm, marginTop: t.space.xl },
   top: { paddingHorizontal: t.gutter, minHeight: 56, justifyContent: "center" },
+  limit: { marginTop: t.space.md, alignItems: "center", gap: t.space.xxs },
 }));
 
 const LOGO = require("../../../../assets/images/source-icon-transparent.png");
@@ -62,16 +69,27 @@ export interface RemindersSetupScreenProps {
    * set from the profile, where the screen is a page you can leave unsaved.
    */
   onBack?: () => void;
+  /** Where the free-tier note sends people who want more. */
+  onOpenPaywall?: () => void;
 }
 
 export function RemindersSetupScreen({
   onDone,
   ctaLabelKey = "onboarding.reminders.cta",
   onBack,
+  onOpenPaywall,
 }: RemindersSetupScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
   const syncReminders = useSyncReminders();
+  const isSubscribed = useAppSelector(
+    (st) => st.auth.user?.isSubscribed ?? false,
+  );
+
+  // The stepper stops where the tier stops. Letting a free account pick
+  // twenty and quietly delivering ten is the kind of gap that reads as a
+  // broken app, not as a plan limit.
+  const maxCount = isSubscribed ? MAX_REMINDERS_PER_DAY : FREE_REMINDERS_PER_DAY;
 
   const [count, setCount] = useState(10);
   const [start, setStart] = useState(at(9));
@@ -87,6 +105,12 @@ export function RemindersSetupScreen({
       setEnd(at(saved.endHour));
     });
   }, []);
+
+  // A schedule saved under premium, reopened after it lapsed, gets pulled
+  // back inside the free ceiling the moment the screen knows it.
+  useEffect(() => {
+    setCount((current) => Math.min(current, maxCount));
+  }, [maxCount]);
   const [editing, setEditing] = useState<"start" | "end" | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -164,7 +188,7 @@ export function RemindersSetupScreen({
           label={t("onboarding.reminders.howMany")}
           value={count}
           min={1}
-          max={20}
+          max={maxCount}
           onChange={setCount}
         />
         <TimeRow
@@ -178,6 +202,21 @@ export function RemindersSetupScreen({
           onPress={() => setEditing("end")}
         />
       </View>
+
+      {!isSubscribed ? (
+        <View style={s.limit}>
+          <Text variant="caption" tone="tertiary" align="center">
+            {t("onboarding.reminders.freeLimit", { count: FREE_REMINDERS_PER_DAY })}
+          </Text>
+          {onOpenPaywall ? (
+            <LinkButton
+              label={t("notifications.upgradeForMore")}
+              icon="ribbon-outline"
+              onPress={onOpenPaywall}
+            />
+          ) : null}
+        </View>
+      ) : null}
 
       {editing ? (
         <DateTimePicker
