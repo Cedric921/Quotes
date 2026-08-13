@@ -22,12 +22,15 @@ export interface AppIconOption {
 /**
  * Alternate app icons.
  *
- * `id` must match the key declared in the iOS `CFBundleAlternateIcons` map and
- * the Android activity-alias name, so this list is the single source of truth
- * for both platforms and the picker.
+ * `id` must match the `name` given to `expo-alternate-app-icons` in
+ * `app.config.js`, which is what ends up in the iOS `CFBundleAlternateIcons`
+ * map and the Android activity-alias. The PNGs under `assets/icons/` are
+ * rendered from the same grounds and tints as the tiles below, so the picker
+ * shows what the home screen will get.
  */
 export const appIcons: AppIconOption[] = [
-  { id: "default", backdrop: palette.ink900, markTint: palette.white },
+  // The icon the app ships with: the mark on white, as `assets/icon.png`.
+  { id: "default", backdrop: palette.white, markTint: palette.ink900 },
   {
     id: "galaxy",
     backdrop: [palette.violet, palette.ink900],
@@ -39,7 +42,7 @@ export const appIcons: AppIconOption[] = [
     backdrop: [palette.slate200, palette.slate300],
     markTint: palette.ink900,
   },
-  { id: "light", backdrop: palette.white, markTint: palette.ink900 },
+  { id: "light", backdrop: palette.slate200, markTint: palette.ink900 },
   { id: "doNotQuit", backdrop: palette.violet, markTint: palette.white },
   {
     id: "pastel",

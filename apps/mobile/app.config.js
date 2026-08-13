@@ -92,6 +92,32 @@ export default ({ config }) => {
     },
     plugins: [
       "expo-localization",
+      // The alternate icons. `expo-alternate-app-icons` was a dependency
+      // without this entry, so no CFBundleAlternateIcons ever reached the
+      // binary and every switch in the picker failed with "Icon not changed".
+      // The names are the ids in src/services/appIconService.ts; the files
+      // are rendered from the palette by the picker's own recipe.
+      [
+        "expo-alternate-app-icons",
+        [
+          "default",
+          "galaxy",
+          "noir",
+          "marble",
+          "light",
+          "doNotQuit",
+          "pastel",
+          "chaseYourDreams",
+          "holo",
+        ].map((name) => ({
+          name,
+          ios: `./assets/icons/${name}.png`,
+          android: {
+            foregroundImage: `./assets/icons/${name}-foreground.png`,
+            backgroundImage: `./assets/icons/${name}.png`,
+          },
+        })),
+      ],
       [
         "react-native-android-widget",
         {
