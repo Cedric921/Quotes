@@ -179,12 +179,18 @@ export function PaywallScreen({
             })}
           </Text>
           <View style={s.legal}>
-            <LinkButton label={t("paywall.restore")} onPress={() => void restore()} />
             <LinkButton
+              size="small"
+              label={t("paywall.restore")}
+              onPress={() => void restore()}
+            />
+            <LinkButton
+              size="small"
               label={t("paywall.terms")}
               onPress={() => openPage(LEGAL_TERMS_URL, "settings.terms")}
             />
             <LinkButton
+              size="small"
               label={t("paywall.privacy")}
               onPress={() => openPage(LEGAL_PRIVACY_URL, "settings.privacy")}
             />

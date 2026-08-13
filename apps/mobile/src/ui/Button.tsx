@@ -111,13 +111,25 @@ export function Button({
         />
       ) : null}
       {loading ? (
-        <ActivityIndicator color={t.base.ctaFg} />
+        <ActivityIndicator
+          color={
+            variant === "gradient" && !inert ? t.base.onAccent : t.base.ctaFg
+          }
+        />
       ) : (
         <Text
           variant="label"
-          // A coral fill needs white type; the white and gradient fills both
-          // take the dark ink.
-          tone={variant === "danger" && !inert ? "primary" : "onCta"}
+          // The ink CTA takes white type, the coral one too; the pastel
+          // gradient takes ink.
+          tone={
+            inert
+              ? "onCta"
+              : variant === "gradient"
+                ? "onAccent"
+                : variant === "danger"
+                  ? "primary"
+                  : "onCta"
+          }
           weight="700"
         >
           {label}
@@ -132,6 +144,8 @@ export interface LinkButtonProps {
   onPress?: () => void;
   icon?: keyof typeof Ionicons.glyphMap;
   align?: "center" | "start" | "end";
+  /** `small` is for fine print — the restore / terms / privacy row. */
+  size?: "regular" | "small";
   testID?: string;
 }
 
@@ -141,6 +155,7 @@ export function LinkButton({
   onPress,
   icon,
   align = "center",
+  size = "regular",
   testID,
 }: LinkButtonProps) {
   const s = useStyles();
@@ -166,9 +181,9 @@ export function LinkButton({
       ]}
     >
       {icon ? (
-        <Ionicons name={icon} size={18} color={t.fgDim} />
+        <Ionicons name={icon} size={size === "small" ? 14 : 18} color={t.fgDim} />
       ) : null}
-      <Text variant="body" tone="dim">
+      <Text variant={size === "small" ? "caption" : "body"} tone="dim">
         {label}
       </Text>
     </Pressable>
