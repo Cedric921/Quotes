@@ -92,15 +92,16 @@ export const imageSurface = {
  * form the rest of this file uses does not compile there.
  */
 export const widgetSurface = {
+  /** The card. Ink, like the design's widget preview — never the gradient. */
+  card: palette.ink900,
+  /** The accent's one job on a widget: a 1.5 px contour around the card. */
   gradientFrom: palette.violet,
   gradientTo: palette.blush,
+  contour: 1.5,
 
   text: palette.white,
-  textStrong: "rgba(255, 255, 255, 0.9)",
-  textDim: "rgba(255, 255, 255, 0.8)",
-  textFaint: "rgba(255, 255, 255, 0.6)",
-  /** Topic pill behind the quote's category. */
-  chip: "rgba(255, 255, 255, 0.2)",
+  textDim: palette.slate200,
+  textFaint: palette.slate300,
 } as const;
 
 /** The accent gradient. Four sanctioned uses — see spec §2.3. */
