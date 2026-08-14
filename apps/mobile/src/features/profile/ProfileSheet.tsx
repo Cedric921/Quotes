@@ -9,6 +9,26 @@ import { UnlockBanner } from "./components/UnlockBanner";
 import { StreakCard } from "./components/StreakCard";
 import { FeatureGrid, type FeatureTile } from "./components/FeatureGrid";
 
+/**
+ * The profile's illustrations. Cut from the reference captures, keyed
+ * against their tile ground and un-mixed, which is what turned the ink
+ * objects silver: what is left is the glow and the highlights, and the
+ * metal shows through the rest.
+ */
+const ART = {
+  unlock: require("../../../assets/illustrations/profile/unlock.png"),
+  flame: require("../../../assets/illustrations/profile/flame.png"),
+  topics: require("../../../assets/illustrations/profile/topics.png"),
+  wallpapers: require("../../../assets/illustrations/profile/wallpapers.png"),
+  reminders: require("../../../assets/illustrations/profile/reminders.png"),
+  homeWidgets: require("../../../assets/illustrations/profile/homeWidgets.png"),
+  lockWidgets: require("../../../assets/illustrations/profile/lockWidgets.png"),
+  appIcon: require("../../../assets/illustrations/profile/appIcon.png"),
+  alarm: require("../../../assets/illustrations/profile/alarm.png"),
+  watch: require("../../../assets/illustrations/profile/watch.png"),
+  bundle: require("../../../assets/illustrations/profile/bundle.png"),
+};
+
 const useStyles = makeStyles((t) => ({
   block: { marginTop: t.space.lg },
   sectionTitle: { marginTop: t.space.xxl, marginBottom: t.space.md },
@@ -58,36 +78,42 @@ export function ProfileSheet({
     () => [
       {
         id: "topics",
+        illustration: ART.topics,
         icon: "albums-outline",
         title: t("profile.tile.topics"),
         onPress: () => onOpen("ContentPreferences"),
       },
       {
         id: "wallpapers",
+        illustration: ART.wallpapers,
         icon: "image-outline",
         title: t("profile.tile.wallpapers"),
         onPress: () => onOpen("ThemePicker"),
       },
       {
         id: "reminders",
+        illustration: ART.reminders,
         icon: "notifications-outline",
         title: t("profile.tile.reminders"),
         onPress: () => onOpen("Reminders"),
       },
       {
         id: "homeWidgets",
+        illustration: ART.homeWidgets,
         icon: "grid-outline",
         title: t("profile.tile.homeWidgets"),
         onPress: () => onOpen("HomeWidgets"),
       },
       {
         id: "lockWidgets",
+        illustration: ART.lockWidgets,
         icon: "lock-closed-outline",
         title: t("profile.tile.lockWidgets"),
         onPress: () => onOpen("LockWidgets"),
       },
       {
         id: "appIcon",
+        illustration: ART.appIcon,
         icon: "apps-outline",
         title: t("profile.tile.appIcon"),
         onPress: () => onOpen("AppIcon"),
@@ -97,6 +123,7 @@ export function ProfileSheet({
       // them. Flip `enabled` when the native side lands.
       {
         id: "alarm",
+        illustration: ART.alarm,
         icon: "alarm-outline",
         title: t("profile.tile.alarm"),
         enabled: false,
@@ -104,6 +131,7 @@ export function ProfileSheet({
       },
       {
         id: "watch",
+        illustration: ART.watch,
         icon: "watch-outline",
         title: t("profile.tile.watch"),
         enabled: false,
@@ -111,6 +139,7 @@ export function ProfileSheet({
       },
       {
         id: "bundle",
+        illustration: ART.bundle,
         icon: "cube-outline",
         title: t("profile.tile.bundle"),
         subtitle: t("profile.tile.bundleSubtitle"),
@@ -131,10 +160,13 @@ export function ProfileSheet({
         onPress: onOpenSettings,
       }}
     >
-      {!isSubscribed ? <UnlockBanner onPress={onOpenPaywall} /> : null}
+      {!isSubscribed ? (
+        <UnlockBanner onPress={onOpenPaywall} illustration={ART.unlock} />
+      ) : null}
 
       <View style={s.block}>
         <StreakCard
+          illustration={ART.flame}
           count={streak.count}
           labels={streak.labels}
           completed={streak.completed}

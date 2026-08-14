@@ -14,6 +14,7 @@ const useStyles = makeStyles((t) => ({
   group: {
     borderRadius: t.radius.lg,
     backgroundColor: t.base.bgElevated,
+    ...t.shadow.card,
     overflow: "hidden",
   },
   row: {

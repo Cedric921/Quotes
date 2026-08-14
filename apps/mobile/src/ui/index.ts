@@ -9,6 +9,7 @@ export { Input, TextArea, type InputProps, type TextAreaProps } from "./Input";
 export { Toggle, type ToggleProps } from "./Toggle";
 export { Stepper, TimeRow, type StepperProps, type TimeRowProps } from "./Stepper";
 export { Card, GradientBorderCard, GradientCard, type CardProps } from "./Card";
+export { Ground } from "./Ground";
 export { TileGrid, type Tile, type TileGridProps } from "./TileGrid";
 export {
   SettingsRow,

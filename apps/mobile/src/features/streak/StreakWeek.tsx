@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { Image, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { makeStyles, useTheme } from "../../theme";
@@ -33,10 +33,15 @@ const useStyles = makeStyles((t) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  /** The drawn flame is taller than it is wide, and reads bigger. */
+  flameArt: { width: 64, height: 78 },
   flameCount: { position: "absolute", bottom: 6 },
+  flameCountArt: { position: "absolute", bottom: 14 },
 }));
 
 export interface StreakWeekProps {
+  /** The reference's drawn flame. Without it, a gradient stands in. */
+  illustration?: number;
   /** Current streak length, shown inside the flame. */
   count: number;
   /** Locale-short weekday labels, starting today. */
@@ -50,21 +55,34 @@ export interface StreakWeekProps {
  * streak step, the toast on the feed, and the profile card — so it owns no
  * layout of its own beyond the row.
  */
-export function StreakWeek({ count, labels, completed }: StreakWeekProps) {
+export function StreakWeek({
+  illustration,
+  count,
+  labels,
+  completed,
+}: StreakWeekProps) {
   const s = useStyles();
   const t = useTheme();
 
   return (
     <View style={s.row}>
       <View style={s.flame}>
-        <LinearGradient
-          colors={[...t.gradient.colors]}
-          start={t.gradient.vertical.start}
-          end={t.gradient.vertical.end}
-          style={{ width: 44, height: 52, borderRadius: 22 }}
-        />
-        <View style={s.flameCount}>
-          <Ionicons name="flame" size={0} color={t.palette.white} />
+        {illustration ? (
+          <Image
+            source={illustration}
+            style={s.flameArt}
+            resizeMode="contain"
+            accessible={false}
+          />
+        ) : (
+          <LinearGradient
+            colors={[...t.gradient.colors]}
+            start={t.gradient.vertical.start}
+            end={t.gradient.vertical.end}
+            style={{ width: 44, height: 52, borderRadius: 22 }}
+          />
+        )}
+        <View style={illustration ? s.flameCountArt : s.flameCount}>
           <Text variant="label" weight="700">
             {count}
           </Text>

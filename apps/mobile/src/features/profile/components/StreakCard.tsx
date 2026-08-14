@@ -18,6 +18,8 @@ const useStyles = makeStyles((t) => ({
 }));
 
 export interface StreakCardProps {
+  /** The drawn flame; the count is set inside it. */
+  illustration?: number;
   count: number;
   labels: string[];
   completed: number[];
@@ -26,6 +28,7 @@ export interface StreakCardProps {
 }
 
 export function StreakCard({
+  illustration,
   count,
   labels,
   completed,
@@ -70,7 +73,7 @@ export function StreakCard({
         </View>
       </View>
 
-      <StreakWeek count={count} labels={labels} completed={completed} />
+      <StreakWeek illustration={illustration} count={count} labels={labels} completed={completed} />
     </Card>
   );
 }

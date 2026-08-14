@@ -17,9 +17,8 @@ const useStyles = makeStyles((t) => ({
     backgroundColor: t.image.chrome,
   },
   onBase: {
-    borderWidth: t.border.hairline,
-    borderColor: t.base.borderSubtle,
     backgroundColor: t.base.bgElevated,
+    ...t.shadow.button,
   },
   blur: {
     position: "absolute",

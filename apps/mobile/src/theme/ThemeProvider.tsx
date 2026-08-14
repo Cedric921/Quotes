@@ -17,6 +17,7 @@ import {
   gutter,
   hitSize,
   palette,
+  shadow,
 } from "./tokens";
 
 /**
@@ -40,6 +41,7 @@ export interface Theme {
   border: typeof border;
   motion: typeof motion;
   typography: typeof typography;
+  shadow: typeof shadow;
   gutter: number;
   hitSize: number;
   /** Font family served by the API for the current background theme. */
@@ -61,6 +63,7 @@ const buildTheme = (surface: Surface, quoteFontFamily?: string): Theme => ({
   border,
   motion,
   typography,
+  shadow,
   gutter,
   hitSize,
   quoteFontFamily,

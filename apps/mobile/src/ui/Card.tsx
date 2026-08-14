@@ -8,6 +8,7 @@ const useStyles = makeStyles((t) => ({
     borderRadius: t.radius.xl,
     backgroundColor: t.base.bgElevated,
     padding: t.space.lg,
+    ...t.shadow.card,
   },
   overlay: {
     borderRadius: t.radius.lg,
@@ -17,6 +18,7 @@ const useStyles = makeStyles((t) => ({
   gradientBorder: {
     borderRadius: t.radius.xl + t.border.selected,
     padding: t.border.selected,
+    ...t.shadow.card,
   },
   gradientInner: {
     borderRadius: t.radius.xl,
@@ -26,7 +28,7 @@ const useStyles = makeStyles((t) => ({
   filled: {
     borderRadius: t.radius.xl,
     padding: t.space.lg,
-    overflow: "hidden",
+    ...t.shadow.card,
   },
 }));
 

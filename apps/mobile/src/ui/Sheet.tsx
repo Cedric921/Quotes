@@ -11,6 +11,7 @@ import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { SurfaceProvider, makeStyles, useTheme } from "../theme";
+import { Ground } from "./Ground";
 import { IconCircle } from "./IconCircle";
 import { Text } from "./Text";
 
@@ -133,6 +134,7 @@ export function Sheet({
         // and the content together.
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
+        <Ground />
         <View style={s.bar}>
           {onBack ? (
             <IconCircle

@@ -66,6 +66,13 @@ cinq primitives qui supposaient un fond sombre.)
 
 La barre d'état suit la surface : sombre sur `base`, claire sur `image`.
 
+Le fond n'est pas une couleur plate mais un **métal brossé** : `ui/Ground`
+dessine `assets/images/brushed-silver.png` (sheen clair, grain diagonal fin)
+sous chaque écran `base` et chaque sheet ; `bg.base` est la couleur qui
+l'attend. Les surfaces posées dessus — cartes, tuiles, boutons ronds, groupes
+de réglages — prennent l'ombre `shadow.card` / `shadow.button`, une seule
+recette pour une seule hauteur.
+
 ### 2.2 Couleurs — surface `image`
 
 Le chrome posé sur une photo n'utilise aucune surface opaque, sauf le toast de

@@ -2,6 +2,7 @@ import React, { type PropsWithChildren, type ReactNode } from "react";
 import { ImageBackground, StatusBar, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SurfaceProvider, makeStyles, useTheme } from "../theme";
+import { Ground } from "./Ground";
 
 const fill = {
   position: "absolute" as const,
@@ -100,7 +101,10 @@ export function Screen({
 
   return (
     <SurfaceProvider surface="base">
-      <View style={s.root}>{content}</View>
+      <View style={s.root}>
+        <Ground />
+        {content}
+      </View>
     </SurfaceProvider>
   );
 }

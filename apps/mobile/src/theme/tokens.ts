@@ -52,9 +52,14 @@ export const palette = {
  * sheet's glass footer, the widget mock-ups).
  */
 export const baseSurface = {
-  bg: palette.silver100,
-  bgElevated: palette.white,
-  surfaceRaised: palette.silver200,
+  /**
+   * The colour under the brushed-metal ground (`ui/Ground`), and what shows
+   * while it loads. The ground itself is an image: a flat colour cannot be
+   * brushed.
+   */
+  bg: palette.silver200,
+  bgElevated: palette.silver50,
+  surfaceRaised: palette.silver300,
   /**
    * The one opaque card laid over a photo — the streak toast, the coachmark
    * bubble. It stays ink: it belongs to the image surface's world, not to
@@ -172,6 +177,29 @@ export const radius = {
 
 /** Horizontal screen margin. Constant across every screen in the app. */
 export const gutter = space.md;
+
+/**
+ * The lift a card gets off the metal. One recipe, so every raised surface
+ * — card, tile, round button, settings group — sits at the same height.
+ * Android reads `elevation`, iOS the rest.
+ */
+export const shadow = {
+  card: {
+    shadowColor: palette.ink900,
+    shadowOpacity: 0.10,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
+  },
+  /** Tighter, for a 52 px button. */
+  button: {
+    shadowColor: palette.ink900,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+} as const;
 
 export const border = {
   hairline: 1,

@@ -12,7 +12,7 @@ const useStyles = makeStyles((t) => ({
     borderRadius: t.radius.lg,
     backgroundColor: t.base.bgElevated,
     padding: t.space.md,
-    overflow: "hidden",
+    ...t.shadow.card,
   },
   title: { marginBottom: t.space.xs },
   art: {
