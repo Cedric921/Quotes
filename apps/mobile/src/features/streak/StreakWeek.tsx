@@ -34,9 +34,9 @@ const useStyles = makeStyles((t) => ({
     justifyContent: "center",
   },
   /** The drawn flame is taller than it is wide, and reads bigger. */
-  flameArt: { width: 64, height: 78 },
+  flameArt: { width: 54, height: 66 },
   flameCount: { position: "absolute", bottom: 6 },
-  flameCountArt: { position: "absolute", bottom: 14 },
+  flameCountArt: { position: "absolute", bottom: 12 },
 }));
 
 export interface StreakWeekProps {

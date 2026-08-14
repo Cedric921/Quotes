@@ -7,7 +7,7 @@ import { GradientCard, Text } from "../../../ui";
 const useStyles = makeStyles((t) => ({
   row: { flexDirection: "row", alignItems: "center", gap: t.space.md },
   copy: { flex: 1, gap: t.space.xxs },
-  art: { width: 110, height: 78 },
+  art: { width: 96, height: 68 },
 }));
 
 /**

@@ -7,17 +7,22 @@ import { makeStyles, useTheme } from "../theme";
 const useStyles = makeStyles((t) => ({
   wrap: {
     borderRadius: t.radius.pill,
-    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
   onImage: {
+    // The blur has to be clipped to the disc; the base variant must not
+    // be, or iOS clips its shadow with it and the button disappears into
+    // the metal.
+    overflow: "hidden",
     borderWidth: t.border.hairline,
     borderColor: t.image.chromeBorder,
     backgroundColor: t.image.chrome,
   },
   onBase: {
     backgroundColor: t.base.bgElevated,
+    borderWidth: t.border.hairline,
+    borderColor: t.base.glassBorder,
     ...t.shadow.button,
   },
   blur: {

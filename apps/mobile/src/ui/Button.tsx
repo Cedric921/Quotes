@@ -20,9 +20,15 @@ const useStyles = makeStyles((t) => ({
     borderRadius: t.radius.pill,
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
   },
-  solid: { backgroundColor: t.base.ctaBg },
+  solid: { backgroundColor: t.base.ctaBg, ...t.shadow.cta },
+  /** The graphite fill, with the light lip along the top edge. */
+  solidFill: {
+    ...fill,
+    borderTopWidth: t.border.hairline,
+    borderTopColor: t.base.ctaLip,
+    borderRadius: t.radius.pill,
+  },
   danger: { backgroundColor: t.base.danger },
   disabled: { backgroundColor: t.base.ctaDisabledBg },
   gradientFill: {
@@ -108,6 +114,13 @@ export function Button({
           start={t.gradient.horizontal.start}
           end={t.gradient.horizontal.end}
           style={s.gradientFill}
+        />
+      ) : variant === "primary" && !inert ? (
+        <LinearGradient
+          colors={[...t.base.ctaGradient]}
+          start={t.gradient.vertical.start}
+          end={t.gradient.vertical.end}
+          style={s.solidFill}
         />
       ) : null}
       {loading ? (

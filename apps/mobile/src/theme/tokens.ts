@@ -76,7 +76,15 @@ export const baseSurface = {
   textSecondary: palette.ink300,
   textTertiary: palette.slate300,
 
+  /**
+   * The primary pill. Flat ink sat on the metal like a hole; the pill is
+   * graphite now — a short vertical gradient with a light lip at the top,
+   * the way a metal key catches the light. `ctaBg` remains the solid the
+   * badge, the icon tile and anything too small for a gradient use.
+   */
   ctaBg: palette.ink900,
+  ctaGradient: [palette.ink400, palette.ink900] as const,
+  ctaLip: "rgba(255,255,255,0.28)",
   ctaFg: palette.white,
   ctaDisabledBg: palette.grey400,
   ctaDisabledFg: palette.white,
@@ -191,13 +199,24 @@ export const shadow = {
     shadowOffset: { width: 0, height: 8 },
     elevation: 5,
   },
-  /** Tighter, for a 52 px button. */
+  /**
+   * Tighter, for a 52 px round button. Deeper than the card's: a white disc
+   * on a white-ish metal has nothing but its shadow to be seen by.
+   */
   button: {
     shadowColor: palette.ink900,
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+  /** The primary pill's own lift. */
+  cta: {
+    shadowColor: palette.ink900,
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
 } as const;
 

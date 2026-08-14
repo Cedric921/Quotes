@@ -15,9 +15,16 @@ const useStyles = makeStyles((t) => ({
     ...t.shadow.card,
   },
   title: { marginBottom: t.space.xs },
+  /**
+   * The drawing sits inside a margin rather than filling the tile: at full
+   * bleed the screenshot-cut art showed its edges, and the reference gives
+   * each object air on every side anyway.
+   */
   art: {
     flex: 1,
     width: "100%",
+    marginVertical: t.space.sm,
+    transform: [{ scale: 0.78 }],
   },
   wide: {
     width: "100%",
@@ -27,7 +34,7 @@ const useStyles = makeStyles((t) => ({
     height: 150,
   },
   wideCopy: { flex: 1, gap: t.space.xxs },
-  wideArt: { width: 130, height: 110 },
+  wideArt: { width: 104, height: 88 },
   pressed: { opacity: 0.75 },
 }));
 
