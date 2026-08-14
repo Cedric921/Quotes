@@ -22,6 +22,8 @@ const useStyles = makeStyles((t) => ({
     justifyContent: "center",
   },
   solid: { backgroundColor: t.base.ctaBg, ...t.shadow.cta },
+  /** The conversion pill sits at the same height as the graphite one. */
+  lifted: { ...t.shadow.cta },
   /** The graphite fill, with the light lip along the top edge. */
   solidFill: {
     ...fill,
@@ -31,8 +33,11 @@ const useStyles = makeStyles((t) => ({
   },
   danger: { backgroundColor: t.base.danger },
   disabled: { backgroundColor: t.base.ctaDisabledBg },
+  // The pill no longer clips its children (that clipped its shadow), so
+  // every fill has to be rounded on its own.
   gradientFill: {
     ...fill,
+    borderRadius: t.radius.pill,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -103,7 +108,7 @@ export function Button({
             ? s.solid
             : variant === "danger"
               ? s.danger
-              : null,
+              : s.lifted,
         pressed && !inert ? s.pressed : null,
         style,
       ]}
