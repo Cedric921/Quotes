@@ -7,7 +7,8 @@
  */
 
 export const palette = {
-  // Neutrals — the app's single background family.
+  // Ink — the dark family. The quote feed's ground, the widgets, the
+  // on-image cards, and every piece of text on the silver surface.
   ink900: "#151C27",
   ink800: "#1A222E",
   ink700: "#232D3B",
@@ -18,6 +19,15 @@ export const palette = {
   slate300: "#8A94A6",
   slate200: "#B5C2D6",
   white: "#FFFFFF",
+
+  // Silver — the light family the `base` surface is drawn in: a cool,
+  // metallic white rather than a warm paper white, so it sits with the
+  // ink text and the violet accent instead of fighting them.
+  silver50: "#F5F7FA",
+  silver100: "#EDF0F4",
+  silver200: "#E2E7ED",
+  silver300: "#D3DAE3",
+  silver400: "#C3CCD7",
 
   // Accent — celebration & conversion only, never a page background.
   violet: "#8B7FE8",
@@ -32,28 +42,49 @@ export const palette = {
   grey400: "#A0A6AE",
 } as const;
 
-/** Surface `base`: solid-background screens (onboarding, settings, sheets). */
+/**
+ * Surface `base`: solid-background screens (onboarding, settings, sheets).
+ *
+ * Silver-white, ink text, ink CTA. The surface was ink until the app was
+ * asked to be light; because every component reads it from here, that was
+ * a change to this block and to the handful of primitives that had assumed
+ * a dark ground (the status bar, the toggle track, the selection badge, the
+ * sheet's glass footer, the widget mock-ups).
+ */
 export const baseSurface = {
-  bg: palette.ink700,
-  bgElevated: palette.ink600,
-  surfaceRaised: palette.ink500,
+  bg: palette.silver100,
+  bgElevated: palette.white,
+  surfaceRaised: palette.silver200,
+  /**
+   * The one opaque card laid over a photo — the streak toast, the coachmark
+   * bubble. It stays ink: it belongs to the image surface's world, not to
+   * the silver one, and its text is white.
+   */
   surfaceOverlay: palette.ink400,
+  /** Off-state of a control: toggle track, the streak's empty days. */
+  control: palette.silver400,
 
-  borderSubtle: palette.ink500,
-  borderStrong: palette.white,
+  borderSubtle: palette.silver300,
+  borderStrong: palette.ink900,
 
-  textPrimary: palette.white,
-  textSecondary: palette.slate200,
+  textPrimary: palette.ink900,
+  textSecondary: palette.ink300,
   textTertiary: palette.slate300,
 
-  ctaBg: palette.white,
-  ctaFg: palette.ink900,
+  ctaBg: palette.ink900,
+  ctaFg: palette.white,
   ctaDisabledBg: palette.grey400,
-  ctaDisabledFg: palette.ink900,
+  ctaDisabledFg: palette.white,
+  /** Type on the accent gradient — the pastel fill wants ink, not white. */
+  onAccent: palette.ink900,
 
   danger: palette.coral,
   success: palette.mint,
   warning: palette.amber,
+
+  /** The sheet's floating footer: frosted silver, not dark glass. */
+  glass: "rgba(255,255,255,0.72)",
+  glassBorder: "rgba(21,28,39,0.10)",
 
   scrim: "rgba(0,0,0,0.55)",
 } as const;

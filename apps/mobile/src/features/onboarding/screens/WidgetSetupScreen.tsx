@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Button, GradientBorderCard, LinkButton, Screen, Text } from "../../../ui";
-import { makeStyles } from "../../../theme";
+import { SurfaceProvider, makeStyles } from "../../../theme";
 import { useAppDispatch } from "../../../store/hooks";
 import { next } from "../store/onboardingSlice";
 import { homeScreenService } from "../../../services/homeScreenService";
@@ -95,11 +95,14 @@ export function WidgetSetupScreen() {
         <View style={s.frame}>
           <View style={s.notch} />
           <GradientBorderCard>
-            <View style={s.widgetInner}>
-              <Text variant="body" align="center">
-                {t("onboarding.widget.sample")}
-              </Text>
-            </View>
+            {/* The mock-up is the real widget: ink, white text. */}
+            <SurfaceProvider surface="image">
+              <View style={s.widgetInner}>
+                <Text variant="body" align="center">
+                  {t("onboarding.widget.sample")}
+                </Text>
+              </View>
+            </SurfaceProvider>
           </GradientBorderCard>
           <View style={s.appGrid}>
             {Array.from({ length: 8 }).map((_, i) => (

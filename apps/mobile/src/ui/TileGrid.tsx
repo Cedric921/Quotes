@@ -46,7 +46,7 @@ const useStyles = makeStyles((t) => ({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: t.palette.white,
+    backgroundColor: t.base.ctaBg,
     alignItems: "center",
     justifyContent: "center",
   },

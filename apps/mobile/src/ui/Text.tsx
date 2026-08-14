@@ -9,7 +9,7 @@ import { useTheme, type TypographyVariant } from "../theme";
 export interface TextProps extends RNTextProps {
   variant?: TypographyVariant;
   /** `primary` follows the surface; `dim` is the muted tone of that surface. */
-  tone?: "primary" | "dim" | "tertiary" | "danger" | "onCta";
+  tone?: "primary" | "dim" | "tertiary" | "danger" | "onCta" | "onAccent";
   align?: TextStyle["textAlign"];
   weight?: TextStyle["fontWeight"];
 }
@@ -42,7 +42,9 @@ export function Text({
           ? t.base.danger
           : tone === "onCta"
             ? t.base.ctaFg
-            : t.fg;
+            : tone === "onAccent"
+              ? t.base.onAccent
+              : t.fg;
 
   return (
     <RNText

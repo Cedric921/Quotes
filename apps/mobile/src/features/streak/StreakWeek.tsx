@@ -17,7 +17,7 @@ const useStyles = makeStyles((t) => ({
     borderRadius: DOT / 2,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: t.palette.ink300,
+    backgroundColor: t.base.control,
     overflow: "hidden",
   },
   dotFill: {

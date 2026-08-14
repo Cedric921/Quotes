@@ -26,7 +26,7 @@ const useStyles = makeStyles((t) => ({
     width: TRACK_W,
     height: TRACK_H,
     borderRadius: t.radius.pill,
-    backgroundColor: t.palette.ink300,
+    backgroundColor: t.base.control,
     justifyContent: "center",
     overflow: "hidden",
   },

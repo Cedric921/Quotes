@@ -40,21 +40,31 @@ que la logique métier est déjà sortie des écrans (`api/hooks/`, `services/`,
 
 ### 2.1 Couleurs — surface `base`
 
+La surface `base` est **blanc argenté** : un blanc froid, métallique, avec le
+texte et le bouton principal en encre. (Elle a été encre sombre jusqu'à ce
+que l'app soit demandée claire ; le changement a tenu dans ce tableau et dans
+cinq primitives qui supposaient un fond sombre.)
+
 | Token | Valeur | Usage |
 |---|---|---|
-| `bg.base` | `#232D3B` | fond de tous les écrans non-image |
-| `bg.elevated` | `#2B3645` | fond de sheet, champ de saisie |
-| `surface.raised` | `#343F4F` | option sélectionnée, groupe de réglages |
-| `surface.overlay` | `#3A4655` | toast et carte posés sur une image |
-| `border.subtle` | `#343F4F` | contour d'option au repos (1 px) |
-| `border.strong` | `#FFFFFF` | contour d'option sélectionnée (1,5 px) |
-| `text.primary` | `#FFFFFF` | titres, label sélectionné |
-| `text.secondary` | `#B5C2D6` | label au repos, sous-titres, « Ignorer » |
+| `bg.base` | `#EDF0F4` | fond de tous les écrans non-image |
+| `bg.elevated` | `#FFFFFF` | fond de carte, champ de saisie, bouton rond |
+| `surface.raised` | `#E2E7ED` | option sélectionnée, groupe de réglages |
+| `surface.overlay` | `#3A4655` | toast et bulle posés sur une image — reste encre, texte blanc |
+| `control` | `#C3CCD7` | piste de toggle au repos, jours vides de la série |
+| `border.subtle` | `#D3DAE3` | contour d'option au repos (1 px) |
+| `border.strong` | `#151C27` | contour d'option sélectionnée (1,5 px) |
+| `text.primary` | `#151C27` | titres, label sélectionné |
+| `text.secondary` | `#5A6579` | label au repos, sous-titres, « Ignorer » |
 | `text.tertiary` | `#8A94A6` | compteurs, mentions légales |
-| `cta.bg` | `#FFFFFF` | bouton principal |
-| `cta.fg` | `#151C27` | texte du bouton principal |
+| `cta.bg` | `#151C27` | bouton principal |
+| `cta.fg` | `#FFFFFF` | texte du bouton principal |
 | `cta.disabledBg` | `#A0A6AE` | bouton principal désactivé |
+| `onAccent` | `#151C27` | texte posé sur le dégradé (CTA de conversion, bannière) |
+| `glass` | `rgba(255,255,255,0.72)` | pied de sheet flottant, flou clair |
 | `danger` | `#FF6B6B` | destructif (suppression de compte) |
+
+La barre d'état suit la surface : sombre sur `base`, claire sur `image`.
 
 ### 2.2 Couleurs — surface `image`
 

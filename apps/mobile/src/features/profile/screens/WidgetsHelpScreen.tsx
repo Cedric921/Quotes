@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Button, GradientBorderCard, Sheet, Text } from "../../../ui";
-import { makeStyles } from "../../../theme";
+import { SurfaceProvider, makeStyles } from "../../../theme";
 import { homeScreenService } from "../../../services/homeScreenService";
 
 const useStyles = makeStyles((t) => ({
@@ -58,11 +58,14 @@ export function WidgetsHelpScreen({ surface, onBack }: WidgetsHelpScreenProps) {
 
       <View style={s.preview}>
         <GradientBorderCard>
-          <View style={s.widget}>
-            <Text variant="body" align="center">
-              {t("onboarding.widget.sample")}
-            </Text>
-          </View>
+          {/* The mock-up is the real widget: ink, white text. */}
+          <SurfaceProvider surface="image">
+            <View style={s.widget}>
+              <Text variant="body" align="center">
+                {t("onboarding.widget.sample")}
+              </Text>
+            </View>
+          </SurfaceProvider>
         </GradientBorderCard>
       </View>
 

@@ -55,7 +55,10 @@ export function Screen({
 
   const content = (
     <>
-      <StatusBar barStyle="light-content" translucent />
+      <StatusBar
+        barStyle={variant === "image" ? "light-content" : "dark-content"}
+        translucent
+      />
       <View
         style={{
           paddingTop: ignoreTopInset ? 0 : insets.top,

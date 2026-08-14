@@ -36,10 +36,10 @@ export function UnlockBanner({
       <GradientCard>
         <View style={s.row}>
           <View style={s.copy}>
-            <Text variant="title" tone="onCta">
+            <Text variant="title" tone="onAccent">
               {t("profile.unlock.title")}
             </Text>
-            <Text variant="body" tone="onCta">
+            <Text variant="body" tone="onAccent">
               {t("profile.unlock.subtitle")}
             </Text>
           </View>

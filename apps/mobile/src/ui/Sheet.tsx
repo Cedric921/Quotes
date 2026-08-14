@@ -57,8 +57,8 @@ const useStyles = makeStyles((t) => ({
     borderRadius: t.radius.pill,
     overflow: "hidden",
     borderWidth: t.border.hairline,
-    borderColor: t.image.chromeBorder,
-    backgroundColor: t.image.chrome,
+    borderColor: t.base.glassBorder,
+    backgroundColor: t.base.glass,
   },
   footerBlur: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
 }));
@@ -193,7 +193,7 @@ export function Sheet({
           <View style={[s.footer, { bottom: footerBottom }]}>
             <BlurView
               intensity={t.image.blurIntensity}
-              tint="dark"
+              tint="light"
               style={s.footerBlur}
             />
             {footer}

@@ -29,13 +29,13 @@ const useStyles = makeStyles((t) => ({
     width: 48,
     height: 48,
     borderRadius: t.radius.sm,
-    backgroundColor: t.palette.ink900,
+    backgroundColor: t.base.ctaBg,
     alignItems: "center",
     justifyContent: "center",
   },
   // The preview is a notification, and a notification shows the app's own
   // icon — this one showed a quotation mark, the reference app's mark.
-  previewLogo: { width: 30, height: 30, tintColor: t.base.textPrimary },
+  previewLogo: { width: 30, height: 30, tintColor: t.base.ctaFg },
   previewBody: { flex: 1 },
   rows: { gap: t.space.sm, marginTop: t.space.xl },
   top: { paddingHorizontal: t.gutter, minHeight: 56, justifyContent: "center" },
@@ -166,7 +166,7 @@ export function RemindersSetupScreen({
         {t("onboarding.reminders.subtitle")}
       </Text>
 
-      <Card variant="overlay">
+      <Card>
         <View style={s.preview}>
           <View style={s.previewIcon}>
             <Image source={LOGO} style={s.previewLogo} resizeMode="contain" />
