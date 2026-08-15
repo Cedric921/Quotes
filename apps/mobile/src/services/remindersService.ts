@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { quotesApi } from "./api";
+import { CACHED_QUOTES_KEY, queryClient } from "../api/queryClient";
+import type { Quote } from "../types";
 import { widgetService } from "./widgetService";
 import {
   areNotificationsEnabled,
@@ -68,8 +70,26 @@ const fetchQuotePool = async (
     const quotes = await quotesApi.getQuotes(1, count, undefined, includePremium);
     return quotes.map(({ id, text, author }) => ({ id, text, author }));
   } catch {
-    return [];
+    return cachedQuotes(count);
   }
+};
+
+/**
+ * The feed's persisted pages, when the network has nothing to give: last
+ * week's quotes ring as reminders rather than the fallback sentence.
+ */
+const cachedQuotes = (count: number): ReminderQuote[] => {
+  const pages = queryClient
+    .getQueriesData<{ pages?: Quote[][] }>({ queryKey: [...CACHED_QUOTES_KEY] })
+    .flatMap(([, data]) => data?.pages ?? []);
+  const quotes = pages.flat();
+  // A different slice each time, so the same quotes do not ring every day.
+  const start = quotes.length ? Math.floor(Math.random() * quotes.length) : 0;
+  return quotes
+    .slice(start)
+    .concat(quotes.slice(0, start))
+    .slice(0, count)
+    .map(({ id, text, author }) => ({ id, text, author }));
 };
 
 const scheduleWithContent = async (
@@ -86,6 +106,14 @@ const scheduleWithContent = async (
 
   const quotes = await fetchQuotePool(times.length, content);
   await scheduleDailyNotifications(configs, quotes);
+
+  // The widget draws from the same pool as the reminders, so it has quotes
+  // to rotate through even on a device where the feed has not loaded yet.
+  if (quotes.length > 0) {
+    await widgetService.updateWidgetQuotes(
+      quotes.map((q) => ({ content: q.text, author: q.author ?? "" })),
+    );
+  }
   return times.length;
 };
 
@@ -106,14 +134,6 @@ export const requestAndSchedule = async (
   await saveSchedule(schedule);
   return { granted: true, scheduled };
 };
-
-  // The widget draws from the same pool as the reminders, so it has quotes
-  // to rotate through even on a device where the feed has not loaded yet.
-  if (quotes.length > 0) {
-    await widgetService.updateWidgetQuotes(
-      quotes.map((q) => ({ content: q.text, author: q.author ?? "" })),
-    );
-  }
 
 /**
  * Re-draws the quotes behind the saved schedule, keeping the times.

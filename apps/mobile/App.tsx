@@ -3,12 +3,12 @@ import { Platform, AppState, LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider, useSelector } from "react-redux";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useEffect, useRef } from "react";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { ThemeProvider } from "./src/theme";
 import { store, RootState } from "./src/store";
-import { queryClient } from "./src/api/queryClient";
+import { persistOptions, queryClient } from "./src/api/queryClient";
 import { quoteKeys } from "./src/api/hooks/useQuotes";
 import { loadStoredAuth } from "./src/store/slices/authSlice";
 import { loadStoredTheme } from "./src/store/slices/themeSlice";
@@ -176,7 +176,7 @@ function AppContent() {
  *                             vertical pager and the sheets lose their gestures
  *   SafeAreaProvider        — `Screen` and `Sheet` read insets from it
  *   Provider (redux)        — ThemeProvider reads the selected font from the store
- *   QueryClientProvider
+ *   PersistQueryClientProvider (the query cache, restored from disk)
  *   ThemeProvider           — must sit inside redux, outside every screen
  */
 export default function App() {
@@ -184,11 +184,14 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={persistOptions}
+          >
             <ThemeProvider>
               <AppContent />
             </ThemeProvider>
-          </QueryClientProvider>
+          </PersistQueryClientProvider>
         </Provider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
