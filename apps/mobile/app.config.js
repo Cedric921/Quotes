@@ -91,6 +91,8 @@ export default ({ config }) => {
       favicon: "./assets/favicon.png",
     },
     plugins: [
+      // Products for StoreKit on local builds — see plugins/withStoreKitConfig.js.
+      "./plugins/withStoreKitConfig",
       "expo-localization",
       // The alternate icons. `expo-alternate-app-icons` was a dependency
       // without this entry, so no CFBundleAlternateIcons ever reached the

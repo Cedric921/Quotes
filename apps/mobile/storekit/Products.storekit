@@ -1,0 +1,90 @@
+{
+  "identifier": "5FAAC6CA-F0FF-4876-BA3C-638372B12A38",
+  "nonRenewingSubscriptions": [],
+  "products": [],
+  "settings": {
+    "_applicationInternalID": "",
+    "_developerTeamID": "",
+    "_failTransactionsEnabled": false,
+    "_lastSynchronizedDate": 0,
+    "_locale": "fr_FR",
+    "_storefront": "FRA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "10B2A060-7C2B-4724-A5DC-1AEAC0C7F1C8",
+      "localizations": [
+        {
+          "description": "Focus Pro",
+          "displayName": "Focus Pro",
+          "locale": "fr_FR"
+        }
+      ],
+      "name": "Focus Pro",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "4.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "84C0B200-AA9D-4DD1-8B24-ABBF84AD73EA",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "Focus Pro mensuel, accès complet à Focus",
+              "displayName": "Focus Pro mensuel",
+              "locale": "fr_FR"
+            },
+            {
+              "description": "Focus Pro mensuel, full access to Focus",
+              "displayName": "Focus Pro mensuel",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "focus_pro_monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Focus Pro mensuel",
+          "subscriptionGroupID": "10B2A060-7C2B-4724-A5DC-1AEAC0C7F1C8",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "49.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "B3A746F8-A469-4216-A19A-EA9490C268A7",
+          "introductoryOffer": {
+            "internalID": "D3A417FA-61E4-49CF-AFBD-0C018F7A7AAB",
+            "numberOfPeriods": 1,
+            "paymentMode": "free",
+            "subscriptionPeriod": "P3D"
+          },
+          "localizations": [
+            {
+              "description": "Focus Pro annuel, accès complet à Focus",
+              "displayName": "Focus Pro annuel",
+              "locale": "fr_FR"
+            },
+            {
+              "description": "Focus Pro annuel, full access to Focus",
+              "displayName": "Focus Pro annuel",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "focus_pro_yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Focus Pro annuel",
+          "subscriptionGroupID": "10B2A060-7C2B-4724-A5DC-1AEAC0C7F1C8",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}
