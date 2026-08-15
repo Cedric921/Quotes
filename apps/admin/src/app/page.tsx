@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: "Focus — Des citations qui vous ressemblent",
     description:
       "Des pensées choisies pour vos objectifs, sur votre écran d'accueil et en notification.",
-    images: ["/landing/feed.jpg"],
+    images: ["/landing/screen-feed.jpg"],
   },
 };
 
