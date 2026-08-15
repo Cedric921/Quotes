@@ -207,6 +207,13 @@ const QUESTIONNAIRE_INTROS = new Set([
   "onboarding.intro.quiz2",
 ]);
 
+/**
+ * The "Personal Growth Essentials" upsell, off at the client's request. The
+ * screen stays; the profile's bundle tile, which opens a web page, is not
+ * this and stays too.
+ */
+export const BUNDLE_UPSELL_ENABLED = false;
+
 export const isQuestionnaireStep = (step: Step): boolean =>
   step.kind === "question" ||
   step.kind === "goals" ||
@@ -271,7 +278,9 @@ export const fullFlow: Step[] = [
 ];
 
 /** The steps the app runs, in order. */
-export const flow: Step[] = QUESTIONNAIRE_ENABLED
-  ? fullFlow
-  : fullFlow.filter((step) => !isQuestionnaireStep(step));
+export const flow: Step[] = fullFlow.filter(
+  (step) =>
+    (QUESTIONNAIRE_ENABLED || !isQuestionnaireStep(step)) &&
+    (BUNDLE_UPSELL_ENABLED || step.kind !== "bundle"),
+);
 

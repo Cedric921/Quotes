@@ -214,8 +214,9 @@ feuille de partage : c'est un écran modal partagé, pas une page de réglages.
 > `features/onboarding/questions.ts`). Le premier lancement garde l'accueil,
 > le prénom, la série, les rappels, l'icône, le lot, le thème, le plan, les
 > manifestes et le widget ; il saute les questions, les objectifs, les sujets
-> et les deux intros qui les annonçaient. Tout ce qui suit reste dans le code
-> et revient en basculant la constante.
+> et les deux intros qui les annonçaient, ainsi que l'étape « lot »
+> (`BUNDLE_UPSELL_ENABLED = false`). Tout ce qui suit reste dans le code et
+> revient en basculant les constantes.
 
 Vingt-deux des trente étapes d'onboarding sont le **même écran** avec des
 données différentes. Elles sont décrites par un schéma, pas par du code.
