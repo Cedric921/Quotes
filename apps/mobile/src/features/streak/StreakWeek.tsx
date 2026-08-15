@@ -109,7 +109,9 @@ export function StreakWeek({
                     <Ionicons
                       name="checkmark"
                       size={18}
-                      color={t.palette.white}
+                      // Ink, like every glyph on the accent: white sank
+                      // into the sky end of the dot.
+                      color={t.base.onAccent}
                     />
                   </>
                 ) : null}

@@ -30,8 +30,11 @@ export const palette = {
   silver400: "#C3CCD7",
 
   // Accent — celebration & conversion only, never a page background.
-  violet: "#8B7FE8",
-  blush: "#F2A8B4",
+  // Sky blue running into an indigo violet. It replaced a pink-to-violet
+  // pair at the client's request; nothing else in the app reads as pink
+  // now, illustrations included.
+  sky: "#87CEEB",
+  indigo: "#5E5CE6",
 
   // Feedback
   coral: "#FF6B6B",
@@ -152,8 +155,8 @@ export const widgetSurface = {
   /** The card. Ink, like the design's widget preview — never the gradient. */
   card: palette.ink900,
   /** The accent's one job on a widget: a 1.5 px contour around the card. */
-  gradientFrom: palette.violet,
-  gradientTo: palette.blush,
+  gradientFrom: palette.sky,
+  gradientTo: palette.indigo,
   contour: 1.5,
 
   text: palette.white,
@@ -161,19 +164,24 @@ export const widgetSurface = {
   textFaint: palette.slate300,
 } as const;
 
-/** The accent gradient. Four sanctioned uses — see spec §2.3. */
+/**
+ * The accent gradient. Four sanctioned uses — see spec §2.3.
+ *
+ * Always light→dark, sky→indigo, in the reading direction: left to right,
+ * top to bottom. That puts the pale end under the ink type a banner or a
+ * CTA carries and the dark end under a toggle's knob, so neither vanishes
+ * into its ground.
+ */
 export const gradient = {
-  from: palette.violet,
-  to: palette.blush,
-  /** Left→right for CTAs and toggle tracks. */
+  from: palette.sky,
+  to: palette.indigo,
+  /** Left→right for CTAs, toggle tracks and the promo banner. */
   horizontal: { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } },
   /** Top→bottom for the trial timeline rail and the streak flame. */
   vertical: { start: { x: 0, y: 0 }, end: { x: 0, y: 1 } },
-  /** Diagonal for filled promo banners. */
+  /** Diagonal for gradient outlines and the tile art. */
   diagonal: { start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
-  /** Banner reads pink→violet, the reverse of every other gradient. */
-  colorsReversed: [palette.blush, palette.violet] as const,
-  colors: [palette.violet, palette.blush] as const,
+  colors: [palette.sky, palette.indigo] as const,
 } as const;
 
 export const space = {

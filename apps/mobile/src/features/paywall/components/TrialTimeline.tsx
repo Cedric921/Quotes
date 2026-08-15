@@ -70,7 +70,9 @@ export function TrialTimeline({ steps }: { steps: TrialStep[] }) {
         {steps.map((step) => (
           <View key={step.title} style={s.step}>
             <View style={s.icon}>
-              <Ionicons name={step.icon} size={18} color={t.palette.white} />
+              {/* Ink, like every glyph on the accent: white vanished on
+                  the sky end of the rail. */}
+              <Ionicons name={step.icon} size={18} color={t.base.onAccent} />
             </View>
             <View style={s.text}>
               <Text

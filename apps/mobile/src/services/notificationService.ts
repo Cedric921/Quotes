@@ -238,7 +238,7 @@ export const setupNotificationChannel = async (): Promise<void> => {
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       // The LED/notification tint follows the app accent.
-      lightColor: palette.violet,
+      lightColor: palette.indigo,
     });
   }
 };

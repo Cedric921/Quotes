@@ -87,7 +87,7 @@ export function GradientCard({
   const t = useTheme();
   return (
     <LinearGradient
-      colors={[...t.gradient.colorsReversed]}
+      colors={[...t.gradient.colors]}
       start={t.gradient.horizontal.start}
       end={t.gradient.horizontal.end}
       style={[s.filled, style]}

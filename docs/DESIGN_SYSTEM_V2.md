@@ -19,7 +19,7 @@ Trois règles non négociables, dont découle tout le reste.
    (`base`), tantôt par-dessus une photo plein écran (`image`). Ce ne sont pas
    deux variantes de clair/sombre : les contrastes, les flous et la typographie
    diffèrent. Un composant déclare sur quelle surface il vit, jamais une couleur.
-3. **Le dégradé est un accent, pas une identité.** Le violet→rose n'apparaît que
+3. **Le dégradé est un accent, pas une identité.** Le ciel→indigo n'apparaît que
    sur une célébration (série), un appel à l'action de conversion, un contour de
    carte premium et les illustrations. Jamais comme fond d'écran, jamais comme
    fond de bouton ordinaire.
@@ -101,8 +101,8 @@ série. Tout est translucide et flouté.
 ### 2.3 Dégradé
 
 ```
-accent.from  #8B7FE8   (violet)
-accent.to    #F2A8B4   (rose)
+accent.from  #87CEEB   (bleu ciel)
+accent.to    #5E5CE6   (indigo violet)
 ```
 
 Quatre emplois, et seulement ceux-là :
@@ -111,6 +111,13 @@ Quatre emplois, et seulement ceux-là :
 - **contour 1,5 px** : carte du plan personnalisé, carte du paywall, aperçu du widget ;
 - **rail vertical** : chronologie de l'essai gratuit ;
 - **piste de toggle** à l'état actif, et la flamme de série.
+
+Toujours du clair au foncé dans le sens de lecture (gauche→droite,
+haut→bas) : le texte encre d'une bannière ou d'un CTA tombe sur le bout
+ciel, le bouton d'un toggle sur le bout indigo. Les illustrations du profil
+sont teintées dans le même accent : `scripts/recolor-illustrations.py` a
+déplacé leurs roses et violets vers le ciel, et refait le travail si de
+nouvelles arrivent dans l'ancien accent.
 
 ### 2.4 Espacement, rayons, durées
 
