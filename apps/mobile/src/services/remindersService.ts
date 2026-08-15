@@ -1,9 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { quotesApi } from "./api";
 import {
+  areNotificationsEnabled,
   requestNotificationPermissions,
   scheduleDailyNotifications,
   setupNotificationChannel,
   type NotificationConfig,
+  type ReminderQuote,
 } from "./notificationService";
 
 /** Sunday through Saturday, in the numbering `notificationService` expects. */
@@ -21,6 +24,11 @@ export interface ReminderSchedule {
 export interface ReminderResult {
   granted: boolean;
   scheduled: number;
+}
+
+export interface ReminderContent {
+  /** Premium quotes go into a subscriber's reminders; a free account gets the free ones. */
+  includePremium: boolean;
 }
 
 /**
@@ -46,17 +54,27 @@ export const buildTimes = ({
 };
 
 /**
- * Asks for permission *and* schedules, in that order, from a single user
- * action. The v2 onboarding never triggers the system dialog on screen entry.
+ * One quote per slot, drawn through the feed's own shuffle so two launches
+ * get two different sets. Best-effort: a reminder that rings with the
+ * fallback sentence beats one that never got scheduled because the API was
+ * asleep.
  */
-export const requestAndSchedule = async (
+const fetchQuotePool = async (
+  count: number,
+  { includePremium }: ReminderContent,
+): Promise<ReminderQuote[]> => {
+  try {
+    const quotes = await quotesApi.getQuotes(1, count, undefined, includePremium);
+    return quotes.map(({ id, text, author }) => ({ id, text, author }));
+  } catch {
+    return [];
+  }
+};
+
+const scheduleWithContent = async (
   schedule: ReminderSchedule,
-): Promise<ReminderResult> => {
-  const status = await requestNotificationPermissions();
-  if (!status.granted) return { granted: false, scheduled: 0 };
-
-  await setupNotificationChannel();
-
+  content: ReminderContent,
+): Promise<number> => {
   // A reminder the user asked for daily runs every day of the week; the
   // scheduler takes one entry per time, each carrying its own days.
   const times = buildTimes(schedule);
@@ -65,9 +83,48 @@ export const requestAndSchedule = async (
     days: EVERY_DAY,
   }));
 
-  await scheduleDailyNotifications(configs);
+  const quotes = await fetchQuotePool(times.length, content);
+  await scheduleDailyNotifications(configs, quotes);
+  return times.length;
+};
+
+/**
+ * Asks for permission *and* schedules, in that order, from a single user
+ * action. The v2 onboarding never triggers the system dialog on screen entry.
+ */
+export const requestAndSchedule = async (
+  schedule: ReminderSchedule,
+  content: ReminderContent = { includePremium: false },
+): Promise<ReminderResult> => {
+  const status = await requestNotificationPermissions();
+  if (!status.granted) return { granted: false, scheduled: 0 };
+
+  await setupNotificationChannel();
+
+  const scheduled = await scheduleWithContent(schedule, content);
   await saveSchedule(schedule);
-  return { granted: true, scheduled: times.length };
+  return { granted: true, scheduled };
+};
+
+/**
+ * Re-draws the quotes behind the saved schedule, keeping the times.
+ *
+ * A daily trigger repeats the same content until it is replaced, so without
+ * this the 9 o'clock reminder would read the same quote every morning. Run
+ * on launch; a no-op when nothing was ever scheduled or permission is gone.
+ */
+export const refreshContent = async (
+  content: ReminderContent,
+): Promise<void> => {
+  const schedule = await loadSchedule();
+  if (!schedule) return;
+  if (!(await areNotificationsEnabled())) return;
+
+  try {
+    await scheduleWithContent(schedule, content);
+  } catch (error) {
+    console.warn("[Reminders] content not refreshed:", error);
+  }
 };
 
 /**
@@ -97,5 +154,6 @@ const saveSchedule = async (schedule: ReminderSchedule): Promise<void> => {
 export const remindersService = {
   buildTimes,
   requestAndSchedule,
+  refreshContent,
   loadSchedule,
 };

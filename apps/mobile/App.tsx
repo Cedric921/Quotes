@@ -16,6 +16,7 @@ import { loadStoredFont } from "./src/store/slices/fontSlice";
 import { loadSettings } from "./src/features/settings/settingsSlice";
 import { useTrackActivity } from "./src/api/hooks/useUserActivity";
 import { setupNotificationChannel } from "./src/services/notificationService";
+import { remindersService } from "./src/services/remindersService";
 import {
   initializePurchases,
   loginUser,
@@ -61,6 +62,7 @@ function AppContent() {
   const user = useSelector((state: RootState) => state.auth.user);
   const trackActivity = useTrackActivity();
   const prevUserIdRef = useRef<string | null>(null);
+  const remindersContentRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     // Load stored authentication, theme, font and user settings on app start.
@@ -111,6 +113,16 @@ function AppContent() {
 
     syncRevenueCatUser();
   }, [user?.id]);
+
+  // Each launch puts fresh quotes behind the scheduled reminders. Once for a
+  // guest, and once more if the stored account turns out to be a subscriber,
+  // whose reminders may carry premium quotes — never twice for the same tier.
+  const isSubscribed = user?.isSubscribed ?? false;
+  useEffect(() => {
+    if (remindersContentRef.current === isSubscribed) return;
+    remindersContentRef.current = isSubscribed;
+    void remindersService.refreshContent({ includePremium: isSubscribed });
+  }, [isSubscribed]);
 
   useEffect(() => {
     // Track daily activity when user is authenticated

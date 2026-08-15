@@ -117,11 +117,10 @@ export function RemindersSetupScreen({
   const save = async () => {
     setSaving(true);
     try {
-      const { granted } = await remindersService.requestAndSchedule({
-        count,
-        startHour: start.getHours(),
-        endHour: end.getHours(),
-      });
+      const { granted } = await remindersService.requestAndSchedule(
+        { count, startHour: start.getHours(), endHour: end.getHours() },
+        { includePremium: isSubscribed },
+      );
 
       // The device is scheduled; tell the server too, so its own sends land in
       // the same window. No-op without an account, and never fatal.

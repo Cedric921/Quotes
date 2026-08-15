@@ -47,6 +47,30 @@ export interface NotificationConfig {
   days: number[]; // Array of day numbers (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
 }
 
+/** What a reminder needs of a quote: enough to show it and to open it. */
+export interface ReminderQuote {
+  id: string;
+  text: string;
+  author?: string;
+}
+
+/**
+ * The longest body a reminder carries. iOS expands a banner to about four
+ * lines and Android to about eight; past that the system cuts the text
+ * itself, mid-word, with no ellipsis.
+ */
+const MAX_BODY_LENGTH = 180;
+
+const bodyFor = (quote: ReminderQuote): string =>
+  quote.text.length > MAX_BODY_LENGTH
+    ? `${quote.text.slice(0, MAX_BODY_LENGTH - 1).trimEnd()}…`
+    : quote.text;
+
+/** Every weekday, in the numbering `NotificationConfig.days` uses. */
+const WEEK = [0, 1, 2, 3, 4, 5, 6];
+const coversTheWeek = (days: number[]) =>
+  WEEK.every((day) => days.includes(day));
+
 /**
  * Schedule notifications with specific times and days
  * @param notifications - Array of notification configurations with time and days
@@ -57,8 +81,23 @@ const DAILY_KIND = "daily";
 /** The one-off "your trial ends soon" notification, scheduled from the paywall. */
 export const TRIAL_REMINDER_ID = "focus-trial-reminder";
 
+/**
+ * Schedules the reminders, each one carrying a quote.
+ *
+ * The body used to be a fixed sentence — "Votre citation du moment vous
+ * attend." — which is the kind of notification people swipe away without
+ * opening. The server's own sends put the quote itself in the body; the
+ * local ones now do the same, taking one quote per slot from `quotes` and
+ * cycling when there are fewer quotes than slots. Without a pool (offline
+ * at schedule time) the sentence stays as the fallback.
+ *
+ * A reminder set for every day of the week is one daily trigger, not seven
+ * weekly ones: iOS keeps at most 64 pending notifications per app, and
+ * twenty a day times seven days went silently past that.
+ */
 export const scheduleDailyNotifications = async (
   notifications: NotificationConfig[],
+  quotes: ReminderQuote[] = [],
 ): Promise<void> => {
   // Replace only the daily reminders. `cancelAllScheduledNotificationsAsync`
   // used to run here, which also dropped the trial reminder the moment the
@@ -72,24 +111,45 @@ export const scheduleDailyNotifications = async (
       ),
   );
 
+  let slot = 0;
+  const contentForNextSlot = (): Notifications.NotificationContentInput => {
+    const quote = quotes.length ? quotes[slot % quotes.length] : undefined;
+    slot += 1;
+    return {
+      // Read at schedule time, so a reminder speaks the language the app
+      // was in when the user set it — it used to be English for all ten
+      // locales.
+      title: i18n.t("notifications.daily.title"),
+      body: quote ? bodyFor(quote) : i18n.t("notifications.daily.body"),
+      sound: true,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+      data: quote
+        ? { kind: DAILY_KIND, quoteId: quote.id, author: quote.author }
+        : { kind: DAILY_KIND },
+    };
+  };
+
   for (const notification of notifications) {
     const [hours, minutes] = notification.time.split(":").map(Number);
+
+    if (coversTheWeek(notification.days)) {
+      await Notifications.scheduleNotificationAsync({
+        content: contentForNextSlot(),
+        // The trigger kind became explicit in SDK 54: without `type` the
+        // call is rejected and nothing is ever scheduled.
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          hour: hours,
+          minute: minutes,
+        },
+      });
+      continue;
+    }
 
     // Schedule a notification for each selected day
     for (const weekday of notification.days) {
       await Notifications.scheduleNotificationAsync({
-        // Read at schedule time, so a reminder speaks the language the app
-        // was in when the user set it — it used to be English for all ten
-        // locales.
-        content: {
-          title: i18n.t("notifications.daily.title"),
-          body: i18n.t("notifications.daily.body"),
-          sound: true,
-          priority: Notifications.AndroidNotificationPriority.HIGH,
-          data: { kind: DAILY_KIND },
-        },
-        // The trigger kind became explicit in SDK 54: without `type` the
-        // call is rejected and nothing is ever scheduled.
+        content: contentForNextSlot(),
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
           hour: hours,
