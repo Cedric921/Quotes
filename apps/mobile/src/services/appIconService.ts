@@ -2,7 +2,12 @@ import { Platform } from "react-native";
 import { palette } from "../theme/tokens";
 
 /** The Focus mark, black on transparent; tinted per variant. */
-export const APP_MARK = require("../../assets/images/source-icon-transparent.png");
+/**
+ * The mark, trimmed to its own bounds. `source-icon-transparent.png` keeps
+ * the mark inside a 1200 px canvas at under half its width, so anything
+ * drawn from it at a given size showed a glyph half that size.
+ */
+export const APP_MARK = require("../../assets/images/focus-mark.png");
 
 export interface AppIconOption {
   id: string;

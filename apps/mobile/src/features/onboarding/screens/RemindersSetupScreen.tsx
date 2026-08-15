@@ -25,24 +25,26 @@ const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
   subtitle: { marginTop: t.space.sm, marginBottom: t.space.xl },
   preview: { flexDirection: "row", gap: t.space.sm, alignItems: "center" },
+  // The notification's app icon. 48 with a 30 mark read as a dot beside
+  // the text; this is the size iOS gives an icon in a banner.
   previewIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: t.radius.sm,
+    width: 64,
+    height: 64,
+    borderRadius: t.radius.md,
     backgroundColor: t.base.badgeBg,
     alignItems: "center",
     justifyContent: "center",
   },
   // The preview is a notification, and a notification shows the app's own
   // icon — this one showed a quotation mark, the reference app's mark.
-  previewLogo: { width: 30, height: 30, tintColor: t.base.badgeFg },
+  previewLogo: { width: 46, height: 46, tintColor: t.base.badgeFg },
   previewBody: { flex: 1 },
   rows: { gap: t.space.sm, marginTop: t.space.xl },
   top: { paddingHorizontal: t.gutter, minHeight: 56, justifyContent: "center" },
   limit: { marginTop: t.space.md, alignItems: "center", gap: t.space.xxs },
 }));
 
-const LOGO = require("../../../../assets/images/source-icon-transparent.png");
+const LOGO = require("../../../../assets/images/focus-mark.png");
 
 const fmt = (d: Date) =>
   `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;

@@ -25,7 +25,8 @@ const useStyles = makeStyles((t) => ({
   },
   image: { width: "100%", height: "100%" },
   fill: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-  logo: { width: "58%", height: "58%" },
+  // The share of the icon a real app icon gives its mark.
+  logo: { width: "68%", height: "68%" },
   centre: {
     position: "absolute",
     top: 0,
