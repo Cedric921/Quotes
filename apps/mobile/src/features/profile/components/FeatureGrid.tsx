@@ -6,8 +6,14 @@ import { MetalFill, Text, TileArt } from "../../../ui";
 
 const useStyles = makeStyles((t) => ({
   grid: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm },
+  // Two per row on every phone. A 48.5% width plus the 12 px gap came to
+  // more than the row on anything narrower than the Pro Max, and the grid
+  // fell into a single column. The basis leaves the gap its room; the tile
+  // then grows to half the row and no further.
   tile: {
-    width: "48.5%",
+    flexBasis: "45%",
+    flexGrow: 1,
+    maxWidth: "48.5%",
     height: 190,
     borderRadius: t.radius.lg,
     backgroundColor: t.base.bgElevated,
@@ -27,7 +33,8 @@ const useStyles = makeStyles((t) => ({
     transform: [{ scale: 0.78 }],
   },
   wide: {
-    width: "100%",
+    flexBasis: "100%",
+    maxWidth: "100%",
     flexDirection: "row",
     alignItems: "center",
     gap: t.space.md,

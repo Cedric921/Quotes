@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Button, Screen, Text, TileGrid, type Tile } from "../../../ui";
 import { makeStyles } from "../../../theme";
@@ -13,7 +13,8 @@ import {
 
 const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
-  grid: { flex: 1, justifyContent: "center" },
+  scroll: { flex: 1 },
+  grid: { flexGrow: 1, justifyContent: "center" },
 }));
 
 const toTiles = (): Tile[] =>
@@ -64,14 +65,18 @@ export function AppIconScreen({
         {t("onboarding.appIcon.title")}
       </Text>
 
-      <View style={s.grid}>
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.grid}
+        showsVerticalScrollIndicator={false}
+      >
         <TileGrid
           shape="icon"
           tiles={toTiles()}
           selectedId={selected}
           onSelect={(id) => void choose(id)}
         />
-      </View>
+      </ScrollView>
     </Screen>
   );
 }

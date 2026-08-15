@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View } from "react-native";
+import { ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Button, Screen, Text, TileGrid, type Tile } from "../../ui";
 import { makeStyles } from "../../theme";
@@ -9,7 +9,10 @@ import { useActiveThemes } from "../../api/hooks/useThemes";
 
 const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
-  grid: { flex: 1, justifyContent: "flex-end", paddingBottom: t.space.xl },
+  scroll: { flex: 1 },
+  // Few themes sit at the foot of the screen, as designed; many scroll,
+  // instead of climbing over the title as they did.
+  grid: { flexGrow: 1, justifyContent: "flex-end", paddingBottom: t.space.xl },
 }));
 
 export interface ThemePickerScreenProps {
@@ -69,14 +72,18 @@ export function ThemePickerScreen({
         {t("theme.picker.title")}
       </Text>
 
-      <View style={s.grid}>
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.grid}
+        showsVerticalScrollIndicator={false}
+      >
         <TileGrid
           shape="theme"
           tiles={tiles}
           selectedId={current?.id}
           onSelect={select}
         />
-      </View>
+      </ScrollView>
     </Screen>
   );
 }
