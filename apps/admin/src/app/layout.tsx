@@ -6,6 +6,7 @@ import { LocaleProvider } from "@/contexts/LocaleContext";
 import { EnvironmentProvider } from "@/contexts/EnvironmentContext";
 import { Providers } from "@/components/providers";
 import { Toaster } from "sonner";
+import { SITE_URL } from "@/lib/links";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,9 +18,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// The favicon, icon.png and apple-icon.png beside this file are the app's
+// own icon — Next picks them up by name and links them on every page.
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Focus - Admin Panel",
   description: "Focus Admin Panel - Manage quotes, topics, and users",
+  applicationName: "Focus",
 };
 
 export default function RootLayout({
