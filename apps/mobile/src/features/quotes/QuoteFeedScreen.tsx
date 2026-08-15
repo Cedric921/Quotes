@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { makeStyles, useTheme } from "../../theme";
+import { makeStyles, useTheme, SurfaceProvider } from "../../theme";
 import { Button, Coachmark, IconCircle, Text } from "../../ui";
 import { useAppSelector } from "../../store/hooks";
 import { useQuotes } from "../../api/hooks/useQuotes";
@@ -220,22 +220,31 @@ export function QuoteFeedScreen({
   // `loaded.length > 0` is what separates "your settings hid everything" from
   // "the first page has not arrived yet" — both leave `quotes` empty, and only
   // one of them is the user's doing.
+  //
+  // Paging also stops at `MAX_SCANNED`, with pages still to come: that has
+  // to count as "nothing left to rescue it" too, or the screen stays black —
+  // no quotes, no message — for a user whose followed topics match nothing
+  // the API sends, which is what stale topic ids in the settings produce.
   const filteredEverythingOut =
     loaded.length > 0 &&
     quotes.length === 0 &&
-    !hasNextPage &&
-    !isFetchingNextPage;
+    !isFetchingNextPage &&
+    (!hasNextPage || loaded.length >= MAX_SCANNED);
 
   if (filteredEverythingOut) {
     return (
       <View style={s.root}>
         <View style={s.empty}>
-          <Text variant="title" align="center">
-            {translate("feed.empty.title")}
-          </Text>
-          <Text variant="body" tone="dim" align="center">
-            {translate("feed.empty.body")}
-          </Text>
+          {/* The root is ink; without the image surface the title took the
+              base surface's ink and vanished into it. */}
+          <SurfaceProvider surface="image">
+            <Text variant="title" align="center">
+              {translate("feed.empty.title")}
+            </Text>
+            <Text variant="body" tone="dim" align="center">
+              {translate("feed.empty.body")}
+            </Text>
+          </SurfaceProvider>
           <Button
             label={translate("settings.contentPreferences")}
             onPress={onOpenTopics}
