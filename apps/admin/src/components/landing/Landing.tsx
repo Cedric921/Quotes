@@ -265,8 +265,14 @@ export function Landing({ locale, t }: { locale: Locale; t: Landing }) {
             </div>
           </div>
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm" style={{ color: "var(--ink-300)" }}>
-            <Link href={legal("terms")} className="hover:underline">{t.footer.terms}</Link>
-            <Link href={legal("privacy")} className="hover:underline">{t.footer.privacy}</Link>
+            {/* The legal pages open in their own tab: they are long, and
+                the reader comes back to where they were. */}
+            <a href={legal("terms")} target="_blank" rel="noopener noreferrer" className="hover:underline">
+              {t.footer.terms}
+            </a>
+            <a href={legal("privacy")} target="_blank" rel="noopener noreferrer" className="hover:underline">
+              {t.footer.privacy}
+            </a>
             <a href={`mailto:${CONTACT_EMAIL}`} className="hover:underline">{t.footer.contact}</a>
             <Link href="/login" className="hover:underline">{t.footer.admin}</Link>
           </nav>
