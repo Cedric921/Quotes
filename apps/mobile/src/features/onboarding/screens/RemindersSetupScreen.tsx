@@ -29,13 +29,13 @@ const useStyles = makeStyles((t) => ({
     width: 48,
     height: 48,
     borderRadius: t.radius.sm,
-    backgroundColor: t.base.ctaBg,
+    backgroundColor: t.base.badgeBg,
     alignItems: "center",
     justifyContent: "center",
   },
   // The preview is a notification, and a notification shows the app's own
   // icon — this one showed a quotation mark, the reference app's mark.
-  previewLogo: { width: 30, height: 30, tintColor: t.base.ctaFg },
+  previewLogo: { width: 30, height: 30, tintColor: t.base.badgeFg },
   previewBody: { flex: 1 },
   rows: { gap: t.space.sm, marginTop: t.space.xl },
   top: { paddingHorizontal: t.gutter, minHeight: 56, justifyContent: "center" },

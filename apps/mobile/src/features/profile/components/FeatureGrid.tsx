@@ -2,7 +2,7 @@ import React from "react";
 import { Image, Pressable, View } from "react-native";
 import type { Ionicons } from "@expo/vector-icons";
 import { makeStyles } from "../../../theme";
-import { Text, TileArt } from "../../../ui";
+import { MetalFill, Text, TileArt } from "../../../ui";
 
 const useStyles = makeStyles((t) => ({
   grid: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm },
@@ -81,6 +81,7 @@ export function FeatureGrid({ tiles }: { tiles: FeatureTile[] }) {
               pressed ? s.pressed : null,
             ]}
           >
+            <MetalFill radius="lg" />
             {tile.wide ? (
               <>
                 <View style={s.wideCopy}>

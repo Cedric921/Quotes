@@ -57,19 +57,31 @@ cinq primitives qui supposaient un fond sombre.)
 | `text.primary` | `#151C27` | titres, label sélectionné |
 | `text.secondary` | `#5A6579` | label au repos, sous-titres, « Ignorer » |
 | `text.tertiary` | `#8A94A6` | compteurs, mentions légales |
-| `cta.bg` | `#151C27` | bouton principal |
-| `cta.fg` | `#FFFFFF` | texte du bouton principal |
-| `cta.disabledBg` | `#A0A6AE` | bouton principal désactivé |
+| `cta.bg` | `#FFFFFF` | bouton principal (dégradé court vers `#F5F7FA`, liseré encre à 8 %) |
+| `cta.fg` | `#151C27` | texte du bouton principal |
+| `cta.disabledBg` | `#A0A6AE` | bouton principal désactivé, texte blanc |
+| `badge.bg` | `#151C27` | pastille de sélection (ligne d'option, tuile), tuile d'icône de l'aperçu de notification |
+| `badge.fg` | `#FFFFFF` | coche et logo posés sur `badge.bg` |
 | `onAccent` | `#151C27` | texte posé sur le dégradé (CTA de conversion, bannière) |
 | `glass` | `rgba(255,255,255,0.72)` | pied de sheet flottant, flou clair |
 | `danger` | `#FF6B6B` | destructif (suppression de compte) |
 
 La barre d'état suit la surface : sombre sur `base`, claire sur `image`.
 
-Le fond n'est pas une couleur plate mais un **métal brossé** : `ui/Ground`
-dessine `assets/images/brushed-silver.png` (sheen clair, grain diagonal fin)
-sous chaque écran `base` et chaque sheet ; `bg.base` est la couleur qui
-l'attend. Les surfaces posées dessus — cartes, tuiles, boutons ronds, groupes
+Le fond n'est pas une couleur plate ni un dégradé d'un bord à l'autre, mais
+une **feuille d'aluminium brossé** : plusieurs reflets clairs et des bandes
+plus sombres mêlés, sous un grain diagonal fin. `ui/Ground` dessine
+`assets/images/brushed-silver.png` sous chaque écran `base` et chaque sheet ;
+`bg.base` est la couleur qui l'attend. Les surfaces posées dessus — cartes,
+lignes (`Stepper`, `TimeRow`), options (`OptionRow`, `Chip`), groupes de
+réglages, tuiles du profil — sont découpées dans la même feuille, en plus
+clair : `ui/MetalFill` pose `assets/images/brushed-silver-card.png` en fond
+de chacune, et `shadow.card` la soulève. Sur une photo, `OptionRow` et `Chip`
+restent transparentes avec leur contour fin. Les deux textures sortent de
+`scripts/brushed-metal.py`, déterministe ; on retouche le script, pas les PNG.
+Les écrans de liste à sélection (questionnaire, sujets, choix de réglage,
+thèmes, icônes) passent par `<Screen>` et héritent de tout cela sans rien
+déclarer. Les surfaces posées dessus — cartes, tuiles, boutons ronds, groupes
 de réglages — prennent l'ombre `shadow.card` / `shadow.button`, une seule
 recette pour une seule hauteur.
 

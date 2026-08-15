@@ -2,6 +2,7 @@ import React, { type PropsWithChildren } from "react";
 import { View, type ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { makeStyles, useTheme } from "../theme";
+import { MetalFill } from "./MetalFill";
 
 const useStyles = makeStyles((t) => ({
   card: {
@@ -42,6 +43,7 @@ export function Card({ variant = "default", style, children }: CardProps) {
   const s = useStyles();
   return (
     <View style={[variant === "overlay" ? s.overlay : s.card, style]}>
+      {variant === "overlay" ? null : <MetalFill radius="xl" />}
       {children}
     </View>
   );
@@ -65,7 +67,10 @@ export function GradientBorderCard({
       end={t.gradient.diagonal.end}
       style={[s.gradientBorder, style]}
     >
-      <View style={s.gradientInner}>{children}</View>
+      <View style={s.gradientInner}>
+        <MetalFill radius="xl" />
+        {children}
+      </View>
     </LinearGradient>
   );
 }

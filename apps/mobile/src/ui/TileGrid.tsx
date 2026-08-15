@@ -46,7 +46,7 @@ const useStyles = makeStyles((t) => ({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: t.base.ctaBg,
+    backgroundColor: t.base.badgeBg,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -167,7 +167,7 @@ export function TileGrid({
 
             {selected ? (
               <View style={s.badge}>
-                <Ionicons name="checkmark" size={18} color={t.base.ctaFg} />
+                <Ionicons name="checkmark" size={18} color={t.base.badgeFg} />
               </View>
             ) : null}
           </Pressable>

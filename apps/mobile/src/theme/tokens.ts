@@ -58,7 +58,12 @@ export const baseSurface = {
    * brushed.
    */
   bg: palette.silver200,
-  bgElevated: palette.silver50,
+  /**
+   * Under a raised surface's `MetalFill`, and the round buttons' fill:
+   * white, so the shadow has an opaque view to hang from and a button
+   * lifts off the metal.
+   */
+  bgElevated: palette.white,
   surfaceRaised: palette.silver300,
   /**
    * The one opaque card laid over a photo — the streak toast, the coachmark
@@ -77,17 +82,25 @@ export const baseSurface = {
   textTertiary: palette.slate300,
 
   /**
-   * The primary pill. Flat ink sat on the metal like a hole; the pill is
-   * graphite now — a short vertical gradient with a light lip at the top,
-   * the way a metal key catches the light. `ctaBg` remains the solid the
-   * badge, the icon tile and anything too small for a gradient use.
+   * The primary pill: white, with ink type — the client's call, after a
+   * graphite pass. It reads off the metal by its shadow and a hairline of
+   * ink at very low alpha; the short vertical gradient keeps it from
+   * looking like a paper cut-out.
    */
-  ctaBg: palette.ink900,
-  ctaGradient: [palette.ink400, palette.ink900] as const,
-  ctaLip: "rgba(255,255,255,0.28)",
-  ctaFg: palette.white,
+  ctaBg: palette.white,
+  ctaGradient: [palette.white, palette.silver50] as const,
+  ctaBorder: "rgba(21,28,39,0.08)",
+  ctaFg: palette.ink900,
   ctaDisabledBg: palette.grey400,
   ctaDisabledFg: palette.white,
+  /**
+   * The one solid ink the light surface keeps: the selection badge on an
+   * option row or a tile, and the app-icon tile in the notification
+   * preview. It used to borrow `ctaBg`; it stops borrowing the day the CTA
+   * goes white.
+   */
+  badgeBg: palette.ink900,
+  badgeFg: palette.white,
   /** Type on the accent gradient — the pastel fill wants ink, not white. */
   onAccent: palette.ink900,
 
@@ -209,6 +222,18 @@ export const shadow = {
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 6,
+  },
+  /**
+   * For a row in a stack — an option, a chip, a time row. Lighter and
+   * tighter than the card's: with a 12 px gap, a card's shadow lands on
+   * the row below and the list reads as a flight of dark ledges.
+   */
+  row: {
+    shadowColor: palette.ink900,
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   /** The primary pill's own lift. */
   cta: {

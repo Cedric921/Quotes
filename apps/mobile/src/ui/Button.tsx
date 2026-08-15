@@ -22,13 +22,13 @@ const useStyles = makeStyles((t) => ({
     justifyContent: "center",
   },
   solid: { backgroundColor: t.base.ctaBg, ...t.shadow.cta },
-  /** The conversion pill sits at the same height as the graphite one. */
+  /** The conversion pill sits at the same height as the white one. */
   lifted: { ...t.shadow.cta },
-  /** The graphite fill, with the light lip along the top edge. */
+  /** The white fill, with the faint ink hairline that edges it on the metal. */
   solidFill: {
     ...fill,
-    borderTopWidth: t.border.hairline,
-    borderTopColor: t.base.ctaLip,
+    borderWidth: t.border.hairline,
+    borderColor: t.base.ctaBorder,
     borderRadius: t.radius.pill,
   },
   danger: { backgroundColor: t.base.danger },
@@ -137,8 +137,8 @@ export function Button({
       ) : (
         <Text
           variant="label"
-          // The ink CTA takes white type, the coral one too; the pastel
-          // gradient takes ink.
+          // The white CTA takes ink type, the pastel gradient too; the
+          // coral one and the disabled grey take white.
           tone={
             inert
               ? "onCta"

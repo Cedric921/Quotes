@@ -2,7 +2,8 @@ import React, { type PropsWithChildren } from "react";
 import { Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { makeStyles, useTheme } from "../theme";
+import { makeStyles, useOnImage, useTheme } from "../theme";
+import { MetalFill } from "./MetalFill";
 import { Text } from "./Text";
 
 const useStyles = makeStyles((t) => ({
@@ -17,8 +18,12 @@ const useStyles = makeStyles((t) => ({
     borderColor: t.base.borderSubtle,
     backgroundColor: "transparent",
   },
+  /** On the metal, a chip is a lit strip of it, lifted like a card. */
+  chipRaised: {
+    backgroundColor: t.base.bgElevated,
+    ...t.shadow.row,
+  },
   chipSelected: {
-    backgroundColor: t.base.surfaceRaised,
     borderWidth: t.border.selected,
     borderColor: t.base.borderStrong,
   },
@@ -43,6 +48,7 @@ export interface ChipProps {
 export function Chip({ label, selected, onPress, testID }: ChipProps) {
   const s = useStyles();
   const t = useTheme();
+  const onImage = useOnImage();
 
   return (
     <Pressable
@@ -54,8 +60,9 @@ export function Chip({ label, selected, onPress, testID }: ChipProps) {
         void Haptics.selectionAsync();
         onPress?.();
       }}
-      style={[s.chip, selected ? s.chipSelected : null]}
+      style={[s.chip, onImage ? null : s.chipRaised, selected ? s.chipSelected : null]}
     >
+      {onImage ? null : <MetalFill radius="pill" />}
       <Ionicons
         name={selected ? "checkmark" : "add"}
         size={20}

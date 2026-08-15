@@ -2,6 +2,7 @@ import React, { Fragment, type ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { makeStyles, useTheme } from "../theme";
+import { MetalFill } from "./MetalFill";
 import { Text } from "./Text";
 
 const useStyles = makeStyles((t) => ({
@@ -124,6 +125,7 @@ export function SettingsSection({ title, children }: SettingsSectionProps) {
         </Text>
       ) : null}
       <View style={s.group}>
+        <MetalFill radius="lg" />
         {rows.map((row, i) => (
           <Fragment key={i}>
             {i > 0 ? <View style={s.separator} /> : null}

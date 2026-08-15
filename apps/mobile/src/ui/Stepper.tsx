@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme } from "../theme";
+import { MetalFill } from "./MetalFill";
 import { Text } from "./Text";
 
 const useStyles = makeStyles((t) => ({
@@ -15,6 +16,7 @@ const useStyles = makeStyles((t) => ({
     paddingRight: t.space.xs,
     borderRadius: t.radius.pill,
     backgroundColor: t.base.bgElevated,
+    ...t.shadow.row,
   },
   label: { flex: 1 },
   controls: { flexDirection: "row", alignItems: "center", gap: t.space.xs },
@@ -65,6 +67,7 @@ export function Stepper({
 
   return (
     <View style={s.row} accessibilityLabel={`${label}: ${value}`}>
+      <MetalFill radius="pill" />
       <Text variant="body" style={s.label}>
         {label}
       </Text>
@@ -114,6 +117,7 @@ export function TimeRow({ label, value, onPress }: TimeRowProps) {
       onPress={onPress}
       style={s.row}
     >
+      <MetalFill radius="pill" />
       <Text variant="body" style={s.label}>
         {label}
       </Text>
