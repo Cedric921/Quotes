@@ -1,5 +1,5 @@
 import React from "react";
-import { Linking, View } from "react-native";
+import { Linking, Platform, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../theme";
@@ -15,7 +15,12 @@ import { useAppSelector } from "../../store/hooks";
 import { useDisplayName } from "./useDisplayName";
 import { useSocialNetworks } from "../../api/hooks/useSocial";
 import { socialIcon } from "../../utils/iconMapper";
-import { APP_VERSION, SOCIAL_URLS, SUPPORT_URL, LEGAL_PRIVACY_URL, LEGAL_TERMS_URL } from "../../constants/appConfig";
+import {
+  APP_VERSION,
+  SOCIAL_URLS,
+  SUPPORT_URL,
+  legalPageUrl,
+} from "../../constants/appConfig";
 /**
  * The five the app ships with, used until the API answers — and if it never
  * does. Each keeps its own mark: a generic feed icon five times over reads as
@@ -61,7 +66,7 @@ export function SettingsScreen({
   onAnalyticsChange,
 }: SettingsScreenProps) {
   const s = useStyles();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = useAppSelector((st) => st.auth.user);
   const isAuthenticated = useAppSelector((st) => st.auth.isAuthenticated);
   const name = useDisplayName();
@@ -138,12 +143,22 @@ export function SettingsScreen({
         <SettingsRow
           icon="shield-checkmark-outline"
           label={t("settings.privacy")}
-          onPress={() => onOpenPage(LEGAL_PRIVACY_URL, "settings.privacy")}
+          onPress={() =>
+            onOpenPage(
+              legalPageUrl("privacy", i18n.language, Platform.OS),
+              "settings.privacy",
+            )
+          }
         />
         <SettingsRow
           icon="document-text-outline"
           label={t("settings.terms")}
-          onPress={() => onOpenPage(LEGAL_TERMS_URL, "settings.terms")}
+          onPress={() =>
+            onOpenPage(
+              legalPageUrl("terms", i18n.language, Platform.OS),
+              "settings.terms",
+            )
+          }
         />
         <SettingsRow
           label={t("settings.analytics")}

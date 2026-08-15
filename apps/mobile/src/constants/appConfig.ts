@@ -11,18 +11,33 @@ import Constants from "expo-constants";
 export const APP_VERSION: string =
   (Constants.expoConfig?.version as string | undefined) ?? "2.0.0";
 
-export const SUPPORT_URL = "https://focus-app.com/help";
-export const SHARE_APP_URL = "https://focus-app.com";
-
 /**
- * Stamped on every shared image (premium can hide it). Written without the
- * scheme because it is read, not tapped.
+ * Where the public site lives: the landing page, the legal pages, and
+ * everything the app links out to. One constant, so a custom domain is a
+ * one-line change. (The links used to point at focus-app.com, which is not
+ * ours — it redirects to a German magazine.)
  */
-export const WATERMARK = "focus-app.com";
-export const MORE_APPS_URL = "https://focus-app.com/apps";
-export const BUNDLE_URL = "https://focus-app.com/bundle";
-export const LEGAL_TERMS_URL = "https://focus-app.com/terms";
-export const LEGAL_PRIVACY_URL = "https://focus-app.com/privacy";
+export const SITE_URL = "https://focus-admin.vercel.app";
+
+export const SUPPORT_URL = "mailto:contact@oderaformations.com";
+export const SHARE_APP_URL = SITE_URL;
+
+/** Stamped on every shared image (premium can hide it). The wordmark. */
+export const WATERMARK = "Focus";
+export const MORE_APPS_URL = SITE_URL;
+export const BUNDLE_URL = `${SITE_URL}/#premium`;
+/**
+ * The legal pages take the language and the platform as query parameters
+ * (the store-specific wording differs), so they are built, not stored.
+ */
+export const legalPageUrl = (
+  page: "terms" | "privacy",
+  language: string,
+  platform: string,
+): string => {
+  const lang = language.startsWith("en") ? "en" : "fr";
+  return `${SITE_URL}/${page}?lang=${lang}&platform=${platform}`;
+};
 
 export const SOCIAL_URLS = {
   instagram: "https://instagram.com/focus.app",

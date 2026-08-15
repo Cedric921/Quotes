@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useTranslation } from "react-i18next";
 import {
@@ -20,7 +20,7 @@ import {
   requestNotificationPermissions,
   scheduleTrialReminder,
 } from "../../services/notificationService";
-import { LEGAL_PRIVACY_URL, LEGAL_TERMS_URL } from "../../constants/appConfig";
+import { legalPageUrl } from "../../constants/appConfig";
 
 const TRIAL_DAYS = 3;
 
@@ -187,12 +187,22 @@ export function PaywallScreen({
             <LinkButton
               size="small"
               label={t("paywall.terms")}
-              onPress={() => openPage(LEGAL_TERMS_URL, "settings.terms")}
+              onPress={() =>
+                openPage(
+                  legalPageUrl("terms", i18n.language, Platform.OS),
+                  "settings.terms",
+                )
+              }
             />
             <LinkButton
               size="small"
               label={t("paywall.privacy")}
-              onPress={() => openPage(LEGAL_PRIVACY_URL, "settings.privacy")}
+              onPress={() =>
+                openPage(
+                  legalPageUrl("privacy", i18n.language, Platform.OS),
+                  "settings.privacy",
+                )
+              }
             />
           </View>
         </>
