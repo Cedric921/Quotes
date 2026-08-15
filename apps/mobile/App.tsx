@@ -39,6 +39,10 @@ LogBox.ignoreLogs([
   /\[RevenueCat\]/,
   /\[Purchases\] Failed to get offerings/,
   /Require cycle: src\/services\/api\.ts/,
+  // The API client logs every failed request; with the server asleep that
+  // is a banner on every screen. The console keeps the line, the screen
+  // does not.
+  /\[API Error\]/,
 ]);
 
 // Register Android widget task handler
