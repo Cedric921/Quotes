@@ -192,10 +192,32 @@ export const questionById = (id: string): Question => {
 };
 
 /**
- * The funnel, in order. ~30 steps; the `question` ones all render through
- * `QuestionScreen`.
+ * Whether the funnel asks its questions. Off at the client's request: the
+ * first launch keeps the welcome, name, streak, reminders, icon, bundle,
+ * theme, plan, manifesto and widget screens, and skips every list — the
+ * questions, the goals, the topics — and the two intros that only announce
+ * them. The screens, the answers and the personalised copy stay in the code
+ * for the day it comes back; flip this and the whole questionnaire returns.
  */
-export const flow: Step[] = [
+export const QUESTIONNAIRE_ENABLED = false;
+
+/** Intros whose only job is to introduce a run of questions. */
+const QUESTIONNAIRE_INTROS = new Set([
+  "onboarding.intro.goals",
+  "onboarding.intro.quiz2",
+]);
+
+export const isQuestionnaireStep = (step: Step): boolean =>
+  step.kind === "question" ||
+  step.kind === "goals" ||
+  step.kind === "topics" ||
+  (step.kind === "intro" && QUESTIONNAIRE_INTROS.has(step.copyKey ?? ""));
+
+/**
+ * The funnel as designed, ~30 steps; the `question` ones all render through
+ * `QuestionScreen`. `flow` below is what actually runs.
+ */
+export const fullFlow: Step[] = [
   {
     kind: "intro",
     copyKey: "onboarding.intro.hero",
@@ -247,3 +269,9 @@ export const flow: Step[] = [
   { kind: "widget" },
   { kind: "welcome" },
 ];
+
+/** The steps the app runs, in order. */
+export const flow: Step[] = QUESTIONNAIRE_ENABLED
+  ? fullFlow
+  : fullFlow.filter((step) => !isQuestionnaireStep(step));
+

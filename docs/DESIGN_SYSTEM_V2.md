@@ -203,6 +203,13 @@ feuille de partage : c'est un écran modal partagé, pas une page de réglages.
 
 ## 5. Le questionnaire
 
+> **Désactivé** à la demande du client (`QUESTIONNAIRE_ENABLED = false` dans
+> `features/onboarding/questions.ts`). Le premier lancement garde l'accueil,
+> le prénom, la série, les rappels, l'icône, le lot, le thème, le plan, les
+> manifestes et le widget ; il saute les questions, les objectifs, les sujets
+> et les deux intros qui les annonçaient. Tout ce qui suit reste dans le code
+> et revient en basculant la constante.
+
 Vingt-deux des trente étapes d'onboarding sont le **même écran** avec des
 données différentes. Elles sont décrites par un schéma, pas par du code.
 

@@ -80,7 +80,9 @@ export function PlanReadyScreen() {
           count: items.length - max,
         })}`;
 
-  const rows: SummaryRow[] = [
+  // With the questionnaire off there are no goals and no topics to show;
+  // an empty row would read as a bug, so the card keeps only what it has.
+  const rows: SummaryRow[] = ([
     {
       icon: "disc-outline",
       labelKey: "onboarding.plan.goals",
@@ -100,7 +102,7 @@ export function PlanReadyScreen() {
         to: hh(schedule.endHour),
       }),
     },
-  ];
+  ] satisfies SummaryRow[]).filter((row) => row.value.length > 0);
 
   return (
     <Screen
