@@ -15,10 +15,10 @@ module.exports = (config) => ({
   // gradient is the 1.5 px contour around it. v1 painted the whole widget
   // indigo→purple, a look that existed nowhere else in the product.
   colors: {
-    $accent: "#8B7FE8",
+    $accent: "#5E5CE6",
     $widgetBackground: "#151C27",
-    gradientStart: "#8B7FE8",
-    gradientEnd: "#F2A8B4",
+    gradientStart: "#87CEEB",
+    gradientEnd: "#5E5CE6",
     textPrimary: "#FFFFFF",
     textSecondary: "#B5C2D6",
   },

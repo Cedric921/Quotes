@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { quotesApi } from "./api";
+import { widgetService } from "./widgetService";
 import {
   areNotificationsEnabled,
   requestNotificationPermissions,
@@ -105,6 +106,14 @@ export const requestAndSchedule = async (
   await saveSchedule(schedule);
   return { granted: true, scheduled };
 };
+
+  // The widget draws from the same pool as the reminders, so it has quotes
+  // to rotate through even on a device where the feed has not loaded yet.
+  if (quotes.length > 0) {
+    await widgetService.updateWidgetQuotes(
+      quotes.map((q) => ({ content: q.text, author: q.author ?? "" })),
+    );
+  }
 
 /**
  * Re-draws the quotes behind the saved schedule, keeping the times.

@@ -25,52 +25,59 @@ struct Provider: TimelineProvider {
         completion(entry)
     }
 
+    /// Quotes change through the day, not once at midnight: eight slots of
+    /// three hours, each with its own pick, the way the reminders bring a
+    /// different quote at each ring. Two days of entries go into the timeline
+    /// so the widget keeps turning even if the app is not opened.
+    private let slotSeconds: TimeInterval = 3 * 60 * 60
+
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> ()) {
         let now = Date()
-        let calendar = Calendar.current
+        let currentSlot = floor(now.timeIntervalSince1970 / slotSeconds)
+        let firstSlotStart = Date(timeIntervalSince1970: currentSlot * slotSeconds)
 
-        // Build one entry for today and one for the next 6 days so the widget
-        // shows a different quote each day even if the app is not opened.
         var entries: [QuoteEntry] = []
-        for offset in 0..<7 {
-            if let day = calendar.date(byAdding: .day, value: offset, to: calendar.startOfDay(for: now)) {
-                entries.append(pickEntry(for: day))
-            }
+        for offset in 0..<16 {
+            let date = firstSlotStart.addingTimeInterval(TimeInterval(offset) * slotSeconds)
+            // The first entry is dated now, or WidgetKit would show the
+            // placeholder until the slot's own start.
+            entries.append(pickEntry(for: date, shownAt: offset == 0 ? now : date))
         }
 
-        // Refresh at next midnight to roll the quote forward
-        let nextMidnight = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now.addingTimeInterval(86400)
-        let timeline = Timeline(entries: entries, policy: .after(nextMidnight))
-        completion(timeline)
+        completion(Timeline(entries: entries, policy: .atEnd))
     }
 
-    /// Pick a quote for a given date. Uses an array of quotes if available
-    /// (key "quotesArray") otherwise falls back to a single "currentQuote".
-    private func pickEntry(for date: Date) -> QuoteEntry {
+    /// The quote for a slot. A scrambled slot number indexes the pool, so
+    /// consecutive slots do not walk the pool in order and the same slot on
+    /// another day lands elsewhere; the same slot always gives the same
+    /// quote, so a redraw never flips the card.
+    private func pickEntry(for date: Date, shownAt: Date? = nil) -> QuoteEntry {
         let defaults = UserDefaults(suiteName: appGroupId)
+        let entryDate = shownAt ?? date
 
         // 1) Preferred: array of quotes
         if let quotes = readQuotesArray(from: defaults), !quotes.isEmpty {
-            let dayIndex = dayOfEra(for: date)
-            let index = abs(dayIndex) % quotes.count
-            return QuoteEntry(date: date, quote: quotes[index])
+            let slot = UInt64(max(0, floor(date.timeIntervalSince1970 / slotSeconds)))
+            let scrambled = (slot &* 2_654_435_761) ^ (slot >> 7)
+            let index = Int(scrambled % UInt64(quotes.count))
+            return QuoteEntry(date: entryDate, quote: quotes[index])
         }
 
         // 2) Fallback: single quote stored as Data (binary JSON)
         if let data = defaults?.data(forKey: "currentQuote"),
            let quote = try? JSONDecoder().decode(QuoteData.self, from: data) {
-            return QuoteEntry(date: date, quote: quote)
+            return QuoteEntry(date: entryDate, quote: quote)
         }
 
         // 3) Fallback: single quote stored as String
         if let jsonString = defaults?.string(forKey: "currentQuote"),
            let data = jsonString.data(using: .utf8),
            let quote = try? JSONDecoder().decode(QuoteData.self, from: data) {
-            return QuoteEntry(date: date, quote: quote)
+            return QuoteEntry(date: entryDate, quote: quote)
         }
 
         // 4) Default placeholder
-        return QuoteEntry(date: date, quote: QuoteData(
+        return QuoteEntry(date: entryDate, quote: QuoteData(
             content: "Ouvrez Focus pour découvrir une citation inspirante.",
             author: "Focus",
             topicName: nil
@@ -90,12 +97,6 @@ struct Provider: TimelineProvider {
         return nil
     }
 
-    private func dayOfEra(for date: Date) -> Int {
-        let calendar = Calendar.current
-        let year = calendar.component(.year, from: date)
-        let dayOfYear = calendar.ordinality(of: .day, in: .year, for: date) ?? 0
-        return year * 366 + dayOfYear
-    }
 }
 
 // MARK: - Timeline Entry
@@ -302,7 +303,7 @@ struct FocusWidget: Widget {
             FocusWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Focus")
-        .description("Une citation, renouvelée chaque jour.")
+        .description("Une citation, renouvelée dans la journée.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryCircular, .accessoryRectangular, .accessoryInline])
         .contentMarginsDisabled()
     }
