@@ -628,7 +628,10 @@
       "s3": {
         "title": "3. Compatibilité et téléchargement",
         "p1": "L'Application est disponible gratuitement :",
-        "list": ["Sur Google Play Store", "Sur Apple App Store"],
+        "list": [
+          "Sur Google Play Store",
+          "Sur Apple App Store"
+        ],
         "p2": "L'utilisateur reconnaît être soumis aux conditions d'utilisation propres à ces plateformes lors du téléchargement, de la mise à jour et du paiement de l'abonnement."
       },
       "s4": {
@@ -817,5 +820,106 @@
     "deleteTitle": "Supprimer le message",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce message ?",
     "markedAsUnread": "Marqué comme non lu"
+  },
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "how": "Comment ça marche",
+      "premium": "Premium",
+      "download": "Télécharger",
+      "admin": "Admin"
+    },
+    "hero": {
+      "eyebrow": "Citations & motivation",
+      "title": "Une citation qui vous ressemble, au bon moment.",
+      "subtitle": "Focus vous envoie chaque jour des pensées choisies selon vos objectifs — sur votre écran d'accueil, votre écran verrouillé, et en notification quand vous en avez besoin.",
+      "cta": "Télécharger l'app",
+      "secondary": "Voir les fonctionnalités",
+      "appstore": "Télécharger sur l'App Store",
+      "play": "Disponible sur Google Play",
+      "stats": [
+        [
+          "10",
+          "rappels par jour, gratuits"
+        ],
+        [
+          "3 j",
+          "d'essai Premium offerts"
+        ],
+        [
+          "+40",
+          "sujets à suivre"
+        ]
+      ]
+    },
+    "features": {
+      "title": "Tout ce qu'il faut pour rester aligné",
+      "subtitle": "Pensé pour être ouvert trois secondes, et vous laisser meilleur qu'avant.",
+      "items": [
+        [
+          "Des citations à votre image",
+          "Choisissez vos sujets — confiance, discipline, amour, travail — et le fil s'y adapte."
+        ],
+        [
+          "Des rappels au bon rythme",
+          "Jusqu'à dix rappels par jour, dans la plage horaire que vous fixez. Rien la nuit."
+        ],
+        [
+          "Widgets écran d'accueil",
+          "La citation du jour, sans ouvrir l'app. Petit, moyen ou grand format."
+        ],
+        [
+          "Écran verrouillé",
+          "Le premier texte que vous lisez le matin, c'est vous qui le choisissez."
+        ],
+        [
+          "Fonds d'écran & polices",
+          "Des dizaines d'ambiances et de typographies pour que chaque citation soit belle à partager."
+        ],
+        [
+          "Votre série",
+          "Un jour lu, un jour gagné. La flamme compte pour vous — et se partage."
+        ]
+      ]
+    },
+    "how": {
+      "title": "Comment ça marche",
+      "steps": [
+        [
+          "Dites-nous où vous en êtes",
+          "Trois minutes de questions : votre humeur, vos objectifs, ce que vous voulez changer."
+        ],
+        [
+          "Recevez votre plan",
+          "Focus compose votre sélection de sujets et votre rythme de rappels."
+        ],
+        [
+          "Lisez, aimez, partagez",
+          "Chaque citation se garde, se met en fond d'écran ou s'envoie en une image."
+        ]
+      ]
+    },
+    "premium": {
+      "eyebrow": "Premium",
+      "title": "Tout débloquer, sans frais aujourd'hui",
+      "subtitle": "Trois jours d'essai gratuit. Un rappel la veille de la fin. Annulable en un geste.",
+      "items": [
+        "Toutes les catégories et toutes les citations",
+        "Tous les thèmes, toutes les polices",
+        "Jusqu'à vingt rappels par jour",
+        "Aucune publicité, aucun filigrane",
+        "Favoris illimités"
+      ],
+      "cta": "Commencer l'essai gratuit",
+      "note": "L'abonnement se gère depuis l'App Store ou Google Play."
+    },
+    "footer": {
+      "tagline": "Focus est édité par ODERA Formations.",
+      "terms": "Conditions contractuelles",
+      "privacy": "Confidentialité",
+      "contact": "Contact",
+      "admin": "Espace admin",
+      "rights": "Tous droits réservés."
+    }
   }
 }

@@ -628,7 +628,10 @@
       "s3": {
         "title": "3. Compatibility and Download",
         "p1": "The Application is available for free:",
-        "list": ["On Google Play Store", "On Apple App Store"],
+        "list": [
+          "On Google Play Store",
+          "On Apple App Store"
+        ],
         "p2": "The user acknowledges being subject to the terms of use specific to these platforms when downloading, updating and paying for the subscription."
       },
       "s4": {
@@ -817,5 +820,106 @@
     "deleteTitle": "Delete Message",
     "deleteConfirm": "Are you sure you want to delete this message?",
     "markedAsUnread": "Marked as unread"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "how": "How it works",
+      "premium": "Premium",
+      "download": "Download",
+      "admin": "Admin"
+    },
+    "hero": {
+      "eyebrow": "Quotes & motivation",
+      "title": "A quote that sounds like you, right when you need it.",
+      "subtitle": "Focus sends you thoughts chosen for your goals every day — on your home screen, your lock screen, and as a reminder when it matters.",
+      "cta": "Get the app",
+      "secondary": "See the features",
+      "appstore": "Download on the App Store",
+      "play": "Get it on Google Play",
+      "stats": [
+        [
+          "10",
+          "free reminders a day"
+        ],
+        [
+          "3 d",
+          "of Premium, on us"
+        ],
+        [
+          "40+",
+          "topics to follow"
+        ]
+      ]
+    },
+    "features": {
+      "title": "Everything you need to stay on track",
+      "subtitle": "Built to be opened for three seconds and leave you better than before.",
+      "items": [
+        [
+          "Quotes in your image",
+          "Pick your topics — confidence, discipline, love, work — and the feed follows."
+        ],
+        [
+          "Reminders at your pace",
+          "Up to ten a day, inside the hours you set. Nothing at night."
+        ],
+        [
+          "Home-screen widgets",
+          "Today's quote without opening the app. Small, medium or large."
+        ],
+        [
+          "Lock screen",
+          "The first words you read in the morning are the ones you chose."
+        ],
+        [
+          "Wallpapers & fonts",
+          "Dozens of moods and typefaces, so every quote is worth sharing."
+        ],
+        [
+          "Your streak",
+          "A day read is a day earned. The flame counts for you — and shares."
+        ]
+      ]
+    },
+    "how": {
+      "title": "How it works",
+      "steps": [
+        [
+          "Tell us where you are",
+          "Three minutes of questions: your mood, your goals, what you want to change."
+        ],
+        [
+          "Get your plan",
+          "Focus composes your topic mix and your reminder rhythm."
+        ],
+        [
+          "Read, like, share",
+          "Every quote can be kept, set as a wallpaper, or sent as an image."
+        ]
+      ]
+    },
+    "premium": {
+      "eyebrow": "Premium",
+      "title": "Unlock everything, nothing charged today",
+      "subtitle": "Three days free. A reminder the day before it ends. Cancel in one tap.",
+      "items": [
+        "Every category and every quote",
+        "All themes, all fonts",
+        "Up to twenty reminders a day",
+        "No ads, no watermark",
+        "Unlimited favourites"
+      ],
+      "cta": "Start the free trial",
+      "note": "The subscription is managed from the App Store or Google Play."
+    },
+    "footer": {
+      "tagline": "Focus is published by ODERA Formations.",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "contact": "Contact",
+      "admin": "Admin",
+      "rights": "All rights reserved."
+    }
   }
 }
