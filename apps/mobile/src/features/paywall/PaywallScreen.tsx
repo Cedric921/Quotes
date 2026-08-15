@@ -166,18 +166,29 @@ export function PaywallScreen({
       }
       footer={
         <>
+          {/* The price on the button is the plan's, in the store's
+              currency — the client's call over the trial's "0,00 €", which
+              was also hard-coded in euros. Without an offering there is no
+              price to promise and nothing to buy, so the pill waits. */}
           <Button
             variant="gradient"
-            label={t("paywall.cta", { price: offering?.introPrice ?? "0,00 €" })}
+            label={
+              offering
+                ? t("paywall.cta", { price: offering.price })
+                : t("paywall.ctaNoPrice")
+            }
+            disabled={!offering}
             loading={isPurchasing}
             onPress={() => void purchase()}
           />
-          <Text variant="body" tone="dim" align="center" style={s.price}>
-            {t("paywall.priceLine", {
-              monthly: offering?.monthlyEquivalent ?? "—",
-              yearly: offering?.price ?? "—",
-            })}
-          </Text>
+          {offering ? (
+            <Text variant="body" tone="dim" align="center" style={s.price}>
+              {t("paywall.priceLine", {
+                monthly: offering.monthlyEquivalent,
+                yearly: offering.price,
+              })}
+            </Text>
+          ) : null}
           <View style={s.legal}>
             <LinkButton
               size="small"

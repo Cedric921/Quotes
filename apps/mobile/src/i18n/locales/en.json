@@ -828,6 +828,7 @@
     "subtitle": "You won't be charged anything today",
     "remindMe": "Remind me before the trial ends",
     "cta": "Try for {{price}}",
+    "ctaNoPrice": "Start the free trial",
     "priceLine": "{{monthly}}/month, billed annually at {{yearly}}",
     "restore": "Restore",
     "terms": "Terms",

@@ -7,18 +7,34 @@ import {
 } from "../../api/hooks/usePurchases";
 
 export interface PaywallOffering {
-  /** Localised price of the yearly plan, e.g. "19,99 €". */
+  /** The yearly plan's price as the store formats it, e.g. "19,99 €" or "$17.99". */
   price: string;
-  /** Localised price per month, e.g. "1,66 €". */
+  /** The same plan per month, in the same currency and format. */
   monthlyEquivalent: string;
-  /** What the user is charged today — "0,00 €" during the trial. */
-  introPrice: string;
+  /** What the store charges today — the trial's own price when there is one. */
+  introPrice: string | undefined;
   identifier?: string;
   /** The store package itself — what `purchase()` hands to RevenueCat. */
   pkg: PurchasesPackage;
 }
 
 const MONTHS = 12;
+
+/**
+ * Formats an amount the way the store would. RevenueCat gives a per-month
+ * string itself for a yearly plan; this is the fallback for a store that
+ * does not, and it keeps the store's currency rather than assuming euros.
+ */
+const formatMoney = (amount: number, currencyCode: string): string => {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currencyCode,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${currencyCode}`;
+  }
+};
 
 /**
  * One hook for the whole paywall, so the screen never touches RevenueCat.
@@ -38,19 +54,20 @@ export function usePaywall() {
       offerings?.availablePackages?.[0];
     if (!annual) return undefined;
 
-    const price = annual.product.priceString;
-    const perMonth = annual.product.price / MONTHS;
+    const { product } = annual;
 
-    // Reuse the store's own currency formatting rather than guessing a symbol.
-    const monthlyEquivalent = price.replace(
-      String(annual.product.price).replace(".", ","),
-      perMonth.toFixed(2).replace(".", ","),
-    );
+    // The monthly figure used to be made by replacing the yearly amount
+    // inside the store's price string with a comma-decimal version of the
+    // twelfth — which matched nothing in "$17.99", so the paywall read
+    // "$17.99/month, billed annually at $17.99" outside the euro zone.
+    const monthlyEquivalent =
+      product.pricePerMonthString ??
+      formatMoney(product.price / MONTHS, product.currencyCode);
 
     return {
-      price,
+      price: product.priceString,
       monthlyEquivalent,
-      introPrice: annual.product.introPrice?.priceString ?? "0,00 €",
+      introPrice: product.introPrice?.priceString ?? undefined,
       identifier: annual.identifier,
       pkg: annual,
     };

@@ -828,6 +828,7 @@
     "subtitle": "Aucun frais ne vous sera facturé aujourd'hui",
     "remindMe": "Rappel avant la fin de l'essai",
     "cta": "Essayez pour {{price}}",
+    "ctaNoPrice": "Commencer l'essai gratuit",
     "priceLine": "{{monthly}}/mois, facturé annuellement à {{yearly}}",
     "restore": "Restaurer",
     "terms": "Conditions générales",
