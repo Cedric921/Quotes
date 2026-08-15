@@ -8,7 +8,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { makeStyles, useTheme, SurfaceProvider } from "../../theme";
-import { Button, Coachmark, IconCircle, Text } from "../../ui";
+import { Button, IconCircle, Text } from "../../ui";
 import { useAppSelector } from "../../store/hooks";
 import { useQuotes } from "../../api/hooks/useQuotes";
 import { QuoteSlide } from "./components/QuoteSlide";
@@ -23,8 +23,6 @@ import { useWidgetSync } from "./useWidgetSync";
 import { useReviewPrompt } from "./useReviewPrompt";
 import { useStreak } from "../streak/useStreak";
 import type { Quote } from "../../types";
-
-const COACHMARK_KEY = "@focus_coachmark_like_v2";
 
 /**
  * Keep pulling pages while the filter leaves fewer than this many quotes to
@@ -129,13 +127,6 @@ export function QuoteFeedScreen({
 
   const [index, setIndex] = useState(0);
   const [burst, setBurst] = useState(false);
-  const [coachmark, setCoachmark] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-
   const current = quotes[index];
 
   // The widgets are advertised in the profile grid and set up during the
@@ -311,18 +302,12 @@ export function QuoteFeedScreen({
         style={[s.actions, { bottom: insets.bottom + 92 }]}
         pointerEvents="box-none"
       >
+        {/* No coachmark over the like button any more: the client wants a
+            first feed with nothing pointing at anything. */}
         <QuoteActions
           liked={!!current?.isLiked}
           onLike={handleLike}
           onShare={() => current && onShare(current)}
-          onLikeLayout={(rect) =>
-            setCoachmark((prev) =>
-              prev ?? {
-                ...rect,
-                y: height - insets.bottom - 92 + rect.y,
-              },
-            )
-          }
         />
       </View>
 
@@ -340,16 +325,6 @@ export function QuoteFeedScreen({
         onHide={streak.dismissToast}
       />
 
-      {coachmark && likesUsed === 0 ? (
-        <Coachmark
-          visible
-          target={coachmark}
-          message={translate("feed.coachmark", { count: FREE_LIKE_QUOTA })}
-          onDismiss={() => setCoachmark(null)}
-        />
-      ) : null}
     </View>
   );
 }
-
-export { COACHMARK_KEY };
