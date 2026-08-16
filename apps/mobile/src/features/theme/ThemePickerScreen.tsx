@@ -1,11 +1,20 @@
 import React, { useMemo } from "react";
 import { ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Button, Screen, Text, TileGrid, type Tile } from "../../ui";
+import {
+  Button,
+  Loader,
+  LoadFailed,
+  Screen,
+  Text,
+  TileGrid,
+  type Tile,
+} from "../../ui";
 import { makeStyles } from "../../theme";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { changeBackgroundTheme } from "../../store/slices/themeSlice";
 import { useActiveThemes } from "../../api/hooks/useThemes";
+import { useLoadState } from "../../api/hooks/useLoadState";
 
 const useStyles = makeStyles((t) => ({
   title: { marginTop: t.space.xl },
@@ -33,7 +42,9 @@ export function ThemePickerScreen({
   const s = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { data: themes = [] } = useActiveThemes();
+  const themesQuery = useActiveThemes();
+  const themes = useMemo(() => themesQuery.data ?? [], [themesQuery.data]);
+  const load = useLoadState(themesQuery);
   const current = useAppSelector((st) => st.theme.backgroundTheme);
 
   const tiles = useMemo<Tile[]>(
@@ -77,12 +88,18 @@ export function ThemePickerScreen({
         contentContainerStyle={s.grid}
         showsVerticalScrollIndicator={false}
       >
-        <TileGrid
-          shape="theme"
-          tiles={tiles}
-          selectedId={current?.id}
-          onSelect={select}
-        />
+        {load.loading ? (
+          <Loader fill withLabel />
+        ) : load.failed ? (
+          <LoadFailed fill onRetry={load.retry} />
+        ) : (
+          <TileGrid
+            shape="theme"
+            tiles={tiles}
+            selectedId={current?.id}
+            onSelect={select}
+          />
+        )}
       </ScrollView>
     </Screen>
   );

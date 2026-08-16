@@ -2,8 +2,9 @@ import React from "react";
 import { Alert, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../theme";
-import { Card, IconCircle, Sheet, Text } from "../../ui";
+import { Card, IconCircle, Loader, LoadFailed, Sheet, Text } from "../../ui";
 import { useLikedQuotes } from "../../api/hooks/useUser";
+import { useLoadState } from "../../api/hooks/useLoadState";
 import { useQuoteLike } from "./useQuoteLike";
 import type { Quote } from "../../types";
 
@@ -34,7 +35,9 @@ export interface LikedQuotesScreenProps {
 export function LikedQuotesScreen({ onBack, onShare }: LikedQuotesScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
-  const { data: quotes = [], isLoading } = useLikedQuotes();
+  const likedQuery = useLikedQuotes();
+  const quotes = likedQuery.data ?? [];
+  const load = useLoadState(likedQuery);
   const like = useQuoteLike();
 
   const confirmRemove = (quote: Quote) => {
@@ -53,7 +56,11 @@ export function LikedQuotesScreen({ onBack, onShare }: LikedQuotesScreenProps) {
 
   return (
     <Sheet title={t("favorites.title")} onBack={onBack} collapsedOnly>
-      {quotes.length > 0 ? (
+      {load.loading ? (
+        <Loader withLabel />
+      ) : load.failed ? (
+        <LoadFailed onRetry={load.retry} />
+      ) : quotes.length > 0 ? (
         <View style={s.list}>
           {quotes.map((quote) => (
             <Card key={quote.id}>
@@ -86,14 +93,10 @@ export function LikedQuotesScreen({ onBack, onShare }: LikedQuotesScreenProps) {
         </View>
       ) : (
         <View style={s.empty}>
-          <Text variant="title">
-            {isLoading ? t("common.loading") : t("favorites.empty")}
+          <Text variant="title">{t("favorites.empty")}</Text>
+          <Text variant="body" tone="dim" align="center">
+            {t("favorites.emptySubtext")}
           </Text>
-          {!isLoading ? (
-            <Text variant="body" tone="dim" align="center">
-              {t("favorites.emptySubtext")}
-            </Text>
-          ) : null}
         </View>
       )}
     </Sheet>

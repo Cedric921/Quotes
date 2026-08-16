@@ -2,7 +2,16 @@ import React, { useMemo, useState } from "react";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../../theme";
-import { Input, LinkButton, OptionRow, Sheet, Text } from "../../../ui";
+import {
+  Input,
+  LinkButton,
+  Loader,
+  LoadFailed,
+  OptionRow,
+  Sheet,
+  Text,
+} from "../../../ui";
+import type { LoadState } from "../../../api/hooks/useLoadState";
 
 const useStyles = makeStyles((t) => ({
   intro: { marginBottom: t.space.lg },
@@ -39,6 +48,11 @@ export interface ChoiceScreenProps {
    */
   lockedNoticeKey?: string;
   onOpenPaywall?: () => void;
+  /**
+   * For options served by the API. While nothing is cached, a spinner or an
+   * error with a retry stands in for the list — never "no results".
+   */
+  load?: LoadState;
 }
 
 /**
@@ -59,6 +73,7 @@ export function ChoiceScreen({
   searchable,
   lockedNoticeKey,
   onOpenPaywall,
+  load,
 }: ChoiceScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
@@ -123,6 +138,9 @@ export function ChoiceScreen({
         </View>
       ) : null}
 
+      {load?.loading ? <Loader withLabel /> : null}
+      {load?.failed ? <LoadFailed onRetry={load.retry} /> : null}
+
       <View style={s.list}>
         {visible.map((option) => (
           <OptionRow
@@ -136,7 +154,7 @@ export function ChoiceScreen({
         ))}
       </View>
 
-      {visible.length === 0 ? (
+      {!load?.loading && !load?.failed && visible.length === 0 ? (
         <Text variant="body" tone="dim" align="center" style={s.empty}>
           {t("common.noResults")}
         </Text>

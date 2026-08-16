@@ -16,6 +16,7 @@ import {
   soundOptions,
 } from "../options";
 import { useTopics } from "../../../api/hooks/useTopics";
+import { useLoadState } from "../../../api/hooks/useLoadState";
 import { SYSTEM_LANGUAGE, changeLanguage } from "../../../i18n";
 import type { Topic } from "../../../types";
 
@@ -164,7 +165,9 @@ function useTopicField(
   lockPremium = false,
 ) {
   const dispatch = useAppDispatch();
-  const { data: topics = [] } = useTopics();
+  const topicsQuery = useTopics();
+  const topics = topicsQuery.data ?? [];
+  const load = useLoadState(topicsQuery);
   const selected = useAppSelector((s) => s.settings[field]);
   const isSubscribed = useAppSelector(
     (s) => s.auth.user?.isSubscribed ?? false,
@@ -187,14 +190,14 @@ function useTopicField(
     [dispatch, field],
   );
 
-  return { options, selected, toggle };
+  return { options, selected, toggle, load };
 }
 
 export function ContentPreferencesScreen({
   onBack,
   onOpenPaywall,
 }: TopicFieldProps) {
-  const { options, selected, toggle } = useTopicField(
+  const { options, selected, toggle, load } = useTopicField(
     "contentPreferences",
     true,
   );
@@ -210,12 +213,13 @@ export function ContentPreferencesScreen({
       onBack={onBack}
       lockedNoticeKey="settings.premiumTopicsLocked"
       onOpenPaywall={onOpenPaywall}
+      load={load}
     />
   );
 }
 
 export function MutedContentScreen({ onBack }: FieldProps) {
-  const { options, selected, toggle } = useTopicField("mutedTopics");
+  const { options, selected, toggle, load } = useTopicField("mutedTopics");
   return (
     <ChoiceScreen
       titleKey="settings.mutedContent"
@@ -226,6 +230,7 @@ export function MutedContentScreen({ onBack }: FieldProps) {
       selected={selected}
       onSelect={toggle}
       onBack={onBack}
+      load={load}
     />
   );
 }

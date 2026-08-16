@@ -20,3 +20,4 @@ export {
 } from "./SettingsList";
 export { Coachmark, type CoachmarkProps } from "./Coachmark";
 export { TileArt, type TileArtProps } from "./TileArt";
+export { Loader, LoadFailed, type LoaderProps, type LoadFailedProps } from "./Loader";

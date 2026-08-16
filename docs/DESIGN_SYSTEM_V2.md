@@ -174,6 +174,7 @@ si un écran a besoin d'un style qui n'est pas ici, c'est la primitive qu'on
 | `SettingsList` | sections à label capitales, groupes arrondis |
 | `IconCircle` | bouton rond, surface `base` ou `image` |
 | `Coachmark` | bulle + flèche vers la cible, assombrissement autour |
+| `Loader` / `LoadFailed` | spinner centré, couleur de la surface (`fill`, `compact`, `withLabel`) ; ou message d'erreur et « Réessayer ». Uniquement quand rien n'est en cache (`useLoadState`) : une liste restaurée du disque s'affiche sans spinner, et un échec ne se déguise jamais en liste vide |
 
 ---
 

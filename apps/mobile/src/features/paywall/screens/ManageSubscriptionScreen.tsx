@@ -7,6 +7,8 @@ import {
   Card,
   GradientBorderCard,
   Input,
+  Loader,
+  LoadFailed,
   Sheet,
   SettingsRow,
   SettingsSection,
@@ -14,6 +16,7 @@ import {
 } from "../../../ui";
 import { useAppSelector } from "../../../store/hooks";
 import { useUserPayments, type Payment } from "../../../api/hooks/useUser";
+import { useLoadState } from "../../../api/hooks/useLoadState";
 import { useApplyPromoCode } from "../../../api/hooks/usePromoCode";
 import { usePaywall } from "../usePaywall";
 import { notifyError, notifySuccess } from "../../auth/feedback";
@@ -64,7 +67,9 @@ export function ManageSubscriptionScreen({
   const user = useAppSelector((st) => st.auth.user);
   const isSubscribed = user?.isSubscribed ?? false;
   const { restore, isRestoring } = usePaywall();
-  const { data: payments = [], isLoading } = useUserPayments();
+  const paymentsQuery = useUserPayments();
+  const payments = paymentsQuery.data ?? [];
+  const paymentsLoad = useLoadState(paymentsQuery);
   const isAuthenticated = useAppSelector((st) => st.auth.isAuthenticated);
   const applyPromoCode = useApplyPromoCode();
   const [promo, setPromo] = useState("");
@@ -200,7 +205,11 @@ export function ManageSubscriptionScreen({
       ) : null}
 
       <SettingsSection title={t("subscription.paymentHistory")}>
-        {payments.length > 0 ? (
+        {paymentsLoad.loading ? (
+          <Loader compact />
+        ) : paymentsLoad.failed ? (
+          <LoadFailed compact onRetry={paymentsLoad.retry} />
+        ) : payments.length > 0 ? (
           payments.map((payment) => (
             <View key={payment.id} style={s.payment}>
               <View style={s.paymentCopy}>
@@ -215,7 +224,7 @@ export function ManageSubscriptionScreen({
         ) : (
           <View style={s.payment}>
             <Text variant="body" tone="dim" style={s.empty}>
-              {isLoading ? t("common.loading") : t("subscription.noPayments")}
+              {t("subscription.noPayments")}
             </Text>
           </View>
         )}

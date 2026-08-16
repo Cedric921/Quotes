@@ -1,11 +1,21 @@
 import React, { useCallback } from "react";
 import { ScrollView, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Button, Chip, ChipWrap, LinkButton, Screen, Text } from "../../../ui";
+import {
+  Button,
+  Chip,
+  ChipWrap,
+  LinkButton,
+  Loader,
+  LoadFailed,
+  Screen,
+  Text,
+} from "../../../ui";
 import { makeStyles } from "../../../theme";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { next, setTopics } from "../store/onboardingSlice";
 import { useTopics } from "../../../api/hooks/useTopics";
+import { useLoadState } from "../../../api/hooks/useLoadState";
 
 const useStyles = makeStyles((t) => ({
   top: { minHeight: 36, justifyContent: "center" },
@@ -21,7 +31,9 @@ export function TopicsScreen() {
   const s = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { data: topics = [] } = useTopics();
+  const topicsQuery = useTopics();
+  const topics = topicsQuery.data ?? [];
+  const load = useLoadState(topicsQuery);
   const selected = useAppSelector((st) => st.onboarding.topicIds);
 
   const toggle = useCallback(
@@ -64,6 +76,8 @@ export function TopicsScreen() {
         contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
       >
+        {load.loading ? <Loader withLabel /> : null}
+        {load.failed ? <LoadFailed onRetry={load.retry} /> : null}
         <ChipWrap>
           {topics.map((topic) => (
             <Chip
