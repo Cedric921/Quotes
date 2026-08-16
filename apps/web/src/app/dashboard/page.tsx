@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
 import { Button } from "@/components/ui/button";
-import { startKeepAlive, stopKeepAlive } from "@/services/keepAliveService";
 import {
   Card,
   CardContent,
@@ -64,19 +62,6 @@ export default function DashboardPage() {
     useSubscriptionStats();
   const { data: healthStatus, isLoading: isLoadingHealth } = useHealthStatus();
 
-  // Start keep-alive polling (refreshes dashboard data every minute)
-  useEffect(() => {
-    startKeepAlive((data) => {
-      // Si on reçoit des données, invalider les queries pour refresh
-      if (data) {
-        queryClient.invalidateQueries({ queryKey: statsKeys.all });
-      }
-    });
-
-    return () => {
-      stopKeepAlive();
-    };
-  }, [queryClient]);
 
   const statCards = [
     {

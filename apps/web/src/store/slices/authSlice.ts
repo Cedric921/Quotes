@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+import { API_URL } from "@/lib/api-base";
 
 // Types
 export interface AdminUser {
