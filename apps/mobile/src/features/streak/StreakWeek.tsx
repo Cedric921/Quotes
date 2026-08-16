@@ -27,6 +27,11 @@ const useStyles = makeStyles((t) => ({
     right: 0,
     bottom: 0,
   },
+  /** Today, not yet read: an ink ring around the empty dot. */
+  dotToday: {
+    borderWidth: t.border.selected,
+    borderColor: t.base.borderStrong,
+  },
   flame: {
     width: 56,
     height: 56,
@@ -48,6 +53,10 @@ export interface StreakWeekProps {
   labels: string[];
   /** Index into `labels` for each completed day. */
   completed: number[];
+  /** Days already behind us with no visit: drawn frozen, not empty. */
+  missed?: number[];
+  /** Which label is today; it gets a ring until it is completed. */
+  todayIndex?: number;
 }
 
 /**
@@ -60,6 +69,8 @@ export function StreakWeek({
   count,
   labels,
   completed,
+  missed = [],
+  todayIndex,
 }: StreakWeekProps) {
   const s = useStyles();
   const t = useTheme();
@@ -92,13 +103,27 @@ export function StreakWeek({
       <View style={s.days}>
         {labels.map((label, i) => {
           const done = completed.includes(i);
+          const frozen = !done && missed.includes(i);
+          const today = i === todayIndex;
           return (
             <View key={`${label}-${i}`} style={s.day}>
-              <Text variant="caption" tone={done ? "primary" : "tertiary"}>
+              <Text
+                variant="caption"
+                tone={done || today ? "primary" : "tertiary"}
+                weight={today ? "700" : undefined}
+              >
                 {label}
               </Text>
-              <View style={s.dot}>
-                {done ? (
+              <View style={[s.dot, today && !done ? s.dotToday : null]}>
+                {frozen ? (
+                  // A day that went by unread is frozen, not blank: the
+                  // week shows where the streak was lost.
+                  <Ionicons
+                    name="snow-outline"
+                    size={18}
+                    color={t.base.textSecondary}
+                  />
+                ) : done ? (
                   <>
                     <LinearGradient
                       colors={[...t.gradient.colors]}

@@ -23,6 +23,8 @@ export interface StreakCardProps {
   count: number;
   labels: string[];
   completed: number[];
+  missed?: number[];
+  todayIndex?: number;
   onShare: () => void;
   onOptions: () => void;
 }
@@ -32,6 +34,8 @@ export function StreakCard({
   count,
   labels,
   completed,
+  missed,
+  todayIndex,
   onShare,
   onOptions,
 }: StreakCardProps) {
@@ -73,7 +77,14 @@ export function StreakCard({
         </View>
       </View>
 
-      <StreakWeek illustration={illustration} count={count} labels={labels} completed={completed} />
+      <StreakWeek
+        illustration={illustration}
+        count={count}
+        labels={labels}
+        completed={completed}
+        missed={missed}
+        todayIndex={todayIndex}
+      />
     </Card>
   );
 }

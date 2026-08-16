@@ -29,6 +29,8 @@ export interface StreakToastProps {
   count: number;
   labels: string[];
   completed: number[];
+  missed?: number[];
+  todayIndex?: number;
   onHide: () => void;
 }
 
@@ -43,6 +45,8 @@ export function StreakToast({
   count,
   labels,
   completed,
+  missed,
+  todayIndex,
   onHide,
 }: StreakToastProps) {
   const s = useStyles();
@@ -81,7 +85,13 @@ export function StreakToast({
           <Text variant="label" align="center" style={s.title}>
             {translate("streak.toast.title")}
           </Text>
-          <StreakWeek count={count} labels={labels} completed={completed} />
+          <StreakWeek
+            count={count}
+            labels={labels}
+            completed={completed}
+            missed={missed}
+            todayIndex={todayIndex}
+          />
         </View>
       </Card>
     </Animated.View>

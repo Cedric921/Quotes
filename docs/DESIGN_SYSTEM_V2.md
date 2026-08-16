@@ -290,8 +290,9 @@ Trois éléments du design n'ont pas d'équivalent côté back :
 
 1. **Quota de likes** (`♡ 0/5`) — limite freemium affichée en permanence sur le
    feed. `useToggleLikeQuote` ne porte aucun quota aujourd'hui.
-2. **Série quotidienne** — compteur, semaine glissante, réglage « Suivre la
-   série ». Rien en base.
+2. **Série quotidienne** — compteur, semaine courante (lundi → dimanche :
+   jour lu coché, jour passé sans visite gelé, aujourd'hui cerclé), réglage
+   « Suivre la série ». Rien en base.
 3. **Préférences de contenu / contenu en sourdine** — filtrage par sujet et mise
    en sourdine de thèmes sensibles.
 

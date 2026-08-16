@@ -134,10 +134,12 @@ export function QuoteFeedScreen({
   useWidgetSync(quotes, current);
 
   // One visit per app open drives the streak; the toast fires off the slice.
+  // It waits for the stored streak to be read back — recording against the
+  // empty initial state was how the count never got past one.
   useEffect(() => {
     streak.recordVisit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [streak.hydrated]);
 
   // Held in a ref because FlatList keeps the first callback it is given:
   // passing a new function on re-render makes it throw.
@@ -322,6 +324,8 @@ export function QuoteFeedScreen({
         count={streak.count}
         labels={streak.labels}
         completed={streak.completed}
+        missed={streak.missed}
+        todayIndex={streak.todayIndex}
         onHide={streak.dismissToast}
       />
 

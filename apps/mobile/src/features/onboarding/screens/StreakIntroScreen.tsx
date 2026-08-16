@@ -21,7 +21,7 @@ export function StreakIntroScreen() {
   const s = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { count, labels, completed } = useStreak();
+  const { count, labels, completed, missed, todayIndex } = useStreak();
 
   return (
     <Screen
@@ -35,10 +35,18 @@ export function StreakIntroScreen() {
     >
       <View style={s.body}>
         <Card>
+          {/* The visit that is about to count: today lit, whatever the
+              feed has recorded so far. */}
           <StreakWeek
             count={Math.max(count, 1)}
             labels={labels}
-            completed={completed.length ? completed : [0]}
+            completed={
+              completed.includes(todayIndex)
+                ? completed
+                : [...completed, todayIndex]
+            }
+            missed={missed}
+            todayIndex={todayIndex}
           />
         </Card>
 

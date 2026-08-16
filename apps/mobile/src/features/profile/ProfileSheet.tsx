@@ -170,6 +170,8 @@ export function ProfileSheet({
           count={streak.count}
           labels={streak.labels}
           completed={streak.completed}
+          missed={streak.missed}
+          todayIndex={streak.todayIndex}
           onShare={onShareStreak}
           onOptions={onOpenStreakSettings}
         />
