@@ -1,0 +1,23 @@
+# Render blueprint.
+#
+# Only the relay is left on Render: it keeps the address the mobile app used
+# before version 2.2.0 answering, by forwarding every request to the API on
+# Vercel. The API itself, the admin and the public pages are on Vercel.
+#
+# The existing service `focus-app-1` owns the old address. Point it at this
+# folder (Root Directory apps/relay, build `npm install`, start `npm start`)
+# rather than creating a new service, which would get a new address.
+services:
+  - type: web
+    name: focus-app-1
+    runtime: node
+    plan: free
+    rootDir: apps/relay
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /relay-health
+    envVars:
+      - key: TARGET_URL
+        value: https://focus-admin.vercel.app/api
+      - key: NODE_VERSION
+        value: "20"

@@ -1,0 +1,14 @@
+{
+  "name": "relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Forwards the old Render API address to the API on Vercel, for app versions released before 2.2.0.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
