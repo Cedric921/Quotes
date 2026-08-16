@@ -59,13 +59,22 @@ export function useStreak() {
     [streak.days, week.join()],
   );
 
-  /** Days of this week already behind us that the app was not opened on. */
+  /**
+   * Days of this week already behind us that the app was not opened on.
+   * Only from the first recorded visit on: a day before the user had the app
+   * is not a day they missed, and a new user's week must not open frozen.
+   */
   const missed = useMemo(
-    () =>
-      week.reduce<number[]>((acc, iso, i) => {
-        if (iso < today && !streak.days.includes(iso)) acc.push(i);
+    () => {
+      const firstVisit = streak.days[0];
+      if (!firstVisit) return [];
+      return week.reduce<number[]>((acc, iso, i) => {
+        if (iso > firstVisit && iso < today && !streak.days.includes(iso)) {
+          acc.push(i);
+        }
         return acc;
-      }, []),
+      }, []);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [streak.days, week.join(), today],
   );
