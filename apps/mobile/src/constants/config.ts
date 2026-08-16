@@ -23,7 +23,7 @@ const getEnvVar = (key: string, fallback: string | number): string => {
 
 // Read API URL from environment
 // Default to production URL for builds
-const API_URL = getEnvVar("API_URL", "https://focus-app-1.onrender.com");
+const API_URL = getEnvVar("API_URL", "https://focus-admin.vercel.app/api");
 
 // Log configuration on app start (only once)
 if (__DEV__) {

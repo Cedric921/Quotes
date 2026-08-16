@@ -27,7 +27,6 @@ import {
   startSubscriptionSync,
   stopSubscriptionSync,
 } from "./src/services/subscriptionSyncService";
-import { startKeepAlive, stopKeepAlive } from "./src/services/keepAliveService";
 import "./src/i18n";
 
 // A simulator has no StoreKit configuration, so RevenueCat cannot load its
@@ -80,11 +79,9 @@ function AppContent() {
     setupNotificationChannel();
     initializePurchases();
     startSubscriptionSync();
-    startKeepAlive();
 
     return () => {
       stopSubscriptionSync();
-      stopKeepAlive();
     };
   }, []);
 

@@ -14,7 +14,7 @@
         "buildType": "apk"
       },
       "env": {
-        "API_URL": "https://focus-app-1.onrender.com",
+        "API_URL": "https://focus-admin.vercel.app/api",
         "APP_NAME": "Focus Dev"
       }
     },
@@ -26,7 +26,7 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "API_URL": "https://focus-app-1.onrender.com",
+        "API_URL": "https://focus-admin.vercel.app/api",
         "APP_NAME": "Focus Simulator"
       }
     },
@@ -39,7 +39,7 @@
         "buildType": "apk"
       },
       "env": {
-        "API_URL": "https://focus-app-1.onrender.com"
+        "API_URL": "https://focus-admin.vercel.app/api"
       }
     },
     "preview-apk": {
@@ -49,7 +49,7 @@
         "gradleCommand": ":app:assembleRelease"
       },
       "env": {
-        "API_URL": "https://focus-app-1.onrender.com"
+        "API_URL": "https://focus-admin.vercel.app/api"
       }
     },
     "production": {
@@ -61,7 +61,7 @@
       },
       "autoIncrement": true,
       "env": {
-        "API_URL": "https://focus-app-1.onrender.com",
+        "API_URL": "https://focus-admin.vercel.app/api",
         "IOS_BUNDLE_ID": "com.mindset.focus",
         "ANDROID_PACKAGE": "com.focus.quotes",
         "APPLE_TEAM_ID": "XA9AGYDNGM"

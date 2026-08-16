@@ -33,7 +33,7 @@ export default ({ config }) => {
   // ===========================================
   // API Configuration
   // ===========================================
-  const apiUrl = process.env.API_URL || "https://focus-app-1.onrender.com";
+  const apiUrl = process.env.API_URL || "https://focus-admin.vercel.app/api";
   const apiTimeout = process.env.API_TIMEOUT || "30000";
 
   // ===========================================
