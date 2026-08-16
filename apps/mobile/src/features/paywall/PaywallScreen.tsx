@@ -32,12 +32,22 @@ const useStyles = makeStyles((t) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: t.space.xl,
+    marginTop: t.space.sm,
     marginBottom: t.space.md,
     paddingVertical: t.space.sm,
     paddingHorizontal: t.space.lg,
   },
   price: { marginTop: t.space.sm },
+  plan: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: t.space.md,
+    marginTop: t.space.xl,
+    paddingVertical: t.space.sm,
+    paddingHorizontal: t.space.lg,
+  },
+  planCopy: { flex: 1, gap: t.space.xxs },
   legal: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -77,7 +87,19 @@ export function PaywallScreen({
 }: PaywallScreenProps) {
   const s = useStyles();
   const { t, i18n } = useTranslation();
-  const { offering, purchase, restore, isPurchasing } = usePaywall();
+  const {
+    offering,
+    plans,
+    plan,
+    setPlan,
+    yearlySavingPercent,
+    purchase,
+    restore,
+    isPurchasing,
+  } = usePaywall();
+  const yearly = plan === "yearly";
+  // The switch only makes sense with two plans to switch between.
+  const canChoosePlan = !!plans.yearly && !!plans.monthly;
   const [remindMe, setRemindMe] = useState(false);
 
   const openPage = (url: string, titleKey: string) =>
@@ -183,10 +205,12 @@ export function PaywallScreen({
           />
           {offering ? (
             <Text variant="body" tone="dim" align="center" style={s.price}>
-              {t("paywall.priceLine", {
-                monthly: offering.monthlyEquivalent,
-                yearly: offering.price,
-              })}
+              {offering.plan === "yearly"
+                ? t("paywall.priceLine", {
+                    monthly: offering.monthlyEquivalent,
+                    yearly: offering.price,
+                  })
+                : t("paywall.priceLineMonthly", { price: offering.price })}
             </Text>
           ) : null}
           <View style={s.legal}>
@@ -229,6 +253,36 @@ export function PaywallScreen({
       <GradientBorderCard>
         <TrialTimeline steps={steps} />
       </GradientBorderCard>
+
+      {/* On, the button buys the year; off, the month. Both prices are the
+          store's own, so the currency follows the storefront. */}
+      {canChoosePlan ? (
+        <Card style={s.plan}>
+          <View style={s.planCopy}>
+            <Text variant="body">{t("paywall.plan.title")}</Text>
+            <Text variant="caption" tone="tertiary">
+              {yearly
+                ? [
+                    t("paywall.plan.yearlyHint", {
+                      monthly: plans.yearly?.monthlyEquivalent,
+                      yearly: plans.yearly?.price,
+                    }),
+                    yearlySavingPercent
+                      ? t("subscription.save", { percent: yearlySavingPercent })
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                : t("paywall.plan.monthlyHint", { price: plans.monthly?.price })}
+            </Text>
+          </View>
+          <Toggle
+            value={yearly}
+            onChange={(value) => setPlan(value ? "yearly" : "monthly")}
+            label={t("paywall.plan.title")}
+          />
+        </Card>
+      ) : null}
 
       <Card style={s.reminder}>
         <Text variant="body">{t("paywall.remindMe")}</Text>

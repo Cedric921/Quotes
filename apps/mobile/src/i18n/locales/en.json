@@ -831,6 +831,12 @@
     "ctaNoPrice": "Start the free trial",
     "priceLine": "{{monthly}}/month, billed annually at {{yearly}}",
     "restore": "Restore",
+    "priceLineMonthly": "{{price}}/month, billed monthly",
+    "plan": {
+      "title": "Yearly plan",
+      "yearlyHint": "{{monthly}}/month, that is {{yearly}}/year",
+      "monthlyHint": "{{price}}/month, cancel anytime"
+    },
     "terms": "Terms",
     "privacy": "Privacy",
     "step": {

@@ -831,6 +831,12 @@
     "ctaNoPrice": "Commencer l'essai gratuit",
     "priceLine": "{{monthly}}/mois, facturé annuellement à {{yearly}}",
     "restore": "Restaurer",
+    "priceLineMonthly": "{{price}}/mois, facturé mensuellement",
+    "plan": {
+      "title": "Forfait annuel",
+      "yearlyHint": "{{monthly}}/mois, soit {{yearly}}/an",
+      "monthlyHint": "{{price}}/mois, résiliable à tout moment"
+    },
     "terms": "Conditions générales",
     "privacy": "Confidentialité",
     "step": {
