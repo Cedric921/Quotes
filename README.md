@@ -187,8 +187,8 @@ node seed-topics.js
 # From root
 npm run dev:admin
 
-# Or from apps/admin
-cd apps/admin
+# Or from apps/web
+cd apps/web
 npm run dev
 ```
 
@@ -220,7 +220,7 @@ Scan the QR code with **Expo Go** or press:
 
 ## 📱 Applications
 
-### 🖥️ Admin Panel (`apps/admin`)
+### 🖥️ Admin Panel (`apps/web`)
 
 Web interface to manage content.
 
@@ -386,7 +386,7 @@ To avoid API cold starts (free hosting), the system implements automatic polling
 - **Mobile**: Ping `/health` every 60 seconds
 - **Admin**: Ping `/health/stats` every 60 seconds + auto-refresh dashboard
 
-**Configuration**: Services configured in `apps/mobile/App.tsx` and `apps/admin/src/app/dashboard/page.tsx`
+**Configuration**: Services configured in `apps/mobile/App.tsx` and `apps/web/src/app/dashboard/page.tsx`
 
 ### Subscription Synchronization
 
@@ -462,7 +462,7 @@ npm test                 # Unit tests
 npm run test:e2e         # E2E tests
 ```
 
-### Admin Scripts (`apps/admin`)
+### Admin Scripts (`apps/web`)
 
 ```bash
 npm run dev              # Development mode

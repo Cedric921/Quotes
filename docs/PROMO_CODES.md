@@ -66,7 +66,7 @@ Méthodes principales :
 
 ### Frontend Admin (Next.js)
 
-#### Page Promo Codes (`apps/admin/src/app/dashboard/promo-codes/page.tsx`)
+#### Page Promo Codes (`apps/web/src/app/dashboard/promo-codes/page.tsx`)
 
 **Fonctionnalités** :
 - Liste des promo codes avec :
@@ -89,7 +89,7 @@ Méthodes principales :
   - Email, nom, date d'inscription
   - Statut premium actuel
 
-#### Hooks (`apps/admin/src/api/hooks/usePromoCodes.ts`)
+#### Hooks (`apps/web/src/api/hooks/usePromoCodes.ts`)
 
 - `usePromoCodes()` - Fetch all
 - `usePromoCode(id)` - Fetch one

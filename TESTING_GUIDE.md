@@ -55,7 +55,7 @@ npm run dev
 
 ```bash
 # Dans un nouveau terminal
-cd apps/admin
+cd apps/web
 npm run dev
 ```
 
@@ -239,7 +239,7 @@ npm start
 ### Erreur : "Module not found: @radix-ui/react-switch"
 **Solution** :
 ```bash
-cd apps/admin
+cd apps/web
 npm install @radix-ui/react-switch
 ```
 

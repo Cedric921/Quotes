@@ -157,7 +157,7 @@ Les endpoints suivants nécessitent `isAdmin: true` dans le JWT :
 ### Le menu "Promo Codes" n'apparaît pas
 ✅ **Solution** : 
 1. Vérifiez que vous avez la dernière version du code
-2. Redémarrez l'admin dashboard : `npm run dev` (dans `apps/admin`)
+2. Redémarrez l'admin dashboard : `npm run dev` (dans `apps/web`)
 3. Videz le cache du navigateur (Ctrl+Shift+R)
 
 ---
@@ -166,7 +166,7 @@ Les endpoints suivants nécessitent `isAdmin: true` dans le JWT :
 
 - **Script Admin Seed** : `apps/api/src/seeds/seed-admin.ts`
 - **Documentation Promo Codes** : `docs/PROMO_CODES.md`
-- **Page Admin Promo Codes** : `apps/admin/src/app/dashboard/promo-codes/page.tsx`
+- **Page Admin Promo Codes** : `apps/web/src/app/dashboard/promo-codes/page.tsx`
 - **Backend Controller** : `apps/api/src/subscriptions/subscriptions.controller.ts`
 
 ---

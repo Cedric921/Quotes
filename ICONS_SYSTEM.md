@@ -21,7 +21,7 @@ Le système d'icônes utilise **Lucide Icons** comme source unique de vérité p
 ### Composants
 
 #### 1. IconPicker
-**Fichier** : `apps/admin/src/components/ui/icon-picker.tsx`
+**Fichier** : `apps/web/src/components/ui/icon-picker.tsx`
 
 Composant de sélection d'icône avec :
 - Dialog popup avec grille d'icônes
@@ -40,7 +40,7 @@ import { IconPicker } from "@/components/ui/icon-picker";
 ```
 
 #### 2. Icon Helper
-**Fichier** : `apps/admin/src/lib/icon-helper.tsx`
+**Fichier** : `apps/web/src/lib/icon-helper.tsx`
 
 Helper pour afficher les icônes dynamiquement :
 

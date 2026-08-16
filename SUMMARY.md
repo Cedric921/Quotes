@@ -78,7 +78,7 @@ const { data: topic } = useTopic(topicId);
 - `README.md` - README principal mis à jour
 
 #### Fichiers Supprimés
-- ❌ `apps/admin/README.md` (boilerplate Next.js)
+- ❌ `apps/web/README.md` (boilerplate Next.js)
 - ❌ `apps/api/README.md` (boilerplate NestJS)
 - ❌ `apps/mobile/README.md` (obsolète)
 - ❌ `MOBILE_IMPLEMENTATION.md` (obsolète)
