@@ -29,6 +29,8 @@ const useStyles = makeStyles((t) => ({
     borderWidth: t.border.selected,
     borderColor: t.base.borderStrong,
   },
+  /** Out of reach on this plan: dimmed, and the marker becomes a padlock. */
+  rowLocked: { opacity: 0.55 },
   label: { flex: 1 },
   // Sized to the icon it stands in for, so a list mixing the two still lines up.
   glyph: { width: 24, textAlign: "center" },
@@ -56,6 +58,13 @@ export interface OptionRowProps {
   icon?: keyof typeof Ionicons.glyphMap;
   /** Drawn in the icon's place for symbols no icon font has. */
   glyph?: string;
+  /**
+   * The option exists but this account cannot pick it — a premium topic on
+   * the free plan. The row stays in the list so the user sees what the plan
+   * holds back, with a padlock where the checkbox would be, and does nothing
+   * when pressed.
+   */
+  locked?: boolean;
   testID?: string;
 }
 
@@ -74,6 +83,7 @@ export function OptionRow({
   kind = "check",
   icon,
   glyph,
+  locked,
   testID,
 }: OptionRowProps) {
   const s = useStyles();
@@ -88,11 +98,17 @@ export function OptionRow({
   return (
     <Pressable
       accessibilityRole={kind === "radio" ? "radio" : "checkbox"}
-      accessibilityState={{ checked: !!selected }}
+      accessibilityState={{ checked: !!selected && !locked, disabled: !!locked }}
       accessibilityLabel={label}
       testID={testID}
+      disabled={locked}
       onPress={handlePress}
-      style={[s.row, onImage ? null : s.rowRaised, selected ? s.rowSelected : null]}
+      style={[
+        s.row,
+        onImage ? null : s.rowRaised,
+        selected && !locked ? s.rowSelected : null,
+        locked ? s.rowLocked : null,
+      ]}
     >
       {onImage ? null : <MetalFill radius="pill" />}
       {icon ? (
@@ -119,11 +135,20 @@ export function OptionRow({
         {label}
       </Text>
 
-      <View style={[s.marker, selected ? s.markerSelected : null]}>
-        {selected ? (
-          <Ionicons name="checkmark" size={18} color={t.base.badgeFg} />
-        ) : null}
-      </View>
+      {locked ? (
+        <Ionicons
+          name="lock-closed"
+          size={22}
+          color={t.base.textSecondary}
+          accessibilityElementsHidden
+        />
+      ) : (
+        <View style={[s.marker, selected ? s.markerSelected : null]}>
+          {selected ? (
+            <Ionicons name="checkmark" size={18} color={t.base.badgeFg} />
+          ) : null}
+        </View>
+      )}
     </Pressable>
   );
 }

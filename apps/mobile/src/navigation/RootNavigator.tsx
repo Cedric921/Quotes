@@ -251,7 +251,12 @@ export function RootNavigator() {
 
                 {/* Personalise */}
                 <Stack.Screen name="ContentPreferences">
-                  {() => <ContentPreferencesScreen onBack={back} />}
+                  {({ navigation }: ScreenProps<"ContentPreferences">) => (
+                    <ContentPreferencesScreen
+                      onBack={back}
+                      onOpenPaywall={() => navigation.navigate("Paywall")}
+                    />
+                  )}
                 </Stack.Screen>
                 <Stack.Screen name="MutedContent">
                   {() => <MutedContentScreen onBack={back} />}

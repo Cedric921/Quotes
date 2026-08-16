@@ -161,7 +161,7 @@ si un écran a besoin d'un style qui n'est pas ici, c'est la primitive qu'on
 | `LinkButton` | texte secondaire, icône optionnelle (« Ignorer », « Obtenez le lot ») |
 | `Input` | champ pill, fond `bg.elevated` |
 | `TextArea` | multi-ligne + compteur `n/max` aligné à droite |
-| `OptionRow` | `radio` \| `check` ; icône gauche optionnelle ; texte multi-ligne |
+| `OptionRow` | `radio` \| `check` ; icône gauche optionnelle ; texte multi-ligne ; `locked` remplace la case par un cadenas (sujet premium sur le plan gratuit) |
 | `Chip` | pill à largeur auto, préfixe `+` au repos / `✓` sélectionné |
 | `ChipWrap` | disposition en flux, retour à la ligne |
 | `Toggle` | piste dégradée à l'état actif |

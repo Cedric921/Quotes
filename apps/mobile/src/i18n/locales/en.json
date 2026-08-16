@@ -164,6 +164,7 @@
     "relationship": "Relationship status",
     "beliefs": "Beliefs",
     "contentPreferences": "Content preferences",
+    "premiumTopicsLocked": "Topics with a padlock are reserved for Premium",
     "mutedContent": "Muted content",
     "sound": "Sound",
     "signIn": "Sign in",

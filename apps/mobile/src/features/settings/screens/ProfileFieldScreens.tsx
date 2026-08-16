@@ -23,6 +23,11 @@ interface FieldProps {
   onBack: () => void;
 }
 
+interface TopicFieldProps extends FieldProps {
+  /** Where the free-plan notice sends people who want the premium topics. */
+  onOpenPaywall?: () => void;
+}
+
 /** Single-value fields: pick one, it saves, you go back. */
 function useSingleField(field: Parameters<typeof setChoice>[0]["field"]) {
   const dispatch = useAppDispatch();
@@ -147,11 +152,23 @@ export function SoundScreen({ onBack }: FieldProps) {
   );
 }
 
-/** Multi-value fields, both driven by the topic list the API serves. */
-function useTopicField(field: "contentPreferences" | "mutedTopics") {
+/**
+ * Multi-value fields, both driven by the topic list the API serves.
+ *
+ * `lockPremium` keeps the premium topics in the list but out of reach on the
+ * free plan: following one would only fill the feed with quotes the plan
+ * does not serve. Muting is open to everyone — not seeing something is free.
+ */
+function useTopicField(
+  field: "contentPreferences" | "mutedTopics",
+  lockPremium = false,
+) {
   const dispatch = useAppDispatch();
   const { data: topics = [] } = useTopics();
   const selected = useAppSelector((s) => s.settings[field]);
+  const isSubscribed = useAppSelector(
+    (s) => s.auth.user?.isSubscribed ?? false,
+  );
 
   const options = (topics as Topic[]).map((topic) => ({
     id: topic.id,
@@ -159,6 +176,7 @@ function useTopicField(field: "contentPreferences" | "mutedTopics") {
     // not keys — ChoiceScreen runs them through t(), which passes them
     // through unchanged when no key matches.
     labelKey: topic.name,
+    locked: lockPremium && !isSubscribed && !!topic.isPremium,
   }));
 
   const toggle = useCallback(
@@ -172,8 +190,14 @@ function useTopicField(field: "contentPreferences" | "mutedTopics") {
   return { options, selected, toggle };
 }
 
-export function ContentPreferencesScreen({ onBack }: FieldProps) {
-  const { options, selected, toggle } = useTopicField("contentPreferences");
+export function ContentPreferencesScreen({
+  onBack,
+  onOpenPaywall,
+}: TopicFieldProps) {
+  const { options, selected, toggle } = useTopicField(
+    "contentPreferences",
+    true,
+  );
   return (
     <ChoiceScreen
       titleKey="settings.contentPreferences"
@@ -184,6 +208,8 @@ export function ContentPreferencesScreen({ onBack }: FieldProps) {
       selected={selected}
       onSelect={toggle}
       onBack={onBack}
+      lockedNoticeKey="settings.premiumTopicsLocked"
+      onOpenPaywall={onOpenPaywall}
     />
   );
 }

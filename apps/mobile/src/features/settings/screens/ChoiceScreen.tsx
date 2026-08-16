@@ -2,10 +2,11 @@ import React, { useMemo, useState } from "react";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "../../../theme";
-import { Input, OptionRow, Sheet, Text } from "../../../ui";
+import { Input, LinkButton, OptionRow, Sheet, Text } from "../../../ui";
 
 const useStyles = makeStyles((t) => ({
   intro: { marginBottom: t.space.lg },
+  notice: { marginBottom: t.space.lg, alignItems: "center", gap: t.space.xxs },
   // The rows are pills; without air between them they read as one striped
   // block. This is the gap the questionnaire uses.
   list: { gap: t.space.sm },
@@ -22,7 +23,7 @@ const fold = (value: string) =>
 export interface ChoiceScreenProps {
   titleKey: string;
   introKey?: string;
-  options: { id: string; labelKey: string }[];
+  options: { id: string; labelKey: string; locked?: boolean }[];
   selected: string[];
   kind?: "single" | "multi";
   onSelect: (id: string) => void;
@@ -32,6 +33,12 @@ export interface ChoiceScreenProps {
    * topic lists, which the API can grow past what fits on a screen.
    */
   searchable?: boolean;
+  /**
+   * Shown above the list when some options are locked: one line saying
+   * why, and where to go to unlock them.
+   */
+  lockedNoticeKey?: string;
+  onOpenPaywall?: () => void;
 }
 
 /**
@@ -50,6 +57,8 @@ export function ChoiceScreen({
   onSelect,
   onBack,
   searchable,
+  lockedNoticeKey,
+  onOpenPaywall,
 }: ChoiceScreenProps) {
   const s = useStyles();
   const { t } = useTranslation();
@@ -65,6 +74,11 @@ export function ChoiceScreen({
     if (!needle) return labelled;
     return labelled.filter((option) => fold(option.label).includes(needle));
   }, [labelled, query]);
+
+  const hasLocked = useMemo(
+    () => options.some((option) => option.locked),
+    [options],
+  );
 
   return (
     <Sheet
@@ -94,6 +108,21 @@ export function ChoiceScreen({
         </Text>
       ) : null}
 
+      {hasLocked && lockedNoticeKey ? (
+        <View style={s.notice}>
+          <Text variant="caption" tone="tertiary" align="center">
+            {t(lockedNoticeKey)}
+          </Text>
+          {onOpenPaywall ? (
+            <LinkButton
+              label={t("settings.unlockAll")}
+              icon="ribbon-outline"
+              onPress={onOpenPaywall}
+            />
+          ) : null}
+        </View>
+      ) : null}
+
       <View style={s.list}>
         {visible.map((option) => (
           <OptionRow
@@ -101,6 +130,7 @@ export function ChoiceScreen({
             label={option.label}
             kind={kind === "single" ? "radio" : "check"}
             selected={selected.includes(option.id)}
+            locked={option.locked}
             onPress={() => onSelect(option.id)}
           />
         ))}
