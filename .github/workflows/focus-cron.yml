@@ -1,0 +1,56 @@
+name: Focus scheduled jobs
+
+# The premium reminders the NestJS API sent at 08:00, 12:30 and 19:00 UTC.
+# Vercel Hobby runs crons once a day at most (that one is /api/cron/daily in
+# apps/web/vercel.json), so the more frequent jobs are triggered from here.
+# GitHub may start a scheduled run some minutes late.
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # morning
+    - cron: "30 12 * * *" # noon
+    - cron: "0 19 * * *" # evening
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "Reminder slot to send"
+        required: true
+        default: morning
+        type: choice
+        options:
+          - morning
+          - noon
+          - evening
+
+permissions:
+  contents: read
+
+concurrency:
+  group: focus-cron-${{ github.event.schedule || inputs.slot }}
+  cancel-in-progress: false
+
+jobs:
+  premium-reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send premium reminder
+        env:
+          API_URL: ${{ vars.FOCUS_API_URL || 'https://focus-admin.vercel.app' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_SLOT: ${{ inputs.slot }}
+        run: |
+          case "$SCHEDULE" in
+            "0 8 * * *") SLOT=morning ;;
+            "30 12 * * *") SLOT=noon ;;
+            "0 19 * * *") SLOT=evening ;;
+            "") SLOT="$INPUT_SLOT" ;;
+            *) echo "Unknown schedule: $SCHEDULE" >&2; exit 1 ;;
+          esac
+          if [ -z "$CRON_SECRET" ]; then echo "CRON_SECRET secret is not set" >&2; exit 1; fi
+          echo "Slot: $SLOT"
+          curl --silent --show-error --fail-with-body --max-time 90 \
+            -X GET \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$API_URL/api/cron/premium-reminders?slot=$SLOT"
