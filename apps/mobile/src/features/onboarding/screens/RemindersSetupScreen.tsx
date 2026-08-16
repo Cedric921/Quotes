@@ -93,7 +93,8 @@ export function RemindersSetupScreen({
   // broken app, not as a plan limit.
   const maxCount = isSubscribed ? MAX_REMINDERS_PER_DAY : FREE_REMINDERS_PER_DAY;
 
-  const [count, setCount] = useState(10);
+  // Opens at the tier's ceiling: three on the free plan, ten on premium.
+  const [count, setCount] = useState(maxCount);
   const [start, setStart] = useState(at(9));
   const [end, setEnd] = useState(at(22));
 

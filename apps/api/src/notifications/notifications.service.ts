@@ -16,7 +16,7 @@ import { RegisterPushTokenDto } from './dto/register-push-token.dto';
  * the same number (`FREE_REMINDERS_PER_DAY` in the mobile app), so a user is
  * told the rule before they hit it rather than losing sends silently.
  */
-export const FREE_MAX_NOTIFICATIONS_PER_DAY = 10;
+export const FREE_MAX_NOTIFICATIONS_PER_DAY = 3;
 
 @Injectable()
 export class NotificationsService {

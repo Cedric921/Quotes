@@ -64,12 +64,12 @@ export const FREE_LIKE_QUOTA = 5;
 /**
  * Free tier's reminders per day. Mirrors `FREE_MAX_NOTIFICATIONS_PER_DAY` on
  * the API: the stepper stops here for a free account, and says why, instead
- * of letting them schedule twenty and receiving ten.
+ * of letting them schedule ten and receiving three.
  */
-export const FREE_REMINDERS_PER_DAY = 10;
+export const FREE_REMINDERS_PER_DAY = 3;
 
 /** What the stepper allows a premium account. Matches the API's DTO ceiling. */
-export const MAX_REMINDERS_PER_DAY = 20;
+export const MAX_REMINDERS_PER_DAY = 10;
 
 /** Length of the introductory trial, in days. */
 export const TRIAL_DAYS = 3;

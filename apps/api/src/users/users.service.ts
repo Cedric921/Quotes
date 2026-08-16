@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { TrackActivityDto } from './dto/track-activity.dto';
+import { FREE_MAX_NOTIFICATIONS_PER_DAY } from '../notifications/notifications.service';
 import { User } from './entities/user.entity';
 import { Quote } from '../quotes/entities/quote.entity';
 import { UserNotificationSettings } from './entities/user-notification-settings.entity';
@@ -161,15 +162,19 @@ export class UsersService {
       updateData.activeDays = JSON.stringify(updateDto.activeDays);
     }
 
-    // Freemium cap: free users can request at most 2 notifications per day.
-    // Premium users keep whatever value they sent.
+    // Freemium cap: free users can request at most three notifications per
+    // day — the same ceiling the sender applies. Premium users keep whatever
+    // value they sent, up to the DTO's ten.
     if (updateDto.maxNotificationsPerDay !== undefined) {
       const user = await this.usersRepository.findOne({
         where: { id: userId },
       });
       const isPremium = user ? this.calculateIsPremium(user) : false;
-      if (!isPremium && updateDto.maxNotificationsPerDay > 2) {
-        updateData.maxNotificationsPerDay = 2;
+      if (
+        !isPremium &&
+        updateDto.maxNotificationsPerDay > FREE_MAX_NOTIFICATIONS_PER_DAY
+      ) {
+        updateData.maxNotificationsPerDay = FREE_MAX_NOTIFICATIONS_PER_DAY;
       }
     }
 
