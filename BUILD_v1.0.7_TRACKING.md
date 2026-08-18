@@ -72,31 +72,46 @@ The queries that grew with the data:
 - **Build ID**: `882a41a5-3e7b-4d66-bcec-44d777c9bd56`
 - **Build Number**: 33
 - **Profile**: production
+- **Status**: ✅ Finished
+- **Artifact**: https://expo.dev/artifacts/eas/u-eT4CaPrnYaG3_qI7gO05GJNw9b2Ipa2bI1-TyLlWg.ipa
 - **Link**: https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/882a41a5-3e7b-4d66-bcec-44d777c9bd56
+- **Submission**: ✅ Uploaded to App Store Connect (ASC API key from EAS servers) —
+  https://expo.dev/accounts/focus-application/projects/focus-quotes-app/submissions/1d7d1199-69a9-42c0-952c-f9608a7d5256
+- **TestFlight**: https://appstoreconnect.apple.com/apps/6761561417/testflight/ios
 
 ### Android Build
 
 - **Build ID**: `2360bebc-e388-4eea-b622-e3aa3a4da82c`
 - **Version Code**: 11
 - **Profile**: production
+- **Status**: ✅ Finished
+- **Artifact**: https://expo.dev/artifacts/eas/th0UqO-tRdy4Y-0Hv0AVtyh68vmtp3Pz2Nw7VeDW1Bk.aab
 - **Link**: https://expo.dev/accounts/focus-application/projects/focus-quotes-app/builds/2360bebc-e388-4eea-b622-e3aa3a4da82c
+- **Submission**: ⏸ Pending — see below
 
 ### ⚠️ Auto-Submit Did Not Run
 
-`eas build --auto-submit` stopped before queueing either submission:
-`eas.json` points Android submission at `./google-service-account.json`, which
-is not present in `apps/mobile/` (it is gitignored). Both **builds** were
-already queued on EAS and were unaffected.
+`eas build --auto-submit` stopped before queueing either submission: `eas.json`
+points Android submission at `./google-service-account.json`, which is not
+present in `apps/mobile/` (it is gitignored). Both **builds** were already
+queued on EAS and were unaffected.
 
-To submit once the builds finish:
+iOS was then submitted on its own and went through — the App Store Connect API
+key was already stored on EAS servers, so nothing had to be supplied:
 
 ```bash
-# Android — after placing google-service-account.json in apps/mobile/
-eas submit -p android --latest
-
-# iOS
 eas submit -p ios --latest
 ```
+
+Android is still waiting on the key file:
+
+```bash
+# after placing google-service-account.json in apps/mobile/
+eas submit -p android --latest
+```
+
+The Android submit profile targets the `internal` track with
+`releaseStatus: draft`, so the upload lands as a draft rather than a release.
 
 ## ✅ Test Cases
 
@@ -134,8 +149,10 @@ eas submit -p ios --latest
 
 ## 📝 Next Steps
 
-1. ⏳ Wait for builds to complete (~20-30 minutes)
-2. 🔑 Set `BREVO_API_KEY` / `MAIL_FROM` on Render — without them the reset code
-   is only logged
-3. 📤 Run the two `eas submit` commands above
-4. 📲 Test on TestFlight (iOS) and Play Store Internal Track (Android)
+1. ✅ Builds complete — iOS build 33, Android versionCode 11
+2. ✅ iOS submitted; Apple processing takes 5-10 minutes before it shows in
+   TestFlight
+3. 🔑 Set `BREVO_API_KEY` / `MAIL_FROM` on Render — without them the reset code
+   is only logged and the feature ships dead
+4. 📤 Add `google-service-account.json` and run `eas submit -p android --latest`
+5. 📲 Test on TestFlight (iOS) and Play Store Internal Track (Android)
