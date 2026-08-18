@@ -1,8 +1,8 @@
 import axios, { AxiosError } from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Quote, Topic } from "../types";
 import { API_CONFIG } from "../constants/config";
 import { handleTokenExpired } from "./authService";
+import { getAuthToken, getAuthUserId } from "./authTokenCache";
 
 const apiClient = axios.create({
   baseURL: API_CONFIG.getBaseUrl(),
@@ -15,10 +15,15 @@ const apiClient = axios.create({
 // Request interceptor for adding auth token and logging
 apiClient.interceptors.request.use(
   async (config) => {
-    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
+    // Le pont natif de React Native serialise chaque `console.log` ; deux par
+    // requete sur une liste infinie, c'est du temps pris au thread JS pour
+    // rien en production.
+    if (__DEV__) {
+      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
+    }
 
     // Add auth token if available
-    const token = await AsyncStorage.getItem("@focus_auth_token");
+    const token = await getAuthToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,9 +39,11 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(
-      `[API Response] ${response.config.url} - Status: ${response.status}`,
-    );
+    if (__DEV__) {
+      console.log(
+        `[API Response] ${response.config.url} - Status: ${response.status}`,
+      );
+    }
     return response;
   },
   async (error: AxiosError) => {
@@ -60,23 +67,6 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-
-/**
- * Helper function to get userId from stored JWT token
- */
-const getUserIdFromToken = async (): Promise<string | null> => {
-  try {
-    const token = await AsyncStorage.getItem("@focus_auth_token");
-    if (!token) return null;
-
-    // Decode JWT payload (simple decode, not verification)
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.sub || payload.userId || null;
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return null;
-  }
-};
 
 // Shuffle seed regenerated each time the app opens (cold start) and each
 // time it returns to the foreground after being backgrounded. Pagination
@@ -107,7 +97,7 @@ export const quotesApi = {
     includePremium: boolean = true,
     seed: string = getShuffleSeed(),
   ): Promise<Quote[]> => {
-    const userId = await getUserIdFromToken();
+    const userId = await getAuthUserId();
     const response = await apiClient.get<Quote[]>("/quotes", {
       params: {
         page,
@@ -130,7 +120,7 @@ export const quotesApi = {
    * @param topicId - Topic ID
    */
   getQuotesByTopic: async (topicId: string): Promise<Quote[]> => {
-    const userId = await getUserIdFromToken();
+    const userId = await getAuthUserId();
     const response = await apiClient.get<Quote[]>("/quotes", {
       params: { topicId, ...(userId && { userId }) },
     });
@@ -142,7 +132,7 @@ export const quotesApi = {
    * @param quoteId - Quote ID
    */
   getQuoteById: async (quoteId: string): Promise<Quote> => {
-    const userId = await getUserIdFromToken();
+    const userId = await getAuthUserId();
     const response = await apiClient.get<Quote>(`/quotes/${quoteId}`, {
       params: { ...(userId && { userId }) },
     });

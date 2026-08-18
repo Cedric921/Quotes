@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { MailService } from '../mail/mail.service';
 import Stripe from 'stripe';
 import { v2 as cloudinary } from 'cloudinary';
 
@@ -34,14 +35,22 @@ export interface HealthCheckResponse {
     stripe: StripeStatus;
     revenuecat: RevenueCatStatus;
     cloudinary: ServiceStatus;
+    mail: MailStatus;
   };
+}
+
+export interface MailStatus extends ServiceStatus {
+  provider: 'brevo' | 'smtp' | 'none';
 }
 
 @Injectable()
 export class HealthService {
   private stripe: Stripe | null = null;
 
-  constructor(private dataSource: DataSource) {
+  constructor(
+    private dataSource: DataSource,
+    private readonly mailService: MailService,
+  ) {
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (stripeKey && !stripeKey.includes('placeholder')) {
       this.stripe = new Stripe(stripeKey);
@@ -61,6 +70,7 @@ export class HealthService {
       this.checkRevenueCat(),
       this.checkCloudinary(),
     ]);
+    const mail = this.checkMail();
 
     let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 
@@ -75,7 +85,8 @@ export class HealthService {
     } else if (
       stripe.status === 'not_configured' ||
       revenuecat.status === 'not_configured' ||
-      cloudinaryStatus.status === 'not_configured'
+      cloudinaryStatus.status === 'not_configured' ||
+      mail.status === 'not_configured'
     ) {
       overallStatus = 'degraded';
     }
@@ -88,7 +99,35 @@ export class HealthService {
         stripe,
         revenuecat,
         cloudinary: cloudinaryStatus,
+        mail,
       },
+    };
+  }
+
+  /**
+   * Un envoi non configure ne se voit nulle part ailleurs : la demande de
+   * reinitialisation repond « success » meme quand rien ne part. C'est ici
+   * qu'on lit lequel des deux chemins est actif.
+   */
+  private checkMail(): MailStatus {
+    const provider = this.mailService.provider();
+
+    if (provider === 'none') {
+      return {
+        status: 'not_configured',
+        provider,
+        message:
+          'No BREVO_API_KEY and no SMTP credentials — password reset codes are only logged',
+      };
+    }
+
+    return {
+      status: 'connected',
+      provider,
+      message:
+        provider === 'brevo'
+          ? 'Sending through the Brevo HTTP API'
+          : 'Sending over SMTP',
     };
   }
 

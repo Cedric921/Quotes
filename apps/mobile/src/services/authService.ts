@@ -4,6 +4,7 @@ import { store } from "../store";
 import { logout } from "../store/slices/authSlice";
 import { resetAndNavigate } from "./navigationService";
 import { queryClient } from "../api/queryClient";
+import { clearAuthTokenCache } from "./authTokenCache";
 
 let isLoggingOut = false;
 
@@ -21,6 +22,7 @@ export const handleTokenExpired = async () => {
     // Clear stored auth data
     await AsyncStorage.removeItem("@focus_auth_token");
     await AsyncStorage.removeItem("@focus_user_data");
+    clearAuthTokenCache();
 
     // Clear Redux state
     store.dispatch(logout());

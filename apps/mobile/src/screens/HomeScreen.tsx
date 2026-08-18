@@ -103,6 +103,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   // Debug log for tracking fetch status
   useEffect(() => {
+    if (!__DEV__) return;
+    // `data.pages.flat()` recopie toute la liste a chaque changement d'etat ;
+    // c'est du travail de mise au point, pas du travail de production.
     console.log("[HomeScreen] Query status:", {
       status,
       isLoading,
@@ -487,6 +490,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             offset: height * index,
             index,
           })}
+          // Chaque carte occupe l'ecran entier : la fenetre par defaut en
+          // gardait une vingtaine montees de part et d'autre de la citation
+          // visible, chacune avec son gradient, ses animations et son hook de
+          // traduction. Trois suffisent pour que le defilement page par page
+          // reste instantane, pour un tiers de la memoire et du travail de
+          // rendu.
+          windowSize={3}
+          initialNumToRender={2}
+          maxToRenderPerBatch={2}
+          updateCellsBatchingPeriod={50}
         />
       )}
 

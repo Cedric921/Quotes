@@ -16,6 +16,7 @@ import { HealthModule } from './health/health.module';
 import { TranslationsModule } from './translations/translations.module';
 import { ContactModule } from './contact/contact.module';
 import { SocialModule } from './social/social.module';
+import { MailModule } from './mail/mail.module';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -38,6 +39,7 @@ import { getDatabaseConfig } from './config/database.config';
     TranslationsModule,
     ContactModule,
     SocialModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

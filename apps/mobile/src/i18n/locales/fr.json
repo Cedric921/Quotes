@@ -61,6 +61,7 @@
     "resetPasswordSuccess": "Mot de passe réinitialisé",
     "resetPasswordSuccessMessage": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
     "invalidResetCode": "Code invalide ou expiré",
+    "tooManyResetRequests": "Trop de demandes. Réessayez dans quelques minutes.",
     "backToLogin": "Retour à la connexion"
   },
   "home": {

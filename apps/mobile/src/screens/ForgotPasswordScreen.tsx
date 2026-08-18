@@ -25,7 +25,7 @@ interface ForgotPasswordScreenProps {
 export default function ForgotPasswordScreen({
   navigation,
 }: ForgotPasswordScreenProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,11 +48,22 @@ export default function ForgotPasswordScreen({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+          // La locale voyage avec la demande : le code arrive dans la langue
+          // de l'app, pas dans celle du serveur.
+          body: JSON.stringify({
+            email: email.trim().toLowerCase(),
+            locale: i18n.language,
+          }),
+          // Render endort les instances gratuites ; un demarrage a froid peut
+          // prendre une trentaine de secondes, au-dela c'est une panne.
+          signal: AbortSignal.timeout(API_CONFIG.TIMEOUT),
         },
       );
 
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error(t("auth.tooManyResetRequests"));
+        }
         const data = await response.json().catch(() => ({}));
         throw new Error(data.message || t("auth.errorOccurred"));
       }

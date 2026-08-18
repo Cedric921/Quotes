@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { PushToken } from './entities/push-token.entity';
@@ -29,16 +29,6 @@ export class NotificationsService {
     private userRepository: Repository<User>,
   ) {
     this.expo = new Expo();
-  }
-
-  // Returns true when the user has an active premium subscription
-  private async isUserPremium(userId: string): Promise<boolean> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      select: ['id', 'isSubscribed', 'subscriptionEndDate'],
-    });
-    if (!user || !user.isSubscribed || !user.subscriptionEndDate) return false;
-    return new Date(user.subscriptionEndDate) > new Date();
   }
 
   // Register a push token for a user
@@ -90,14 +80,39 @@ export class NotificationsService {
 
   // Get a random quote
   private async getRandomQuote(): Promise<Quote | null> {
-    const quotes = await this.quoteRepository
+    const quotes = await this.getRandomQuotes(1);
+    return quotes[0] || null;
+  }
+
+  /** Plusieurs citations au hasard, en un seul tri. */
+  private getRandomQuotes(count: number): Promise<Quote[]> {
+    return this.quoteRepository
       .createQueryBuilder('quote')
       .leftJoinAndSelect('quote.topic', 'topic')
       .orderBy('RANDOM()')
-      .limit(1)
+      .limit(Math.max(count, 1))
       .getMany();
+  }
 
-    return quotes[0] || null;
+  /** Parmi ces utilisateurs, lesquels ont un abonnement actif. */
+  private async premiumUserIds(userIds: string[]): Promise<Set<string>> {
+    if (userIds.length === 0) return new Set();
+
+    const users = await this.userRepository.find({
+      where: { id: In(userIds), isSubscribed: true },
+      select: ['id', 'subscriptionEndDate'],
+    });
+
+    const now = new Date();
+    return new Set(
+      users
+        .filter(
+          (user) =>
+            user.subscriptionEndDate &&
+            new Date(user.subscriptionEndDate) > now,
+        )
+        .map((user) => user.id),
+    );
   }
 
   // Send push notification to specific tokens
@@ -242,6 +257,16 @@ export class NotificationsService {
       where: { enabled: true },
     });
 
+    // Le statut premium de tout le monde, en une requete.
+    //
+    // Il etait auparavant demande utilisateur par utilisateur, a l'interieur de
+    // la boucle - et cette boucle tourne toutes les minutes. Avec mille
+    // reglages actifs cela faisait 1,44 million de requetes par jour pour lire
+    // deux colonnes qui changent une fois par mois.
+    const premiumUserIds = await this.premiumUserIds(
+      allSettings.map((settings) => settings.userId),
+    );
+
     // Filter users who should receive notifications now
     const usersToNotify: { userId: string; settingsId: string }[] = [];
 
@@ -277,7 +302,7 @@ export class NotificationsService {
         }
 
         // Apply freemium cap: free users get at most 2 notifications per day
-        const isPremium = await this.isUserPremium(settings.userId);
+        const isPremium = premiumUserIds.has(settings.userId);
         const effectiveMaxPerDay = isPremium
           ? settings.maxNotificationsPerDay
           : Math.min(
@@ -342,24 +367,45 @@ export class NotificationsService {
       `Sending notifications to ${usersToNotify.length} users at ${currentTime}`,
     );
 
+    // Une citation differente par destinataire, tirees ensemble.
+    //
+    // `ORDER BY RANDOM()` trie la table entiere a chaque appel ; le faire une
+    // fois pour cent destinataires plutot que cent fois change l'ordre de
+    // grandeur du travail demande a la base, sans rien changer au resultat.
+    const userIds = usersToNotify.map(({ userId }) => userId);
+    const [quotePool, allPushTokens] = await Promise.all([
+      this.getRandomQuotes(userIds.length),
+      this.pushTokenRepository.find({
+        where: { userId: In(userIds), isActive: true },
+      }),
+    ]);
+
+    if (quotePool.length === 0) {
+      this.logger.warn('No quotes available to send');
+      return;
+    }
+
+    const tokensByUser = new Map<string, string[]>();
+    for (const pushToken of allPushTokens) {
+      const existing = tokensByUser.get(pushToken.userId);
+      if (existing) {
+        existing.push(pushToken.token);
+      } else {
+        tokensByUser.set(pushToken.userId, [pushToken.token]);
+      }
+    }
+
     // Send notification to each user with a different random quote
-    for (const { userId } of usersToNotify) {
-      const quote = await this.getRandomQuote();
+    for (const [index, { userId }] of usersToNotify.entries()) {
+      // Le vivier peut etre plus petit que le nombre de destinataires quand il
+      // y a moins de citations que d'utilisateurs a notifier ; on boucle.
+      const quote = quotePool[index % quotePool.length];
 
-      if (!quote) {
-        this.logger.warn('No quotes available to send');
+      const tokens = tokensByUser.get(userId);
+
+      if (!tokens || tokens.length === 0) {
         continue;
       }
-
-      const pushTokens = await this.pushTokenRepository.find({
-        where: { userId, isActive: true },
-      });
-
-      if (pushTokens.length === 0) {
-        continue;
-      }
-
-      const tokens = pushTokens.map((pt) => pt.token);
 
       await this.sendPushNotifications(
         tokens,
@@ -373,10 +419,13 @@ export class NotificationsService {
           topicId: quote.topic?.id,
         },
       );
+    }
 
-      // Update lastUsedAt for tokens
+    // Une seule ecriture pour tous les jetons servis, plutot qu'une par
+    // destinataire.
+    if (allPushTokens.length > 0) {
       await this.pushTokenRepository.update(
-        { token: tokens as any },
+        { token: In(allPushTokens.map((pushToken) => pushToken.token)) },
         { lastUsedAt: new Date() },
       );
     }

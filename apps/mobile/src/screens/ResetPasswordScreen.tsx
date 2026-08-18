@@ -78,6 +78,7 @@ export default function ResetPasswordScreen({
             code: code.trim(),
             newPassword,
           }),
+          signal: AbortSignal.timeout(API_CONFIG.TIMEOUT),
         },
       );
 

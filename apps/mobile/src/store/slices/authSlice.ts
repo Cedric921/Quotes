@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "../../types";
 import { API_CONFIG } from "../../constants/config";
+import { clearAuthTokenCache } from "../../services/authTokenCache";
 
 interface AuthState {
   user: User | null;
@@ -39,6 +40,7 @@ export const loginThunk = createAsyncThunk(
 
       // Save to AsyncStorage
       await AsyncStorage.setItem("@focus_auth_token", data.access_token);
+      clearAuthTokenCache();
       await AsyncStorage.setItem("@focus_user_data", JSON.stringify(data.user));
 
       return { user: data.user, token: data.access_token };
@@ -93,6 +95,7 @@ export const registerThunk = createAsyncThunk(
 
       // Save to AsyncStorage
       await AsyncStorage.setItem("@focus_auth_token", loginData.access_token);
+      clearAuthTokenCache();
       await AsyncStorage.setItem(
         "@focus_user_data",
         JSON.stringify(loginData.user),
@@ -168,6 +171,7 @@ export default authSlice.reducer;
 // Other thunks
 export const logoutThunk = () => async (dispatch: any) => {
   await AsyncStorage.removeItem("@focus_auth_token");
+  clearAuthTokenCache();
   await AsyncStorage.removeItem("@focus_user_data");
   dispatch(logout());
 };
@@ -190,6 +194,7 @@ export const loadStoredAuth = () => async (dispatch: any) => {
         console.error("[Auth] Failed to parse user data, clearing storage:", parseError);
         // Clear corrupted data
         await AsyncStorage.removeItem("@focus_auth_token");
+        clearAuthTokenCache();
         await AsyncStorage.removeItem("@focus_user_data");
         dispatch(setLoading(false));
       }

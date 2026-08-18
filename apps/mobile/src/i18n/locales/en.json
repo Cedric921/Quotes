@@ -61,6 +61,7 @@
     "resetPasswordSuccess": "Password reset",
     "resetPasswordSuccessMessage": "You can now log in with your new password.",
     "invalidResetCode": "Invalid or expired code",
+    "tooManyResetRequests": "Too many requests. Please try again in a few minutes.",
     "backToLogin": "Back to login"
   },
   "home": {

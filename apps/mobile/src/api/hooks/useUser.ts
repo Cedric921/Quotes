@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 import axios from "axios";
 import { API_CONFIG } from "../../constants/config";
 import { User, Quote } from "../../types";
@@ -19,7 +20,7 @@ export const useUser = (userId?: string) => {
   const token = useAppSelector((state) => state.auth.token);
   const dispatch = useAppDispatch();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: userKeys.detail(userId || ""),
     queryFn: async () => {
       if (!userId || !token) {
@@ -35,14 +36,25 @@ export const useUser = (userId?: string) => {
         },
       );
 
-      // Update Redux store with fresh user data
-      dispatch(setUser(response.data));
-
       return response.data;
     },
     enabled: !!userId && !!token,
     staleTime: 1 * 60 * 1000, // 1 minute
   });
+
+  // Le dispatch etait dans `queryFn`, donc a chaque refetch : la reponse etant
+  // un objet neuf, tout ce qui lit `state.auth.user` se reaffichait meme quand
+  // rien n'avait change. Ici React Query a deja fait son partage structurel -
+  // `data` garde la meme reference tant que le contenu est identique - et le
+  // store n'est touche que sur un vrai changement.
+  const data = query.data;
+  useEffect(() => {
+    if (data) {
+      dispatch(setUser(data));
+    }
+  }, [data, dispatch]);
+
+  return query;
 };
 
 // Fetch current authenticated user

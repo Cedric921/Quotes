@@ -5,6 +5,7 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import { quotesApi } from "../../services/api";
+import { userKeys } from "./useUser";
 import { Quote } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setUser } from "../../store/slices/authSlice";
@@ -28,20 +29,13 @@ export const useQuotes = (
   return useInfiniteQuery({
     queryKey: quoteKeys.list({ pageSize, includePremium }),
     queryFn: async ({ pageParam = 1 }) => {
-      console.log("[useQuotes] Fetching page:", pageParam);
-      try {
-        const result = await quotesApi.getQuotes(
-          pageParam,
-          pageSize,
-          undefined,
-          includePremium,
-        );
-        console.log("[useQuotes] Received quotes:", result?.length || 0);
-        return result || [];
-      } catch (error) {
-        console.error("[useQuotes] Error fetching quotes:", error);
-        throw error;
-      }
+      const result = await quotesApi.getQuotes(
+        pageParam,
+        pageSize,
+        undefined,
+        includePremium,
+      );
+      return result || [];
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < pageSize) return undefined;
@@ -52,7 +46,9 @@ export const useQuotes = (
     gcTime: 1000 * 60 * 30, // 30 minutes cache
     retry: 5, // More retries for cold starts on Render
     retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 10000),
-    refetchOnMount: "always", // Always refetch on mount to ensure fresh data
+    // `refetchOnMount: "always"` rechargeait *toutes* les pages deja parcourues
+    // a chaque retour sur l'accueil - dix requetes pour redescendre la meme
+    // liste. Le defaut respecte `staleTime` : rien ne repart avant cinq minutes.
     refetchOnWindowFocus: false,
     enabled: true, // Always enabled - no conditions
   });
@@ -155,8 +151,12 @@ export const useToggleLikeQuote = () => {
       console.error("Error toggling like:", err);
     },
     onSettled: () => {
-      // Refetch to ensure we have the latest data
-      queryClient.invalidateQueries({ queryKey: quoteKeys.all });
+      // Surtout pas d'invalidation de `quoteKeys.all` : sur une liste infinie,
+      // elle relance chaque page chargee - donc tout le flux - pour un seul
+      // coeur tape. La mise a jour optimiste tient deja l'affichage, et le
+      // rollback couvre l'echec. Seule la liste des favoris, qui change
+      // vraiment de contenu, est invalidee.
+      queryClient.invalidateQueries({ queryKey: userKeys.likedQuotes() });
     },
   });
 };

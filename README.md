@@ -249,6 +249,8 @@ NestJS backend with modular architecture.
 
 - `POST /auth/login` - Authentication
 - `POST /auth/register` - Registration
+- `POST /auth/forgot-password` - Send a 6-digit reset code by email (`{ email, locale? }`)
+- `POST /auth/reset-password` - Set a new password (`{ email, code, newPassword }`)
 - `GET /quotes` - List quotes (pagination)
 - `GET /quotes/:id` - Quote by ID
 - `POST /quotes/:id/like` - Like a quote
@@ -350,6 +352,32 @@ If you encounter `Invalid admin password` error during manual subscription assig
    ```
 
 **Note**: Manual subscription assignment requires admin password to secure this sensitive action.
+
+### Password Reset Emails Never Arrive
+
+**Cause**: Render blocks the SMTP ports (25, 465, 587) on free instances. The
+symptom is not an error but a two-minute connection timeout per message —
+nothing looks misconfigured, the mail simply never leaves.
+
+**Solution**: send over Brevo's HTTP API (port 443), which no host blocks. Set
+on the API service:
+
+```
+BREVO_API_KEY=xkeysib-...
+MAIL_FROM=Focus <noreply@your-domain.com>
+```
+
+`MAIL_FROM` must be an address **verified** in Brevo (Senders & IP), otherwise
+the API answers `sender not valid`. SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
+`SMTP_PASSWORD`) remains supported as a fallback wherever the ports are open,
+and is ignored as soon as `BREVO_API_KEY` is present.
+
+**Check which path is active**: `GET /health` reports `services.mail` with
+`provider: "brevo" | "smtp" | "none"`. With `none`, the API does not crash — the
+reset code is written to the logs and nothing is sent.
+
+**Rate limit**: 3 reset requests per email per 15 minutes; beyond that the
+endpoint answers `429`.
 
 ### Keep-Alive Polling
 
