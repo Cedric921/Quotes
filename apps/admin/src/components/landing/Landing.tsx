@@ -85,10 +85,13 @@ function StoreButton({
  * The public page for the app.
  *
  * It borrows the app's own surfaces — ink for the hero, brushed silver for
- * the rest, graphite and gradient pills — so someone who has seen the app
+ * the rest, white and gradient pills — so someone who has seen the app
  * recognises it, and someone who has not sees what they would get. The
  * phones are real captures, not mock-ups.
  */
+// The profile and paywall captures were retaken for the sky accent under new
+// names: a browser or a CDN that cached the pink ones would otherwise keep
+// serving them. Rename again when the captures change.
 export function Landing({ locale, t }: { locale: Locale; t: Landing }) {
   const legal = (page: "terms" | "privacy") => `/${page}?lang=${locale}`;
   const other = locale === "fr" ? "en" : "fr";
@@ -147,13 +150,13 @@ export function Landing({ locale, t }: { locale: Locale; t: Landing }) {
 
           <div className="relative mx-auto flex h-[520px] w-full max-w-[520px] items-end justify-center md:h-[600px]">
             <div className="phone float absolute bottom-6 left-0 hidden md:block" style={{ "--tilt": "-8deg", animationDelay: "-1.5s" } as React.CSSProperties}>
-              <Image src="/landing/screen-profile.jpg" alt="" width={660} height={1434} />
+              <Image src="/landing/screen-profile-v2.jpg" alt="" width={660} height={1434} />
             </div>
             <div className="phone float relative z-10 !w-[260px]" style={{ "--tilt": "0deg" } as React.CSSProperties}>
               <Image src="/landing/screen-feed.jpg" alt="" width={660} height={1434} priority />
             </div>
             <div className="phone float absolute bottom-6 right-0 hidden md:block" style={{ "--tilt": "8deg", animationDelay: "-3s" } as React.CSSProperties}>
-              <Image src="/landing/screen-paywall.jpg" alt="" width={660} height={1434} />
+              <Image src="/landing/screen-paywall-v2.jpg" alt="" width={660} height={1434} />
             </div>
           </div>
         </section>
@@ -203,7 +206,7 @@ export function Landing({ locale, t }: { locale: Locale; t: Landing }) {
           </div>
           <div className="card metal flex items-center justify-center p-8 md:p-12">
             <div className="phone !w-[240px]" style={{ boxShadow: "0 24px 48px rgba(21,28,39,0.25)" }}>
-              <Image src="/landing/screen-profile.jpg" alt="" width={660} height={1434} />
+              <Image src="/landing/screen-profile-v2.jpg" alt="" width={660} height={1434} />
             </div>
           </div>
         </div>
@@ -233,7 +236,7 @@ export function Landing({ locale, t }: { locale: Locale; t: Landing }) {
           </div>
           <div className="flex justify-center">
             <div className="phone" style={{ "--tilt": "4deg", transform: "rotate(4deg)" } as React.CSSProperties}>
-              <Image src="/landing/screen-paywall.jpg" alt="" width={660} height={1434} />
+              <Image src="/landing/screen-paywall-v2.jpg" alt="" width={660} height={1434} />
             </div>
           </div>
         </div>

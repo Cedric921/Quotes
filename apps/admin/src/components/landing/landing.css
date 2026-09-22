@@ -13,9 +13,11 @@
   --silver-50: #f5f7fa;
   --silver-100: #edf0f4;
   --silver-300: #d3dae3;
-  --violet: #8b7fe8;
-  --blush: #f2a8b4;
-  --accent: linear-gradient(135deg, var(--violet), var(--blush));
+  /* The accent: sky blue into indigo, light to dark in the reading direction,
+     the same pair the app draws its banners, toggles and trial rail with. */
+  --sky: #87ceeb;
+  --indigo: #5e5ce6;
+  --accent: linear-gradient(135deg, var(--sky), var(--indigo));
 
   color: var(--ink-900);
   background: var(--silver-100);
@@ -31,18 +33,36 @@
   color: transparent;
 }
 
-/* The brushed metal the app draws under its screens, as a CSS gradient. */
+/*
+ * The brushed aluminium the app draws under its screens, as CSS: light
+ * pooling in a few places, darker bands between, a fine diagonal grain over
+ * it all. Mixed, not lit from one side — the app's ground is a texture with
+ * the same four reflections.
+ */
 .landing .metal {
   background-color: var(--silver-100);
   background-image:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 45%, rgba(21, 28, 39, 0.05)),
-    repeating-linear-gradient(118deg, rgba(21, 28, 39, 0.035) 0 1px, transparent 1px 3px);
+    radial-gradient(45% 40% at 12% 6%, rgba(255, 255, 255, 0.9), transparent 70%),
+    radial-gradient(40% 35% at 98% 40%, rgba(255, 255, 255, 0.85), transparent 70%),
+    radial-gradient(35% 30% at 5% 66%, rgba(255, 255, 255, 0.6), transparent 70%),
+    radial-gradient(45% 40% at 78% 97%, rgba(255, 255, 255, 0.9), transparent 70%),
+    radial-gradient(45% 40% at 55% 26%, rgba(211, 218, 227, 0.75), transparent 70%),
+    radial-gradient(50% 45% at 35% 50%, rgba(211, 218, 227, 0.8), transparent 70%),
+    radial-gradient(30% 30% at 92% 72%, rgba(211, 218, 227, 0.6), transparent 70%),
+    repeating-linear-gradient(118deg, rgba(21, 28, 39, 0.03) 0 1px, transparent 1px 3px);
 }
 
+/* A card is a lighter cut of the same sheet, lifted off it. */
 .landing .card {
-  background: var(--silver-50);
   border-radius: 24px;
-  box-shadow: 0 8px 16px rgba(21, 28, 39, 0.08), 0 1px 2px rgba(21, 28, 39, 0.06);
+  background-color: #fff;
+  background-image:
+    radial-gradient(40% 55% at 10% 20%, rgba(255, 255, 255, 1), transparent 70%),
+    radial-gradient(40% 55% at 85% 85%, rgba(255, 255, 255, 0.9), transparent 70%),
+    radial-gradient(35% 50% at 50% 55%, rgba(211, 218, 227, 0.55), transparent 70%),
+    linear-gradient(180deg, #fff, var(--silver-100)),
+    repeating-linear-gradient(118deg, rgba(21, 28, 39, 0.025) 0 1px, transparent 1px 3px);
+  box-shadow: 0 8px 16px rgba(21, 28, 39, 0.1), 0 1px 2px rgba(21, 28, 39, 0.06);
 }
 
 .landing .pill {
@@ -59,20 +79,16 @@
 .landing .pill:hover { transform: translateY(-1px); }
 .landing .pill:active { transform: translateY(0); opacity: 0.9; }
 
-.landing .pill-graphite {
-  color: #fff;
-  background: linear-gradient(180deg, #3a4655, var(--ink-900));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 14px rgba(21, 28, 39, 0.28);
+/* The app's primary pill: white with ink type, a faint ink hairline, lifted. */
+.landing .pill-ghost {
+  color: var(--ink-900);
+  background: linear-gradient(180deg, #fff, var(--silver-50));
+  box-shadow: inset 0 0 0 1px rgba(21, 28, 39, 0.08), 0 8px 14px rgba(21, 28, 39, 0.22);
 }
 .landing .pill-accent {
   color: var(--ink-900);
   background: var(--accent);
-  box-shadow: 0 8px 14px rgba(139, 127, 232, 0.35);
-}
-.landing .pill-ghost {
-  color: var(--ink-900);
-  background: var(--silver-50);
-  box-shadow: 0 6px 12px rgba(21, 28, 39, 0.12);
+  box-shadow: 0 8px 14px rgba(94, 92, 230, 0.35);
 }
 
 /* The hero's ground: ink with two soft accent glows, like the app's photo feed at dusk. */
@@ -80,8 +96,8 @@
   position: relative;
   overflow: hidden;
   color: #fff;
-  background: radial-gradient(60% 50% at 20% 10%, rgba(139, 127, 232, 0.35), transparent 60%),
-    radial-gradient(50% 45% at 85% 80%, rgba(242, 168, 180, 0.28), transparent 60%),
+  background: radial-gradient(60% 50% at 20% 10%, rgba(135, 206, 235, 0.32), transparent 60%),
+    radial-gradient(50% 45% at 85% 80%, rgba(94, 92, 230, 0.38), transparent 60%),
     linear-gradient(180deg, var(--ink-800), var(--ink-700));
 }
 .landing .hero::after {
@@ -151,7 +167,7 @@
   display: grid;
   place-items: center;
   color: var(--ink-900);
-  background: linear-gradient(135deg, rgba(139, 127, 232, 0.22), rgba(242, 168, 180, 0.22));
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.35), rgba(94, 92, 230, 0.25));
 }
 
 .landing .step-index {
@@ -169,5 +185,5 @@
 .landing .rail {
   width: 6px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--violet), var(--blush));
+  background: linear-gradient(180deg, var(--sky), var(--indigo));
 }
