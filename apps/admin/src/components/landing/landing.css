@@ -1,0 +1,173 @@
+/*
+ * The landing's own palette: the app's ink and silver, and its accent.
+ * Kept out of the admin's oklch theme on purpose — the dashboard is a tool,
+ * this is the product.
+ */
+.landing {
+  --ink-900: #151c27;
+  --ink-800: #1a222e;
+  --ink-700: #232d3b;
+  --ink-500: #343f4f;
+  --ink-300: #5a6579;
+  --slate-200: #b5c2d6;
+  --silver-50: #f5f7fa;
+  --silver-100: #edf0f4;
+  --silver-300: #d3dae3;
+  --violet: #8b7fe8;
+  --blush: #f2a8b4;
+  --accent: linear-gradient(135deg, var(--violet), var(--blush));
+
+  color: var(--ink-900);
+  background: var(--silver-100);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+.landing .accent-text {
+  background: var(--accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* The brushed metal the app draws under its screens, as a CSS gradient. */
+.landing .metal {
+  background-color: var(--silver-100);
+  background-image:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 45%, rgba(21, 28, 39, 0.05)),
+    repeating-linear-gradient(118deg, rgba(21, 28, 39, 0.035) 0 1px, transparent 1px 3px);
+}
+
+.landing .card {
+  background: var(--silver-50);
+  border-radius: 24px;
+  box-shadow: 0 8px 16px rgba(21, 28, 39, 0.08), 0 1px 2px rgba(21, 28, 39, 0.06);
+}
+
+.landing .pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3.25rem;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+.landing .pill:hover { transform: translateY(-1px); }
+.landing .pill:active { transform: translateY(0); opacity: 0.9; }
+
+.landing .pill-graphite {
+  color: #fff;
+  background: linear-gradient(180deg, #3a4655, var(--ink-900));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 14px rgba(21, 28, 39, 0.28);
+}
+.landing .pill-accent {
+  color: var(--ink-900);
+  background: var(--accent);
+  box-shadow: 0 8px 14px rgba(139, 127, 232, 0.35);
+}
+.landing .pill-ghost {
+  color: var(--ink-900);
+  background: var(--silver-50);
+  box-shadow: 0 6px 12px rgba(21, 28, 39, 0.12);
+}
+
+/* The hero's ground: ink with two soft accent glows, like the app's photo feed at dusk. */
+.landing .hero {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background: radial-gradient(60% 50% at 20% 10%, rgba(139, 127, 232, 0.35), transparent 60%),
+    radial-gradient(50% 45% at 85% 80%, rgba(242, 168, 180, 0.28), transparent 60%),
+    linear-gradient(180deg, var(--ink-800), var(--ink-700));
+}
+.landing .hero::after {
+  /* the grain, again, at night */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(118deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+}
+
+/* Phones: a frame around a real capture, three of them fanned out. */
+.landing .phone {
+  position: relative;
+  width: 232px;
+  aspect-ratio: 1320 / 2868;
+  border-radius: 40px;
+  padding: 8px;
+  background: linear-gradient(160deg, #3a4655, #0f141c);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.landing .phone > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 32px;
+  display: block;
+}
+.landing .phone::before {
+  /* the island */
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  width: 72px;
+  height: 20px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #000;
+  z-index: 1;
+}
+
+@keyframes landing-float {
+  from { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  to { transform: translateY(-14px) rotate(var(--tilt, 0deg)); }
+}
+.landing .float {
+  animation: landing-float 4.5s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing .float { animation: none; }
+}
+
+@keyframes landing-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.landing .rise { animation: landing-rise 700ms ease-out both; }
+.landing .rise-2 { animation-delay: 120ms; }
+.landing .rise-3 { animation-delay: 240ms; }
+.landing .rise-4 { animation-delay: 360ms; }
+
+.landing .icon-tile {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-900);
+  background: linear-gradient(135deg, rgba(139, 127, 232, 0.22), rgba(242, 168, 180, 0.22));
+}
+
+.landing .step-index {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, #3a4655, var(--ink-900));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.landing .rail {
+  width: 6px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--violet), var(--blush));
+}

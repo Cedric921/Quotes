@@ -56,8 +56,11 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-  async forgotPassword(@Body('email') email: string) {
-    return this.authService.forgotPassword(email);
+  async forgotPassword(
+    @Body('email') email: string,
+    @Body('locale') locale?: string,
+  ) {
+    return this.authService.forgotPassword(email, locale);
   }
 
   @Post('reset-password')

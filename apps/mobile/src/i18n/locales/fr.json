@@ -17,7 +17,19 @@
     "send": "Envoyer",
     "success": "Succès",
     "required": "Requis",
-    "reset": "Réinitialiser"
+    "reset": "Réinitialiser",
+    "skip": "Ignorer",
+    "continue": "Continuer",
+    "done": "Terminé",
+    "copy": "Copier",
+    "now": "Maintenant",
+    "andMore": ", et {{count}} de plus",
+    "back": "Retour",
+    "share": "Partager",
+    "decrease": "Diminuer",
+    "increase": "Augmenter",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -61,7 +73,12 @@
     "resetPasswordSuccess": "Mot de passe réinitialisé",
     "resetPasswordSuccessMessage": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
     "invalidResetCode": "Code invalide ou expiré",
-    "backToLogin": "Retour à la connexion"
+    "tooManyResetRequests": "Trop de demandes. Réessayez dans quelques minutes.",
+    "backToLogin": "Retour à la connexion",
+    "showPassword": "Afficher le mot de passe",
+    "signupSubtitle": "Votre compte garde vos citations aimées et votre abonnement, sur tous vos appareils.",
+    "sessionExpired": "Session expirée",
+    "sessionExpiredMessage": "Reconnectez-vous depuis Paramètres › Compte."
   },
   "home": {
     "title": "Accueil",
@@ -81,11 +98,11 @@
   },
   "settings": {
     "title": "Paramètres",
-    "account": "COMPTE",
+    "account": "Mon compte",
     "profile": "Profil",
     "subscription": "Abonnement",
     "settings": "PARAMÈTRES",
-    "language": "Langues",
+    "language": "Langue",
     "theme": "Thème",
     "mode": "Mode",
     "selectMode": "Sélectionner un mode",
@@ -96,7 +113,7 @@
     "termsOfService": "Conditions d'utilisation",
     "contactUs": "Contactez-nous",
     "aboutUs": "Suivez-nous",
-    "version": "Version",
+    "version": "Focus app - version {{version}}",
     "logout": "Déconnexion",
     "logoutConfirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
     "selectTheme": "Sélectionner un thème",
@@ -129,7 +146,81 @@
     "deleteMyAccount": "Supprimer mon compte",
     "accountDeleted": "Compte supprimé",
     "accountDeletedMessage": "Votre compte a été supprimé avec succès.",
-    "deleteAccountError": "Une erreur s'est produite lors de la suppression de votre compte. Veuillez réessayer."
+    "deleteAccountError": "Une erreur s'est produite lors de la suppression de votre compte. Veuillez réessayer.",
+    "section": {
+      "premium": "Premium",
+      "aboutYou": "À propos de vous",
+      "personalise": "Personnalisez-le",
+      "account": "Compte",
+      "support": "Nous soutenir",
+      "help": "Aide",
+      "follow": "Suivez-nous",
+      "other": "Autre"
+    },
+    "manageSubscription": "Gérer l'abonnement",
+    "name": "Nom",
+    "gender": "Identité de genre",
+    "age": "Âge",
+    "relationship": "Situation amoureuse",
+    "beliefs": "Croyances",
+    "contentPreferences": "Préférences contenu",
+    "mutedContent": "Contenu en sourdine",
+    "sound": "Son",
+    "signIn": "Se connecter",
+    "shareApp": "Partager Focus",
+    "moreApps": "Plus d'applications",
+    "review": "Laissez-nous un avis",
+    "help": "Aide",
+    "privacy": "Confidentialité",
+    "terms": "Conditions générales",
+    "analytics": "Marketing et analyses",
+    "userId": "User ID : {{id}}",
+    "social": {
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "pinterest": "Pinterest",
+      "x": "X (anciennement Twitter)"
+    },
+    "intro": {
+      "sound": "Un léger retour sonore quand vous aimez ou partagez une citation.",
+      "contentPreferences": "Choisissez les sujets que vous voulez voir plus souvent dans votre fil.",
+      "mutedContent": "Les sujets mis en sourdine n'apparaîtront plus du tout."
+    },
+    "options": {
+      "gender": {
+        "woman": "Femme",
+        "man": "Homme",
+        "non_binary": "Non-binaire",
+        "other": "Autre",
+        "prefer_not": "Je préfère ne pas répondre"
+      },
+      "relationship": {
+        "single": "Célibataire",
+        "dating": "En fréquentation",
+        "relationship": "En couple",
+        "married": "Marié·e",
+        "complicated": "C'est compliqué",
+        "prefer_not": "Je préfère ne pas répondre"
+      },
+      "sound": {
+        "on": "Activé",
+        "off": "Désactivé"
+      },
+      "language": {
+        "system": "Langue du système",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "nl": "Nederlands",
+        "ru": "Русский",
+        "tr": "Türkçe",
+        "ar": "العربية",
+        "zh": "中文"
+      }
+    }
   },
   "profile": {
     "title": "Profil",
@@ -149,7 +240,29 @@
     "daysActive": "jours actifs",
     "totalSpent": "Total dépensé",
     "subscription": "Abonnement",
-    "paymentHistory": "Historique des paiements"
+    "paymentHistory": "Historique des paiements",
+    "customise": "Personnalisez l'appli",
+    "unlock": {
+      "title": "Tout débloquer",
+      "subtitle": "Toutes les catégories, citations, et thèmes, sans publicité !"
+    },
+    "streak": {
+      "title": "Votre série",
+      "share": "Partager la série",
+      "options": "Options de série"
+    },
+    "tile": {
+      "topics": "Sujets suivis",
+      "wallpapers": "Fonds d'écran",
+      "reminders": "Rappels",
+      "homeWidgets": "Widgets écran d'accueil",
+      "lockWidgets": "Widgets verrouillage",
+      "appIcon": "Icône de l'application",
+      "alarm": "Alarme",
+      "watch": "Watch",
+      "bundle": "Lot développement",
+      "bundleSubtitle": "La boîte à outils complète pour le bien-être et le développement mental"
+    }
   },
   "favorites": {
     "title": "Mes favoris",
@@ -254,7 +367,17 @@
     "year": "an",
     "restoreSuccess": "Achats restaurés",
     "noSubscription": "Aucun abonnement actif",
-    "noPurchasesToRestore": "Aucun achat précédent à restaurer"
+    "noPurchasesToRestore": "Aucun achat précédent à restaurer",
+    "manageInStore": "Gérer sur le store",
+    "noPayments": "Aucun paiement pour le moment",
+    "promo": {
+      "title": "Code promo",
+      "placeholder": "Saisissez votre code",
+      "apply": "Appliquer",
+      "optional": "Code promo (facultatif)",
+      "applied": "Code appliqué",
+      "failed": "Ce code n'a pas pu être appliqué"
+    }
   },
   "notifications": {
     "title": "Notifications",
@@ -311,7 +434,15 @@
     "testNotificationSent": "Notification test envoyée",
     "checkYourDevice": "Vérifiez votre appareil pour la notification",
     "upgradeForMore": "Passez à Premium pour plus de notifications",
-    "freeUserLimit": "Les utilisateurs gratuits peuvent avoir 3 notifications par jour"
+    "freeUserLimit": "Les comptes gratuits reçoivent jusqu'à 10 rappels par jour",
+    "daily": {
+      "title": "Focus",
+      "body": "Votre citation du moment vous attend."
+    },
+    "test": {
+      "title": "🔔 Notification de test",
+      "body": "Vos notifications fonctionnent parfaitement."
+    }
   },
   "widget": {
     "title": "Widget Focus",
@@ -332,7 +463,10 @@
     "completeProfile": "Complétez votre profil",
     "createAccount": "Créer un compte",
     "createAccountSubtitle": "Pour continuer vers le paiement",
-    "name": "Nom complet",
+    "name": {
+      "title": "Comment souhaitez-vous qu'on vous appelle ?",
+      "placeholder": "Votre prénom"
+    },
     "email": "Adresse email",
     "password": "Mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
@@ -359,6 +493,279 @@
       "passwordRequired": "Le mot de passe est requis",
       "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
       "passwordMismatch": "Les mots de passe ne correspondent pas"
+    },
+    "intro": {
+      "hero": "Motivez-vous tout au long de la journée",
+      "personalise": "Personnalisez l'application pour améliorer votre expérience",
+      "goals": "Personnalisez l'application en fonction de vos objectifs",
+      "quiz2": "Répondez à quelques questions pour obtenir des citations personnalisées",
+      "heroSubtitle": "L'inspiration pour penser positivement, rester cohérent et se concentrer sur son évolution"
+    },
+    "manifesto": {
+      "firstThing": "La première chose que vous voyez lorsque vous regardez votre téléphone peut transformer toute votre journée",
+      "threeDays": "Nous offrons trois jours gratuits pour que chacun puisse changer de vie"
+    },
+    "goals": {
+      "title": "Quels sont vos objectifs à l'heure actuelle ?",
+      "placeholder": "Je souhaite…",
+      "save": "Enregistrer objectifs"
+    },
+    "topics": {
+      "title": "Quels sont les sujets qui vous intéressent ?",
+      "cta": "Poursuivre"
+    },
+    "reminders": {
+      "title": "Recevez des citations tout au long de la journée",
+      "subtitle": "De petites doses de motivation peuvent faire une grande différence",
+      "sample": "Un jour, vous serez là où vous avez toujours voulu être.",
+      "howMany": "Combien",
+      "startAt": "Commencer à",
+      "endAt": "Finir à",
+      "cta": "Autoriser et enregistrer",
+      "freeLimit": "Jusqu'à {{count}} rappels par jour avec le compte gratuit"
+    },
+    "streak": {
+      "title": "Restez motivé grâce à une routine quotidienne cohérente",
+      "subtitle": "Revenez chaque jour pour faire grandir votre série"
+    },
+    "plan": {
+      "title": "Votre plan personnalisé est prêt",
+      "subtitle": "Profitez-en gratuitement avec un essai de 3 jours",
+      "goals": "Ce que vous souhaitez accomplir",
+      "interests": "Centres d'intérêt",
+      "reminders": "Vos rappels",
+      "remindersValue": "{{count}} par jour, de {{from}} à {{to}}"
+    },
+    "appIcon": {
+      "title": "Quelle icône aimez-vous le plus ?"
+    },
+    "bundle": {
+      "title": "Découvrez le pack « Essentiels pour la croissance personnelle »",
+      "subtitle": "Investissez en vous : énorme réduction en vous abonnant à nos six applications",
+      "getBundle": "Obtenez le lot"
+    },
+    "personalQuote": {
+      "line": "Vous êtes exactement à l'endroit où vous êtes censé être, {{name}}."
+    },
+    "widget": {
+      "title": "Ajoutez un widget gratuit à votre écran d'accueil",
+      "subtitle": "Sur l'écran d'accueil, appuyez longuement sur un espace vide, puis appuyez sur Modifier",
+      "sample": "Vous êtes plus fort que vous ne le pensez.",
+      "install": "Installer le widget",
+      "later": "Me rappeler plus tard"
+    },
+    "welcome": {
+      "title": "Bienvenue dans Focus",
+      "swipe": "Balayez vers le haut"
+    },
+    "q": {
+      "source": {
+        "title": "Comment avez-vous entendu parler de Focus ?",
+        "opt": {
+          "tiktok": "TikTok",
+          "instagram": "Instagram",
+          "facebook": "Facebook",
+          "friend": "Un ami",
+          "appstore": "App Store",
+          "search": "Recherche web",
+          "other": "Autre"
+        }
+      },
+      "age": {
+        "title": "Quel âge avez-vous ?",
+        "opt": {
+          "u18": "Moins de 18 ans",
+          "18_24": "18 à 24 ans",
+          "25_34": "25 à 34 ans",
+          "35_44": "35 à 44 ans",
+          "45_54": "45 à 54 ans",
+          "55p": "55 ans et plus"
+        }
+      },
+      "faith": {
+        "title": "Diriez-vous que vous êtes une personne croyante ?",
+        "opt": {
+          "yes": "Oui",
+          "somewhat": "Un peu",
+          "no": "Non",
+          "prefer_not": "Je préfère ne pas répondre"
+        }
+      },
+      "beliefs": {
+        "title": "Quelles sont vos convictions ?",
+        "opt": {
+          "christian": "Christianisme",
+          "muslim": "Islam",
+          "jewish": "Judaïsme",
+          "hindu": "Hindouisme",
+          "buddhist": "Bouddhisme",
+          "spiritual": "Spirituel sans religion",
+          "none": "Aucune",
+          "other": "Autre"
+        }
+      },
+      "zodiac": {
+        "title": "Quel est votre signe astrologique ?",
+        "opt": {
+          "aries": "Bélier",
+          "taurus": "Taureau",
+          "gemini": "Gémeaux",
+          "cancer": "Cancer",
+          "leo": "Lion",
+          "virgo": "Vierge",
+          "libra": "Balance",
+          "scorpio": "Scorpion",
+          "sagittarius": "Sagittaire",
+          "capricorn": "Capricorne",
+          "aquarius": "Verseau",
+          "pisces": "Poissons"
+        }
+      },
+      "motivationSources": {
+        "title": "Quelles sont vos principales sources de motivation ?",
+        "opt": {
+          "learning": "Apprendre de nouvelles choses",
+          "people": "Les gens autour de moi",
+          "progress": "Voir mes progrès",
+          "challenge": "Relever un défi",
+          "recognition": "La reconnaissance",
+          "other": "Autre"
+        }
+      },
+      "consistency": {
+        "title": "Qu'est-ce qui vous aide à rester régulier ?",
+        "opt": {
+          "routine": "Une routine",
+          "reminders": "Des rappels",
+          "accountability": "Rendre des comptes",
+          "small_steps": "De petites étapes",
+          "other": "Autre"
+        }
+      },
+      "whenUnmotivated": {
+        "title": "Que faites-vous lorsque vous manquez de motivation ?",
+        "opt": {
+          "rest": "Je me repose",
+          "music": "J'écoute de la musique",
+          "talk": "J'en parle à quelqu'un",
+          "push_through": "Je m'accroche",
+          "avoid": "J'évite la tâche"
+        }
+      },
+      "dailyHabit": {
+        "title": "Quand souhaitez-vous prendre ce moment pour vous ?",
+        "opt": {
+          "morning": "Le matin",
+          "commute": "Dans les transports",
+          "break": "Pendant une pause",
+          "evening": "En soirée",
+          "before_sleep": "Avant de dormir"
+        }
+      },
+      "quoteStyle": {
+        "title": "Quel genre de citations vous inspire le plus ?",
+        "opt": {
+          "tough_love": "Amour vache",
+          "admired_people": "Venant de personne que j'admire",
+          "short": "Courte et concise",
+          "thought_provoking": "Sage et poussant à la réflexion",
+          "spiritual": "Spirituelle"
+        }
+      },
+      "whenItLands": {
+        "title": "Que faites-vous lorsqu'une citation vous parle vraiment ?",
+        "opt": {
+          "write": "Je l'écris",
+          "save": "Je la garde pour plus tard",
+          "share": "Je la partage",
+          "send": "Je l'envoie à quelqu'un",
+          "download": "Je la télécharge dans mes photos",
+          "wallpaper": "Je la définis comme fond d'écran"
+        }
+      },
+      "mentalHealth": {
+        "title": "Comment améliorez-vous votre santé mentale ?",
+        "opt": {
+          "meditation": "Méditation",
+          "support": "Soutien d'autrui",
+          "exercise": "Exercice et alimentation",
+          "therapy": "Traitement thérapeutique",
+          "journal": "Journal",
+          "nature": "Temps dans la nature"
+        }
+      },
+      "thoughtsShapeReality": {
+        "title": "Croyez-vous que les pensées contribuent à façonner votre réalité ?",
+        "opt": {
+          "seen_it": "Oui, j'ai vu cela se produire",
+          "open": "Je suis ouvert·e à cette idée",
+          "not_really": "Pas vraiment"
+        }
+      },
+      "positiveThinking": {
+        "title": "Savez-vous que la pensée positive reprogramme votre cerveau ?",
+        "opt": {
+          "believe": "Oui, j'y crois",
+          "heard": "J'en ai entendu parler",
+          "tell_me_more": "Je ne savais pas, dites m'en plus",
+          "sceptical": "Je suis sceptique, mais ouvert·e"
+        }
+      },
+      "mood": {
+        "title": "Comment vous sentez-vous ces derniers temps, {{name}} ?",
+        "opt": {
+          "excellent": "Excellent",
+          "good": "Bien",
+          "neutral": "Neutre",
+          "bad": "Mal",
+          "terrible": "Terrible",
+          "other": "Autre"
+        }
+      },
+      "moodCause": {
+        "title": "Qu'est-ce qui vous fait ressentir de cette façon ?",
+        "opt": {
+          "work": "Emploi",
+          "health": "Santé",
+          "relationship": "Relation",
+          "family": "Famille",
+          "friends": "Amis",
+          "other": "Autre"
+        }
+      },
+      "avoiding": {
+        "title": "Est-ce que vous évitez d'affronter quelque chose ?",
+        "opt": {
+          "heal_past": "Guérir de mon passé",
+          "set_goals": "Fixer objectifs pour façonner l'avenir",
+          "transform_relationships": "Transformer mes relations",
+          "career": "Faire progresser travail et carrière",
+          "finances": "Améliorer ma situation financière",
+          "other": "Autre"
+        }
+      },
+      "improve": {
+        "title": "Que souhaitez-vous améliorer ?",
+        "opt": {
+          "positive_thinking": "Pensée positive",
+          "faith": "Foi et spiritualité",
+          "stress": "Stress et anxiété",
+          "self_esteem": "Estime de soi",
+          "relationships": "Relations",
+          "goals": "Atteindre ses objectifs"
+        }
+      },
+      "achieve": {
+        "title": "Que voulez-vous atteindre avec Focus ?",
+        "opt": {
+          "positive_mindset": "Développer un état d'esprit positif",
+          "confidence": "Améliorer ma confiance en moi",
+          "reach_goals": "Réaliser mes objectifs",
+          "energy": "Renouveler mon énergie et ma concentration",
+          "happiness": "Trouver le bonheur",
+          "presence": "Être plus présent et profiter de la vie"
+        }
+      }
     }
   },
   "contact": {
@@ -385,5 +792,90 @@
     "followUs": "Suivez-nous",
     "noSocials": "Aucun réseau social disponible",
     "version": "Version"
+  },
+  "app": {
+    "name": "Focus"
+  },
+  "feed": {
+    "coachmark": "Commencez : mettez {{count}} citations dans vos favoris pour personnaliser votre fil",
+    "empty": {
+      "title": "Rien à lire avec ces réglages",
+      "body": "Vos sujets suivis et votre contenu en sourdine ne laissent passer aucune citation. Élargissez-les pour retrouver votre fil."
+    }
+  },
+  "theme": {
+    "picker": {
+      "title": "Avec quel thème souhaitez-vous commencer ?"
+    }
+  },
+  "appIcon": {
+    "errorTitle": "Icône non modifiée",
+    "errorBody": "Impossible de changer l'icône de l'application pour le moment."
+  },
+  "streak": {
+    "toast": {
+      "title": "Nouvelle série commencée"
+    },
+    "settings": {
+      "title": "Série",
+      "intro": "Lire des citations quotidiennement peut améliorer considérablement votre état d'esprit",
+      "track": "Suivre la série"
+    }
+  },
+  "paywall": {
+    "open": "Passer à Premium",
+    "title": "Comment fonctionne l'essai gratuit ?",
+    "subtitle": "Aucun frais ne vous sera facturé aujourd'hui",
+    "remindMe": "Rappel avant la fin de l'essai",
+    "cta": "Essayez pour {{price}}",
+    "priceLine": "{{monthly}}/mois, facturé annuellement à {{yearly}}",
+    "restore": "Restaurer",
+    "terms": "Conditions générales",
+    "privacy": "Confidentialité",
+    "step": {
+      "install": {
+        "title": "Installez l'appli",
+        "subtitle": "Paramétrez-la pour vos objectifs"
+      },
+      "today": {
+        "title": "Aujourd'hui - Début de l'essai",
+        "subtitle": "Entièrement gratuit pendant vos {{days}} premiers jours"
+      },
+      "reminder": {
+        "title": "{{date}} - Rappel",
+        "subtitle": "Lorsque votre essai prendra fin"
+      },
+      "member": {
+        "title": "{{date}} - Devenir membre",
+        "subtitle": "Votre essai prendra fin sauf si vous l'annulez"
+      }
+    },
+    "reminderTitle": "Votre essai se termine demain",
+    "reminderBody": "Annulez avant demain si Focus Premium n'est pas pour vous."
+  },
+  "share": {
+    "editTheme": "Modifier thème",
+    "saveImage": "Sauvegarder l'image",
+    "addToCollection": "Ajouter à collection",
+    "copyText": "Copier le texte",
+    "hideWatermark": "Cacher le filigrane"
+  },
+  "widgets": {
+    "openHome": "Ouvrir l'écran d'accueil",
+    "home": {
+      "title": "Widgets écran d'accueil",
+      "intro": "Une citation sur votre écran d'accueil, renouvelée au fil de la journée.",
+      "step1": "Appuyez longuement sur un espace vide de l'écran d'accueil",
+      "step2": "Appuyez sur Modifier, puis sur Ajouter un widget",
+      "step3": "Cherchez Focus et choisissez une taille"
+    },
+    "lock": {
+      "title": "Widgets écran de verrouillage",
+      "intro": "Une citation visible sans même déverrouiller votre téléphone.",
+      "step1": "Appuyez longuement sur l'écran de verrouillage",
+      "step2": "Appuyez sur Personnaliser, puis sur l'écran de verrouillage",
+      "step3": "Appuyez sur la zone sous l'heure",
+      "step4": "Choisissez Focus dans la liste"
+    }
   }
 }

@@ -21,7 +21,7 @@ export default ({ config }) => {
   const easOwner = process.env.EAS_OWNER || "focus-application";
   const appSlug = process.env.APP_SLUG || "focus-quotes-app";
   const appName = process.env.APP_NAME || "Focus";
-  const appVersion = process.env.APP_VERSION || "1.0.6";
+  const appVersion = process.env.APP_VERSION || "1.0.7";
 
   // ===========================================
   // Platform-specific Configuration
@@ -91,7 +91,35 @@ export default ({ config }) => {
       favicon: "./assets/favicon.png",
     },
     plugins: [
+      // Products for StoreKit on local builds — see plugins/withStoreKitConfig.js.
+      "./plugins/withStoreKitConfig",
       "expo-localization",
+      // The alternate icons. `expo-alternate-app-icons` was a dependency
+      // without this entry, so no CFBundleAlternateIcons ever reached the
+      // binary and every switch in the picker failed with "Icon not changed".
+      // The names are the ids in src/services/appIconService.ts; the files
+      // are rendered from the palette by the picker's own recipe.
+      [
+        "expo-alternate-app-icons",
+        [
+          "default",
+          "galaxy",
+          "noir",
+          "marble",
+          "light",
+          "doNotQuit",
+          "pastel",
+          "chaseYourDreams",
+          "holo",
+        ].map((name) => ({
+          name,
+          ios: `./assets/icons/${name}.png`,
+          android: {
+            foregroundImage: `./assets/icons/${name}-foreground.png`,
+            backgroundImage: `./assets/icons/${name}.png`,
+          },
+        })),
+      ],
       [
         "react-native-android-widget",
         {

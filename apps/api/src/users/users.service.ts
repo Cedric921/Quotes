@@ -14,6 +14,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { TrackActivityDto } from './dto/track-activity.dto';
 import { User } from './entities/user.entity';
+import { Quote } from '../quotes/entities/quote.entity';
 import { UserNotificationSettings } from './entities/user-notification-settings.entity';
 import { UserActivity } from './entities/user-activity.entity';
 import * as bcrypt from 'bcrypt';
@@ -63,49 +64,58 @@ export class UsersService {
     return endDate > now;
   }
 
+  /**
+   * L'utilisateur, avec le nombre de ses favoris.
+   *
+   * `relations: ['likedQuotes']` ramenait chaque citation aimee - texte,
+   * auteur, sujet - pour n'en garder que la longueur du tableau. Un compte qui
+   * aime beaucoup payait sa page de profil de plus en plus cher. Ici le compte
+   * est calcule par la base et revient en un entier.
+   */
+  private userWithLikeCount(where: 'id' | 'email', value: string) {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .loadRelationCountAndMap('user.likedQuotesCount', 'user.likedQuotes')
+      .where(`user.${where} = :value`, { value })
+      .getOne();
+  }
+
   async findOne(id: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id },
-      relations: ['likedQuotes'],
-    });
+    const user = await this.userWithLikeCount('id', id);
 
     if (!user) return null;
 
     // Return user with likedQuotesCount and isPremium
-    const { likedQuotes, password, ...userWithoutPassword } = user as any;
+    const { password, ...userWithoutPassword } = user as any;
     return {
       ...userWithoutPassword,
-      likedQuotesCount: likedQuotes?.length || 0,
+      likedQuotesCount: (user as any).likedQuotesCount ?? 0,
       isPremium: this.calculateIsPremium(user),
     };
   }
 
   async findOneByEmail(email: string) {
-    const user = await this.usersRepository.findOne({
-      where: { email },
-      relations: ['likedQuotes'],
-    });
+    const user = await this.userWithLikeCount('email', email);
 
     if (!user) return null;
 
-    // Return user with likedQuotesCount and isPremium
-    const { likedQuotes, ...userWithoutLikedQuotes } = user as any;
+    // Le mot de passe est conserve : `validateUser` le compare juste apres.
     return {
-      ...userWithoutLikedQuotes,
-      likedQuotesCount: likedQuotes?.length || 0,
+      ...(user as any),
+      likedQuotesCount: (user as any).likedQuotesCount ?? 0,
       isPremium: this.calculateIsPremium(user),
     };
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
-    const user: User = await this.findOne(id);
+    const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) return null;
 
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
     Object.assign(user, updateUserDto);
-    return (await this.usersRepository.save(user)) as User;
+    return this.usersRepository.save(user);
   }
 
   remove(id: string) {
@@ -269,18 +279,23 @@ export class UsersService {
 
   // ==================== Liked Quotes (Favorites) ====================
 
+  /**
+   * Les favoris, dans l'ordre ou ils ont ete ajoutes.
+   *
+   * Interroger les citations plutot que l'utilisateur evite de materialiser
+   * l'entite User et sa relation ; c'est la meme jointure, en une requete, et
+   * elle peut etre triee - ce que la version precedente ne faisait pas.
+   */
   async getLikedQuotes(userId: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id: userId },
-      relations: ['likedQuotes', 'likedQuotes.topic'],
-    });
+    const quotes = await this.usersRepository.manager
+      .getRepository(Quote)
+      .createQueryBuilder('quote')
+      .leftJoinAndSelect('quote.topic', 'topic')
+      .innerJoin('quote.likedBy', 'liker', 'liker.id = :userId', { userId })
+      .orderBy('quote.createdAt', 'DESC')
+      .getMany();
 
-    if (!user) return [];
-
-    return user.likedQuotes.map((quote) => ({
-      ...quote,
-      isLiked: true,
-    }));
+    return quotes.map((quote) => ({ ...quote, isLiked: true }));
   }
 
   // ==================== Profile Update ====================

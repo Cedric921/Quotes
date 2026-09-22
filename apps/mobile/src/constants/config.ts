@@ -26,11 +26,13 @@ const getEnvVar = (key: string, fallback: string | number): string => {
 const API_URL = getEnvVar("API_URL", "https://focus-app-1.onrender.com");
 
 // Log configuration on app start (only once)
-console.log("===========================================");
-console.log("📱 FOCUS APP CONFIGURATION");
-console.log("===========================================");
-console.log(`🌐 API URL: ${API_URL}`);
-console.log("===========================================");
+if (__DEV__) {
+  console.log("===========================================");
+  console.log("📱 FOCUS APP CONFIGURATION");
+  console.log("===========================================");
+  console.log(`🌐 API URL: ${API_URL}`);
+  console.log("===========================================");
+}
 
 /**
  * API Configuration

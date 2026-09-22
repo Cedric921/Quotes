@@ -17,7 +17,19 @@
     "send": "Send",
     "success": "Success",
     "required": "Required",
-    "reset": "Reset"
+    "reset": "Reset",
+    "skip": "Skip",
+    "continue": "Continue",
+    "done": "Done",
+    "copy": "Copy",
+    "now": "Now",
+    "andMore": ", and {{count}} more",
+    "back": "Back",
+    "share": "Share",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "search": "Search",
+    "noResults": "No results"
   },
   "permissions": {
     "notificationsTitle": "Notifications",
@@ -61,7 +73,12 @@
     "resetPasswordSuccess": "Password reset",
     "resetPasswordSuccessMessage": "You can now log in with your new password.",
     "invalidResetCode": "Invalid or expired code",
-    "backToLogin": "Back to login"
+    "tooManyResetRequests": "Too many requests. Please try again in a few minutes.",
+    "backToLogin": "Back to login",
+    "showPassword": "Show password",
+    "signupSubtitle": "Your account keeps your liked quotes and your subscription across every device.",
+    "sessionExpired": "Session expired",
+    "sessionExpiredMessage": "Sign in again from Settings › Account."
   },
   "home": {
     "title": "Home",
@@ -81,7 +98,7 @@
   },
   "settings": {
     "title": "Settings",
-    "account": "ACCOUNT",
+    "account": "My account",
     "profile": "Profile",
     "subscription": "Subscription",
     "settings": "SETTINGS",
@@ -96,7 +113,7 @@
     "termsOfService": "Terms of Service",
     "contactUs": "Contact Us",
     "aboutUs": "Follow Us",
-    "version": "Version",
+    "version": "Focus app - version {{version}}",
     "logout": "Logout",
     "logoutConfirmation": "Are you sure you want to logout?",
     "selectTheme": "Select theme",
@@ -129,7 +146,81 @@
     "deleteMyAccount": "Delete My Account",
     "accountDeleted": "Account Deleted",
     "accountDeletedMessage": "Your account has been successfully deleted.",
-    "deleteAccountError": "An error occurred while deleting your account. Please try again."
+    "deleteAccountError": "An error occurred while deleting your account. Please try again.",
+    "section": {
+      "premium": "Premium",
+      "aboutYou": "About you",
+      "personalise": "Personalise it",
+      "account": "Account",
+      "support": "Support us",
+      "help": "Help",
+      "follow": "Follow us",
+      "other": "Other"
+    },
+    "manageSubscription": "Manage subscription",
+    "name": "Name",
+    "gender": "Gender identity",
+    "age": "Age",
+    "relationship": "Relationship status",
+    "beliefs": "Beliefs",
+    "contentPreferences": "Content preferences",
+    "mutedContent": "Muted content",
+    "sound": "Sound",
+    "signIn": "Sign in",
+    "shareApp": "Share Focus",
+    "moreApps": "More apps",
+    "review": "Leave us a review",
+    "help": "Help",
+    "privacy": "Privacy",
+    "terms": "Terms and conditions",
+    "analytics": "Marketing and analytics",
+    "userId": "User ID: {{id}}",
+    "social": {
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "pinterest": "Pinterest",
+      "x": "X (formerly Twitter)"
+    },
+    "intro": {
+      "sound": "A light sound when you like or share a quote.",
+      "contentPreferences": "Pick the topics you want to see more of in your feed.",
+      "mutedContent": "Muted topics won't appear at all."
+    },
+    "options": {
+      "gender": {
+        "woman": "Woman",
+        "man": "Man",
+        "non_binary": "Non-binary",
+        "other": "Other",
+        "prefer_not": "Prefer not to say"
+      },
+      "relationship": {
+        "single": "Single",
+        "dating": "Dating",
+        "relationship": "In a relationship",
+        "married": "Married",
+        "complicated": "It's complicated",
+        "prefer_not": "Prefer not to say"
+      },
+      "sound": {
+        "on": "On",
+        "off": "Off"
+      },
+      "language": {
+        "system": "System language",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "nl": "Nederlands",
+        "ru": "Русский",
+        "tr": "Türkçe",
+        "ar": "العربية",
+        "zh": "中文"
+      }
+    }
   },
   "profile": {
     "title": "Profile",
@@ -149,7 +240,29 @@
     "daysActive": "days active",
     "totalSpent": "Total Spent",
     "subscription": "Subscription",
-    "paymentHistory": "Payment History"
+    "paymentHistory": "Payment History",
+    "customise": "Customise the app",
+    "unlock": {
+      "title": "Unlock everything",
+      "subtitle": "All categories, quotes and themes, with no ads!"
+    },
+    "streak": {
+      "title": "Your streak",
+      "share": "Share streak",
+      "options": "Streak options"
+    },
+    "tile": {
+      "topics": "Followed topics",
+      "wallpapers": "Wallpapers",
+      "reminders": "Reminders",
+      "homeWidgets": "Home screen widgets",
+      "lockWidgets": "Lock screen widgets",
+      "appIcon": "App icon",
+      "alarm": "Alarm",
+      "watch": "Watch",
+      "bundle": "Growth bundle",
+      "bundleSubtitle": "The complete toolkit for wellbeing and personal growth"
+    }
   },
   "favorites": {
     "title": "My Favorites",
@@ -254,7 +367,17 @@
     "year": "year",
     "restoreSuccess": "Purchases restored",
     "noSubscription": "No active subscription",
-    "noPurchasesToRestore": "No previous purchases found to restore"
+    "noPurchasesToRestore": "No previous purchases found to restore",
+    "manageInStore": "Manage in the store",
+    "noPayments": "No payments yet",
+    "promo": {
+      "title": "Promo code",
+      "placeholder": "Enter your code",
+      "apply": "Apply",
+      "optional": "Promo code (optional)",
+      "applied": "Code applied",
+      "failed": "That code could not be applied"
+    }
   },
   "notifications": {
     "title": "Notifications",
@@ -311,7 +434,15 @@
     "testNotificationSent": "Test notification sent",
     "checkYourDevice": "Check your device for the notification",
     "upgradeForMore": "Upgrade for more notifications",
-    "freeUserLimit": "Free users can have 3 notifications per day"
+    "freeUserLimit": "Free accounts get up to 10 reminders a day",
+    "daily": {
+      "title": "Focus",
+      "body": "Your quote of the moment is waiting."
+    },
+    "test": {
+      "title": "🔔 Test notification",
+      "body": "Your notifications are working perfectly."
+    }
   },
   "widget": {
     "title": "Focus Widget",
@@ -332,7 +463,10 @@
     "completeProfile": "Complete your profile",
     "createAccount": "Create an account",
     "createAccountSubtitle": "To continue to payment",
-    "name": "Full name",
+    "name": {
+      "title": "What should we call you?",
+      "placeholder": "Your first name"
+    },
     "email": "Email address",
     "password": "Password",
     "confirmPassword": "Confirm password",
@@ -359,6 +493,279 @@
       "passwordRequired": "Password is required",
       "passwordTooShort": "Password must be at least 6 characters",
       "passwordMismatch": "Passwords do not match"
+    },
+    "intro": {
+      "hero": "Stay motivated throughout the day",
+      "personalise": "Personalise the app to improve your experience",
+      "goals": "Personalise the app around your goals",
+      "quiz2": "Answer a few questions to get personalised quotes",
+      "heroSubtitle": "The inspiration to think positively, stay consistent and focus on your own growth"
+    },
+    "manifesto": {
+      "firstThing": "The first thing you see when you look at your phone can change your whole day",
+      "threeDays": "We give everyone three free days to change their life"
+    },
+    "goals": {
+      "title": "What are your goals right now?",
+      "placeholder": "I want to…",
+      "save": "Save goals"
+    },
+    "topics": {
+      "title": "Which topics interest you?",
+      "cta": "Continue"
+    },
+    "reminders": {
+      "title": "Get quotes throughout the day",
+      "subtitle": "Small doses of motivation can make a big difference",
+      "sample": "One day you'll be where you always wanted to be.",
+      "howMany": "How many",
+      "startAt": "Start at",
+      "endAt": "End at",
+      "cta": "Allow and save",
+      "freeLimit": "Up to {{count}} reminders a day on the free plan"
+    },
+    "streak": {
+      "title": "Stay motivated with a consistent daily routine",
+      "subtitle": "Come back each day to grow your streak"
+    },
+    "plan": {
+      "title": "Your personalised plan is ready",
+      "subtitle": "Enjoy it free with a 3-day trial",
+      "goals": "What you want to achieve",
+      "interests": "Interests",
+      "reminders": "Your reminders",
+      "remindersValue": "{{count}} a day, from {{from}} to {{to}}"
+    },
+    "appIcon": {
+      "title": "Which icon do you like most?"
+    },
+    "bundle": {
+      "title": "Discover the \"Personal Growth Essentials\" bundle",
+      "subtitle": "Invest in yourself: a huge discount when you subscribe to all six of our apps",
+      "getBundle": "Get the bundle"
+    },
+    "personalQuote": {
+      "line": "You are exactly where you are meant to be, {{name}}."
+    },
+    "widget": {
+      "title": "Add a free widget to your home screen",
+      "subtitle": "On the home screen, press and hold an empty space, then tap Edit",
+      "sample": "You are stronger than you think.",
+      "install": "Install the widget",
+      "later": "Remind me later"
+    },
+    "welcome": {
+      "title": "Welcome to Focus",
+      "swipe": "Swipe up"
+    },
+    "q": {
+      "source": {
+        "title": "How did you hear about Focus?",
+        "opt": {
+          "tiktok": "TikTok",
+          "instagram": "Instagram",
+          "facebook": "Facebook",
+          "friend": "A friend",
+          "appstore": "App Store",
+          "search": "Web search",
+          "other": "Other"
+        }
+      },
+      "age": {
+        "title": "How old are you?",
+        "opt": {
+          "u18": "Under 18",
+          "18_24": "18 to 24",
+          "25_34": "25 to 34",
+          "35_44": "35 to 44",
+          "45_54": "45 to 54",
+          "55p": "55 and over"
+        }
+      },
+      "faith": {
+        "title": "Would you say you are a person of faith?",
+        "opt": {
+          "yes": "Yes",
+          "somewhat": "Somewhat",
+          "no": "No",
+          "prefer_not": "Prefer not to say"
+        }
+      },
+      "beliefs": {
+        "title": "What are your beliefs?",
+        "opt": {
+          "christian": "Christianity",
+          "muslim": "Islam",
+          "jewish": "Judaism",
+          "hindu": "Hinduism",
+          "buddhist": "Buddhism",
+          "spiritual": "Spiritual, not religious",
+          "none": "None",
+          "other": "Other"
+        }
+      },
+      "zodiac": {
+        "title": "What is your star sign?",
+        "opt": {
+          "aries": "Aries",
+          "taurus": "Taurus",
+          "gemini": "Gemini",
+          "cancer": "Cancer",
+          "leo": "Leo",
+          "virgo": "Virgo",
+          "libra": "Libra",
+          "scorpio": "Scorpio",
+          "sagittarius": "Sagittarius",
+          "capricorn": "Capricorn",
+          "aquarius": "Aquarius",
+          "pisces": "Pisces"
+        }
+      },
+      "motivationSources": {
+        "title": "What are your main sources of motivation?",
+        "opt": {
+          "learning": "Learning new things",
+          "people": "The people around me",
+          "progress": "Seeing my progress",
+          "challenge": "Taking on a challenge",
+          "recognition": "Recognition",
+          "other": "Other"
+        }
+      },
+      "consistency": {
+        "title": "What helps you stay consistent?",
+        "opt": {
+          "routine": "A routine",
+          "reminders": "Reminders",
+          "accountability": "Accountability",
+          "small_steps": "Small steps",
+          "other": "Other"
+        }
+      },
+      "whenUnmotivated": {
+        "title": "What do you do when you lack motivation?",
+        "opt": {
+          "rest": "I rest",
+          "music": "I listen to music",
+          "talk": "I talk to someone",
+          "push_through": "I push through",
+          "avoid": "I avoid the task"
+        }
+      },
+      "dailyHabit": {
+        "title": "When would you like to take this moment for yourself?",
+        "opt": {
+          "morning": "In the morning",
+          "commute": "On my commute",
+          "break": "During a break",
+          "evening": "In the evening",
+          "before_sleep": "Before sleeping"
+        }
+      },
+      "quoteStyle": {
+        "title": "What kind of quotes inspire you most?",
+        "opt": {
+          "tough_love": "Tough love",
+          "admired_people": "From people I admire",
+          "short": "Short and concise",
+          "thought_provoking": "Wise and thought-provoking",
+          "spiritual": "Spiritual"
+        }
+      },
+      "whenItLands": {
+        "title": "What do you do when a quote really speaks to you?",
+        "opt": {
+          "write": "I write it down",
+          "save": "I save it for later",
+          "share": "I share it",
+          "send": "I send it to someone",
+          "download": "I download it to my photos",
+          "wallpaper": "I set it as my wallpaper"
+        }
+      },
+      "mentalHealth": {
+        "title": "How do you look after your mental health?",
+        "opt": {
+          "meditation": "Meditation",
+          "support": "Support from others",
+          "exercise": "Exercise and nutrition",
+          "therapy": "Therapy",
+          "journal": "Journalling",
+          "nature": "Time in nature"
+        }
+      },
+      "thoughtsShapeReality": {
+        "title": "Do you believe thoughts help shape your reality?",
+        "opt": {
+          "seen_it": "Yes, I've seen it happen",
+          "open": "I'm open to the idea",
+          "not_really": "Not really"
+        }
+      },
+      "positiveThinking": {
+        "title": "Did you know positive thinking rewires your brain?",
+        "opt": {
+          "believe": "Yes, I believe it",
+          "heard": "I've heard about it",
+          "tell_me_more": "I didn't know, tell me more",
+          "sceptical": "Sceptical, but open"
+        }
+      },
+      "mood": {
+        "title": "How have you been feeling lately, {{name}}?",
+        "opt": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "neutral": "Neutral",
+          "bad": "Bad",
+          "terrible": "Terrible",
+          "other": "Other"
+        }
+      },
+      "moodCause": {
+        "title": "What is making you feel this way?",
+        "opt": {
+          "work": "Work",
+          "health": "Health",
+          "relationship": "Relationship",
+          "family": "Family",
+          "friends": "Friends",
+          "other": "Other"
+        }
+      },
+      "avoiding": {
+        "title": "Is there something you're avoiding?",
+        "opt": {
+          "heal_past": "Healing from my past",
+          "set_goals": "Setting goals to shape my future",
+          "transform_relationships": "Transforming my relationships",
+          "career": "Moving my work and career forward",
+          "finances": "Improving my finances",
+          "other": "Other"
+        }
+      },
+      "improve": {
+        "title": "What would you like to improve?",
+        "opt": {
+          "positive_thinking": "Positive thinking",
+          "faith": "Faith and spirituality",
+          "stress": "Stress and anxiety",
+          "self_esteem": "Self-esteem",
+          "relationships": "Relationships",
+          "goals": "Reaching my goals"
+        }
+      },
+      "achieve": {
+        "title": "What do you want to achieve with Focus?",
+        "opt": {
+          "positive_mindset": "Build a positive mindset",
+          "confidence": "Improve my confidence",
+          "reach_goals": "Reach my goals",
+          "energy": "Renew my energy and focus",
+          "happiness": "Find happiness",
+          "presence": "Be more present and enjoy life"
+        }
+      }
     }
   },
   "contact": {
@@ -385,5 +792,90 @@
     "followUs": "Follow Us",
     "noSocials": "No social networks available",
     "version": "Version"
+  },
+  "app": {
+    "name": "Focus"
+  },
+  "feed": {
+    "coachmark": "Get started: favourite {{count}} quotes to personalise your feed",
+    "empty": {
+      "title": "Nothing to read with these settings",
+      "body": "The topics you follow and the ones you muted leave no quote through. Widen them to get your feed back."
+    }
+  },
+  "theme": {
+    "picker": {
+      "title": "Which theme would you like to start with?"
+    }
+  },
+  "appIcon": {
+    "errorTitle": "Icon not changed",
+    "errorBody": "We couldn't change the app icon right now."
+  },
+  "streak": {
+    "toast": {
+      "title": "New streak started"
+    },
+    "settings": {
+      "title": "Streak",
+      "intro": "Reading quotes daily can significantly improve your mindset",
+      "track": "Track streak"
+    }
+  },
+  "paywall": {
+    "open": "Go Premium",
+    "title": "How does the free trial work?",
+    "subtitle": "You won't be charged anything today",
+    "remindMe": "Remind me before the trial ends",
+    "cta": "Try for {{price}}",
+    "priceLine": "{{monthly}}/month, billed annually at {{yearly}}",
+    "restore": "Restore",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "step": {
+      "install": {
+        "title": "Install the app",
+        "subtitle": "Set it up for your goals"
+      },
+      "today": {
+        "title": "Today - Trial starts",
+        "subtitle": "Completely free for your first {{days}} days"
+      },
+      "reminder": {
+        "title": "{{date}} - Reminder",
+        "subtitle": "When your trial is about to end"
+      },
+      "member": {
+        "title": "{{date}} - Become a member",
+        "subtitle": "Your trial ends unless you cancel"
+      }
+    },
+    "reminderTitle": "Your trial ends tomorrow",
+    "reminderBody": "Cancel before tomorrow if Focus Premium isn't for you."
+  },
+  "share": {
+    "editTheme": "Edit theme",
+    "saveImage": "Save image",
+    "addToCollection": "Add to collection",
+    "copyText": "Copy text",
+    "hideWatermark": "Hide watermark"
+  },
+  "widgets": {
+    "openHome": "Open the home screen",
+    "home": {
+      "title": "Home screen widgets",
+      "intro": "A quote on your home screen, refreshed through the day.",
+      "step1": "Press and hold an empty space on your home screen",
+      "step2": "Tap Edit, then Add widget",
+      "step3": "Search for Focus and pick a size"
+    },
+    "lock": {
+      "title": "Lock screen widgets",
+      "intro": "A quote you can see without unlocking your phone.",
+      "step1": "Press and hold the lock screen",
+      "step2": "Tap Customise, then the lock screen",
+      "step3": "Tap the area under the clock",
+      "step4": "Choose Focus from the list"
+    }
   }
 }

@@ -2,10 +2,23 @@ import {
   createNavigationContainerRef,
   CommonActions,
 } from "@react-navigation/native";
-import { RootStackParamList } from "../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/RootNavigator";
 
 // Create a navigation reference that can be used outside of React components
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+
+/**
+ * `navigate` is a union of one overload per route, so a name only known at
+ * runtime never matches any of them. Widening it once here keeps the cast out
+ * of every caller.
+ */
+const navigateTo = (name: keyof RootStackParamList, params?: unknown): void =>
+  (
+    navigationRef.navigate as unknown as (
+      name: keyof RootStackParamList,
+      params?: unknown,
+    ) => void
+  )(name, params);
 
 /**
  * Navigate to a screen from anywhere in the app
@@ -15,7 +28,7 @@ export function navigate<RouteName extends keyof RootStackParamList>(
   params?: RootStackParamList[RouteName],
 ) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name, params as any);
+    navigateTo(name, params);
   } else {
     console.warn("Navigation not ready yet");
   }

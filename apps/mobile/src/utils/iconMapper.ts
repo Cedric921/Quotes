@@ -89,6 +89,46 @@ const LUCIDE_TO_IONICONS_MAP: Record<
 };
 
 /**
+ * Marques des réseaux sociaux.
+ *
+ * Le back-office stocke un nom d'icône libre ("Instagram", "TikTok"), et
+ * certaines de ces marques n'existent pas dans Lucide : on accepte donc aussi
+ * le nom du réseau lui-même. Sans cette table, chaque réseau servi par l'API
+ * s'affichait avec l'icône par défaut (une étiquette).
+ */
+const SOCIAL_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  instagram: "logo-instagram",
+  facebook: "logo-facebook",
+  twitter: "logo-twitter",
+  x: "logo-twitter",
+  tiktok: "logo-tiktok",
+  pinterest: "logo-pinterest",
+  youtube: "logo-youtube",
+  linkedin: "logo-linkedin",
+  snapchat: "logo-snapchat",
+  whatsapp: "logo-whatsapp",
+  discord: "logo-discord",
+  reddit: "logo-reddit",
+  threads: "at-circle-outline",
+};
+
+/**
+ * Icône d'un réseau social, d'après le nom d'icône du back-office ou, à
+ * défaut, le nom du réseau.
+ */
+export function socialIcon(
+  iconName?: string,
+  networkName?: string,
+): keyof typeof Ionicons.glyphMap {
+  for (const candidate of [iconName, networkName]) {
+    if (!candidate) continue;
+    const hit = SOCIAL_ICONS[candidate.trim().toLowerCase()];
+    if (hit) return hit;
+  }
+  return lucideToIonicons(iconName);
+}
+
+/**
  * Convertit un nom d'icône Lucide en nom Ionicons
  * @param lucideName - Le nom de l'icône Lucide (ex: "Flame", "Trophy")
  * @returns Le nom de l'icône Ionicons correspondante

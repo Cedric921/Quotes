@@ -40,17 +40,49 @@ const getCacheKey = (text: string, targetLang: string): string => {
   return `${targetLang}:${textHash}`;
 };
 
-// Load cache from AsyncStorage
+/**
+ * Le cache des traductions, tenu en memoire et recopie sur disque.
+ *
+ * Chaque appel relisait et reparsait le blob complet depuis AsyncStorage, puis
+ * le reecrivait en entier. Sur l'accueil, une dizaine de citations traduisent
+ * en parallele : c'etaient dix lectures et dix ecritures du meme objet, et les
+ * ecritures concurrentes s'ecrasaient les unes les autres - une traduction sur
+ * deux etait reperdue et redemandee au prochain lancement.
+ *
+ * La lecture disque n'a lieu qu'une fois, memoisee par sa propre promesse pour
+ * que des appels simultanes la partagent. L'ecriture est groupee : la rafale de
+ * traductions d'un ecran ne produit qu'une sauvegarde.
+ */
+let memoryCache: TranslationCache | null = null;
+let loadingCache: Promise<TranslationCache> | null = null;
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
 const loadCache = async (): Promise<TranslationCache> => {
-  try {
-    const cached = await AsyncStorage.getItem(TRANSLATION_CACHE_KEY);
-    if (cached) {
-      return JSON.parse(cached);
+  if (memoryCache) return memoryCache;
+  if (loadingCache) return loadingCache;
+
+  loadingCache = (async () => {
+    try {
+      const cached = await AsyncStorage.getItem(TRANSLATION_CACHE_KEY);
+      memoryCache = cached ? JSON.parse(cached) : {};
+    } catch (error) {
+      console.error("Error loading translation cache:", error);
+      memoryCache = {};
+    } finally {
+      loadingCache = null;
     }
-  } catch (error) {
-    console.error("Error loading translation cache:", error);
-  }
-  return {};
+    return memoryCache as TranslationCache;
+  })();
+
+  return loadingCache;
+};
+
+const scheduleSave = (): void => {
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    if (memoryCache) void saveCache(memoryCache);
+  }, 1000);
 };
 
 // Save cache to AsyncStorage
@@ -180,7 +212,7 @@ export const translateText = async (
       translation,
       timestamp: Date.now(),
     };
-    await saveCache(cache);
+    scheduleSave();
     return translation;
   }
 
@@ -217,6 +249,11 @@ export const translateQuote = async (
  */
 export const clearTranslationCache = async (): Promise<void> => {
   try {
+    memoryCache = null;
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
     await AsyncStorage.removeItem(TRANSLATION_CACHE_KEY);
   } catch (error) {
     console.error("Error clearing translation cache:", error);

@@ -88,25 +88,40 @@ export class QuotesService {
 
     const quotes = await queryBuilder.getMany();
 
-    // If userId is provided, check which quotes are liked by this user
-    if (userId) {
-      const user = await this.usersRepository.findOne({
-        where: { id: userId },
-        relations: ['likedQuotes'],
-      });
+    // Les favoris ne sont interroges que pour les citations de cette page.
+    // Charger `likedQuotes` en entier ramenait tout l'historique de likes d'un
+    // utilisateur - potentiellement des milliers de lignes - pour en cocher dix.
+    const likedIds = await this.likedQuoteIds(
+      userId,
+      quotes.map((quote) => quote.id),
+    );
 
-      if (user) {
-        const likedQuoteIds = new Set(
-          user.likedQuotes.map((quote) => quote.id),
-        );
-        return quotes.map((quote) => ({
-          ...quote,
-          isLiked: likedQuoteIds.has(quote.id),
-        }));
-      }
-    }
+    return quotes.map((quote) => ({
+      ...quote,
+      isLiked: likedIds.has(quote.id),
+    }));
+  }
 
-    return quotes.map((quote) => ({ ...quote, isLiked: false }));
+  /**
+   * Parmi ces citations, lesquelles l'utilisateur a-t-il aimees.
+   *
+   * Une seule requete sur la table de jonction, bornee aux identifiants
+   * demandes : le cout ne depend plus du nombre total de likes du compte.
+   */
+  private async likedQuoteIds(
+    userId: string | undefined,
+    quoteIds: string[],
+  ): Promise<Set<string>> {
+    if (!userId || quoteIds.length === 0) return new Set();
+
+    const rows: { id: string }[] = await this.quotesRepository
+      .createQueryBuilder('quote')
+      .select('quote.id', 'id')
+      .innerJoin('quote.likedBy', 'liker', 'liker.id = :userId', { userId })
+      .where('quote.id IN (:...quoteIds)', { quoteIds })
+      .getRawMany();
+
+    return new Set(rows.map((row) => row.id));
   }
 
   async findOne(id: string, userId?: string) {
@@ -119,20 +134,9 @@ export class QuotesService {
       return null;
     }
 
-    // If userId is provided, check if this quote is liked by the user
-    if (userId) {
-      const user = await this.usersRepository.findOne({
-        where: { id: userId },
-        relations: ['likedQuotes'],
-      });
+    const likedIds = await this.likedQuoteIds(userId, [quote.id]);
 
-      if (user) {
-        const isLiked = user.likedQuotes.some((q) => q.id === quote.id);
-        return { ...quote, isLiked };
-      }
-    }
-
-    return { ...quote, isLiked: false };
+    return { ...quote, isLiked: likedIds.has(quote.id) };
   }
 
   async update(id: string, updateQuoteDto: UpdateQuoteDto) {
@@ -153,48 +157,45 @@ export class QuotesService {
     return this.quotesRepository.softDelete(id);
   }
 
+  /**
+   * Aimer une citation, c'est une ligne dans la table de jonction.
+   *
+   * L'ancienne version chargeait l'utilisateur avec la totalite de ses favoris
+   * puis reenregistrait l'entite : TypeORM comparait alors la collection entiere
+   * pour en deduire un unique INSERT. Le cout d'un like grandissait avec le
+   * nombre de likes deja poses.
+   */
   async likeQuote(quoteId: string, userId: string) {
-    const quote = await this.quotesRepository.findOne({
-      where: { id: quoteId },
-    });
-
-    if (!quote) {
+    const quoteExists = await this.quotesRepository.existsBy({ id: quoteId });
+    if (!quoteExists) {
       throw new NotFoundException(`Quote with ID ${quoteId} not found`);
     }
 
-    const user = await this.usersRepository.findOne({
-      where: { id: userId },
-      relations: ['likedQuotes'],
-    });
-
-    if (!user) {
+    const userExists = await this.usersRepository.existsBy({ id: userId });
+    if (!userExists) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    // Check if already liked
-    const alreadyLiked = user.likedQuotes.some((q) => q.id === quoteId);
-
-    if (!alreadyLiked) {
-      user.likedQuotes.push(quote);
-      await this.usersRepository.save(user);
+    const alreadyLiked = await this.likedQuoteIds(userId, [quoteId]);
+    if (alreadyLiked.size === 0) {
+      await this.quotesRepository
+        .createQueryBuilder()
+        .relation(Quote, 'likedBy')
+        .of(quoteId)
+        .add(userId);
     }
 
     return { message: 'Quote liked successfully', isLiked: true };
   }
 
   async unlikeQuote(quoteId: string, userId: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id: userId },
-      relations: ['likedQuotes'],
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
-    // Remove the quote from likedQuotes
-    user.likedQuotes = user.likedQuotes.filter((q) => q.id !== quoteId);
-    await this.usersRepository.save(user);
+    // `remove` est idempotent : retirer un like absent ne supprime aucune
+    // ligne et n'a pas besoin d'etre distingue du cas nominal.
+    await this.quotesRepository
+      .createQueryBuilder()
+      .relation(Quote, 'likedBy')
+      .of(quoteId)
+      .remove(userId);
 
     return { message: 'Quote unliked successfully', isLiked: false };
   }

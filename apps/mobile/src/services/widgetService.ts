@@ -1,5 +1,9 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  WIDGET_QUOTE_KEY,
+  WIDGET_QUOTES_ARRAY_KEY,
+} from "../constants/appConfig";
 
 // Types
 interface QuoteData {
@@ -9,8 +13,6 @@ interface QuoteData {
 }
 
 // Constants
-const WIDGET_QUOTE_KEY = "@focus_widget_quote";
-const WIDGET_QUOTES_ARRAY_KEY = "@focus_widget_quotes_array";
 const IOS_APP_GROUP = "group.com.mindset.focus.widget";
 const MAX_WIDGET_QUOTES = 30;
 
@@ -19,7 +21,13 @@ const MAX_WIDGET_QUOTES = 30;
  * Manages data sharing between the main app and widgets (iOS/Android)
  */
 class WidgetService {
-  private extensionStorage: typeof ExtensionStorage | null = null;
+  /**
+   * An *instance* of the iOS extension storage — `typeof ExtensionStorage`
+   * would be the class itself, which is what `reloadWidget` is called on.
+   */
+  private extensionStorage: InstanceType<
+    typeof import("@bacons/apple-targets").ExtensionStorage
+  > | null = null;
 
   constructor() {
     this.initializeExtensionStorage();
@@ -119,26 +127,22 @@ class WidgetService {
    */
   private async updateAndroidWidget(quote: QuoteData): Promise<void> {
     try {
-      const { SharedGroupPreferences } =
-        await import("react-native-android-widget");
-
-      // Store quote data
-      await SharedGroupPreferences.setItem(
-        "widgetQuote",
-        JSON.stringify({
-          content: quote.content,
-          author: quote.author,
-          topicName: quote.topicName || null,
-        }),
-        "com.mindset.focus.widget",
+      // The quote is already in AsyncStorage, under the key the widget task
+      // handler reads. There is nothing else to write: the library exports no
+      // shared-preferences bridge, and the handler runs in a JS context that
+      // can read the app's own storage.
+      const { requestWidgetUpdate } = await import(
+        "react-native-android-widget"
+      );
+      const { renderFocusQuoteWidget } = await import(
+        "../widgets/FocusQuoteWidget"
       );
 
-      // Request widget update
-      const { requestWidgetUpdate } =
-        await import("react-native-android-widget");
       await requestWidgetUpdate({
         widgetName: "FocusQuoteWidget",
-        renderWidget: () => null, // Will be handled by native code
+        // `renderWidget` must produce the widget: returning null renders an
+        // empty widget, which is what the home screen showed until now.
+        renderWidget: () => renderFocusQuoteWidget(quote),
         widgetNotFound: () => {
           console.log("[WidgetService] Widget not found on home screen");
         },

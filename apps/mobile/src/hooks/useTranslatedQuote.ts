@@ -27,17 +27,21 @@ export function useTranslatedQuote(quote: Quote): UseTranslatedQuoteResult {
   const autoTranslate = useAppSelector(
     (state) => state.translation.autoTranslate,
   );
-  const translationCache = useAppSelector(
-    (state) => state.translation.translationCache,
-  );
-  const loadingQuotes = useAppSelector(
-    (state) => state.translation.loadingQuotes,
-  );
 
   const currentLang = i18n.language || "en";
   const cacheKey = `${quote.id}:${currentLang}`;
-  const cachedTranslation = translationCache[cacheKey];
-  const isTranslating = loadingQuotes.includes(cacheKey);
+
+  // Chaque carte visible monte ce hook. En selectionnant le dictionnaire
+  // entier, la traduction d'une citation changeait la reference de l'objet et
+  // reaffichait toutes les autres cartes ; sur l'accueil, une dizaine de
+  // rendus complets par traduction recue. Selectionner la seule entree qui
+  // concerne cette citation ramene la comparaison a une chaine.
+  const cachedTranslation = useAppSelector(
+    (state) => state.translation.translationCache[cacheKey],
+  );
+  const isTranslating = useAppSelector((state) =>
+    state.translation.loadingQuotes.includes(cacheKey),
+  );
 
   // Check if translation is needed
   const needsTranslation = useMemo(() => {

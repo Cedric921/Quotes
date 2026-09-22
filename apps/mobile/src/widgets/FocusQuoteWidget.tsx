@@ -1,9 +1,6 @@
 import React from "react";
-import {
-  FlexWidget,
-  TextWidget,
-  ImageWidget,
-} from "react-native-android-widget";
+import { FlexWidget, TextWidget } from "react-native-android-widget";
+import { widgetSurface as w } from "../theme/tokens";
 
 interface QuoteWidgetProps {
   content: string;
@@ -13,8 +10,13 @@ interface QuoteWidgetProps {
 }
 
 /**
- * Android Widget Component for Focus Quote
- * Uses react-native-android-widget for rendering
+ * Android home-screen widget.
+ *
+ * The same card the design's widget preview shows, and the same one the iOS
+ * widget draws: ink, a gradient hairline around it, the quote centred in
+ * white with the author under it. `react-native-android-widget` has no
+ * gradient border, so the contour is a gradient box holding a solid one,
+ * inset by the contour's width.
  */
 export function FocusQuoteWidget({
   content,
@@ -30,99 +32,64 @@ export function FocusQuoteWidget({
       style={{
         height: "match_parent",
         width: "match_parent",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        padding: isSmall ? 12 : 16,
-        borderRadius: 16,
+        padding: w.contour,
+        borderRadius: 22,
         backgroundGradient: {
-          colors: ["#6366f1", "#a855f7"],
-          orientation: "TOP_BOTTOM",
+          from: w.gradientFrom,
+          to: w.gradientTo,
+          orientation: "TL_BR",
         },
       }}
       clickAction="OPEN_APP"
     >
-      {/* Header with quote icon and topic */}
       <FlexWidget
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
+          height: "match_parent",
           width: "match_parent",
-        }}
-      >
-        <TextWidget
-          text="❝"
-          style={{
-            fontSize: isSmall ? 20 : isLarge ? 32 : 24,
-            color: "rgba(255, 255, 255, 0.8)",
-          }}
-        />
-        {topicName && !isSmall && (
-          <FlexWidget
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 8,
-            }}
-          >
-            <TextWidget
-              text={topicName}
-              style={{
-                fontSize: 10,
-                color: "rgba(255, 255, 255, 0.9)",
-                fontWeight: "600",
-              }}
-            />
-          </FlexWidget>
-        )}
-      </FlexWidget>
-
-      {/* Quote content */}
-      <FlexWidget
-        style={{
-          flex: 1,
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          paddingVertical: 8,
+          paddingHorizontal: isSmall ? 14 : isLarge ? 24 : 20,
+          paddingVertical: isSmall ? 14 : isLarge ? 20 : 16,
+          borderRadius: 22 - w.contour,
+          backgroundColor: w.card,
         }}
       >
+        {isLarge && topicName ? (
+          <TextWidget
+            text={topicName.toUpperCase()}
+            style={{
+              fontSize: 11,
+              color: w.textDim,
+              fontWeight: "600",
+              marginBottom: 12,
+            }}
+            maxLines={1}
+          />
+        ) : null}
+
         <TextWidget
           text={content}
           style={{
-            fontSize: isSmall ? 12 : isLarge ? 18 : 14,
-            color: "#ffffff",
+            fontSize: isSmall ? 14 : isLarge ? 22 : 16,
+            color: w.text,
             fontWeight: "500",
-            lineHeight: isSmall ? 16 : isLarge ? 24 : 20,
+            textAlign: "center",
           }}
-          maxLines={isSmall ? 3 : isLarge ? 6 : 4}
+          maxLines={isSmall ? 5 : isLarge ? 7 : 4}
           truncate="END"
         />
-      </FlexWidget>
 
-      {/* Author */}
-      <FlexWidget
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "match_parent",
-        }}
-      >
-        <TextWidget
-          text={`— ${author}`}
-          style={{
-            fontSize: isSmall ? 10 : isLarge ? 14 : 12,
-            color: "rgba(255, 255, 255, 0.9)",
-            fontWeight: "600",
-          }}
-        />
-        {isLarge && (
+        {isSmall ? null : (
           <TextWidget
-            text="Focus"
+            text={author}
             style={{
-              fontSize: 10,
-              color: "rgba(255, 255, 255, 0.6)",
+              fontSize: isLarge ? 14 : 12,
+              color: w.textDim,
+              fontWeight: "600",
+              marginTop: isLarge ? 14 : 8,
             }}
+            maxLines={1}
           />
         )}
       </FlexWidget>
@@ -144,3 +111,12 @@ export function FocusQuoteWidgetSmall(props: Omit<QuoteWidgetProps, "size">) {
   return <FocusQuoteWidget {...props} size="small" />;
 }
 
+/**
+ * The widget as `requestWidgetUpdate` wants it: a function of the quote.
+ *
+ * It lives here rather than in `widgetService` because that file is `.ts` —
+ * and because the service has no business knowing which variant renders.
+ */
+export const renderFocusQuoteWidget = (quote: QuoteWidgetProps) => (
+  <FocusQuoteWidget {...quote} />
+);

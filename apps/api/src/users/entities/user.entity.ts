@@ -39,7 +39,15 @@ export class User extends BaseEntity {
   @JoinTable()
   favoriteTopics: Topic[];
 
-  @ManyToMany(() => Quote)
+  /**
+   * The owning side of the like.
+   *
+   * The inverse was missing: `Quote.likedBy` named this property, this one
+   * named nothing back, so TypeORM never paired them and `likedBy` had no
+   * junction table to join through. Every quote request from a signed-in user
+   * came back 500 — the feed worked as a guest and broke at login.
+   */
+  @ManyToMany(() => Quote, (quote) => quote.likedBy)
   @JoinTable()
   likedQuotes: Quote[];
 }
